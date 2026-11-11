@@ -15,7 +15,8 @@ import java.util.List;
  */
 public final class SkillPromptBlock {
 
-    // The size bounds (skills listed, character budget, names-only headroom, description words, sticky
+    // The size bounds (skills listed, character budget, names-only headroom, description words,
+    // sticky
     // memory) are app.skills.prompt.* - see SkillPromptProperties.
 
     /** Registry keys of the wording that opens the block ({@code prompts/en/skills.header*.md}). */
@@ -25,16 +26,20 @@ public final class SkillPromptBlock {
 
     private SkillPromptBlock() {}
 
-    /** The shipped opening of the block (heading line and instruction), full or small-model wording. */
+    /**
+     * The shipped opening of the block (heading line and instruction), full or small-model wording.
+     */
     public static String defaultHeader(boolean compact) {
-        return PromptResolver.defaultsOnly().catalog().defaultText(compact ? COMPACT_HEADER_KEY : HEADER_KEY);
+        return PromptResolver.defaultsOnly()
+                .catalog()
+                .defaultText(compact ? COMPACT_HEADER_KEY : HEADER_KEY);
     }
 
     /**
      * {@code block} (the output of {@link #render} or {@link #renderCompact}) with its opening
-     * replaced by {@code header}: how an owner's reworded {@code skills.header} reaches a block that
-     * is built where no agent or tenant is known. Unchanged when {@code header} is null, equals the
-     * shipped wording, or {@code block} does not start with the shipped opening.
+     * replaced by {@code header}: how an owner's reworded {@code skills.header} reaches a block
+     * that is built where no agent or tenant is known. Unchanged when {@code header} is null,
+     * equals the shipped wording, or {@code block} does not start with the shipped opening.
      */
     public static String withHeader(String block, String header, boolean compact) {
         String shipped = defaultHeader(compact);
@@ -50,8 +55,22 @@ public final class SkillPromptBlock {
         return render(skills, SkillPromptProperties.active());
     }
 
+    /**
+     * {@link #render(List)} cut to {@code lean} = {maxSkills, maxBlockChars, maxDescriptionWords};
+     * null = configured size.
+     */
+    public static String render(List<SkillService.SkillMetadata> skills, int[] lean) {
+        if (lean == null || lean.length != 3) {
+            return render(skills);
+        }
+        SkillPromptProperties limits = SkillPromptProperties.active().with(lean[0], lean[1]);
+        limits.setMaxDescriptionWords(lean[2]);
+        return render(skills, limits);
+    }
+
     /** {@link #render(List)} with explicit limits. */
-    public static String render(List<SkillService.SkillMetadata> skills, SkillPromptProperties limits) {
+    public static String render(
+            List<SkillService.SkillMetadata> skills, SkillPromptProperties limits) {
         if (skills == null || skills.isEmpty()) {
             return "";
         }
@@ -67,7 +86,11 @@ public final class SkillPromptBlock {
                 break;
             }
             String detailed =
-                    "- " + skill.name() + ": " + brief(skill.description(), limits.getMaxDescriptionWords()) + "\n";
+                    "- "
+                            + skill.name()
+                            + ": "
+                            + brief(skill.description(), limits.getMaxDescriptionWords())
+                            + "\n";
             String bare = "- " + skill.name() + "\n";
             if (!namesOnly && sb.length() + detailed.length() <= limits.getMaxBlockChars()) {
                 sb.append(detailed);
@@ -98,7 +121,8 @@ public final class SkillPromptBlock {
     }
 
     /** {@link #renderCompact(List)} with explicit limits. */
-    public static String renderCompact(List<SkillService.SkillMetadata> skills, SkillPromptProperties limits) {
+    public static String renderCompact(
+            List<SkillService.SkillMetadata> skills, SkillPromptProperties limits) {
         if (skills == null || skills.isEmpty()) {
             return "";
         }
@@ -215,14 +239,18 @@ public final class SkillPromptBlock {
      * Per-session sticky gate: skills stay on for a conversation once they were relevant, so a
      * follow-up like "yes, go ahead" does not drop {@code load_skill} (and churn the cached prompt
      * prefix) mid-task. Offered when the current message matches, OR any of the last {@code
-     * app.skills.prompt.history-turns} messages in this session matched, OR a skill was already loaded in it.
-     * In-memory and bounded (LRU); losing it on restart only costs one un-sticky turn.
+     * app.skills.prompt.history-turns} messages in this session matched, OR a skill was already
+     * loaded in it. In-memory and bounded (LRU); losing it on restart only costs one un-sticky
+     * turn.
      */
     public static final class SessionGate {
 
         private final java.util.function.Supplier<SkillPromptProperties> limits;
 
-        /** A gate that reads the limits {@link SkillPromptProperties#active()} holds at the time of each call. */
+        /**
+         * A gate that reads the limits {@link SkillPromptProperties#active()} holds at the time of
+         * each call.
+         */
         public SessionGate() {
             this(SkillPromptProperties::active);
         }

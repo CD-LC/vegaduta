@@ -8,31 +8,49 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+  12 skills in 1,800 characters (`app.chat.local-model.skills-*`); everything else is one `search_tools` or
+  150 ms per result on a local model; the regex layer still runs on it, and anything with prose goes to
+  65/65 score.
   Measured in the sandbox container: a JavaScript execute drops from a median of about 90-155 ms to about 35-65 ms; Python is unchanged (about 35 ms).
+  `APP_CHAT_LOCAL_MODEL_TOOL_DEFERRAL`, `false` restores the old behaviour). The fixed tool set
   `SETTING_INVALID`. `SettingsExceptionHandler` had no `@Order`, so it tied with the generic fallback advice and
   `checkCookiesAndSetTimer` from `authChecker.js`, which Keycloak 26.8 no longer exports, so the "signed in in
+  `load_skill` away. Other models are unchanged.
+  `search_tools` / `call_tool` by default (`app.chat.local-model.tool-deferral`, env
   another tab" check never started. It now calls `startSessionPolling`, as Keycloak's own templates do.
+  different model than `LOCAL_LLM_MODEL` / `app.local-llm.bootstrap.model`, core logs a WARN at
   effective-settings endpoint (and any turn-time read that was not already in a transaction) queried the default
   executes), so the pre-check now runs only when a run produced no result, with the same validation message.
+  is kept, so the prompt cache still holds. In our 65-task eval on a 9B model, config-equivalent
+  local bring-your-own provider) now keep all but a short list of standing tools behind
   lost; it now has highest precedence, scoped to the two settings controllers.
   mapped Spring Security's `AccessDeniedException`. It now answers 403 with the generic permission message.
+  numbers and strings of at most two short words) no longer costs the extra LLM judge call, about
   override, the next `GET /api/settings/effective` answered without it, so the console showed the old value after a
   reload. `JdbcSettingsStore.tenantValues()` and `agentValues()` now run in their own read-only transaction.
+  runs went from 5,089 to 2,311 tokens per run (plain questions 10,883 to 1,456) at the same
   schema instead of the tenant's, found no rows, and returned the platform value: a save answered with the
   separate node process before running it; the run itself is the parse (a module that does not parse never
+  startup (the row is still never rewritten) instead of silently running the other model.
+  the judge as before. `APP_GUARDRAILS_JUDGE_SKIP_INERT_DATA=false` judges every result.
+  tools visible (`app.tools.search.local-always-on`, env `TOOL_SEARCH_LOCAL_ALWAYS_ON`) and lists at most
 ### Added
 ### Changed
 - **code-intel: offline heuristic security scan.** New `GET /repos/{repo_id}/security-scan` and read-only MCP tool `security_scan` report hard-coded secrets (always redacted), dangerous sinks in Python/JS/TS/Java (command exec, eval, unsafe deserialization, SQL string building, weak crypto, disabled TLS verification) and a normalized dependency inventory (requirements, package.json/lock, pom.xml, go.mod). Deterministic, no network or LLM, tenant-scoped like the other analyses. It is a regex/entropy heuristic, not a replacement for CodeQL/gitleaks/Trivy, and does no CVE matching (an advisory-provider hook is provided for callers).
 - Release signing for the Setup app: the macOS `.dmg` (and a new `.pkg`) can be Developer ID signed, notarized and stapled, and the Windows `.exe` Authenticode-signed, by `release.yml` when the signing secrets are set. With none set the release builds what it built before. See `docs/maintainers/release-signing.md`.
 ### Fixed
 - **A failed `@PreAuthorize` returned HTTP 500 and recorded a platform issue** instead of 403, because nothing
+- **A local model's deferred turn is also lean on tools and skills.** It keeps only memory and the skill
+- **A local model's turn starts lean.** Turns on the install's own local model (Ollama pool row or a
 - **A saved workspace or agent setting override was ignored by every read that ran outside a transaction.** The
+- **A stale local-model pool row is now reported.** When the platform pool's local row serves a
 - **Agent evaluation harness (`tests/eval/`, `docs/benchmarks/README.md`).** A dependency-free Node harness with a versioned 20-task suite (Q&A, tool use, knowledge retrieval, approval-gated actions, multi-step workflow) that drives a running stack through its public REST API and reports programmatic task success, tool-call accuracy, platform-reported tokens and cost, p50/p95 latency and guardrail/approval behaviour as `results.json` plus a markdown table, behind an adapter interface. Scoring and aggregation are unit-tested offline (`make test-eval`); the harness has not been run against a stack and no results are published yet.
 - **Code intelligence now builds a real call graph for Java and resolves calls by receiver.** Java (and other grammars with a `method_invocation`-style call node) stored every call as a fake symbol and recorded no `calls` edge, so callers, callees, impact, dead-code and hotspots were empty or wrong for the platform's main language (on `core/guardrails`: 11,606 symbols and 0 call edges before, 1,664 symbols and 10,221 call edges now). Calls now carry their receiver, so `map.get(k)` or `Pattern.compile(x)` no longer point at an unrelated in-repo method of the same name (ambiguous Python call edges on `services/code-intel` fell from 494 to 119). Edges in unchanged files are re-linked when another file adds or removes a symbol, instead of waiting for a full rebuild.
 - **JavaScript and TypeScript tool runs start one process, not two.** The sandbox parsed the source in a
 - **Production web builds no longer fall back to localhost in crawler-facing output.** With no `NEXT_PUBLIC_SITE_URL`/`SITE_URL`, `metadataBase` is omitted and canonical/OG/alternate URLs are relative, `robots.txt` names no sitemap and `sitemap.xml` is empty (instead of advertising `http://localhost:3000`); the share-page layouts and the observability deep links no longer default to localhost in production. Development and test builds keep the localhost defaults. The six `approvalsPanel.trace*` keys (and the keys `de`/`pa` lacked) are now in every locale file with the English fallback, so `uiI18n.test.ts` passes again.
 - **Licence wording is accurate.** The platform is source-available under the Business Source License 1.1 (free to self-host in production; converts to Apache-2.0 four years after each release), not OSI open source. README, site metadata, `llms.txt`, About, footer and the free-launch copy now say so. `sdk/` stays Apache-2.0.
 - **Making a security setting weaker than the value it inherits returned HTTP 500** instead of the documented 400
+- **Plain data skips the injection judge.** A tool result that is only structured data (JSON of ids,
 - **Production web builds no longer fall back to localhost in crawler-facing output.** With no `NEXT_PUBLIC_SITE_URL`/`SITE_URL`, `metadataBase` is omitted and canonical/OG/alternate URLs are relative, `robots.txt` names no sitemap and `sitemap.xml` is empty (instead of advertising `http://localhost:3000`); the share-page layouts and the observability deep links no longer default to localhost in production. Development and test builds keep the localhost defaults. The six `approvalsPanel.trace*` keys (and the keys `de`/`pa` lacked) are now in every locale file with the English fallback, so `uiI18n.test.ts` passes again.
 - **The Keycloak login theme threw a script error on every login page.** `template.ftl` imported
 - Release signing for the Setup app: the macOS `.dmg` (and a new `.pkg`) can be Developer ID signed, notarized and stapled, and the Windows `.exe` Authenticode-signed, by `release.yml` when the signing secrets are set. With none set the release builds what it built before. See `docs/maintainers/release-signing.md`.
