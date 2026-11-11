@@ -13,17 +13,22 @@ import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * {@link SettingsStore} over {@link JdbcTemplate}: {@code setting_override} and {@code setting_override_history} of the
- * current tenant's schema (unqualified: the connection's search path is the tenant, exactly as for every other
- * tenant table). Table names are constants, never built from input.
+ * {@link SettingsStore} over {@link JdbcTemplate}: {@code setting_override} and {@code
+ * setting_override_history} of the current tenant's schema (unqualified: the connection's search
+ * path is the tenant, exactly as for every other tenant table). Table names are constants, never
+ * built from input.
  */
 @Component
 public class JdbcSettingsStore implements SettingsStore {
 
     private static final ObjectMapper JSON =
-            JsonMappers.plain().enable(com.fasterxml.jackson.databind.DeserializationFeature.USE_LONG_FOR_INTS);
+            JsonMappers.plain()
+                    .enable(
+                            com.fasterxml.jackson.databind.DeserializationFeature
+                                    .USE_LONG_FOR_INTS);
 
     private static final RowMapper<SettingOverride> ROW =
             (rs, i) ->
@@ -98,19 +103,31 @@ public class JdbcSettingsStore implements SettingsStore {
         return out;
     }
 
+    // These two feed the effective-value cache from threads that are often not inside a transaction
+    // (the effective
+    // read endpoint, a chat turn). The tenant's schema is selected on a transaction's connection,
+    // so without one the
+    // query ran against the default schema, found no rows, and every tenant and agent override was
+    // invisible: the
+    // write answered with the override, and the next read answered with the platform value. Inside
+    // an existing
+    // transaction (the write path) this just joins it.
     @Override
+    @Transactional(readOnly = true)
     public Map<String, Object> tenantValues() {
         return values(SettingScope.TENANT, "");
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Map<String, Object> agentValues(String agentId) {
         return values(SettingScope.AGENT, agentId);
     }
 
     @Override
     public Optional<SettingOverride> find(SettingScope scope, String scopeId, String key) {
-        return jdbc.query(
+        return jdbc
+                .query(
                         "SELECT scope, scope_id, setting_key, value::text AS value, version, updated_by, updated_at"
                                 + " FROM setting_override WHERE scope = ? AND scope_id = ? AND setting_key = ?",
                         ROW,
@@ -123,9 +140,12 @@ public class JdbcSettingsStore implements SettingsStore {
 
     @Override
     public int latestVersion(SettingScope scope, String scopeId, String key) {
-        // Two concurrent writers of the same key would both compute MAX+1 and the second would hit the unique
-        // (scope, scope_id, key, version) constraint (a 500). A transaction-scoped advisory lock on the key
-        // serialises them: the second one waits for the first to commit, then reads the new maximum. Callers run
+        // Two concurrent writers of the same key would both compute MAX+1 and the second would hit
+        // the unique
+        // (scope, scope_id, key, version) constraint (a 500). A transaction-scoped advisory lock on
+        // the key
+        // serialises them: the second one waits for the first to commit, then reads the new
+        // maximum. Callers run
         // inside the service's transaction, so the lock is held until the write is committed.
         jdbc.queryForObject(
                 "SELECT pg_advisory_xact_lock(hashtextextended(?, 0))::text",
@@ -185,7 +205,8 @@ public class JdbcSettingsStore implements SettingsStore {
     }
 
     @Override
-    public List<SettingHistoryEntry> history(SettingScope scope, String scopeId, String key, int limit) {
+    public List<SettingHistoryEntry> history(
+            SettingScope scope, String scopeId, String key, int limit) {
         return jdbc.query(
                 "SELECT id, scope, scope_id, setting_key, version, action, value::text AS value,"
                         + " previous_value::text AS previous_value, reason, actor, created_at"
@@ -199,7 +220,8 @@ public class JdbcSettingsStore implements SettingsStore {
     }
 
     @Override
-    public List<SettingHistoryEntry> historyPage(SettingScope scope, String scopeId, java.time.Instant since, int limit, int offset) {
+    public List<SettingHistoryEntry> historyPage(
+            SettingScope scope, String scopeId, java.time.Instant since, int limit, int offset) {
         java.util.List<Object> args = new java.util.ArrayList<>();
         String where = historyFilter(scope, scopeId, since, args);
         args.add(Math.max(1, limit));
@@ -207,7 +229,8 @@ public class JdbcSettingsStore implements SettingsStore {
         return jdbc.query(
                 "SELECT id, scope, scope_id, setting_key, version, action, value::text AS value,"
                         + " previous_value::text AS previous_value, reason, actor, created_at"
-                        + " FROM setting_override_history" + where
+                        + " FROM setting_override_history"
+                        + where
                         + " ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?",
                 HISTORY_ROW,
                 args.toArray());
@@ -217,12 +240,23 @@ public class JdbcSettingsStore implements SettingsStore {
     public long historyCount(SettingScope scope, String scopeId, java.time.Instant since) {
         java.util.List<Object> args = new java.util.ArrayList<>();
         String where = historyFilter(scope, scopeId, since, args);
-        Long n = jdbc.queryForObject("SELECT COUNT(*) FROM setting_override_history" + where, Long.class, args.toArray());
+        Long n =
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM setting_override_history" + where,
+                        Long.class,
+                        args.toArray());
         return n == null ? 0 : n;
     }
 
-    /** The WHERE clause for the bulk history queries: fixed fragments only, every value is a bind parameter. */
-    private static String historyFilter(SettingScope scope, String scopeId, java.time.Instant since, java.util.List<Object> args) {
+    /**
+     * The WHERE clause for the bulk history queries: fixed fragments only, every value is a bind
+     * parameter.
+     */
+    private static String historyFilter(
+            SettingScope scope,
+            String scopeId,
+            java.time.Instant since,
+            java.util.List<Object> args) {
         StringBuilder sb = new StringBuilder();
         String glue = " WHERE ";
         if (scope != null) {
