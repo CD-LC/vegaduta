@@ -4,7 +4,7 @@
 # Security review 2026-07-27: core/Dockerfile's build stage does `COPY . .`
 # (whole build context) before `mvn package` - without these exclusions,
 # core/.env.local (APP_ENCRYPTION_KEY, KEYCLOAK_CLIENT_SECRET, etc. - see
-# this repo's root CLAUDE.md Rule 0) gets copied straight into the build
+# this repo's root ENGINEERING-RULES.md rule 4) gets copied straight into the build
 # stage's image layer even though the runtime stage only COPYs the built
 # jar out of it. That layer is still recoverable (docker build --target
 # build, or any exported/pushed build cache) - .env.local was never meant

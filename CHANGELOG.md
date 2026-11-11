@@ -8,12 +8,17 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
-### Changed
-
-- **JavaScript and TypeScript tool runs start one process, not two.** The sandbox parsed the source in a
-  separate node process before running it; the run itself is the parse (a module that does not parse never
-  executes), so the pre-check now runs only when a run produced no result, with the same validation message.
   Measured in the sandbox container: a JavaScript execute drops from a median of about 90-155 ms to about 35-65 ms; Python is unchanged (about 35 ms).
+  executes), so the pre-check now runs only when a run produced no result, with the same validation message.
+  separate node process before running it; the run itself is the parse (a module that does not parse never
+### Added
+### Changed
+### Fixed
+- **Code intelligence now builds a real call graph for Java and resolves calls by receiver.** Java (and other grammars with a `method_invocation`-style call node) stored every call as a fake symbol and recorded no `calls` edge, so callers, callees, impact, dead-code and hotspots were empty or wrong for the platform's main language (on `core/guardrails`: 11,606 symbols and 0 call edges before, 1,664 symbols and 10,221 call edges now). Calls now carry their receiver, so `map.get(k)` or `Pattern.compile(x)` no longer point at an unrelated in-repo method of the same name (ambiguous Python call edges on `services/code-intel` fell from 494 to 119). Edges in unchanged files are re-linked when another file adds or removes a symbol, instead of waiting for a full rebuild.
+- **JavaScript and TypeScript tool runs start one process, not two.** The sandbox parsed the source in a
+- **Licence wording is accurate.** The platform is source-available under the Business Source License 1.1 (free to self-host in production; converts to Apache-2.0 four years after each release), not OSI open source. README, site metadata, `llms.txt`, About, footer and the free-launch copy now say so. `sdk/` stays Apache-2.0.
+- Release signing for the Setup app: the macOS `.dmg` (and a new `.pkg`) can be Developer ID signed, notarized and stapled, and the Windows `.exe` Authenticode-signed, by `release.yml` when the signing secrets are set. With none set the release builds what it built before. See `docs/maintainers/release-signing.md`.
+- Tenant status guard sanitises the schema name in its schema-check failure log line (`LogSafe.clean`).
 
 ## [0.1.14] - 2026-10-30
 

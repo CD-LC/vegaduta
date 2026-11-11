@@ -126,7 +126,7 @@ follow A and B so it is justified by data.
 
 ### E. Migrations (weeks; high care)
 
-Released migrations are never edited (AGENTS.md). A baseline for empty databases needs a new mechanism (a snapshot
+Released migrations are never edited (ENGINEERING-RULES.md). A baseline for empty databases needs a new mechanism (a snapshot
 applied only when the history table is empty, with the existing scripts kept for upgrades) and a test that both
 paths produce the same schema. Expected: the 640 first-start script runs shrink to a few. Do it only if A shows
 migrations are still a large share of a first start.

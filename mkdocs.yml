@@ -3,7 +3,7 @@
 # from docs/requirements.txt). The Markdown under docs/ stays readable on GitHub
 # without this file; nothing here is required to read the docs.
 site_name: VegaDūta documentation
-site_description: Open-source platform for building, governing and running AI agents, and the Java Agent SDK.
+site_description: Source-available (BSL-1.1) platform for building, governing and running AI agents, and the Java Agent SDK.
 site_url: https://cd-lc.github.io/vegaduta/
 repo_url: https://github.com/CD-LC/vegaduta
 repo_name: vegaduta
@@ -247,7 +247,6 @@ nav:
       - Security hardening: engineering/SECURITY-HARDENING.md
       - Open UI gaps: engineering/UI-GAPS-OPEN.md
       - Big files split plan: engineering/BIG-FILES-SPLIT-PLAN.md
-      - Agent brief, next phase: engineering/AGENT-BRIEF-NEXT-PHASE.md
       - Configuration reference (generated): engineering/CONFIG-REFERENCE.generated.md
       - Console i18n parity: engineering/I18N.md
       - Error Prone baseline: engineering/ERROR-PRONE-BASELINE.md
@@ -256,8 +255,9 @@ nav:
       - Repository setup: maintainers/repo-setup.md
       - Branch protection: maintainers/branch-protection.md
       - Releasing: maintainers/releasing.md
+      - Signing the Setup app: maintainers/release-signing.md
       - Dependabot pull requests: maintainers/dependabot-prs.md
       - v1.0.0 definition of done: maintainers/v1.0.0-definition-of-done.md
-      - Agent coordination: maintainers/agent-coordination.md
+      - Change coordination: maintainers/change-coordination.md
       - Releasing the Java Agent SDK: maintainers/releasing-sdk.md
       - Publishing these docs: maintainers/docs-site.md

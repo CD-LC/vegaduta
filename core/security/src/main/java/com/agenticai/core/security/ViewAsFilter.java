@@ -1,6 +1,7 @@
 package com.agenticai.core.security;
 
 import com.agenticai.core.security.ImpersonationGrantResolver.ViewAsSession;
+import com.agenticai.core.security.logging.LogSafe;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -129,7 +130,8 @@ public class ViewAsFilter extends OncePerRequestFilter {
         this.resolver = resolver;
         this.authenticationConverter = authenticationConverter;
         this.clock = clock;
-        this.claimMapping = claimMapping == null ? OidcClaimMapping.keycloakDefaults() : claimMapping;
+        this.claimMapping =
+                claimMapping == null ? OidcClaimMapping.keycloakDefaults() : claimMapping;
     }
 
     /**
@@ -189,8 +191,8 @@ public class ViewAsFilter extends OncePerRequestFilter {
         } catch (RuntimeException e) {
             log.error(
                     "view-as rejected: session lookup failed for {} {}",
-                    request.getMethod(),
-                    request.getRequestURI(),
+                    LogSafe.clean(request.getMethod()),
+                    LogSafe.clean(request.getRequestURI()),
                     e);
             write(
                     response,
@@ -203,9 +205,9 @@ public class ViewAsFilter extends OncePerRequestFilter {
         if (found.isEmpty()) {
             log.warn(
                     "view-as rejected: unknown grant presented by admin {} on {} {}",
-                    adminSubject,
-                    request.getMethod(),
-                    request.getRequestURI());
+                    LogSafe.clean(adminSubject),
+                    LogSafe.clean(request.getMethod()),
+                    LogSafe.clean(request.getRequestURI()));
             write(
                     response,
                     HttpServletResponse.SC_UNAUTHORIZED,
@@ -240,9 +242,9 @@ public class ViewAsFilter extends OncePerRequestFilter {
                 || isWebSocketUpgrade(request)) {
             log.info(
                     "view-as blocked session={} method={} path={}",
-                    session.id(),
-                    request.getMethod(),
-                    path);
+                    LogSafe.clean(session.id()),
+                    LogSafe.clean(request.getMethod()),
+                    LogSafe.clean(path));
             write(
                     response,
                     HttpServletResponse.SC_FORBIDDEN,
@@ -268,9 +270,9 @@ public class ViewAsFilter extends OncePerRequestFilter {
         if (!asyncRedispatch) {
             log.info(
                     "view-as request session={} method={} path={}",
-                    session.id(),
-                    request.getMethod(),
-                    path);
+                    LogSafe.clean(session.id()),
+                    LogSafe.clean(request.getMethod()),
+                    LogSafe.clean(path));
             try {
                 resolver.get().recordRequest(session.id());
             } catch (RuntimeException e) {
@@ -307,11 +309,10 @@ public class ViewAsFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Same as {@link #targetJwt(Jwt, ViewAsSession)} but writes the tenant and
-     * roles claims under the configured {@link OidcClaimMapping} locations
-     * (Keycloak's {@code tenant_id}/{@code realm_access.roles} by default), so
-     * the synthetic token is readable by the same converters the real token
-     * went through - see {@link JwtClaimPaths#putNested} for how a configured
+     * Same as {@link #targetJwt(Jwt, ViewAsSession)} but writes the tenant and roles claims under
+     * the configured {@link OidcClaimMapping} locations (Keycloak's {@code tenant_id}/{@code
+     * realm_access.roles} by default), so the synthetic token is readable by the same converters
+     * the real token went through - see {@link JwtClaimPaths#putNested} for how a configured
      * dot-path or namespaced claim is shaped.
      */
     static Jwt targetJwt(Jwt adminJwt, ViewAsSession session, OidcClaimMapping claimMapping) {

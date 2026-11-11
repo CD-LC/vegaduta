@@ -38,7 +38,7 @@ log = logging.getLogger("sidecar.render")
 # a POST-capable SSRF primitive aimed at whatever this container can reach -
 # and this container is on agent-io alongside core and code-intel. Hostnames
 # only, matched exactly, defaulting to the one host that is ever a legitimate
-# target. Per CLAUDE.md RULE 0 this is an internal-only service-to-service
+# target. Per ENGINEERING-RULES.md rule 4 this is an internal-only service-to-service
 # URL, which is the documented exception that correctly stays off the public
 # domain - the same relationship core -> sidecar already has.
 CALLBACK_ALLOWED_HOSTS = {

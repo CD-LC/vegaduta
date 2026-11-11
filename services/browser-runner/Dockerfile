@@ -13,7 +13,7 @@
 # network holding Postgres and Valkey.
 # Digest-pinned (OpenSSF Pinned-Dependencies): tag alone can be moved; bump the
 # tag AND digest together when the Playwright base revs.
-ARG PLAYWRIGHT_IMAGE=mcr.microsoft.com/playwright:v1.63.0-noble@sha256:eff16c30e6f3f4af0a03fa4b706120d5e9b0891c344a27d64559aff5900a4a27
+ARG PLAYWRIGHT_IMAGE=mcr.microsoft.com/playwright:v1.64.0-noble@sha256:06a9939e57531807f8d5fd76ce44b53165ffb7d7501d87ab10e285c20b1e971f
 
 FROM ${PLAYWRIGHT_IMAGE}
 

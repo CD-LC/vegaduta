@@ -120,7 +120,7 @@ export type LandingEvent =
   // walkthrough dialog: the intent ("show me the demo") is the same, and
   // the counter now finally measures a demo that exists. All need the
   // matching names in core's LandingEventController.ALLOWED_EVENTS(_ORDERED)
-  // or they 204-drop silently - see AGENT-COORDINATION 2026-09-17.
+  // or they 204-drop silently - see the internal change log 2026-09-17.
   | "hero_email_start"
   | "hero_persona_click"
   | "outcomes_signup_click"
@@ -139,7 +139,7 @@ export type LandingEvent =
   // core's LandingEventController.ALLOWED_EVENTS *and* ALLOWED_EVENTS_ORDERED.
   // core/ is core-3's scope, so this session did not edit it. Until that
   // lands the endpoint 204-drops it and it reads as a flat 0. Noted in
-  // docs/AGENT-COORDINATION.md.
+  // the internal change log.
   | "oss_try_click"
   // 2026-09-28: ShippedBand ("Just shipped", under OutcomesBand). Same
   // CROSS-SCOPE caveat as oss_try_click: both names (and sec_shipped) need
@@ -206,6 +206,7 @@ export const LANDING_SECTIONS = [
   // (WhatsUnderneath) and band 13 (ProviderWall), i.e. after most readers
   // had already left.
   "ledger",
+  "platform-edge",
   // 2026-09-12: the category band, immediately after the ledger. The ledger
   // says WHAT the platform is; this says what it is LIKE, against the tools a
   // visitor already knows (n8n/Zapier/Make). That order is deliberate —

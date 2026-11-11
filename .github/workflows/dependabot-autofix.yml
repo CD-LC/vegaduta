@@ -58,9 +58,13 @@ jobs:
         run: |
           PR="$(jq -r '.inputs.pr // .pull_request.number // empty' "$GITHUB_EVENT_PATH")"
           case "$PR" in ''|*[!0-9]*) echo "::error::bad PR number '$PR'"; exit 1;; esac
-          read -r opener headref <<<"$(gh pr view "$PR" --json author,headRefName --jq '.author.login + " " + .headRefName')"
-          [ "$opener" = "dependabot[bot]" ] || { echo "::error::PR #$PR was opened by $opener, not dependabot[bot]"; exit 1; }
-          if ! gh pr view "$PR" --json files --jq '.files[].path' | grep -q '^services/.*/requirements\.txt$'; then
+          read -r opener headref <<<"$(gh pr view "$PR" --repo ${{ github.repository }} --json author,headRefName --jq '.author.login + " " + .headRefName')"
+          # gh reports a GitHub App author as app/<slug>; the REST/event payload says dependabot[bot].
+          case "$opener" in
+            "dependabot[bot]"|"app/dependabot") ;;
+            *) echo "::error::PR #$PR was opened by $opener, not dependabot[bot]"; exit 1;;
+          esac
+          if ! gh pr view "$PR" --repo ${{ github.repository }} --json files --jq '.files[].path' | grep -q '^services/.*/requirements\.txt$'; then
             echo "PR #$PR does not touch services/*/requirements.txt - nothing to do"
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
@@ -73,12 +77,12 @@ jobs:
         with:
           ref: ${{ steps.pr.outputs.ref }}
 
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         if: steps.pr.outputs.skip != 'true'
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         if: steps.pr.outputs.skip != 'true'
         with:
           version: "0.13.0"

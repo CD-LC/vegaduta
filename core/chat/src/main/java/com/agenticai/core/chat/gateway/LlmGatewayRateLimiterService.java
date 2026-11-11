@@ -3,6 +3,7 @@ package com.agenticai.core.chat.gateway;
 import com.agenticai.core.resilience.RateLimitedLog;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.security.ratelimit.LocalRateLimitFallback;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
@@ -140,7 +141,7 @@ public class LlmGatewayRateLimiterService {
             // must never be the reason a legitimate call is rejected.
             log.warn(
                     "LLM gateway rate limiter could not resolve plan for tenant {} - failing open",
-                    tenantId,
+                    LogSafe.clean(tenantId),
                     e);
             degradationSignal.failOpen(DEGRADATION_COMPONENT, e);
             return;

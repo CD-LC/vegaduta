@@ -1,14 +1,13 @@
 package com.agenticai.core;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIf;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
-
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 /**
  * Stage 1 smoke test: confirms the Spring context loads cleanly.
@@ -68,7 +67,7 @@ import java.sql.DriverManager;
             // startup (issuer resolved lazily). Same set as it/ApplicationContextIT.
             "spring.profiles.active=security,knowledge,graph-memory",
             // application-security.yml carries NO localhost default for the issuer any more
-            // (AGENTS.md rule 4), and PublicWebUrlStartupValidator refuses a blank
+            // (ENGINEERING-RULES.md rule 4), and PublicWebUrlStartupValidator refuses a blank
             // app.web.public-url under `security`; both are test-only non-routable values.
             "spring.security.oauth2.resourceserver.jwt.issuer-uri=http://keycloak.invalid/realms/test",
             "app.web.public-url=http://app.invalid",

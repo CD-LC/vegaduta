@@ -189,7 +189,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // DemoLanding, see components/demo-landing/): Cloudflare sets CF-IPCountry
   // on every request that passes through its edge (the platform's whole
   // browser-facing surface runs behind the Cloudflare tunnel — see
-  // CLAUDE.md's Rule 0), so it's read here, server-side, same pattern as
+  // ENGINEERING-RULES.md rule 4), so it's read here, server-side, same pattern as
   // the locale read above. Missing (local/non-Cloudflare requests) or
   // Cloudflare's own "XX" unknown-country sentinel both fall back to the
   // neutral "global" variant inside resolveLandingVariant() - never IN by

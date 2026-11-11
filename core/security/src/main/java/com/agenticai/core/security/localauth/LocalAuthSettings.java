@@ -19,7 +19,7 @@ import org.springframework.core.env.Environment;
  * @param issuer issuer identifier stamped into {@code iss} and required on validation. URL-shaped
  *     so {@code Jwt#getIssuer()} works for every library that calls it, but under the reserved
  *     {@code .invalid} TLD: nobody ever dereferences it, and it is never a localhost address
- *     (AGENTS.md rule 4).
+ *     (ENGINEERING-RULES.md rule 4).
  * @param audience required {@code aud} value.
  * @param dataDir directory holding the signing keys and the first-run setup file; created 0700.
  * @param accessTokenTtl lifetime of an access JWT. Short on purpose: access tokens are not

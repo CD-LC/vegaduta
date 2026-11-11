@@ -4,7 +4,7 @@
 |---|---|
 | **Status** | Proposed. **Design only: no behaviour changes in this ADR.** Nothing in `SchemaMultiTenantConnectionProvider` is modified by it. |
 | **Date** | 2026-10-13 |
-| **Relates to** | [HOT-PATH-PERFORMANCE.md](HOT-PATH-PERFORMANCE.md) section 5 ("Two extra `SET search_path` per transaction"), [ADR-0014](ADR-0014-horizontal-scaling.md), AGENTS.md rules 6 and 8 |
+| **Relates to** | [HOT-PATH-PERFORMANCE.md](HOT-PATH-PERFORMANCE.md) section 5 ("Two extra `SET search_path` per transaction"), [ADR-0014](ADR-0014-horizontal-scaling.md), ENGINEERING-RULES.md rules 6 and 8 |
 | **Code** | `core/tenancy/.../SchemaMultiTenantConnectionProvider.java`, `TenantSchemaResolver.java`, `core/security/.../TenantContext.java`, `AgeSessionSupport.java` |
 
 ## 1. Context
@@ -59,7 +59,7 @@ of the two, so the replacement guarantee must be at least as strong and must be 
    released on the same virtual thread within one transaction, but a virtual thread can unmount while it holds the
    connection. Nothing in the provider is thread-affine, which is good; it also means thread identity cannot be used
    as a safety argument.
-6. PgBouncer must stay in session mode (AGENTS.md rule 8). In session mode a client connection owns one server
+6. PgBouncer must stay in session mode (ENGINEERING-RULES.md rule 8). In session mode a client connection owns one server
    connection until it disconnects, so everything in this ADR is about the application pool (Hikari), not PgBouncer.
 
 ## 2. Leak scenarios any design must survive
@@ -126,7 +126,7 @@ transaction**. `AgeSessionSupport` does (L10, fact 3), so the claim is condition
   update-count result breaks `executeQuery` and Hibernate's result handling, generated keys and JDBC batching is
   **not known** and must be proven on a real server before this is considered.
 - Side benefit, not a goal: a path that exists only inside a transaction does not survive a transaction-pooling
-  proxy. This could one day make transaction pooling safe for transactional paths. AGENTS.md rule 8 stays in force
+  proxy. This could one day make transaction pooling safe for transactional paths. ENGINEERING-RULES.md rule 8 stays in force
   until the isolation suite has been run through PgBouncer in transaction mode and passed.
 - **Base path changes.** Today release leaves a pooled connection on `public`. With C an idle connection sits on the
   server/role default (`"$user", public` unless configured), so the auditor and T2/T9 must assert the exact string
@@ -243,7 +243,7 @@ Cases T1 to T6 and T9 to T17 must run with the flag in both positions once phase
   the suite exists to bound it.
 - Option B stays the strategic path if the platform ever needs transaction pooling or database-level isolation
   proofs; nothing here blocks it.
-- AGENTS.md rule 8 (PgBouncer in session mode) is unchanged by this ADR.
+- ENGINEERING-RULES.md rule 8 (PgBouncer in session mode) is unchanged by this ADR.
 
 ## 7. Measured cost of the two round trips
 

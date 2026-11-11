@@ -177,6 +177,8 @@ jobs:
         run: bash scripts/ci/channel-docs-check.sh
       - name: Internal planning jargon ratchet
         run: bash scripts/ci/internal-reference-lint.sh
+      - name: Web localhost and type-escape ratchet
+        run: bash scripts/ci/web-ratchet.sh
       - name: No telemetry
         run: bash scripts/ci/no-telemetry-check.sh
       - name: Lint self-tests
