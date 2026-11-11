@@ -47,6 +47,7 @@ export default function ProviderActivationCard({
   multiFieldValues,
   setMultiFieldValue,
 }: ProviderActivationCardProps) {
+  const tHC = useTranslations("hcComponentsProvidersProviderActivationCard");
   const t = useTranslations("providersPanel");
   return (
     <Card className="gap-4 p-6">
@@ -131,7 +132,7 @@ export default function ProviderActivationCard({
               />
               {i === 0 && (
                 <p id="provider-first-field-help" className="text-xs text-muted-foreground">
-                  Copy these values from this provider’s own dashboard or console.
+                  {tHC("s2")}
                 </p>
               )}
             </div>
@@ -151,7 +152,7 @@ export default function ProviderActivationCard({
               required
             />
             <p id="provider-api-key-help" className="text-xs text-muted-foreground">
-              Paste the secret key from this provider’s dashboard, then activate.
+              {tHC("s1")}
             </p>
           </div>
         )}

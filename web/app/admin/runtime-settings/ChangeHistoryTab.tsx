@@ -26,10 +26,7 @@ interface Loaded {
   hasMore: boolean;
 }
 
-type State =
-  | { status: "loading" }
-  | { status: "error"; message: string }
-  | ({ status: "ready" } & Loaded);
+type State = { status: "loading" } | { status: "error"; message: string } | ({ status: "ready" } & Loaded);
 
 const rowId = (r: SettingHistoryRow) => `${r.scope}:${r.agentId ?? ""}:${r.key}:${r.version}`;
 
@@ -147,7 +144,13 @@ export default function ChangeHistoryTab({
 
   if (state.status === "loading") {
     return (
-      <div role="status" aria-busy="true" aria-label={t("history.loading")} className="space-y-3" data-testid="history-loading">
+      <div
+        role="status"
+        aria-busy="true"
+        aria-label={t("history.loading")}
+        className="space-y-3"
+        data-testid="history-loading"
+      >
         <Skeleton className="h-10" />
         <Skeleton className="h-10" />
         <Skeleton className="h-10" />
@@ -174,10 +177,13 @@ export default function ChangeHistoryTab({
     <div className="space-y-4" data-testid="history-tab">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <div className="relative sm:max-w-xs sm:flex-1">
-          <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Search
+            aria-hidden="true"
+            className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+          />
           <Input
             type="search"
-            className="pl-9"
+            className="ps-9"
             aria-label={t("history.search")}
             placeholder={t("history.searchPlaceholder")}
             value={query}
@@ -236,7 +242,9 @@ export default function ChangeHistoryTab({
                       </TableCell>
                       <TableCell className="whitespace-nowrap text-sm" data-testid="history-scope">
                         {r.scope === "agent" ? (
-                          <span title={r.agentId}>{t("history.scopeAgent", { id: (r.agentId ?? "").slice(0, 8) })}</span>
+                          <span title={r.agentId}>
+                            {t("history.scopeAgent", { id: (r.agentId ?? "").slice(0, 8) })}
+                          </span>
                         ) : (
                           t("history.scopeWorkspace")
                         )}
@@ -247,13 +255,19 @@ export default function ChangeHistoryTab({
                       </TableCell>
                       <TableCell className="text-sm">
                         <span className="sr-only">{t("history.before")} </span>
-                        <del className="text-muted-foreground">{r.previousValue == null ? t("history.inherited") : formatValue(entry, r.previousValue)}</del>
+                        <del className="text-muted-foreground">
+                          {r.previousValue == null ? t("history.inherited") : formatValue(entry, r.previousValue)}
+                        </del>
                         <span aria-hidden="true"> → </span>
                         <span className="sr-only">{t("history.after")} </span>
-                        <ins className="font-medium no-underline">{r.value == null ? t("history.inherited") : formatValue(entry, r.value)}</ins>
+                        <ins className="font-medium no-underline">
+                          {r.value == null ? t("history.inherited") : formatValue(entry, r.value)}
+                        </ins>
                       </TableCell>
                       <TableCell className="text-sm">{r.actor || t("history.unknownActor")}</TableCell>
-                      <TableCell className="max-w-xs text-sm">{r.reason || <span className="text-muted-foreground">{t("history.noReason")}</span>}</TableCell>
+                      <TableCell className="max-w-xs text-sm">
+                        {r.reason || <span className="text-muted-foreground">{t("history.noReason")}</span>}
+                      </TableCell>
                     </TableRow>
                   );
                 })}

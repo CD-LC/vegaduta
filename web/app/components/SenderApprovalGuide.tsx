@@ -51,7 +51,7 @@ export default function SenderApprovalGuide() {
       </CardHeader>
       <CardContent className="space-y-3 pt-3">
         <p className="max-w-prose text-sm text-muted-foreground">{t("senderGuideIntro")}</p>
-        <ol className="list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
+        <ol className="list-decimal space-y-1 ps-5 text-sm text-muted-foreground">
           {steps.map((s) => (
             <li key={s}>{s}</li>
           ))}

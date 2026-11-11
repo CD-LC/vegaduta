@@ -241,7 +241,7 @@ export default function ContactsTab() {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">{t("generatedAt", { at: fmtTime(exported.generatedAt) })}</p>
-          <ul className="list-disc pl-5 text-sm">
+          <ul className="list-disc ps-5 text-sm">
             {Object.entries(exported.data).map(([k, v]) => (
               <li key={k}>
                 {k}: {Array.isArray(v) ? v.length : typeof v === "object" && v ? Object.keys(v).length : String(v)}
@@ -252,7 +252,7 @@ export default function ContactsTab() {
             <Alert variant="warning">
               <AlertTitle>{t("notIncludedTitle")}</AlertTitle>
               <AlertDescription>
-                <ul className="list-disc pl-5">
+                <ul className="list-disc ps-5">
                   {exported.notIncluded.map((n) => (
                     <li key={n}>{n}</li>
                   ))}
@@ -269,7 +269,7 @@ export default function ContactsTab() {
           <Alert variant={erased.complete ? "success" : "destructive"}>
             <AlertDescription>{erased.complete ? t("erasureComplete") : t("erasureIncomplete")}</AlertDescription>
           </Alert>
-          <ul className="list-disc pl-5 text-sm">
+          <ul className="list-disc ps-5 text-sm">
             {Object.entries(erased.erased).map(([k, n]) => (
               <li key={k}>
                 {k}: {n}
@@ -280,7 +280,7 @@ export default function ContactsTab() {
             <Alert variant="destructive">
               <AlertTitle>{t("failedSteps")}</AlertTitle>
               <AlertDescription>
-                <ul className="list-disc pl-5">
+                <ul className="list-disc ps-5">
                   {erased.failures.map((f) => (
                     <li key={f}>{f}</li>
                   ))}
@@ -292,7 +292,7 @@ export default function ContactsTab() {
             <Alert variant="warning">
               <AlertTitle>{t("notReachedTitle")}</AlertTitle>
               <AlertDescription>
-                <ul className="list-disc pl-5">
+                <ul className="list-disc ps-5">
                   {erased.notReached.map((n) => (
                     <li key={n}>{n}</li>
                   ))}

@@ -163,7 +163,11 @@ export default function AgentBundlesPage() {
                 <CardContent className="flex items-center justify-between gap-2 px-4">
                   <Badge variant="secondary">{t(b.needs === "nothing" ? "needsNothing" : "needsGoogle")}</Badge>
                   <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => previewReady(b.file)}>
-                    {busy === "preview" ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Sparkles aria-hidden="true" />}
+                    {busy === "preview" ? (
+                      <Loader2 className="animate-spin" aria-hidden="true" />
+                    ) : (
+                      <Sparkles aria-hidden="true" />
+                    )}
                     {t("previewButton")}
                   </Button>
                 </CardContent>
@@ -205,13 +209,28 @@ export default function AgentBundlesPage() {
                 data-testid="bundle-file-input"
                 onChange={onFile}
               />
-              <Button type="button" variant="outline" size="sm" disabled={busy !== null} onClick={() => fileRef.current?.click()}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={busy !== null}
+                onClick={() => fileRef.current?.click()}
+              >
                 <Upload size={14} aria-hidden="true" /> {t("uploadButton")}
               </Button>
-              <Button type="button" size="sm" disabled={busy !== null || !text.trim()} onClick={() => previewText(text)}>
+              <Button
+                type="button"
+                size="sm"
+                disabled={busy !== null || !text.trim()}
+                onClick={() => previewText(text)}
+              >
                 <Sparkles size={14} aria-hidden="true" /> {t("previewButton")}
               </Button>
-              {fileName && <span className="min-w-0 break-all text-xs text-muted-foreground">{t("fileLoaded", { name: fileName })}</span>}
+              {fileName && (
+                <span className="min-w-0 break-all text-xs text-muted-foreground">
+                  {t("fileLoaded", { name: fileName })}
+                </span>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -234,7 +253,13 @@ export default function AgentBundlesPage() {
             <CardContent className="space-y-5 px-4 sm:px-6">
               <div className="space-y-2">
                 <Label htmlFor="bundle-name">{t("nameLabel")}</Label>
-                <Input id="bundle-name" value={name} maxLength={200} onChange={(e) => setName(e.target.value)} disabled={busy !== null} />
+                <Input
+                  id="bundle-name"
+                  value={name}
+                  maxLength={200}
+                  onChange={(e) => setName(e.target.value)}
+                  disabled={busy !== null}
+                />
               </div>
               <div className="space-y-1.5">
                 <p className="text-sm font-medium text-foreground">{t("toolsLabel")}</p>
@@ -259,7 +284,7 @@ export default function AgentBundlesPage() {
                   <Info aria-hidden="true" />
                   <AlertDescription>
                     <p className="font-medium">{t("adjustedTitle")}</p>
-                    <ul className="list-disc pl-5">
+                    <ul className="list-disc ps-5">
                       {preview.data.adjustments.map((a) => (
                         <li key={a}>{a}</li>
                       ))}

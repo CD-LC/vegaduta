@@ -16,6 +16,7 @@ import { tenantDetailApi } from "../lib/adminApi/tenantDetail";
 import { useConfirm } from "../components/admin/ConfirmDialog";
 import { AdminErrorState, AdminTableWrap } from "../components/admin/AdminKit";
 import { Select } from "../../components/ui/select";
+import { useTranslations } from "../../lib/i18n";
 
 // The fleet supervisor: every agent in every tenant, one row each, sorted so
 // the agents needing an operator surface first. SLOs are the server's
@@ -48,6 +49,7 @@ function money(x: number | null | undefined): string {
 }
 
 export default function FleetHealthPage() {
+  const tHC = useTranslations("hcPlatformadminFleetPage");
   const askConfirm = useConfirm();
   const [data, setData] = useState<FleetHealthResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -134,12 +136,10 @@ export default function FleetHealthPage() {
   const pg = usePagination(rows, 25);
 
   return (
-    <AdminShell title="Fleet health">
+    <AdminShell title={tHC("s16")}>
       <PageHint>
-        Every agent in every active tenant, scored against SLOs: windowed error rate, finished-job success, eval-score
-        drift between the latest two runs, and spend against its 7-day baseline. A row with no traffic reports{" "}
-        <em>no verdict</em>, not a fabricated 100%. Escalation is the tenant emergency stop - reversible, audited, and
-        enforced at the request filter.
+        {tHC("s15")} <em>{tHC("s14")}</em>
+        {tHC("s13")}
       </PageHint>
 
       <SectionCard
@@ -160,7 +160,7 @@ export default function FleetHealthPage() {
                 setSlo((s) => ({ ...s, windowHours }));
                 setSloDraft((s) => ({ ...s, windowHours }));
               }}
-              aria-label="Traffic window"
+              aria-label={tHC("s12")}
               options={[
                 { value: "1", label: "Last hour" },
                 { value: "24", label: "Last 24h" },
@@ -231,7 +231,7 @@ export default function FleetHealthPage() {
                   setShowSloPanel(false);
                 }}
               >
-                Apply thresholds
+                {tHC("s11")}
               </Button>
             </div>
           </div>
@@ -239,12 +239,12 @@ export default function FleetHealthPage() {
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <input
             className="h-9 rounded-md border border-border bg-background px-3 text-sm"
-            placeholder="Filter by agent or tenant"
+            placeholder={tHC("s10")}
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            aria-label="Filter agents"
+            aria-label={tHC("s9")}
           />
-          <div className="flex items-center gap-1" role="group" aria-label="Filter by health">
+          <div className="flex items-center gap-1" role="group" aria-label={tHC("s8")}>
             {(["ALL", "BREACH", "WARN", "STOPPED", "OK"] as const).map((h) => (
               <button
                 key={h}
@@ -263,8 +263,7 @@ export default function FleetHealthPage() {
           </div>
           {data && data.unavailableTenants.length > 0 && (
             <span className="inline-flex items-center gap-1 text-xs font-medium text-destructive">
-              <TriangleAlert size={13} /> Unreadable tenants: {data.unavailableTenants.join(", ")} - their agents are
-              absent below, not reported healthy.
+              <TriangleAlert size={13} /> {tHC("s7")} {data.unavailableTenants.join(", ")} {tHC("s6")}
             </span>
           )}
         </div>
@@ -276,28 +275,28 @@ export default function FleetHealthPage() {
           <AdminTableWrap>
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                  <th className="py-2 pr-3 font-semibold">Health</th>
-                  <th className="py-2 pr-3 font-semibold">Agent</th>
-                  <th className="py-2 pr-3 font-semibold">Tenant</th>
-                  <th className="py-2 pr-3 font-semibold text-right">Calls</th>
-                  <th className="py-2 pr-3 font-semibold text-right">Error rate</th>
-                  <th className="py-2 pr-3 font-semibold text-right">Spend</th>
-                  <th className="py-2 pr-3 font-semibold text-right">Jobs OK</th>
-                  <th className="py-2 pr-3 font-semibold text-right">Eval</th>
-                  <th className="py-2 pr-3 font-semibold">Alerts</th>
-                  <th className="py-2 pr-3 font-semibold text-right">Last activity</th>
-                  <th className="py-2 font-semibold text-right">Escalate</th>
+                <tr className="border-b border-border text-start text-[11px] uppercase tracking-wide text-muted-foreground">
+                  <th className="py-2 pe-3 font-semibold">Health</th>
+                  <th className="py-2 pe-3 font-semibold">Agent</th>
+                  <th className="py-2 pe-3 font-semibold">Tenant</th>
+                  <th className="py-2 pe-3 font-semibold text-end">Calls</th>
+                  <th className="py-2 pe-3 font-semibold text-end">{tHC("s5")}</th>
+                  <th className="py-2 pe-3 font-semibold text-end">Spend</th>
+                  <th className="py-2 pe-3 font-semibold text-end">Jobs OK</th>
+                  <th className="py-2 pe-3 font-semibold text-end">Eval</th>
+                  <th className="py-2 pe-3 font-semibold">Alerts</th>
+                  <th className="py-2 pe-3 font-semibold text-end">{tHC("s4")}</th>
+                  <th className="py-2 font-semibold text-end">Escalate</th>
                 </tr>
               </thead>
               <tbody>
                 {pg.pageItems.map((a) => (
                   <tr key={`${a.tenantId}:${a.agentId}`} className="border-b border-border/60 align-top">
-                    <td className="py-2.5 pr-3">
+                    <td className="py-2.5 pe-3">
                       <Badge variant={HEALTH_TONE[a.health] ?? "outline"}>{a.health}</Badge>
                     </td>
-                    <td className="py-2.5 pr-3 font-medium">{a.agentName}</td>
-                    <td className="py-2.5 pr-3">
+                    <td className="py-2.5 pe-3 font-medium">{a.agentName}</td>
+                    <td className="py-2.5 pe-3">
                       <Link
                         href={`/platform-admin/tenant-detail?id=${a.tenantId}`}
                         className="text-primary hover:underline"
@@ -305,9 +304,9 @@ export default function FleetHealthPage() {
                         {a.tenantName}
                       </Link>
                     </td>
-                    <td className="py-2.5 pr-3 text-right tabular-nums">{a.calls.toLocaleString()}</td>
+                    <td className="py-2.5 pe-3 text-end tabular-nums">{a.calls.toLocaleString()}</td>
                     <td
-                      className={`py-2.5 pr-3 text-right tabular-nums ${
+                      className={`py-2.5 pe-3 text-end tabular-nums ${
                         a.errorRate != null && a.errorRate > data.slo.maxErrorRate && a.calls >= data.slo.minCallsForSlo
                           ? "font-semibold text-destructive"
                           : ""
@@ -315,20 +314,20 @@ export default function FleetHealthPage() {
                     >
                       {pct(a.errorRate)}
                     </td>
-                    <td className="py-2.5 pr-3 text-right tabular-nums">
+                    <td className="py-2.5 pe-3 text-end tabular-nums">
                       {money(a.costUsd)}
                       {a.spendRatio != null && a.spendRatio > data.slo.spendSpikeRatio && (
-                        <span className="ml-1 text-[11px] font-semibold text-destructive">
+                        <span className="ms-1 text-[11px] font-semibold text-destructive">
                           {a.spendRatio.toFixed(1)}x
                         </span>
                       )}
                     </td>
-                    <td className="py-2.5 pr-3 text-right tabular-nums">
+                    <td className="py-2.5 pe-3 text-end tabular-nums">
                       {a.jobSuccessRate == null
                         ? "-"
                         : `${a.jobsSucceeded}/${a.jobsFinished} (${pct(a.jobSuccessRate)})`}
                     </td>
-                    <td className="py-2.5 pr-3 text-right tabular-nums">
+                    <td className="py-2.5 pe-3 text-end tabular-nums">
                       {a.latestEvalScore == null ? (
                         "-"
                       ) : (
@@ -336,7 +335,7 @@ export default function FleetHealthPage() {
                           {a.latestEvalScore.toFixed(2)}
                           {a.previousEvalScore != null && (
                             <span
-                              className={`ml-1 text-[11px] ${
+                              className={`ms-1 text-[11px] ${
                                 a.previousEvalScore - a.latestEvalScore > data.slo.evalDriftDrop
                                   ? "font-semibold text-destructive"
                                   : "text-muted-foreground"
@@ -349,7 +348,7 @@ export default function FleetHealthPage() {
                         </>
                       )}
                     </td>
-                    <td className="py-2.5 pr-3">
+                    <td className="py-2.5 pe-3">
                       <div className="flex flex-wrap gap-1">
                         {a.alerts.map((al) => (
                           <Badge key={al} variant="destructive" className="text-[10px]">
@@ -358,10 +357,10 @@ export default function FleetHealthPage() {
                         ))}
                       </div>
                     </td>
-                    <td className="py-2.5 pr-3 text-right text-muted-foreground">
+                    <td className="py-2.5 pe-3 text-end text-muted-foreground">
                       {a.lastCallAt ? timeAgo(a.lastCallAt) : "-"}
                     </td>
-                    <td className="py-2.5 text-right">
+                    <td className="py-2.5 text-end">
                       {a.tenantEmergencyStopped ? (
                         <Button
                           size="sm"
@@ -387,7 +386,7 @@ export default function FleetHealthPage() {
                 {rows.length === 0 && (
                   <tr>
                     <td colSpan={11} className="py-8 text-center text-muted-foreground">
-                      No agents match this filter.
+                      {tHC("s3")}
                     </td>
                   </tr>
                 )}
@@ -407,11 +406,9 @@ export default function FleetHealthPage() {
       </SectionCard>
 
       <InfoNote>
-        SLOs are request parameters tuned from the SLOs panel above (server defaults: error rate &le;10% with &ge;5
-        calls, job success &ge;90%, eval drop &gt;0.05 between the latest two runs, spend &gt;3x the daily baseline and
-        {/* a $-amount literal would trip the plan-price ratchet (scripts/ci/price-grep.sh) */}&ge;&#36;1). Per-agent
-        SLO config and routed paging are follow-ups. Emergency stop acts on the whole tenant, not the one agent; the
-        platform-wide kill switch lives on Platform Settings.
+        {tHC("s2")}
+        {/* a $-amount literal would trip the plan-price ratchet (scripts/ci/price-grep.sh) */}
+        {tHC("s1")}
       </InfoNote>
     </AdminShell>
   );

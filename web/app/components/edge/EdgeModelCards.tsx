@@ -136,6 +136,7 @@ export function OnDeviceModelCard({
   detail,
   caps,
   reasoningModelReady,
+  requiresFp16,
   asset,
   installed,
   busy,
@@ -151,6 +152,10 @@ export function OnDeviceModelCard({
   caps: EdgeCapabilities | null;
   /** A text model (or the built-in one) is ready; otherwise a cross-reference note shows. */
   reasoningModelReady: boolean;
+  /** Weights are fp16-only: adapters without the shader-f16 feature can't run
+   * them — label honestly and hold the download rather than charge the person
+   * gigabytes for a session-create that always fails. */
+  requiresFp16?: boolean;
   asset: AssetStatus | null;
   installed: boolean;
   busy: boolean;
@@ -158,14 +163,24 @@ export function OnDeviceModelCard({
   onDownload: () => void;
   onDelete: () => void;
 }) {
+  const fp16Missing =
+    requiresFp16 === true && caps != null && caps.webgpu.available === true && caps.webgpu.shaderF16 !== true;
   return (
     <MarketCard
       icon={icon}
       name={name}
       purpose={purpose}
       sizeLabel={formatBytes(sizeBytes)}
-      fitsLabel={caps == null ? t("hero.checking") : caps.webgpu.available ? t("market.fits") : t("market.fitsWasm")}
-      fitsWarn={false}
+      fitsLabel={
+        caps == null
+          ? t("hero.checking")
+          : fp16Missing
+            ? t("market.noFit")
+            : caps.webgpu.available
+              ? t("market.fits")
+              : t("market.fitsWasm")
+      }
+      fitsWarn={fp16Missing}
       detail={detail}
       note={reasoningModelReady ? null : NEEDS_TEXT_MODEL_NOTE}
       asset={asset}
@@ -177,7 +192,7 @@ export function OnDeviceModelCard({
             {t("market.delete")}
           </Button>
         ) : (
-          <Button size="sm" onClick={onDownload} disabled={busy}>
+          <Button size="sm" onClick={onDownload} disabled={busy || fp16Missing}>
             <Download size={13} aria-hidden="true" />
             {t("market.download")}
           </Button>

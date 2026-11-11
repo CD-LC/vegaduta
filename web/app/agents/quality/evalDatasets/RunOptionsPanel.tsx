@@ -21,10 +21,11 @@ export default function RunOptionsPanel({
   values: RunOptionValues;
   onChange: (patch: Partial<RunOptionValues>) => void;
 }) {
+  const tHC = useTranslations("hcAgentsQualityEvalDatasetsRunOptionsPanel");
   const t = useTranslations("evalControls");
   return (
     <div className="space-y-3 rounded-md border border-border p-3">
-      <h3 className="text-sm font-semibold text-foreground">Run options</h3>
+      <h3 className="text-sm font-semibold text-foreground">{tHC("s8")}</h3>
       <div className="space-y-1">
         <label className="text-xs font-medium text-muted-foreground" id="eval-run-mode-label">
           {t("runModeLabel")}
@@ -44,18 +45,18 @@ export default function RunOptionsPanel({
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div className="space-y-1">
           <label className="text-xs font-medium text-muted-foreground" htmlFor="eval-run-judge-model">
-            Judge model (optional)
+            {tHC("s7")}
           </label>
           <Input
             id="eval-run-judge-model"
             value={values.judgeModel}
             onChange={(e) => onChange({ judgeModel: e.target.value })}
-            placeholder="e.g. gpt-4o-mini — blank = default"
+            placeholder={tHC("s6")}
           />
         </div>
         <div className="space-y-1">
           <label className="text-xs font-medium text-muted-foreground" htmlFor="eval-run-repeats">
-            Repeats per case (1–5)
+            {tHC("s5")}
           </label>
           <Input
             id="eval-run-repeats"
@@ -66,7 +67,7 @@ export default function RunOptionsPanel({
         </div>
         <div className="space-y-1">
           <label className="text-xs font-medium text-muted-foreground" htmlFor="eval-run-budget">
-            Budget (USD, default 5)
+            {tHC("s4")}
           </label>
           <Input
             id="eval-run-budget"
@@ -81,14 +82,11 @@ export default function RunOptionsPanel({
             checked={values.strictJudge}
             onChange={(e) => onChange({ strictJudge: e.target.checked })}
           />
-          Strict judge
-          <span className="text-xs text-muted-foreground">(refuse a judge identical to the agent model)</span>
+          {tHC("s3")}
+          <span className="text-xs text-muted-foreground">{tHC("s2")}</span>
         </label>
       </div>
-      <p className="text-xs text-muted-foreground">
-        Repeats replay each case k times and require a strict majority to pass — the non-determinism guard. The run
-        cancels once observed spend exceeds the budget, and a cancelled run never satisfies a promotion gate.
-      </p>
+      <p className="text-xs text-muted-foreground">{tHC("s1")}</p>
     </div>
   );
 }

@@ -64,7 +64,8 @@ export default function RankedBars({
   const shown = ranked.slice(0, limit);
   const hidden = ranked.length - shown.length;
   const largest = safeMax(ranked.map((item) => item.value));
-  const max = typeof scaleMax === "number" && Number.isFinite(scaleMax) && scaleMax > 0 ? Math.max(scaleMax, largest) : largest;
+  const max =
+    typeof scaleMax === "number" && Number.isFinite(scaleMax) && scaleMax > 0 ? Math.max(scaleMax, largest) : largest;
 
   return (
     <div className={cn("min-w-0", className)}>
@@ -80,7 +81,7 @@ export default function RankedBars({
                 <span className="min-w-0 max-w-full truncate text-foreground" title={item.label}>
                   {item.label}
                 </span>
-                <span className="ml-auto shrink-0 text-xs font-medium tabular-nums text-muted-foreground">
+                <span className="ms-auto shrink-0 text-xs font-medium tabular-nums text-muted-foreground">
                   {item.valueText ?? formatCompact(item.value) ?? "0"}
                 </span>
               </div>

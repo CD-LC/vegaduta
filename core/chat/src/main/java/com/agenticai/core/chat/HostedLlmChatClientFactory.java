@@ -87,13 +87,21 @@ public class HostedLlmChatClientFactory {
     // The install's local model server, to recognise its pool row (see isLocalOllamaRow), and
     // the Ollama context window OllamaAgentChatClientFactory also applies. Field-injected so the
     // one constructor - and every caller that builds this factory by hand - stays as it is.
-    @Value("${app.local-models.ollama-base-url:${app.local-llm.bootstrap.base-url:http://ollama:11434}}")
+    @Value(
+            "${app.local-models.ollama-base-url:${app.local-llm.bootstrap.base-url:http://ollama:11434}}")
     private String localOllamaBaseUrl = "";
 
     @Value("${app.llm.ollama.num-ctx:32768}")
     private int ollamaNumCtx = 32768;
 
-    /** How long a local model stays loaded after a request (Ollama keep_alive); see OllamaKeepAlive. */
+    // llama.cpp's n_batch, sent as the per-request num_batch when a local row asks for it.
+    // 0 = the server default.
+    @Value("${app.llm.ollama.num-batch:0}")
+    private int ollamaNumBatch = 0;
+
+    /**
+     * How long a local model stays loaded after a request (Ollama keep_alive); see OllamaKeepAlive.
+     */
     @Value("${app.local-models.keep-alive:30m}")
     private String localModelsKeepAlive = "30m";
 
@@ -254,7 +262,13 @@ public class HostedLlmChatClientFactory {
         }
         OpenAiChatOptions options = optionsBuilder.build();
         if (localOllama) {
-            Map<String, Object> extra = localOllamaExtraBody(ollamaNumCtx, provider.getKeepAlive(), localModelsKeepAlive);
+            Map<String, Object> extra =
+                    LocalOllamaExtraBody.of(
+                            ollamaNumCtx,
+                            provider.getKeepAlive(),
+                            localModelsKeepAlive,
+                            provider.getNumBatch(),
+                            ollamaNumBatch);
             if (!extra.isEmpty()) {
                 options.setExtraBody(extra);
             }
@@ -268,8 +282,10 @@ public class HostedLlmChatClientFactory {
                 .chatClientBuilder(
                         chatModel,
                         provider.effectiveToolRouterMode(),
-                        // The text-call recovery is a small-model workaround: by what is known of this row.
-                        modelSupport.capabilityOf(provider.getToolCallGrade(), provider.effectiveSmallModel()))
+                        // The text-call recovery is a small-model workaround: by what is known of
+                        // this row.
+                        modelSupport.capabilityOf(
+                                provider.getToolCallGrade(), provider.effectiveSmallModel()))
                 .defaultAdvisors(
                         modelSupport.advisors(
                                 new LlmMetricsAdvisor(
@@ -297,9 +313,9 @@ public class HostedLlmChatClientFactory {
      * ProviderName#GOOGLE_VERTEX}.
      */
     /**
-     * True for the pool row that serves this install's own Ollama: a row whose {@code
-     * providerName} says OLLAMA, or whose base URL is the operator-configured local model server
-     * ({@code app.local-models.ollama-base-url}, the same URL LocalModelOllamaGateway talks to).
+     * True for the pool row that serves this install's own Ollama: a row whose {@code providerName}
+     * says OLLAMA, or whose base URL is the operator-configured local model server ({@code
+     * app.local-models.ollama-base-url}, the same URL LocalModelOllamaGateway talks to).
      */
     public boolean isLocalOllamaRow(PlatformHostedLlmProvider provider) {
         if (provider == null) {
@@ -315,30 +331,15 @@ public class HostedLlmChatClientFactory {
 
     /**
      * The thinking switch for a local Ollama row: the row's own setting (Providers -> Local model),
-     * else {@code app.llm.ollama.reasoning-effort}. Null or blank means "leave the model's default".
+     * else {@code app.llm.ollama.reasoning-effort}. Null or blank means "leave the model's
+     * default".
      */
     String effectiveReasoningEffort(PlatformHostedLlmProvider provider) {
-        String value = provider.getReasoningEffort() != null ? provider.getReasoningEffort() : ollamaReasoningEffort;
+        String value =
+                provider.getReasoningEffort() != null
+                        ? provider.getReasoningEffort()
+                        : ollamaReasoningEffort;
         return value == null || value.isBlank() ? null : value.trim();
-    }
-
-    /**
-     * The Ollama-only fields of a local row's request: the context window, and how long the model stays loaded (the
-     * row's own keep-alive, else {@code app.local-models.keep-alive}). Without keep_alive Ollama applies its
-     * five-minute default, the model unloads after a short pause and the next message waits for a reload plus a full
-     * prompt read. Package-private for tests.
-     */
-    static Map<String, Object> localOllamaExtraBody(int numCtx, String rowKeepAlive, String defaultKeepAlive) {
-        Map<String, Object> extra = new java.util.LinkedHashMap<>();
-        if (numCtx > 0) {
-            extra.put("options", Map.of("num_ctx", numCtx));
-        }
-        Object keepAlive = com.agenticai.core.providers.localmodels.OllamaKeepAlive.jsonValue(
-                rowKeepAlive != null && !rowKeepAlive.isBlank() ? rowKeepAlive : defaultKeepAlive);
-        if (keepAlive != null) {
-            extra.put("keep_alive", keepAlive);
-        }
-        return extra;
     }
 
     /** True when a pool row carries no usable API key, so no Authorization header is sent. */
@@ -449,7 +450,8 @@ public class HostedLlmChatClientFactory {
                 .chatClientBuilder(
                         chatModel,
                         null,
-                        modelSupport.capabilityOf(provider.getToolCallGrade(), provider.effectiveSmallModel()))
+                        modelSupport.capabilityOf(
+                                provider.getToolCallGrade(), provider.effectiveSmallModel()))
                 .defaultAdvisors(
                         modelSupport.advisors(
                                 // Gemini rejects >1 system message; the platform routinely sends
@@ -484,7 +486,9 @@ public class HostedLlmChatClientFactory {
      * catalog, where an unknown model still gets the conservative fallback rate.
      */
     private LlmPricingCatalog pricingCatalogFor(PlatformHostedLlmProvider provider) {
-        return provider != null && provider.isZeroCost() ? LlmPricingCatalog.zeroCost() : pricingCatalog;
+        return provider != null && provider.isZeroCost()
+                ? LlmPricingCatalog.zeroCost()
+                : pricingCatalog;
     }
 
     private static String resolveModel(PlatformHostedLlmProvider provider) {

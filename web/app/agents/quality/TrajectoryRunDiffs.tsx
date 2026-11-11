@@ -147,7 +147,7 @@ export default function TrajectoryRunDiffs({
     <div className="mt-2 rounded-md border border-border" data-testid={`trajectory-run-${runId}`}>
       <button
         type="button"
-        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium text-foreground"
+        className="flex w-full items-center gap-2 px-3 py-2 text-start text-sm font-medium text-foreground"
         aria-expanded={open}
         onClick={() => setOpen(!open)}
       >
@@ -171,9 +171,15 @@ export default function TrajectoryRunDiffs({
           {graded.map((c) => {
             const r = c.report as TrajectoryReportView;
             return (
-              <section key={c.resultId} className="space-y-2 rounded-md border border-border/60 p-3" data-testid={`trajectory-case-${c.resultId}`}>
+              <section
+                key={c.resultId}
+                className="space-y-2 rounded-md border border-border/60 p-3"
+                data-testid={`trajectory-case-${c.resultId}`}
+              >
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-medium text-muted-foreground">{t("caseHeading", { n: String(c.position + 1) })}</span>
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {t("caseHeading", { n: String(c.position + 1) })}
+                  </span>
                   {r.passed ? (
                     <Badge variant="state" state="var(--state-success)">
                       {t("passed")}
@@ -200,7 +206,7 @@ export default function TrajectoryRunDiffs({
                           return (
                             <li
                               key={row.index}
-                              className="rounded-sm border-l-4 bg-muted/30 px-2 py-1 text-xs"
+                              className="rounded-sm border-s-4 bg-muted/30 px-2 py-1 text-xs"
                               style={{ borderLeftColor: tone.cssVar }}
                               data-status={row.status}
                             >
@@ -210,7 +216,9 @@ export default function TrajectoryRunDiffs({
                                 {t(STATUS_KEYS[row.status] || "statusMissing")}
                               </Badge>
                               {row.actualIndex != null && (
-                                <span className="ml-1 text-muted-foreground">{t("pairedWith", { n: String(row.actualIndex + 1) })}</span>
+                                <span className="ms-1 text-muted-foreground">
+                                  {t("pairedWith", { n: String(row.actualIndex + 1) })}
+                                </span>
                               )}
                               {row.detail && <div className="mt-0.5 text-muted-foreground">{row.detail}</div>}
                             </li>
@@ -230,7 +238,7 @@ export default function TrajectoryRunDiffs({
                           return (
                             <li
                               key={row.index}
-                              className="rounded-sm border-l-4 bg-muted/30 px-2 py-1 text-xs"
+                              className="rounded-sm border-s-4 bg-muted/30 px-2 py-1 text-xs"
                               style={{ borderLeftColor: tone.cssVar }}
                               data-status={row.status}
                             >
@@ -239,12 +247,17 @@ export default function TrajectoryRunDiffs({
                               <Badge variant="state" state={tone.cssVar}>
                                 {t(STATUS_KEYS[row.status] || "statusExtra")}
                               </Badge>
-                              {!row.ok && <span className="ml-1 text-destructive">{t("callFailed")}</span>}
+                              {!row.ok && <span className="ms-1 text-destructive">{t("callFailed")}</span>}
                               {row.expectedIndex != null && (
-                                <span className="ml-1 text-muted-foreground">{t("pairedWith", { n: String(row.expectedIndex + 1) })}</span>
+                                <span className="ms-1 text-muted-foreground">
+                                  {t("pairedWith", { n: String(row.expectedIndex + 1) })}
+                                </span>
                               )}
                               {row.args && (
-                                <code className="mt-0.5 block truncate font-mono text-muted-foreground" title={row.args}>
+                                <code
+                                  className="mt-0.5 block truncate font-mono text-muted-foreground"
+                                  title={row.args}
+                                >
                                   {row.args}
                                 </code>
                               )}
@@ -253,7 +266,9 @@ export default function TrajectoryRunDiffs({
                         })}
                       </ol>
                     )}
-                    {r.actualTruncated && <p className="mt-1 text-xs text-muted-foreground">{t("truncated", { max: "200" })}</p>}
+                    {r.actualTruncated && (
+                      <p className="mt-1 text-xs text-muted-foreground">{t("truncated", { max: "200" })}</p>
+                    )}
                   </div>
                 </div>
 
@@ -277,7 +292,13 @@ export default function TrajectoryRunDiffs({
                         <Button type="button" size="sm" disabled={busy} onClick={() => void adoptActual(c)}>
                           {t("useActualYes")}
                         </Button>
-                        <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => setConfirming(null)}>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={busy}
+                          onClick={() => setConfirming(null)}
+                        >
                           {t("cancel")}
                         </Button>
                       </>

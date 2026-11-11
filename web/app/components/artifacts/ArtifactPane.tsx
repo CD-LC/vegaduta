@@ -249,7 +249,7 @@ export default function ArtifactPane({
 
       <div className="flex flex-wrap items-center gap-1.5 border-b border-border px-3 py-1.5">
         {previewable && (
-          <div role="tablist" className="mr-auto inline-flex rounded-full border border-border p-0.5">
+          <div role="tablist" className="me-auto inline-flex rounded-full border border-border p-0.5">
             {(["preview", "code"] as const).map((id) => (
               <button
                 key={id}
@@ -270,7 +270,7 @@ export default function ArtifactPane({
             ))}
           </div>
         )}
-        {!previewable && <span className="mr-auto" />}
+        {!previewable && <span className="me-auto" />}
         <Button type="button" variant="ghost" size="sm" onClick={() => void handleCopy()} data-testid="artifact-copy">
           {copyState === "ok" ? (
             <Check className="size-3.5" aria-hidden="true" />

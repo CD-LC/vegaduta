@@ -10,6 +10,30 @@ sidebar and the page shows "All add-ons included" instead of switches. The page 
 
 | | |
 |---|---|
+A **first personal install is lean**: Postgres, core and the console, about 3 GB, with no add-on on and no local
+model. Every card on this page therefore starts **Off**. The full set (a local model, web search, the tools runner and
+the build terminal) is about 8 GB; the browser (+3.4 GB) and documents (+4.1 GB) are on top.
+
+## Turning on an add-on after a lean install
+
+Each one is a single step; pick whichever is easiest:
+
+| Add-on | In the console | From a terminal | In VegaDūta Setup |
+|---|---|---|---|
+| A local model (Qwen 3.5 2B / 4B / 9B, gpt-oss 20B) | **Turn on** on its card: core downloads it through Ollama with a progress bar. Or **Providers → Set up a local model** | `./scripts/vegaduta personal --local-ai` (optionally `--local-model TAG`); it shows the size and asks first | tick the model pack |
+| Web search | **Turn on** on the Web search card | `./scripts/vegaduta personal --search` | tick Web search |
+| Tools runner (MCP connectors) | **Turn on** on the Tools runner card | `./scripts/vegaduta personal --profile tools` | tick Tools runner |
+| Build terminal and projects folder | **Turn on** on its card | `./scripts/vegaduta personal --profile workspace` | tick Build terminal |
+| Assistant browser | **Turn on** on its card | `./scripts/vegaduta personal --browser` | tick Assistant browser |
+| Documents and transcription | **Turn on** on its card | `./scripts/vegaduta personal --profile rag` | tick Documents |
+
+Compose add-ons (everything except the model packs) are started on your computer, so after **Turn on** the card says
+"Waiting to be turned on" until you run the command in its confirmation or re-run Setup (see "Who does the work").
+Windows uses `.\scripts\vegaduta.ps1 personal` with `-Search`, `-Profile tools`, `-Profile workspace`, `-Profile
+browser`, `-Profile rag`, `-LocalAi`. An install that existed before the lean default keeps what it already had.
+
+| | |
+|---|---|
 | Route | `/add-ons` |
 | Sidebar | Configuration group, after "Data & Infrastructure". Shown on personal and lite installs, not on a full install. A caller without change rights sees the switches disabled rather than a 403 after the click |
 | Nav needs | any signed-in user |

@@ -200,7 +200,7 @@ export default function LessonView({
         {content?.keyPoints && content.keyPoints.length > 0 && (
           <Card className="gap-0 p-5">
             <h3 className="text-sm font-semibold text-foreground">{t("keyPoints")}</h3>
-            <ul className="mt-2 ml-5 list-disc space-y-1 text-sm leading-relaxed text-foreground">
+            <ul className="mt-2 ms-5 list-disc space-y-1 text-sm leading-relaxed text-foreground">
               {content.keyPoints.map((point, i) => (
                 <li key={i} className="[overflow-wrap:anywhere]">
                   {point}
@@ -249,7 +249,11 @@ export default function LessonView({
             )
           ) : (
             <Button type="button" onClick={() => void complete()} disabled={completing} data-testid="tutor-complete">
-              {completing ? <Loader2 className="animate-spin" aria-hidden="true" /> : <CheckCircle2 aria-hidden="true" />}
+              {completing ? (
+                <Loader2 className="animate-spin" aria-hidden="true" />
+              ) : (
+                <CheckCircle2 aria-hidden="true" />
+              )}
               {followingId ? t("completeAndNext") : t("completeLesson")}
             </Button>
           )}

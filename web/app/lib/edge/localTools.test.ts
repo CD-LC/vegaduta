@@ -24,9 +24,10 @@ import {
   findLocalTool,
   listLocalTools,
   runLocalTool,
+  toolAdvertisementBudgetFor,
   type LocalTool,
 } from "./localTools";
-import type { EdgeCapabilities } from "./capabilities";
+import { WEBLLM_BASELINE_CONTEXT_WINDOW, type EdgeCapabilities } from "./capabilities";
 
 // listLocalTools takes EdgeCapabilities; none of the phase-1 four reads it, so
 // the tests pass both a realistic object and null (the "detection hasn't
@@ -34,7 +35,7 @@ import type { EdgeCapabilities } from "./capabilities";
 const CAPS = {
   version: 1,
   detectedAt: 1,
-  webgpu: { available: true, maxBufferSize: 1, maxStorageBufferBindingSize: 1 },
+  webgpu: { available: true, maxBufferSize: 1, maxStorageBufferBindingSize: 1, shaderF16: true },
   promptApi: { shape: "none", availability: "unavailable" },
   deviceMemoryGB: 8,
   hardwareConcurrency: 8,
@@ -139,6 +140,39 @@ describe("registry", () => {
     // -- the failure this replaces (4,606 chars, ~48% of a 4096-window model's
     // whole prompt budget) is exactly what the trim exists to prevent.
     expect(total).toBeLessThanOrEqual(TOOL_ADVERTISEMENT_CHAR_BUDGET);
+  });
+
+  it("scales the advertisement budget with the model's context window", () => {
+    // The 3,200-char baseline fits compute+folder only — media generation is
+    // always trimmed away. A model with a bigger window must be offered the
+    // whole registry, which is the "caller passes a larger budget" contract
+    // the budget's doc names.
+    expect(toolAdvertisementBudgetFor(WEBLLM_BASELINE_CONTEXT_WINDOW)).toBe(TOOL_ADVERTISEMENT_CHAR_BUDGET);
+    expect(toolAdvertisementBudgetFor(8192)).toBe(TOOL_ADVERTISEMENT_CHAR_BUDGET * 2);
+    // Absent/absurd input answers the baseline, never less.
+    expect(toolAdvertisementBudgetFor(null)).toBe(TOOL_ADVERTISEMENT_CHAR_BUDGET);
+    expect(toolAdvertisementBudgetFor(0)).toBe(TOOL_ADVERTISEMENT_CHAR_BUDGET);
+    expect(toolAdvertisementBudgetFor(NaN)).toBe(TOOL_ADVERTISEMENT_CHAR_BUDGET);
+
+    const names = (b: number) => listLocalTools(CAPS, b).map((t) => t.name);
+    expect(names(toolAdvertisementBudgetFor(WEBLLM_BASELINE_CONTEXT_WINDOW))).not.toContain("local_generate_image");
+    const bigger = names(toolAdvertisementBudgetFor(8192));
+    expect(bigger).toContain("local_generate_image");
+    expect(bigger).toContain("local_generate_audio");
+  });
+
+  it("hides image generation on adapters without shader-f16 — fp16 weights cannot run there", () => {
+    // SD-Turbo's ONNX weights are fp16-only: an adapter that exposes WebGPU
+    // without the shader-f16 feature would fail every session create, so the
+    // tool is gated off rather than advertised into guaranteed refusal. Audio
+    // stays — it falls back to q4 weights.
+    const noF16 = {
+      ...CAPS,
+      webgpu: { ...CAPS.webgpu, shaderF16: false },
+    } as unknown as EdgeCapabilities;
+    const names = listLocalTools(noF16, 99_000).map((t) => t.name);
+    expect(names).not.toContain("local_generate_image");
+    expect(names).toContain("local_generate_audio");
   });
 
   it("resolves tools by exact name only, so a local tool cannot shadow a server tool", () => {

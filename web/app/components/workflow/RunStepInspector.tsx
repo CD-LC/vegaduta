@@ -39,6 +39,7 @@ import { ToolsPanel } from "./inspector/ToolsPanel";
 import { DataPanel } from "./inspector/DataPanel";
 import { CostPanel } from "./inspector/CostPanel";
 import { SentPanel } from "./inspector/SentPanel";
+import { useTranslations } from "../../lib/i18n";
 
 // The "black box" card for one node visit during a run or replay. It reads a
 // single trace visit and never fetches (except the "Sent" tab): the canvas owns
@@ -60,6 +61,7 @@ export default function RunStepInspector({
   pinRunId,
   workflowId,
 }: RunStepInspectorProps) {
+  const tHC = useTranslations("hcComponentsWorkflowRunStepInspector");
   const uid = useId();
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [copied, copy] = useCopy();
@@ -231,7 +233,7 @@ export default function RunStepInspector({
           <h2 id={`${uid}-title`} className="ri-title" title={title}>
             {title}
           </h2>
-          <button type="button" className="ri-iconbtn" onClick={onClose} aria-label="Close step inspector (Esc)">
+          <button type="button" className="ri-iconbtn" onClick={onClose} aria-label={tHC("s7")}>
             <X size={15} aria-hidden="true" />
           </button>
         </div>
@@ -241,13 +243,13 @@ export default function RunStepInspector({
           </span>
           {visit.nodeType ? <span className="ri-type">{visit.nodeType}</span> : null}
           {visitCount > 1 ? (
-            <div className="ri-visits" role="group" aria-label="Visits of this node">
+            <div className="ri-visits" role="group" aria-label={tHC("s6")}>
               <button
                 type="button"
                 className="ri-iconbtn ri-sm"
                 onClick={onPrevVisit}
                 disabled={!canPrev}
-                aria-label="Previous visit ([)"
+                aria-label={tHC("s5")}
               >
                 <ChevronLeft size={14} aria-hidden="true" />
               </button>
@@ -260,7 +262,7 @@ export default function RunStepInspector({
                 className="ri-iconbtn ri-sm"
                 onClick={onNextVisit}
                 disabled={!canNext}
-                aria-label="Next visit (])"
+                aria-label={tHC("s4")}
               >
                 <ChevronRight size={14} aria-hidden="true" />
               </button>
@@ -271,7 +273,7 @@ export default function RunStepInspector({
       </header>
 
       {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus -- roving tabindex lives on the tabs; arrow keys bubble to the tablist */}
-      <div className="ri-tabs" role="tablist" aria-label="Step details" onKeyDown={onTabKey}>
+      <div className="ri-tabs" role="tablist" aria-label={tHC("s3")} onKeyDown={onTabKey}>
         {tabs.map((k) => {
           const t = tabMeta[k];
           return (
@@ -370,14 +372,14 @@ export default function RunStepInspector({
           {visitCount > 1 ? (
             <>
               <kbd>[</kbd>
-              <kbd>]</kbd> visits ·{" "}
+              <kbd>]</kbd> {tHC("s2")}{" "}
             </>
           ) : null}
           <kbd>Esc</kbd> close
         </span>
         {onOpenFullRun ? (
           <button type="button" className="ri-btn" onClick={onOpenFullRun}>
-            Open full run
+            {tHC("s1")}
             <ExternalLink size={13} aria-hidden="true" />
           </button>
         ) : null}

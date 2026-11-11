@@ -275,7 +275,7 @@ export default function AddonCard({
             href={learn}
             target="_blank"
             rel="noopener noreferrer"
-            className="ml-auto text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+            className="ms-auto text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
           >
             {t("learnMore")} <span className="sr-only">{name}</span>
           </a>

@@ -42,8 +42,8 @@ newest published stable `vX.Y.Z` release),
 ## Extras (personal tier)
 
 The wizard's **Extras** step lists the optional add-ons with their disk, memory
-and licence, ticks the recommended set (today: the build terminal and private web search, the two things a
-fresh install turns on by itself) and totals
+and licence, ticks **nothing** (a fresh install is lean: about 3 GB, Postgres, core and web; the full set is about
+8 GB, and the step says so) and totals
 what the ticked ones cost against this computer's free disk, Docker memory and
 RAM, with a warning (never a block) when it is short. An add-on that needs
 another pulls it in and says so; unticking the needed one unticks the rest.
@@ -88,7 +88,7 @@ Planned add-ons are shown but cannot be ticked.
   `tools=1`); Setup reads both.
 - **Headless.** `--extras workspace,search` installs exactly those, `--extras
   none` none; without it a re-run keeps what is installed and a fresh install
-  gets the recommended set. `--list-extras` prints the catalog.
+  gets none (lean). `--list-extras` prints the catalog.
 
 ## Re-running on an existing install, and versions
 
@@ -187,20 +187,28 @@ Two layers, both optional and on-device:
   `CORE_HOST_PORT` into the launcher for machines whose default ports are taken.
   With `--payload`, the tarball plus its `SHA256SUMS` sit in the app's
   `Resources/` and the launcher passes `--release-url file://…`, so no published
-  release is needed. The app is ad-hoc signed (not notarized) and packed in a
-  `.dmg` next to a "READ ME FIRST" with the current steps for opening it:
-  System Settings → Privacy & Security → **Open Anyway** on macOS 15 and later
-  (right-click → Open only works up to macOS 14), or
+  release is needed. Without signing credentials the app is ad-hoc signed (not
+  notarized) and packed in a `.dmg` next to a "READ ME FIRST" with the current
+  steps for opening it: System Settings → Privacy & Security → **Open Anyway** on
+  macOS 15 and later (right-click → Open only works up to macOS 14), or
   `xattr -dr com.apple.quarantine "VegaDuta Setup.app"` in Terminal.
 - **Windows**: the exe is already the whole installer; the zip adds a
-  `READ-ME-FIRST.txt` explaining SmartScreen's "More info → Run anyway".
-- **Unsigned**: Gatekeeper blocks the quarantined app and SmartScreen warns,
-  once per machine, until a Developer ID signature with Apple notarization
-  and a Windows code-signing certificate are wired (they need certificates the
-  project does not hold yet; the ad-hoc signature does not replace them). Every
-  artifact is still covered by the release's `SHA256SUMS`.
+  `READ-ME-FIRST.txt` explaining SmartScreen's "More info → Run anyway" (or, for
+  a signed exe, how to see the publisher). `windows-exe` builds just the exe so a
+  signing step can sign it; `windows --exe <file> [--signed]` zips a prebuilt one.
+- **Signing**: opt-in through `MAC_SIGN_IDENTITY`, `MAC_NOTARY_KEY_PATH` /
+  `MAC_NOTARY_KEY_ID` / `MAC_NOTARY_ISSUER` and `MAC_INSTALLER_IDENTITY` (see the
+  header of `package.sh`). With them the app and dmg are Developer ID signed with
+  the hardened runtime, notarized and stapled, and a signed `.pkg` is also built;
+  the README then drops the Gatekeeper steps. Without them the build is
+  unchanged and Gatekeeper blocks the quarantined app and SmartScreen warns, once
+  per machine. `release.yml` supplies the credentials from repository secrets; the
+  list, the Apple and Windows prerequisites and the checks are in
+  [docs/maintainers/release-signing.md](../docs/maintainers/release-signing.md).
+  Every artifact is covered by the release's `SHA256SUMS` either way.
 
 CI: `installer.yml`'s `dist` job (manual dispatch) builds linux/windows on
 Ubuntu and the `.dmg` in `dist-darwin` on `macos-latest`. `release.yml`
-attaches the same artifacts, including the `.dmg` from `setup-pkg-darwin`, to
-the draft release inside `SHA256SUMS`.
+attaches the same artifacts, including the `.dmg` and `.pkg` from
+`setup-pkg-darwin` and the exe from `setup-exe-windows`, to the draft release
+inside `SHA256SUMS`.

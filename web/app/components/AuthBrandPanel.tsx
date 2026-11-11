@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import Logo from "./Logo";
+import { useTranslations } from "../lib/i18n";
 
 // Slim top strip shared by the public auth funnel (/login, /signup,
 // /signup/complete): brand lockup, one short title, one optional sentence.
@@ -42,9 +43,10 @@ export default function AuthBrandPanel({
   /** Optional extra row under the subtitle (e.g. the sign-in / sign-up switch). */
   children?: ReactNode;
 }) {
+  const tHC = useTranslations("hcComponentsAuthBrandPanel");
   return (
     <header className="vd-auth__strip">
-      <Link href={logoHref} className="vd-auth__brand" aria-label="VegaDūta home">
+      <Link href={logoHref} className="vd-auth__brand" aria-label={tHC("s1")}>
         <Logo size={32} />
       </Link>
       {eyebrow && <p className="vd-auth__eyebrow">{eyebrow}</p>}

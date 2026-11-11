@@ -12,6 +12,7 @@
 
 import { AGENT_COPY } from "../../lib/agentkit/copy";
 import type { ContextReport, Eviction } from "../../lib/agentkit/context";
+import { useTranslations } from "../../lib/i18n";
 
 function pct(used: number, cap: number): number {
   if (cap <= 0) return used > 0 ? 100 : 0;
@@ -19,6 +20,7 @@ function pct(used: number, cap: number): number {
 }
 
 export default function ContextMeter({ report, evictions }: { report: ContextReport | null; evictions: Eviction[] }) {
+  const tHC = useTranslations("hcComponentsAgentkitContextMeter");
   return (
     <div className="mt-5 rounded-lg border border-border p-4" data-testid="agentkit-context-meter">
       <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{AGENT_COPY.meterTitle}</p>
@@ -31,11 +33,11 @@ export default function ContextMeter({ report, evictions }: { report: ContextRep
           <div className="mt-3">
             <div className="flex flex-wrap items-baseline justify-between gap-2 text-xs">
               <span className="font-medium text-foreground">
-                ~{report.usedTokens.toLocaleString()} of {report.promptBudget.toLocaleString()} prompt tokens
+                ~{report.usedTokens.toLocaleString()} of {report.promptBudget.toLocaleString()} {tHC("s2")}
               </span>
               <span className="text-muted-foreground">
-                {report.contextWindow.toLocaleString()}-token window ·{" "}
-                {(report.contextWindow - report.promptBudget).toLocaleString()} {AGENT_COPY.meterReserved}
+                {report.contextWindow.toLocaleString()}
+                {tHC("s1")} {(report.contextWindow - report.promptBudget).toLocaleString()} {AGENT_COPY.meterReserved}
               </span>
             </div>
             <div

@@ -1,6 +1,7 @@
 "use client";
 
 import { extraStatusComponents } from "../../lib/statusComponents";
+import { useTranslations } from "../../../lib/i18n";
 
 // Straight copy of web/app/components/dashboard/SystemStatusPanel.js - every
 // reading comes from whatever SystemStatusResponse-shaped object the caller
@@ -62,6 +63,7 @@ export default function SystemStatusPanel({
   error?: any;
   hideHeader?: boolean;
 }) {
+  const tHC = useTranslations("hcPlatformadminComponentsDashboardSystemStatusPanel");
   return (
     <div className="mc-status-panel mc-hud-panel">
       <svg
@@ -84,7 +86,7 @@ export default function SystemStatusPanel({
       <div className="mc-status-header">
         {!hideHeader && (
           <h3>
-            System status <span className="mc-status-header-id">ECOSYSTEM</span>
+            {tHC("s6")} <span className="mc-status-header-id">ECOSYSTEM</span>
           </h3>
         )}
         {status && (
@@ -109,17 +111,17 @@ export default function SystemStatusPanel({
           />
           <Readout label="Redis" status={status.redis?.status} detail={status.redis?.status || "—"} />
           <Readout
-            label="Kafka / Redpanda"
+            label={tHC("s5")}
             status={status.kafka?.status}
             detail={status.kafka?.status === "UNKNOWN" ? "not active" : status.kafka?.status || "—"}
           />
           <Readout
-            label="MCP registry"
+            label={tHC("s4")}
             status={status.mcp ? "UP" : "UNKNOWN"}
             detail={status.mcp ? `${status.mcp.enabledServers}/${status.mcp.totalServers} enabled` : "—"}
           />
           <Readout
-            label="JVM heap"
+            label={tHC("s3")}
             status="UP"
             detail={
               status.jvm ? `${status.jvm.heapUsedMb}${status.jvm.heapMaxMb ? `/${status.jvm.heapMaxMb}` : ""} MB` : "—"
@@ -127,7 +129,7 @@ export default function SystemStatusPanel({
           />
           <Readout label="Uptime" status="UP" detail={formatUptime(status.jvm?.uptimeSeconds)} />
           <Readout
-            label="LLM calls"
+            label={tHC("s2")}
             status={status.llm?.totalCalls > 0 ? "UP" : "UNKNOWN"}
             detail={
               status.llm
@@ -137,7 +139,7 @@ export default function SystemStatusPanel({
             hint="Each count is one full agent turn (ChatClient call), not one raw model completion."
           />
           <Readout
-            label="LLM latency"
+            label={tHC("s1")}
             status={status.llm?.avgLatencyMs != null ? "UP" : "UNKNOWN"}
             detail={status.llm?.avgLatencyMs != null ? `${Math.round(status.llm.avgLatencyMs)}ms avg` : "no calls yet"}
             hint="Whole-turn latency, including any tool calls the model made - not raw model completion time."

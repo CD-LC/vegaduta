@@ -50,6 +50,40 @@ describe("AgentWorkbench (split shell)", () => {
     expect(onSelect).not.toHaveBeenCalled();
   });
 
+  it("auto-selects the most recently saved agent when the page hands no selection over", async () => {
+    // GET /api/agents has no documented order - "most recent" is by
+    // updatedAt/createdAt, not list position, so the older row sits last
+    // here on purpose (issue #294).
+    const recent: any = {
+      id: "a-recent",
+      name: "Recent bot",
+      systemPrompt: "Be brief.",
+      providerName: "OPENAI",
+      model: "gpt-x",
+      maxTokens: 512,
+      temperature: 0.4,
+      topP: 1,
+      editable: true,
+      allowedKnowledgeCollectionIds: [],
+      createdAt: "2026-10-01T00:00:00Z",
+      updatedAt: "2026-10-28T00:00:00Z",
+    };
+    const older: any = { ...recent, id: "a-older", name: "Older bot", updatedAt: "2026-09-01T00:00:00Z" };
+    const onSelect = vi.fn();
+    render(
+      <AgentWorkbench
+        agents={[recent, older]}
+        providers={[provider]}
+        collections={[]}
+        selectedAgentId={null}
+        onSelect={onSelect}
+        onChanged={vi.fn()}
+        agentsLoaded
+      />
+    );
+    await waitFor(() => expect(onSelect).toHaveBeenCalledWith("a-recent"));
+  });
+
   it("renders a saved agent and keeps the draft-only controls out of the way", async () => {
     const agent: any = {
       id: "a1",

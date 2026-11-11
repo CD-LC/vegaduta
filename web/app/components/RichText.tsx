@@ -41,13 +41,16 @@ const INLINE_PATTERN = new RegExp(
     "\\*([^*]+)\\*", // *italic*
     "(https?://[^\\s<>()]+[^\\s<>().,;:!?'\"])", // bare url
   ].join("|"),
-  "g",
+  "g"
 );
 
 function Link({ href, children }: { href: string; children: ReactNode }) {
   if (APP_PAGE.test(href)) {
     return (
-      <NextLink href={href} className="font-medium text-primary underline underline-offset-2 hover:opacity-80 break-words">
+      <NextLink
+        href={href}
+        className="font-medium text-primary underline underline-offset-2 hover:opacity-80 break-words"
+      >
         {children}
       </NextLink>
     );
@@ -78,17 +81,31 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
     if (imgSrc) {
       out.push(<SafeModelImage key={k} src={imgSrc} alt={imgAlt} />);
     } else if (label && url) {
-      out.push(<Link key={k} href={url}>{label}</Link>);
+      out.push(
+        <Link key={k} href={url}>
+          {label}
+        </Link>
+      );
     } else if (code) {
       out.push(
-        <code key={k} className="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.85em]">{code}</code>,
+        <code key={k} className="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.85em]">
+          {code}
+        </code>
       );
     } else if (bold) {
-      out.push(<strong key={k} className="font-semibold">{bold}</strong>);
+      out.push(
+        <strong key={k} className="font-semibold">
+          {bold}
+        </strong>
+      );
     } else if (italic) {
       out.push(<em key={k}>{italic}</em>);
     } else if (bareUrl) {
-      out.push(<Link key={k} href={bareUrl}>{bareUrl}</Link>);
+      out.push(
+        <Link key={k} href={bareUrl}>
+          {bareUrl}
+        </Link>
+      );
     }
     last = m.index + m[0].length;
   }
@@ -201,11 +218,17 @@ function parseBlocks(src: string): Block[] {
     }
 
     const para: string[] = [];
-    while (i < lines.length && lines[i].trim() !== "" && !/^```/.test(lines[i])
-      && !/^\s*[-*•]\s+/.test(lines[i]) && !/^\s*\d+[.)]\s+/.test(lines[i])
-      && !/^#{1,4}\s+/.test(lines[i]) && !/^\s*>\s?/.test(lines[i])
-      && !/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(lines[i])
-      && !(lines[i].includes("|") && i + 1 < lines.length && TABLE_SEPARATOR.test(lines[i + 1]))) {
+    while (
+      i < lines.length &&
+      lines[i].trim() !== "" &&
+      !/^```/.test(lines[i]) &&
+      !/^\s*[-*•]\s+/.test(lines[i]) &&
+      !/^\s*\d+[.)]\s+/.test(lines[i]) &&
+      !/^#{1,4}\s+/.test(lines[i]) &&
+      !/^\s*>\s?/.test(lines[i]) &&
+      !/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(lines[i]) &&
+      !(lines[i].includes("|") && i + 1 < lines.length && TABLE_SEPARATOR.test(lines[i + 1]))
+    ) {
       para.push(lines[i++]);
     }
     blocks.push({ kind: "p", lines: para });
@@ -237,7 +260,7 @@ export default function RichText({ text, className = "" }: { text: string; class
         if (b.kind === "table") {
           return (
             <div key={key} className="overflow-x-auto rounded-lg border border-border">
-              <table className="w-full border-collapse text-left text-sm">
+              <table className="w-full border-collapse text-start text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/60">
                     {b.header.map((cell, ci) => (
@@ -264,7 +287,7 @@ export default function RichText({ text, className = "" }: { text: string; class
         }
         if (b.kind === "quote") {
           return (
-            <div key={key} className="space-y-1 border-l-2 border-primary/40 pl-3 text-muted-foreground italic">
+            <div key={key} className="space-y-1 border-s-2 border-primary/40 ps-3 text-muted-foreground italic">
               {b.lines.map((ln, li) => (
                 <p key={`${key}-${li}`}>{renderInline(ln, `${key}-${li}`)}</p>
               ))}
@@ -276,15 +299,16 @@ export default function RichText({ text, className = "" }: { text: string; class
         }
         if (b.kind === "h") {
           const size = b.level <= 2 ? "text-base" : "text-sm";
-          return <p key={key} className={`${size} font-semibold`}>{renderInline(b.text, key)}</p>;
+          return (
+            <p key={key} className={`${size} font-semibold`}>
+              {renderInline(b.text, key)}
+            </p>
+          );
         }
         if (b.kind === "ul" || b.kind === "ol") {
           const ListTag = b.kind === "ul" ? "ul" : "ol";
           return (
-            <ListTag
-              key={key}
-              className={`ml-5 space-y-1 ${b.kind === "ul" ? "list-disc" : "list-decimal"}`}
-            >
+            <ListTag key={key} className={`ml-5 space-y-1 ${b.kind === "ul" ? "list-disc" : "list-decimal"}`}>
               {b.items.map((it, ii) => (
                 <li key={`${key}-${ii}`}>{renderInline(it, `${key}-${ii}`)}</li>
               ))}

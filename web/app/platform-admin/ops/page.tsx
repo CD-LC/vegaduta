@@ -44,6 +44,7 @@ import {
   unreachableServices,
   versionLabel,
 } from "../lib/opsFormat";
+import { useTranslations } from "../../lib/i18n";
 
 // Operations hub - one screen that answers "is anything wrong right now?".
 // Each card is a glance-level read of the same endpoint its own page renders in
@@ -85,7 +86,7 @@ function HubCard({
         <CardContent className="flex h-full flex-col gap-2 p-4">
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             <Icon size={14} className="text-primary" /> {title}
-            <ArrowRight size={13} className="ml-auto opacity-0 transition-opacity group-hover:opacity-100" />
+            <ArrowRight size={13} className="ms-auto opacity-0 transition-opacity group-hover:opacity-100" />
           </div>
           <div className="flex-1 text-sm">{children}</div>
         </CardContent>
@@ -107,6 +108,7 @@ function Loading() {
 }
 
 export default function OpsHubPage() {
+  const tHC = useTranslations("hcPlatformadminOpsPage");
   const [deps, setDeps] = useState<Settled<DependenciesResponse>>(LOADING);
   const [versions, setVersions] = useState<Settled<VersionsResponse>>(LOADING);
   const [maint, setMaint] = useState<Settled<MaintenanceState>>(LOADING);
@@ -166,8 +168,7 @@ export default function OpsHubPage() {
       }
     >
       <PageHint>
-        Is anything wrong right now? Dependency health, what is deployed, maintenance and banner state, failed jobs,
-        schema drift and open alerts on one screen. Every card opens its full page.
+        {tHC("s22")}
         {checkedAt && ` Checked ${formatRelative(checkedAt)}.`}
       </PageHint>
 
@@ -202,18 +203,19 @@ export default function OpsHubPage() {
           {versions.state === "unavailable" && <Unavailable reason={versions.reason} />}
           {versions.state === "ok" && (
             <p className="text-xs text-muted-foreground">
-              {versions.value.services?.length ?? 0} service(s) reported
-              {unreachable.length ? ` · ${unreachable.length} unreachable` : ""}. Full list below.
+              {versions.value.services?.length ?? 0} {tHC("s21")}
+              {unreachable.length ? ` · ${unreachable.length} unreachable` : ""}
+              {tHC("s20")}
             </p>
           )}
           <p className="mt-1 text-xs">
-            web-admin build: <span className="font-mono">{OWN_SHA ? shortSha(OWN_SHA) : "not stamped"}</span>
+            {tHC("s19")} <span className="font-mono">{OWN_SHA ? shortSha(OWN_SHA) : "not stamped"}</span>
           </p>
         </HubCard>
 
         <HubCard
           href="/platform-admin/maintenance"
-          title="Maintenance & banner"
+          title={tHC("s18")}
           icon={Construction}
           tone={maint.state === "ok" && maint.value.enabled ? "bad" : null}
         >
@@ -235,7 +237,7 @@ export default function OpsHubPage() {
               announcementLive(ann.value) ? (
                 <ToneChip tone="warn" label="Live" />
               ) : (
-                <ToneChip tone="muted" label="Not showing" />
+                <ToneChip tone="muted" label={tHC("s17")} />
               )
             ) : ann.state === "loading" ? (
               <span className="text-xs text-muted-foreground">…</span>
@@ -245,7 +247,7 @@ export default function OpsHubPage() {
           </div>
         </HubCard>
 
-        <HubCard href="/platform-admin/jobs" title="Scheduled jobs" icon={Timer} tone={failedJobs ? "bad" : null}>
+        <HubCard href="/platform-admin/jobs" title={tHC("s16")} icon={Timer} tone={failedJobs ? "bad" : null}>
           {jobs.state === "loading" && <Loading />}
           {jobs.state === "unavailable" && <Unavailable reason={jobs.reason} />}
           {jobs.state === "ok" && (
@@ -253,14 +255,16 @@ export default function OpsHubPage() {
               <div className={`font-mono text-2xl font-semibold ${failedJobs ? "text-destructive" : ""}`}>
                 {failedJobs}
               </div>
-              <p className="text-xs text-muted-foreground">failed on last run, of {jobs.value.length} jobs</p>
+              <p className="text-xs text-muted-foreground">
+                {tHC("s15")} {jobs.value.length} jobs
+              </p>
             </>
           )}
         </HubCard>
 
         <HubCard
           href="/platform-admin/migrations"
-          title="Schema migrations"
+          title={tHC("s14")}
           icon={Database}
           tone={drift?.failed ? "bad" : driftCount ? "warn" : null}
         >
@@ -272,19 +276,20 @@ export default function OpsHubPage() {
                 {driftCount}
               </div>
               <p className="text-xs text-muted-foreground">
-                tenant schema(s) behind or failed ({drift.failed} failed, {drift.behind} behind)
+                {tHC("s13")}
+                {drift.failed} failed, {drift.behind} behind)
                 {drift.controlPlaneProblem ? " · control plane has pending/failed migrations" : ""}
               </p>
             </>
           )}
         </HubCard>
 
-        <HubCard href="/platform-admin/fraud" title="Open alerts" icon={Siren} tone={openAlerts ? "warn" : null}>
+        <HubCard href="/platform-admin/fraud" title={tHC("s12")} icon={Siren} tone={openAlerts ? "warn" : null}>
           {alerts.state === "loading" && <Loading />}
           {alerts.state === "ok" && openAlerts != null ? (
             <>
               <div className="font-mono text-2xl font-semibold">{openAlerts}</div>
-              <p className="text-xs text-muted-foreground">open platform issues</p>
+              <p className="text-xs text-muted-foreground">{tHC("s11")}</p>
             </>
           ) : alerts.state !== "loading" ? (
             <Unavailable reason={alerts.state === "unavailable" ? alerts.reason : undefined} />
@@ -293,14 +298,14 @@ export default function OpsHubPage() {
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
-        <HubCard href="/platform-admin/observability" title="LLM traces" icon={Radar}>
-          <p className="text-xs text-muted-foreground">Langfuse traces, cost and latency, external dashboards.</p>
+        <HubCard href="/platform-admin/observability" title={tHC("s10")} icon={Radar}>
+          <p className="text-xs text-muted-foreground">{tHC("s9")}</p>
         </HubCard>
-        <HubCard href="/platform-admin/skill-security" title="Skill security" icon={ShieldAlert}>
-          <p className="text-xs text-muted-foreground">Skill scan findings and the approval queue.</p>
+        <HubCard href="/platform-admin/skill-security" title={tHC("s8")} icon={ShieldAlert}>
+          <p className="text-xs text-muted-foreground">{tHC("s7")}</p>
         </HubCard>
-        <HubCard href="/platform-admin/email-suppressions" title="Email suppressions" icon={MailX}>
-          <p className="text-xs text-muted-foreground">Bounced, complained and unsubscribed addresses.</p>
+        <HubCard href="/platform-admin/email-suppressions" title={tHC("s6")} icon={MailX}>
+          <p className="text-xs text-muted-foreground">{tHC("s5")}</p>
         </HubCard>
       </div>
 
@@ -308,29 +313,29 @@ export default function OpsHubPage() {
         <Card>
           <CardContent className="p-4">
             <h2 className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              <GitCommit size={14} /> Deployed versions
+              <GitCommit size={14} /> {tHC("s4")}
             </h2>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[560px] text-left text-sm">
+              <table className="w-full min-w-[560px] text-start text-sm">
                 <thead className="text-xs text-muted-foreground">
                   <tr className="border-b border-border">
-                    <th className="py-2 pr-3 font-medium">Service</th>
-                    <th className="py-2 pr-3 font-medium">Version</th>
-                    <th className="py-2 pr-3 font-medium">Git SHA</th>
-                    <th className="py-2 pr-3 font-medium">Built</th>
+                    <th className="py-2 pe-3 font-medium">Service</th>
+                    <th className="py-2 pe-3 font-medium">Version</th>
+                    <th className="py-2 pe-3 font-medium">Git SHA</th>
+                    <th className="py-2 pe-3 font-medium">Built</th>
                     <th className="py-2 font-medium">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="border-b border-border/60">
-                    <td className="py-2 pr-3 font-medium">web-admin (this console)</td>
-                    <td className="py-2 pr-3 font-mono text-xs">—</td>
-                    <td className="py-2 pr-3 font-mono text-xs" title={OWN_SHA || undefined}>
+                    <td className="py-2 pe-3 font-medium">{tHC("s3")}</td>
+                    <td className="py-2 pe-3 font-mono text-xs">—</td>
+                    <td className="py-2 pe-3 font-mono text-xs" title={OWN_SHA || undefined}>
                       {OWN_SHA ? shortSha(OWN_SHA) : "not stamped"}
                     </td>
-                    <td className="py-2 pr-3 text-xs">—</td>
+                    <td className="py-2 pe-3 text-xs">—</td>
                     <td className="py-2">
-                      <ToneChip tone="ok" label="Serving you" />
+                      <ToneChip tone="ok" label={tHC("s2")} />
                     </td>
                   </tr>
                   {versions.state === "ok" &&
@@ -338,12 +343,12 @@ export default function OpsHubPage() {
                       const m = serviceStatusMeta(s.status);
                       return (
                         <tr key={s.name} className="border-b border-border/60" data-testid="version-row">
-                          <td className="py-2 pr-3 font-medium">{s.name}</td>
-                          <td className="py-2 pr-3 font-mono text-xs">{versionLabel(s)}</td>
-                          <td className="py-2 pr-3 font-mono text-xs" title={s.gitSha || undefined}>
+                          <td className="py-2 pe-3 font-medium">{s.name}</td>
+                          <td className="py-2 pe-3 font-mono text-xs">{versionLabel(s)}</td>
+                          <td className="py-2 pe-3 font-mono text-xs" title={s.gitSha || undefined}>
                             {shortSha(s.gitSha)}
                           </td>
-                          <td className="py-2 pr-3 text-xs">{s.buildTime ? formatRelative(s.buildTime) : "—"}</td>
+                          <td className="py-2 pe-3 text-xs">{s.buildTime ? formatRelative(s.buildTime) : "—"}</td>
                           <td className="py-2">
                             <ToneChip tone={m.tone} label={m.label} />
                           </td>
@@ -354,7 +359,8 @@ export default function OpsHubPage() {
               </table>
               {versions.state === "unavailable" && (
                 <p className="pt-2 text-xs text-muted-foreground">
-                  Backend versions unavailable{versions.reason ? `: ${versions.reason}` : ""}.
+                  {tHC("s1")}
+                  {versions.reason ? `: ${versions.reason}` : ""}.
                 </p>
               )}
             </div>

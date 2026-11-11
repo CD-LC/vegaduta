@@ -100,7 +100,9 @@ export async function edgeImageGenAvailable(): Promise<boolean> {
     if (typeof window === "undefined") return false;
     if (!("gpu" in navigator) || !(navigator as Navigator & { gpu?: unknown }).gpu) return false;
     const caps = await detectCapabilities();
-    return caps?.webgpu?.available === true;
+    // The weights are fp16 — an adapter without the shader-f16 feature can
+    // expose WebGPU and still fail every session create.
+    return caps?.webgpu?.available === true && caps.webgpu.shaderF16 === true;
   } catch {
     return false;
   }
@@ -273,9 +275,10 @@ function runLoad(): Promise<void> {
     );
     if (response.type !== "loaded") {
       const detail = response.type === "error" ? response.detail : "unexpected worker reply";
+      const label = alreadyCached ? "Could not start on-device image generation" : "Download failed";
       downloadManager.reportExternalProgress(IMAGE_GEN_ASSET_ID, EDGE_BRANDING.imageGenModelDisplayName, {
         state: "error",
-        error: alreadyCached ? "Could not start on-device image generation" : "Download failed",
+        error: detail ? `${label}: ${String(detail).slice(0, 160)}` : label,
       });
       throw new Error(detail || "on-device image generation setup failed");
     }
@@ -315,12 +318,26 @@ export async function generateImageLocally(prompt: string, seed?: number): Promi
   if (!trimmed) return { handled: false, reason: "empty-prompt" };
   if (trimmed.length > MAX_PROMPT_CHARS) return { handled: false, reason: "prompt-too-long" };
   if (!(await edgeImageGenAvailable())) return { handled: false, reason: "unsupported" };
-  if (!workerModelLoaded) {
+  // No side-effect downloads: generation only proceeds when the model is live
+  // in the worker or was fully installed on this device before (a cache-hit
+  // warm-up, not an acquisition) - same contract vision.ts's analyzeFramesLocally
+  // already follows.
+  if (!workerModelLoaded && !isImageGenModelCached()) {
     return { handled: false, reason: "model-not-ready" };
   }
 
   const requestId = nextRequestId++;
   const run = generateChain.then(async (): Promise<ImageGenResult> => {
+    if (!workerModelLoaded) {
+      // Warm-up from the local cache (marker checked above): the weights are
+      // already on this device, so runLoad moves no bytes and the no-download
+      // consent rule is not implicated.
+      try {
+        await runLoad();
+      } catch {
+        return { handled: false, reason: "warmup-failed" };
+      }
+    }
     const response = await request(
       { type: "generate", requestId, prompt: trimmed, seed },
       GENERATE_TIMEOUT_MS,

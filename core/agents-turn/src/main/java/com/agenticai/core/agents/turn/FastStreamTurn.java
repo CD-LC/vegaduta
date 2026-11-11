@@ -8,16 +8,14 @@ import com.agenticai.core.agents.core.ReasoningDepth;
 import com.agenticai.core.agents.memory.ChatTurn;
 import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
+import com.agenticai.core.agents.turn.TurnReplyOutcome.Kind;
 import com.agenticai.core.agents.turnjournal.TurnJournalGateway;
 import com.agenticai.core.agents.turnjournal.TurnRecorder;
-import com.agenticai.core.agents.turn.TurnReplyOutcome.Kind;
 import com.agenticai.core.chat.FinishReason;
 import com.agenticai.core.chat.FinishReasonAdvisor;
 import com.agenticai.core.chat.FinishReasonCapture;
-import com.agenticai.core.chat.LlmMetricsAdvisor;
-import com.agenticai.core.chat.TerminalRoundStreamAdvisor;
-import com.agenticai.core.chat.UpstreamProviderException;
 import com.agenticai.core.chat.ToolLoopTranscript;
+import com.agenticai.core.chat.UpstreamProviderException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +52,9 @@ final class FastStreamTurn {
     final String experimentVariants;
     final AgentStepEventEmitter stepEvents;
 
-    /** SEC-004: the scoped memory id bound by the caller; sessionId stays raw for events/metrics. */
+    /**
+     * SEC-004: the scoped memory id bound by the caller; sessionId stays raw for events/metrics.
+     */
     final String memorySessionId;
 
     /** ADR-0020: NOOP unless app.turn-journal.enabled=true; never throws into the turn. */
@@ -78,17 +78,19 @@ final class FastStreamTurn {
     /** How many tool calls had finished when this turn started, to tell what a pass called. */
     final int callsAtStart;
 
-    /** Where a platform-written notice starts in {@link #accumulated}, or -1 when none was added. */
+    /**
+     * Where a platform-written notice starts in {@link #accumulated}, or -1 when none was added.
+     */
     private volatile int noticeStart = -1;
 
     private int lengthPasses;
     private int toolCallRetryPasses;
 
     /**
-     * Tool-loop rounds the turn's extra passes (continuation, tool-call retry) already ran. The primary
-     * pass's rounds are read straight off its {@link #transcript}; each later pass's transcript is
-     * seeded with the running total ({@link ToolLoopTranscript#roundsSpentBefore}) so the loop's round
-     * cap counts the turn's passes together instead of refilling on each one.
+     * Tool-loop rounds the turn's extra passes (continuation, tool-call retry) already ran. The
+     * primary pass's rounds are read straight off its {@link #transcript}; each later pass's
+     * transcript is seeded with the running total ({@link ToolLoopTranscript#roundsSpentBefore}) so
+     * the loop's round cap counts the turn's passes together instead of refilling on each one.
      */
     private final java.util.concurrent.atomic.AtomicInteger extraToolRounds =
             new java.util.concurrent.atomic.AtomicInteger();
@@ -107,8 +109,8 @@ final class FastStreamTurn {
      * result, never from the model's own knowledge). Prompt instructions alone are not reliably
      * stopping this, so this is the deterministic backstop - see containsFabricatedGenerationUrl's
      * own javadoc for exactly what it catches and its known limitation (it cannot un-send tokens
-     * already streamed live to the client this one time; it only stops the lie from persisting
-     * into session history and feeds observability).
+     * already streamed live to the client this one time; it only stops the lie from persisting into
+     * session history and feeds observability).
      */
     final Instant fabricationCheckStartedAt;
 
@@ -149,9 +151,12 @@ final class FastStreamTurn {
         // Statement order is the original streamFast's: bound memory id, journal, wrapped tools,
         // then the fabrication-check start instant.
         this.memorySessionId = SessionMemoryService.boundMemorySessionId();
-        // The turn's own id (TurnContext#turnId), the same one the response header names, so the client can open
+        // The turn's own id (TurnContext#turnId), the same one the response header names, so the
+        // client can open
         // this turn; every attempt of the turn (a hosted-chain failover) appends to the same chain.
-        this.turn = TurnJournalGateway.begin(agentId, context == null ? null : context.turnId(), sessionId);
+        this.turn =
+                TurnJournalGateway.begin(
+                        agentId, context == null ? null : context.turnId(), sessionId);
         turn.intake(
                 userMessage,
                 attachments == null ? 0 : attachments.size(),
@@ -172,21 +177,35 @@ final class FastStreamTurn {
         return context == null ? detachedActivity : context.toolActivity();
     }
 
-    /** Tool-loop rounds the turn's finished passes ran: the primary pass's plus each extra pass's. */
+    /**
+     * Tool-loop rounds the turn's finished passes ran: the primary pass's plus each extra pass's.
+     */
     int toolRoundsSpent() {
         return transcript.rounds() + extraToolRounds.get();
     }
 
-    /** Counts a finished extra pass's tool rounds into the turn's total ({@link #toolRoundsSpent()}). */
+    /**
+     * Counts a finished extra pass's tool rounds into the turn's total ({@link
+     * #toolRoundsSpent()}).
+     */
     void spendPassRounds(ToolLoopTranscript passTranscript) {
         if (passTranscript != null) {
             extraToolRounds.addAndGet(passTranscript.rounds());
         }
     }
 
-    /** One pass's idle timeout: model silence only, never tool time (see {@link StreamIdleWatch}). */
+    /**
+     * One pass's idle timeout: model silence only, never tool time (see {@link StreamIdleWatch}).
+     */
     Flux<String> idleTimeout(Flux<String> stream) {
-        return owner.idleTimeout(stream, activity());
+        // V674: context carries the serving row's own responseTimeoutMs (set per attempt).
+        return StreamIdleWatch.apply(
+                stream,
+                owner.streamIdleTimeout,
+                owner.resilience.getToolIdleCeiling(),
+                activity(),
+                context,
+                com.agenticai.core.security.concurrent.TenantAwareSchedulers.parallel());
     }
 
     /** How this turn's reply ends; shared with the stages that cache and store it. */
@@ -261,7 +280,8 @@ final class FastStreamTurn {
                         .onErrorResume(recovery::retryWithoutToolsOnThoughtSignatureBug)
                         .onErrorResume(recovery::retryOnFallbackProvider)
                         .onErrorResume(recovery::closeHalfResponse)
-                        // Finish-reason handling: the stream completed normally, but the provider may
+                        // Finish-reason handling: the stream completed normally, but the provider
+                        // may
                         // have stopped it for a reason that makes the text something other than an
                         // answer - cut off at the output limit (continue it), stopped by the safety
                         // system (say so), an unusable tool call (retry once). See settleFinish.
@@ -302,14 +322,16 @@ final class FastStreamTurn {
         if (owner.continuationPasses(context) > 0 && tools != null && !tools.isEmpty()) {
             // Evaluated only after the primary pass completes normally (concatWith), by which time
             // every token of it is already in {@code accumulated}. Only a finished answer can be
-            // "unfinished": a reply that was cut off, refused or replaced by a notice has already been
+            // "unfinished": a reply that was cut off, refused or replaced by a notice has already
+            // been
             // dealt with by the finish-reason handling above.
             stream =
                     stream.concatWith(
                             Flux.defer(
                                     () ->
                                             reply().isComplete()
-                                                    ? new FastStreamContinuation(this).afterPrimaryPass()
+                                                    ? new FastStreamContinuation(this)
+                                                            .afterPrimaryPass()
                                                     : Flux.empty()));
         }
         if (turn.active()) {
@@ -329,27 +351,29 @@ final class FastStreamTurn {
     }
 
     /**
-     * One continuation pass: the conversation so far ({@link ContinuationThread}) plus the nudge, with
-     * the turn's tools on offer, recording its own tool rounds into {@code passTranscript}.
+     * One continuation pass: the conversation so far ({@link ContinuationThread}) plus the nudge,
+     * with the turn's tools on offer, recording its own tool rounds into {@code passTranscript}.
      */
-    Flux<String> continuationContent(ContinuationThread.Request request, ToolLoopTranscript passTranscript) {
+    Flux<String> continuationContent(
+            ContinuationThread.Request request, ToolLoopTranscript passTranscript) {
         ChatClient.ChatClientRequestSpec spec = chatClient.prompt();
         if (request.systemPrompt() != null) {
             spec = spec.system(request.systemPrompt());
         }
-        return spec.messages(request.messages())
+        return spec
+                .messages(request.messages())
                 .user(request.user())
                 .toolCallbacks(ChatTurnExecutor.stableToolOrder(journaledTools))
                 .toolContext(Map.of(ToolLoopTranscript.TOOL_CONTEXT_KEY, passTranscript))
-                .advisors(this::configureAdvisors)
+                .advisors(a -> TurnAdvisors.configure(this, a))
                 .stream()
                 .content();
     }
 
     /**
      * The prompt every FAST attempt sends: the primary call and the fallback provider's offer the
-     * turn's (journaled, stably ordered) tools, the thought_signature retry passes {@code false}
-     * so no {@code toolCallbacks} call is made at all.
+     * turn's (journaled, stably ordered) tools, the thought_signature retry passes {@code false} so
+     * no {@code toolCallbacks} call is made at all.
      */
     Flux<String> content(ChatClient client, boolean offerTools) {
         ChatClient.ChatClientRequestSpec spec =
@@ -362,13 +386,14 @@ final class FastStreamTurn {
                     spec.toolCallbacks(ChatTurnExecutor.stableToolOrder(journaledTools))
                             .toolContext(Map.of(ToolLoopTranscript.TOOL_CONTEXT_KEY, transcript));
         }
-        return spec.advisors(this::configureAdvisors).stream().content();
+        return spec.advisors(a -> TurnAdvisors.configure(this, a)).stream().content();
     }
 
     /**
-     * The prompt of the reply written without tools after the provider refused the tool-call history
-     * (see {@link ThoughtSignatureDegrade}): the same system prompt, history and attachments, with
-     * {@code userText} - the user's message plus what the tools returned - as the request.
+     * The prompt of the reply written without tools after the provider refused the tool-call
+     * history (see {@link ThoughtSignatureDegrade}): the same system prompt, history and
+     * attachments, with {@code userText} - the user's message plus what the tools returned - as the
+     * request.
      */
     Flux<String> contentWithoutTools(String userText) {
         return chatClient
@@ -376,43 +401,9 @@ final class FastStreamTurn {
                 .system(systemPrompt)
                 .messages(history)
                 .user(userSpec(userText, attachments))
-                .advisors(this::configureAdvisors)
+                .advisors(a -> TurnAdvisors.configure(this, a))
                 .stream()
                 .content();
-    }
-
-    /** What every model call of this turn carries: attribution, step events, the finish reason. */
-    void configureAdvisors(ChatClient.AdvisorSpec a) {
-        a.param(LlmMetricsAdvisor.AGENT_ID_PARAM, agentId)
-                .param(LlmMetricsAdvisor.SESSION_ID_PARAM, sessionId);
-        // Forwards provider reasoning (Ollama "reasoning",
-        // reasoning_content elsewhere) into step events so
-        // the console can show live thinking. No-op when the
-        // turn opted out of step events (shared disabled emitter).
-        a.advisors(new ReasoningEmitAdvisor(stepEvents));
-        // The provider's stop reason (max_tokens, safety, ...): the tool loop runs inside Spring
-        // AI and .content() discards the response metadata that carries it.
-        a.advisors(new FinishReasonAdvisor(finish));
-        // app.chat.parity.fast-terminal-rounds-only: stream only the tool loop's terminal round - the
-        // mid-loop narration of rounds that ended in tool calls never reaches the client.
-        if (owner.parity != null && owner.parity.isFastTerminalRoundsOnly()) {
-            a.advisors(new TerminalRoundStreamAdvisor());
-        }
-        // #1102 (direct feedback: opaque "value cannot be null" 400 on every
-        // single chat turn) - resolveExperimentVariants() returns null
-        // whenever a tenant has no active feature-flag experiment (the common
-        // case), but Spring AI's DefaultChatClient$DefaultAdvisorSpec#param(k,
-        // v) asserts its value argument non-null and throws exactly that
-        // generic message - unconditionally passing experimentVariants through
-        // crashed every turn, not just ones under an experiment.
-        // LlmMetricsAdvisor#paramAsString already treats an absent key the
-        // same as an explicitly-null one (chatClientRequest.context().get
-        // returns null either way), so simply omitting the .param() call when
-        // there's nothing to record is behaviorally identical to before, minus
-        // the crash.
-        if (experimentVariants != null) {
-            a.param(LlmMetricsAdvisor.EXPERIMENT_VARIANTS_PARAM, experimentVariants);
-        }
     }
 
     // ------------------------------------------------------------------ finish-reason handling
@@ -430,12 +421,12 @@ final class FastStreamTurn {
     private volatile TurnFinishLimits finishLimits;
 
     /**
-     * Acts on the provider's finish reason once a pass has completed normally. Cut off at the output
-     * limit: another pass continues the reply, up to {@code app.chat.finish.max-continuations}, and
-     * the pieces are joined. Stopped by the provider's safety system: the person is told so. An
-     * unusable tool call: one more pass, tools offered. A reply that is still unfinished when the
-     * passes run out says so. Nothing here fires for a reply that ended for another reason, or that a
-     * failure already closed.
+     * Acts on the provider's finish reason once a pass has completed normally. Cut off at the
+     * output limit: another pass continues the reply, up to {@code
+     * app.chat.finish.max-continuations}, and the pieces are joined. Stopped by the provider's
+     * safety system: the person is told so. An unusable tool call: one more pass, tools offered. A
+     * reply that is still unfinished when the passes run out says so. Nothing here fires for a
+     * reply that ended for another reason, or that a failure already closed.
      */
     Flux<String> settleFinish() {
         if (!finishLimits().enabled() || reply().kind() == Kind.INTERRUPTED) {
@@ -454,7 +445,15 @@ final class FastStreamTurn {
         int used = cutOff ? lengthPasses : toolCallRetryPasses;
         TurnFinishLimits limits = finishLimits();
         int limit = cutOff ? limits.maxContinuations() : limits.maxToolCallRetries();
-        boolean mayPass = used < limit && (cutOff || mayRetryToolCall());
+        boolean mayPass =
+                used < limit
+                        && (cutOff
+                                || ToolCallRetryGate.mayRetry(
+                                        context,
+                                        owner,
+                                        agentId,
+                                        sessionId,
+                                        fabricationCheckStartedAt));
         if (!mayPass) {
             return endWith(cutOff ? Kind.TRUNCATED : Kind.MALFORMED_TOOL_CALL, null);
         }
@@ -474,19 +473,24 @@ final class FastStreamTurn {
                 limit);
         turn.guard(cutOff ? "finish-continuation" : "finish-tool-call-retry", "pass-" + (used + 1));
         TurnLifecycleEvents.finishPass(stepEvents, cutOff, used, limit);
-        // The nudge is the prompt nudge.reply_cut_off / nudge.retry_tool_call: the agent's, the tenant's or the
+        // The nudge is the prompt nudge.reply_cut_off / nudge.retry_tool_call: the agent's, the
+        // tenant's or the
         // platform's text, else the shipped one; read in the turn's tenant.
         ResolvedDirectives promptsForTurn = context.scope().get(() -> owner.prompts.apply(agentId));
-        String nudge = promptsForTurn.text(cutOff ? NudgeTexts.REPLY_CUT_OFF : NudgeTexts.RETRY_TOOL_CALL);
+        String nudge =
+                promptsForTurn.text(cutOff ? NudgeTexts.REPLY_CUT_OFF : NudgeTexts.RETRY_TOOL_CALL);
         ReplyFinish.PassPrompt prompt =
                 ReplyFinish.passPrompt(history, userMessage, accumulated.toString(), nudge);
         // A continuation is prose: offering the tools again would let a cut-off answer rerun the
         // calls that produced it. A retry is about the tool call, so the tools stay on offer.
         boolean offerTools = !cutOff;
-        // A retry is a fresh tool-loop invocation; it shares the turn's round budget, so it carries a
+        // A retry is a fresh tool-loop invocation; it shares the turn's round budget, so it carries
+        // a
         // transcript like the primary pass's, seeded with the rounds the turn already spent.
         ToolLoopTranscript passTranscript =
-                offerTools ? owner.newTranscript(context, agentId).roundsSpentBefore(toolRoundsSpent()) : null;
+                offerTools
+                        ? owner.newTranscript(context, agentId).roundsSpentBefore(toolRoundsSpent())
+                        : null;
         // The previous pass completes on an HTTP-client thread that holds no TenantContext, and the
         // next one is subscribed from there: subscribe it in the turn's captured scope (AGENTS.md
         // rule 12) so the advisors' llm_call_log writes land in the tenant schema.
@@ -507,7 +511,8 @@ final class FastStreamTurn {
                                     reply().mark(Kind.INTERRUPTED);
                                     return Flux.just(AgentChatService.INTERRUPTED_REPLY_MARKER);
                                 });
-        // Count the pass's tool rounds before the finish check may start another pass that seeds its
+        // Count the pass's tool rounds before the finish check may start another pass that seeds
+        // its
         // transcript with the total: the deferred supplier runs after this pass terminated.
         return pass.concatWith(
                 Flux.defer(
@@ -517,40 +522,21 @@ final class FastStreamTurn {
                         }));
     }
 
-    /**
-     * A tool call the provider could not use is retried only when no tool has run this turn: the
-     * retry re-sends the conversation without the tool results of this turn (Spring AI keeps them
-     * inside its loop), so after a tool ran it could repeat the call's side effect.
-     */
-    private boolean mayRetryToolCall() {
-        if (context.approval() != null && context.approval().isParked()) {
-            return false;
-        }
-        try {
-            return context.scope()
-                            .get(
-                                    () ->
-                                            owner.collectToolEvidenceSince(
-                                                    agentId, sessionId, fabricationCheckStartedAt))
-                    == null;
-        } catch (RuntimeException e) {
-            ChatTurnExecutor.log.warn(
-                    "Agent {} session {}: could not tell whether a tool ran this turn; not retrying the tool call",
-                    agentId,
-                    sessionId,
-                    e);
-            return false;
-        }
-    }
-
-    private Flux<String> passContent(ReplyFinish.PassPrompt prompt, ToolLoopTranscript passTranscript) {
+    private Flux<String> passContent(
+            ReplyFinish.PassPrompt prompt, ToolLoopTranscript passTranscript) {
         ChatClient.ChatClientRequestSpec spec =
-                chatClient.prompt().system(systemPrompt).messages(prompt.messages()).user(prompt.user());
+                chatClient
+                        .prompt()
+                        .system(systemPrompt)
+                        .messages(prompt.messages())
+                        .user(prompt.user());
         if (passTranscript != null) {
-            spec = spec.toolCallbacks(ChatTurnExecutor.stableToolOrder(journaledTools))
-                    .toolContext(Map.of(ToolLoopTranscript.TOOL_CONTEXT_KEY, passTranscript));
+            spec =
+                    spec.toolCallbacks(ChatTurnExecutor.stableToolOrder(journaledTools))
+                            .toolContext(
+                                    Map.of(ToolLoopTranscript.TOOL_CONTEXT_KEY, passTranscript));
         }
-        return spec.advisors(this::configureAdvisors).stream().content();
+        return spec.advisors(a -> TurnAdvisors.configure(this, a)).stream().content();
     }
 
     /** The notice for {@code state} from the prompt registry, for this turn's agent and tenant. */
@@ -573,10 +559,14 @@ final class FastStreamTurn {
     /** The complete-path body: outbound audit, fabrication check, persistence, judge sampling. */
     private void onCompleteFullAnswer(String fullAnswer) {
         if (reply().isHeldForOutputCheck() && reply().isComplete()) {
-            // app.chat.parity.fast-buffering-triggers contains OUTPUT_GUARDRAILS: nothing has been sent
-            // yet (the dispatcher holds the reply), so a violating answer can genuinely be withheld, as on
-            // the buffered depths - and what is stored below is what the person is shown. Pattern-based
-            // guardrails only: this runs on the stream-completion thread, where the semantic toxicity
+            // app.chat.parity.fast-buffering-triggers contains OUTPUT_GUARDRAILS: nothing has been
+            // sent
+            // yet (the dispatcher holds the reply), so a violating answer can genuinely be
+            // withheld, as on
+            // the buffered depths - and what is stored below is what the person is shown.
+            // Pattern-based
+            // guardrails only: this runs on the stream-completion thread, where the semantic
+            // toxicity
             // check (a blocking model call) must not run; the buffered depths run that one too.
             final String held = fullAnswer;
             String checked =
@@ -584,7 +574,12 @@ final class FastStreamTurn {
                             .get(
                                     () ->
                                             owner.guardrails.enforceOutboundGuardrails(
-                                                    agent, agentId, sessionId, context.tenantId(), null, held));
+                                                    agent,
+                                                    agentId,
+                                                    sessionId,
+                                                    context.tenantId(),
+                                                    null,
+                                                    held));
             boolean withheld = checked != null && !checked.equals(held);
             if (withheld) {
                 reply().replaceWith(checked);
@@ -595,7 +590,12 @@ final class FastStreamTurn {
             // Content guardrails, OUTPUT path, FAST depth: detection + audit only - tokens are
             // already delivered, see auditStreamedOutboundViolation's javadoc for the tradeoff.
             owner.guardrails.auditStreamedOutboundViolation(
-                    agent, agentId, sessionId, context.tenantId(), fullAnswer, context.tenantContext());
+                    agent,
+                    agentId,
+                    sessionId,
+                    context.tenantId(),
+                    fullAnswer,
+                    context.tenantContext());
             turn.guard("outbound-audit", "ran");
         }
         // Fabricated-generation-URL guard: same "tokens already delivered, detect for the record"
@@ -642,7 +642,8 @@ final class FastStreamTurn {
         }
         turn.commit(toPersist, "completed");
         owner.sessionMemoryService.appendTurn(
-                memorySessionId, ChatTurn.assistant(toPersist, activity().ledger().snapshotOrNull()));
+                memorySessionId,
+                ChatTurn.assistant(toPersist, activity().ledger().snapshotOrNull()));
         StreamedReplyCompletion.afterPersisted(
                 owner.events,
                 owner.llmQualityJudgeService,

@@ -66,7 +66,7 @@ export function CollapsibleSection({
             >
               {icon != null && <span className="cat-chip cat-chip-sm">{icon}</span>}
               <span className="truncate">{label}</span>
-              <ChevronDown className="ml-1 size-3.5 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+              <ChevronDown className="ms-1 size-3.5 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
             </AccordionPrimitive.Trigger>
           </AccordionPrimitive.Header>
           {actions ? <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">{actions}</div> : null}

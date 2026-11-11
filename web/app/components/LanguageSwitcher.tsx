@@ -2,9 +2,10 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Globe, Check } from "lucide-react";
-import { useLocale } from "../lib/i18n";
+import { Globe, Check, Download, Loader2, ArrowLeft } from "lucide-react";
+import { useLocale, useTranslations } from "../lib/i18n";
 import { SUPPORTED_LOCALES, LOCALE_COOKIE, splitLocalePrefix, localizedPath } from "../lib/i18n-config";
+import { packNeedsConsent, grantPackConsent, packSizeLabel } from "../lib/langPacks";
 
 // On a locale-prefixed URL ("/hi/billing") the URL decides the language, so
 // writing the cookie and refreshing would change nothing. Go to the chosen
@@ -62,10 +63,14 @@ const MIN_MENU_HEIGHT = 160;
 
 export default function LanguageSwitcher({ className = "" }: { className?: string }) {
   const locale = useLocale();
+  const t = useTranslations("languageSwitcher");
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [pending, setPending] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
+  const [packError, setPackError] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
-  const menuRef = useRef<HTMLUListElement>(null);
+  const menuRef = useRef<HTMLElement>(null);
 
   // Edge flip, measured rather than assumed (mobile-nav audit, 2026-09-11).
   // The menu is anchored `right-0` - its right edge to the trigger's - which
@@ -122,7 +127,7 @@ export default function LanguageSwitcher({ className = "" }: { className?: strin
     } else {
       menu.style.maxHeight = Math.floor(Math.max(below, MIN_MENU_HEIGHT)) + "px";
     }
-  }, [open]);
+  }, [open, pending]);
 
   // Move focus onto the current locale's option (or the first one) as soon
   // as the menu opens, and let Arrow/Home/End rove between options - the
@@ -137,7 +142,7 @@ export default function LanguageSwitcher({ className = "" }: { className?: strin
     active?.focus();
   }, [open]);
 
-  function onMenuKeyDown(e: React.KeyboardEvent<HTMLUListElement>) {
+  function onMenuKeyDown(e: React.KeyboardEvent<HTMLElement>) {
     const menu = menuRef.current;
     if (!menu) return;
     const buttons = Array.from(menu.querySelectorAll<HTMLButtonElement>('button[role="option"]'));
@@ -180,24 +185,62 @@ export default function LanguageSwitcher({ className = "" }: { className?: strin
       document.removeEventListener("mousedown", onPointerDown);
       document.removeEventListener("touchstart", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
+      // A close of any kind drops a half-answered consent prompt: reopening
+      // shows the language list again, not a stale "Download X?" panel.
+      setPending(null);
     };
   }, [open]);
 
-  function selectLocale(code: string) {
+  function applyLocale(code: string) {
     document.cookie = `${LOCALE_COOKIE}=${code}; path=/; max-age=${60 * 60 * 24 * 365}`;
     setOpen(false);
+    setPending(null);
     if (navigateToLocaleUrl(router, code)) return;
     router.refresh();
   }
 
+  function selectLocale(code: string) {
+    // Personal edition: a language nobody has asked for is kept off the
+    // device path entirely (see lib/langPacks.ts) - first selection is a
+    // consent step, not a silent ~0.6 MB fetch.
+    if (packNeedsConsent(code)) {
+      setPending(code);
+      return;
+    }
+    applyLocale(code);
+  }
+
+  async function confirmPack() {
+    if (!pending) return;
+    setDownloading(true);
+    setPackError(false);
+    try {
+      // Real fetch, not theatre: warm /api/i18n/<locale> so the switch that
+      // follows never shows an empty catalog on a slow link, and so a refused
+      // connection fails the CONSENT, not the whole locale switch.
+      const res = await fetch(`/api/i18n/${encodeURIComponent(pending)}`, { credentials: "omit" });
+      if (!res.ok) throw new Error(String(res.status));
+      grantPackConsent(pending);
+      applyLocale(pending);
+    } catch {
+      setPackError(true);
+    } finally {
+      setDownloading(false);
+    }
+  }
+
   const current = SUPPORTED_LOCALES.find((l) => l.code === locale) || SUPPORTED_LOCALES[0];
+  const pendingLabel = pending ? (SUPPORTED_LOCALES.find((l) => l.code === pending)?.label ?? pending) : null;
 
   return (
     <div ref={rootRef} className={`lang-switcher ${className}`}>
       <button
         type="button"
         className="lang-switcher-trigger"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          setPending(null);
+          setOpen((v) => !v);
+        }}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={`Language: ${current.label}`}
@@ -205,9 +248,49 @@ export default function LanguageSwitcher({ className = "" }: { className?: strin
         <Globe aria-hidden="true" size={15} strokeWidth={2} />
         <span className="topbar-label">{current.label}</span>
       </button>
-      {open && (
+      {open && pending && (
+        <div
+          ref={menuRef as React.RefObject<HTMLDivElement>}
+          className="lang-switcher-menu lang-switcher-consent"
+          role="dialog"
+          aria-label={t("packTitle", { label: pendingLabel })}
+        >
+          <p className="px-2.5 pb-1 pt-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+            {t("packTitle", { label: pendingLabel })}
+          </p>
+          <p className="px-2.5 pb-2 text-xs text-muted-foreground">
+            {t("packBody", { label: pendingLabel, size: packSizeLabel(pending) })}
+          </p>
+          {packError && <p className="px-2.5 pb-1.5 text-xs text-destructive">{t("packFailed")}</p>}
+          <div className="flex items-center gap-1.5 px-1 pb-0.5">
+            <button
+              type="button"
+              className="lang-switcher-option lang-switcher-option-active"
+              onClick={() => void confirmPack()}
+              disabled={downloading}
+            >
+              {downloading ? (
+                <Loader2 size={13} className="animate-spin" aria-hidden="true" />
+              ) : (
+                <Download size={13} strokeWidth={2.5} aria-hidden="true" />
+              )}
+              <span>{downloading ? t("packDownloading") : t("packDownload")}</span>
+            </button>
+            <button
+              type="button"
+              className="lang-switcher-option"
+              onClick={() => setPending(null)}
+              disabled={downloading}
+              aria-label={t("packCancel")}
+            >
+              <ArrowLeft size={13} strokeWidth={2.5} aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+      )}
+      {open && !pending && (
         <ul
-          ref={menuRef}
+          ref={menuRef as React.RefObject<HTMLUListElement>}
           className="lang-switcher-menu"
           role="listbox"
           aria-label={`${SUPPORTED_LOCALES.length} languages`}
@@ -230,7 +313,13 @@ export default function LanguageSwitcher({ className = "" }: { className?: strin
                 onClick={() => selectLocale(l.code)}
               >
                 <span>{l.label}</span>
-                {l.code === locale && <Check size={14} strokeWidth={2.5} aria-hidden="true" />}
+                {l.code === locale ? (
+                  <Check size={14} strokeWidth={2.5} aria-hidden="true" />
+                ) : (
+                  packNeedsConsent(l.code) && (
+                    <Download size={12} strokeWidth={2} aria-hidden="true" className="text-muted-foreground" />
+                  )
+                )}
               </button>
             </li>
           ))}

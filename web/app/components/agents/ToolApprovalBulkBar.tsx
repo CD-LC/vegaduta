@@ -85,7 +85,7 @@ export default function ToolApprovalBulkBar({
         <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
           {t("waitingList")} ({waiting.length})
         </summary>
-        <ol className="mt-1 list-decimal space-y-1 pl-5">
+        <ol className="mt-1 list-decimal space-y-1 ps-5">
           {waiting.map((card) => {
             const named = labelOf(toolNameOf(card));
             const args = redactedArguments(card.payload, LIST_PREVIEW_CHARS).text;
@@ -94,9 +94,7 @@ export default function ToolApprovalBulkBar({
                 <span className="font-medium text-foreground" title={named.raw}>
                   {named.label}
                 </span>
-                {args && (
-                  <span className="ml-1 break-all font-mono text-[11px] text-muted-foreground">{args}</span>
-                )}
+                {args && <span className="ms-1 break-all font-mono text-[11px] text-muted-foreground">{args}</span>}
               </li>
             );
           })}

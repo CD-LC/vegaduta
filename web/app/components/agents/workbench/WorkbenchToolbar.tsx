@@ -75,7 +75,7 @@ export default function WorkbenchToolbar() {
             // below carries the marker instead, so the spotlight always sits
             // on the control the step's copy tells the person to click.
             data-tour={isDraft ? undefined : "create-agent"}
-            className="flex max-w-full items-center gap-2.5 rounded-lg px-1.5 py-1 text-left transition-colors hover:bg-accent/60"
+            className="flex max-w-full items-center gap-2.5 rounded-lg px-1.5 py-1 text-start transition-colors hover:bg-accent/60"
           >
             <AgentMark agent={identityAgent} size="md" />
             <span className="flex min-w-0 flex-col">
@@ -110,7 +110,7 @@ export default function WorkbenchToolbar() {
               <li>
                 <button
                   type="button"
-                  className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-start text-sm text-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={startDraft}
                   disabled={busy}
                 >

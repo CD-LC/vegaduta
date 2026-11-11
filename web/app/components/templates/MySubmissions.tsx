@@ -17,6 +17,7 @@ import EditSubmissionModal from "./EditSubmissionModal";
 import { categoryMeta, kindMeta, statusMeta } from "./categories";
 import PaginationControls from "../PaginationControls";
 import { usePagination } from "../../lib/usePagination";
+import { useTranslations } from "../../lib/i18n";
 
 // The authed "my submissions" surface. Because /templates is a PUBLIC route
 // prefix (so the gallery works logged-out), AuthProvider does NOT run the
@@ -29,6 +30,7 @@ import { usePagination } from "../../lib/usePagination";
 // /api/me itself; without the permission the share and submit actions
 // are replaced by a note, and editing or withdrawing an existing one stays.
 export default function MySubmissions({ autoOpenSubmit = false }: { autoOpenSubmit?: boolean }) {
+  const tHC = useTranslations("hcComponentsTemplatesMySubmissions");
   const [authState, setAuthState] = useState<"checking" | "anon" | "authed">("checking");
   const [items, setItems] = useState<CommunityTemplateSubmission[] | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
@@ -116,10 +118,8 @@ export default function MySubmissions({ autoOpenSubmit = false }: { autoOpenSubm
           <span className="cat-chip cat-chip-lg" style={{ ["--cat" as string]: "var(--cat-assistant)" }}>
             <Sparkles size={18} strokeWidth={2} aria-hidden="true" />
           </span>
-          <p className="text-sm font-medium text-foreground">Sign in to manage your templates</p>
-          <p className="max-w-sm text-sm text-muted-foreground">
-            Share one of your agents or workflows as a community template, and track it through review.
-          </p>
+          <p className="text-sm font-medium text-foreground">{tHC("s11")}</p>
+          <p className="max-w-sm text-sm text-muted-foreground">{tHC("s10")}</p>
           <Button onClick={() => auth.login({ redirectUri: `${window.location.origin}/templates/mine` })}>
             Sign in
           </Button>
@@ -132,21 +132,17 @@ export default function MySubmissions({ autoOpenSubmit = false }: { autoOpenSubm
   return (
     <div className="space-y-6">
       <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-        <p className="text-sm text-muted-foreground">
-          Templates you&apos;ve shared, and their review status. Submitted templates are reviewed before they appear
-          publicly.
-        </p>
+        <p className="text-sm text-muted-foreground">{tHC("s9")}</p>
         {canShare && (
           <Button onClick={() => setSubmitOpen(true)} className="shrink-0">
-            <Plus size={16} strokeWidth={2} aria-hidden="true" /> Share a template
+            <Plus size={16} strokeWidth={2} aria-hidden="true" /> {tHC("s3")}
           </Button>
         )}
       </div>
 
       {canShare === false && (
         <p className="text-sm text-muted-foreground" data-testid="templates-share-needs-permission">
-          Sharing a template needs the templates permission, because it publishes your workspace&apos;s agent
-          configuration. Ask a workspace admin.
+          {tHC("s8")}
         </p>
       )}
 
@@ -163,10 +159,10 @@ export default function MySubmissions({ autoOpenSubmit = false }: { autoOpenSubm
             <span className="cat-chip cat-chip-lg" style={{ ["--cat" as string]: "var(--state-error)" }}>
               <AlertCircle size={18} strokeWidth={2} aria-hidden="true" />
             </span>
-            <p className="text-sm font-medium text-foreground">Couldn&apos;t load your submissions</p>
+            <p className="text-sm font-medium text-foreground">{tHC("s7")}</p>
             <p className="max-w-sm text-sm text-muted-foreground">{error}</p>
             <Button variant="outline" size="sm" onClick={load}>
-              <RefreshCw size={14} strokeWidth={2} aria-hidden="true" /> Try again
+              <RefreshCw size={14} strokeWidth={2} aria-hidden="true" /> {tHC("s6")}
             </Button>
           </CardContent>
         </Card>
@@ -178,14 +174,11 @@ export default function MySubmissions({ autoOpenSubmit = false }: { autoOpenSubm
             <span className="cat-chip cat-chip-lg" style={{ ["--cat" as string]: "var(--cat-assistant)" }}>
               <Sparkles size={18} strokeWidth={2} aria-hidden="true" />
             </span>
-            <p className="text-sm font-medium text-foreground">You haven&apos;t shared any templates yet</p>
-            <p className="max-w-sm text-sm text-muted-foreground">
-              Turn one of your agents or workflows into a template others can start from. It&apos;s reviewed before it
-              goes public.
-            </p>
+            <p className="text-sm font-medium text-foreground">{tHC("s5")}</p>
+            <p className="max-w-sm text-sm text-muted-foreground">{tHC("s4")}</p>
             {canShare && (
               <Button onClick={() => setSubmitOpen(true)}>
-                <Plus size={16} strokeWidth={2} aria-hidden="true" /> Share a template
+                <Plus size={16} strokeWidth={2} aria-hidden="true" /> {tHC("s3")}
               </Button>
             )}
           </CardContent>
@@ -245,6 +238,7 @@ function SubmissionRow({
   onSubmit: () => void;
   onWithdraw: () => void;
 }) {
+  const tHC = useTranslations("hcComponentsTemplatesMySubmissions");
   const cat = categoryMeta(sub.category);
   const kind = kindMeta(sub.kind);
   const KindIcon = kind.icon;
@@ -276,7 +270,7 @@ function SubmissionRow({
                 backgroundColor: "color-mix(in srgb, var(--state-error) 10%, transparent)",
               }}
             >
-              <span className="font-medium">Not approved:</span>{" "}
+              <span className="font-medium">{tHC("s2")}</span>{" "}
               {sub.rejectReason || "No reason was provided. Edit and resubmit when ready."}
             </p>
           ) : (
@@ -291,7 +285,7 @@ function SubmissionRow({
           {sub.status === "APPROVED" && (
             <Button asChild variant="ghost" size="sm">
               <Link href={`/templates/${encodeURIComponent(sub.id)}`}>
-                <ExternalLink size={14} strokeWidth={2} aria-hidden="true" /> View public
+                <ExternalLink size={14} strokeWidth={2} aria-hidden="true" /> {tHC("s1")}
               </Link>
             </Button>
           )}

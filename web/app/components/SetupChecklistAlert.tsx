@@ -173,7 +173,7 @@ export default function SetupChecklistAlert({ steps, allDone }: SetupChecklistAl
       >
         <Sparkles aria-hidden="true" size={14} className="text-primary" />
         <span className="hidden sm:inline">{t("getSetup")}</span>
-        <span className="ml-0.5 rounded-full bg-primary/10 px-1.5 py-0.5 text-[length:var(--fs-label)] font-semibold tabular-nums text-primary">
+        <span className="ms-0.5 rounded-full bg-primary/10 px-1.5 py-0.5 text-[length:var(--fs-label)] font-semibold tabular-nums text-primary">
           {doneCount}/{steps.length}
         </span>
       </button>

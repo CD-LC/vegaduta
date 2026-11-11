@@ -103,6 +103,9 @@ export function OssFooter() {
   const links = [
     ...resourceLinks(),
     ...COMMUNITY_LINKS,
+    // PeerPush "Get Verified" - the verifier only needs a link back to the
+    // product page on the homepage footer.
+    { label: "PeerPush", href: "https://peerpush.com/p/vegaduta" },
     ...(hosted ? [{ label: "Hosted version", href: hosted }] : []),
   ];
   return (
@@ -111,7 +114,7 @@ export function OssFooter() {
         <div className="space-y-3 text-sm text-muted-foreground">
           <Logo size={28} />
           <p className="m-0 max-w-sm">
-            <BrandName /> is open-source software released under the {LICENSE_NAME} license.
+            <BrandName /> is source-available software released under the {LICENSE_NAME} license.
           </p>
           <p className="m-0">
             Maintained by {LEGAL_ENTITY}

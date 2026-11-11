@@ -202,7 +202,7 @@ export default function PromptRegistryPanel({ initialAgentId = null }: { initial
                 />
                 <Input
                   id="reg-search"
-                  className="pl-8"
+                  className="ps-8"
                   value={query}
                   placeholder={t("regSearchPlaceholder")}
                   onChange={(e) => setQuery(e.target.value)}

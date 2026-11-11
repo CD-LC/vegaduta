@@ -9,6 +9,125 @@ Release notes on GitHub are generated from the section for each version.
 ## [Unreleased]
 
 ### Added
+- Release signing for the Setup app: the macOS `.dmg` (and a new `.pkg`) can be Developer ID signed, notarized and stapled, and the Windows `.exe` Authenticode-signed, by `release.yml` when the signing secrets are set. With none set the release builds what it built before. See `docs/maintainers/release-signing.md`.
+### Fixed
+
+- **Code intelligence now builds a real call graph for Java and resolves calls by receiver.** Java (and other grammars with a `method_invocation`-style call node) stored every call as a fake symbol and recorded no `calls` edge, so callers, callees, impact, dead-code and hotspots were empty or wrong for the platform's main language (on `core/guardrails`: 11,606 symbols and 0 call edges before, 1,664 symbols and 10,221 call edges now). Calls now carry their receiver, so `map.get(k)` or `Pattern.compile(x)` no longer point at an unrelated in-repo method of the same name (ambiguous Python call edges on `services/code-intel` fell from 494 to 119). Edges in unchanged files are re-linked when another file adds or removes a symbol, instead of waiting for a full rebuild.
+- **Licence wording is accurate.** The platform is source-available under the Business Source License 1.1 (free to self-host in production; converts to Apache-2.0 four years after each release), not OSI open source. README, site metadata, `llms.txt`, About, footer and the free-launch copy now say so. `sdk/` stays Apache-2.0.
+
+## [0.1.14] - 2026-10-30
+
+### Changed
+
+- **A first personal install is lean.** With no remembered choices (no
+  `.vegaduta-state`) `scripts/vegaduta personal`, `scripts/vegaduta.ps1 personal`
+  and the Setup app now start only Postgres, core and web (about 3 GB on disk,
+  about 2.3 GB of container limits), download no local model, and use the
+  cloud-key path: add a provider key in the console after sign-up. Valkey,
+  private web search, the connector runner, the build terminal, the Assistant
+  browser and a local model are add-ons: turn each on from the console's Add-ons
+  page or with `--valkey`, `--search`, `--profile tools`, `--profile workspace`,
+  `--browser`, `--local-ai` / `--local-model TAG` (`-LocalAi` on Windows, new).
+  The launcher and Setup print "Lean: about 3 GB. Full: about 8 GB" before they
+  pull anything, and show a model's download size and ask before pulling it.
+  **Installs that already exist are untouched**: remembered `search=`, `tools=`,
+  `browser=`, `valkey=`, local-model and cloud choices are kept, and an install
+  that never chose still gets its model on the next plain `personal`. The
+  `workspace` add-on's catalog `defaultOn` is now `false`, and Setup preselects
+  no extras. The sizes quoted are estimates from image and model sizes, not
+  measurements.
+### Security
+
+- **Security-review hardening (2026-10-29).** (1) `deploy/compose/backups/` snapshots are no longer committable (`.gitignore` covers the directory, `*.dump` and `files.tar.gz`); the three already-committed snapshots contain live install secrets and must be rotated - see the release note. (2) The internal app-builder endpoints now bound the caller-chosen `X-Tenant-Id`: reserved schemas are refused, `APP_BUILDER_ALLOWED_TENANTS` (`app.app-builder.allowed-tenants`) scopes which tenants the static service token may act for, and a `TenantStatusGuard` check rejects unknown/stopped tenants. (3) `POST /webhook/workflows/oidc/{workflowId}` now requires the workflow to have a WEBHOOK trigger node configured for OAUTH2 - a `workflow-trigger` role token no longer runs every ACTIVE workflow. (4) Delegation tokens honour the tenant-status guard and system-schema check (a stopped tenant's tokens stop working). (5) `remember_fact`/`remember_shared_fact` writes pass the knowledge write screen (injection phrases and credentials are refused). (6) Channel pairing codes use `SecureRandom`. (7) Remote MCP response bodies are capped at `APP_MCP_MAX_RESPONSE_BYTES` (default 32 MiB) at the transport, closing the heap-exhaustion path. (8) iMessage credential reads carry a masked webhook token; the full value is only in the activate response and `GET /api/channels/imessage/credential/webhook-token`. (9) x402: payment reservations carry a status (the internal scheme previously could not settle) and a REJECTED record no longer folds into a served resource on replay. (10) `X-Forwarded-Proto` can no longer downgrade an https-canonical deployment's redirects or the refresh cookie's `Secure` flag. (11) Twilio activation errors are scrubbed of submitted credential values before being returned.
+
+### Added
+
+- **Trending open-source integrations.** Four minimal-effort integrations:
+  a `freellmapi` Compose profile running FreeLLMAPI (MIT) — an
+  OpenAI-compatible `/v1` gateway over ~34 free LLM providers for zero-key
+  agent models via a `LOCAL_OPENAI` provider row; a `hindsight` Compose
+  profile plus MCP catalog entry for Hindsight (MIT) learning agent memory
+  (`http://hindsight:8888/mcp/<bank_id>/`); a `context-mode` MCP catalog
+  entry (Elastic License 2.0 — not vendored, points at the user's own
+  `npx -y context-mode` install); and four vendored built-in agent skills —
+  Cloudflare's `security-audit` (MIT) and HeyGen's `hyperframes`,
+  `hyperframes-cli` and `media-use` (Apache-2.0). Attribution in `NOTICE`.
+
+- **Approval trace.** `GET /api/approval-traces/{requestId}` (viewer access to the request's agent) and a "What the agent executed after this decision" section on the approval detail show the decision, the conversation it belongs to and the agent's tool calls in that conversation from the decision on (sanitized, shortened inputs; 30-minute window, matched by conversation and time). Nothing new is stored, so approvals decided before this are covered too; a request that did not come from an agent turn says so.
+
+- **Per-model runtime knobs on the local model.** Providers → Local model →
+  "Speed and behaviour" now saves four more switches on the serving row
+  (`GET`/`PUT /api/local-models/settings`, migration V674), replacing the
+  env-only knobs a personal install could only change by editing `.env` and
+  restarting: `numBatch` (Ollama `num_batch`, the per-request prompt-eval
+  batch size; `app.llm.ollama.num-batch` stays the default), `numParallel`
+  (Ollama `num_parallel`, applied by deriving a `{model}-parN` variant through
+  `/api/create` - the same weights-sharing mechanism the `-ctxNk` context
+  variants use), `responseTimeoutMs` (this model's stream idle-timeout,
+  overriding `app.llm.http.stream-idle-timeout` for its own turns only), and
+  `toolDeferral` (forces `search_tools`/`call_tool` on-demand tool loading
+  for this model's turns regardless of `app.tools.search.enabled`). Every
+  field is nullable: unset means the server or configured default.
+- **Local model speed controls.** The local model's speed controls now include
+  the prompt batch size (Ollama `num_batch`), how many requests the model
+  serves at once (`num_parallel`), a per-turn timeout, and tool deferral
+  (hiding tool schemas behind `search_tools` for a much smaller prompt) —
+  each with a "server default" choice, alongside thinking effort, keep-alive
+  and the context window.
+
+
+### Fixed
+
+- **Workflow step timeout no longer breaks slow nodes.** The workflow-level `stepTimeoutSeconds` (default 30 in every existing row, never enforced before) now bounds only fast node types (`http`, `condition`); agent, supervisor, sub-workflow, tool, code and other long-running nodes get a 600 s floor (`-Dvegaduta.workflow.longRunningStepTimeoutSeconds`, 0 = no limit). A node's own `timeoutSeconds` (1..3600) overrides both. A timed-out attempt is never retried, because its worker may still be running.
+- **Workflow engine: duplicate side effects on retry, unenforced step timeout,
+  approvals inside loop bodies.** (1) The default retry path no longer retries
+  irreversible nodes (`bulk_email`, `tool`, `crm_lead`, `device_control`,
+  `media`, sub-`workflow`, non-GET `http`) unless the node sets
+  `retryUnsafe=true`, matching the per-node error strategy. (2) Saving a graph
+  whose loop, fan-out or sub-flow body is an `approval` / `human_input` node or
+  has `requiresApproval=true` is now rejected (a paused run cannot resume at the
+  right iteration); the "needs exactly one Trigger node" message now says "at
+  least one" (several triggers were always allowed). (3) `stepTimeoutSeconds` is
+  now enforced per node attempt by the in-process engine (the attempt is
+  interrupted and fails), parallel branches are cancelled when a sibling fails,
+  and the parallel join is bounded.
+- **Untrusted-content taint now covers auto-injected memory recall and the workflow `knowledge` node.** A non-empty recalled-facts block injected into the prompt marks the turn tainted (source `memory_recall`; sinks need approval in enforce mode, recorded in observe mode) via `TurnTaintSeeds`, bound to the turn's taint key when tools are resolved. The `knowledge` workflow node wraps retrieved chunks in the untrusted-data spotlight with numbered source citations, skips with a clear result on an invalid `collectionId`, and clamps `topK` to 1..20.
+- **Tenant isolation hardening.** A JWT or API-key tenant claim naming the `public` (or a reserved) schema is rejected with 403 instead of running tenant queries in the legacy schema (webhook paths that set `public` deliberately are unchanged); the tenant status guard now fails closed on a schema-check SQL error (`app.tenant.status-fail-open-on-schema-check-error=true` restores the old behavior) and rejects claims the schema-name sanitizer would rewrite; tenants whose startup schema migration failed get 403 until a background retry (`app.tenancy.migrate-retry-interval`) migrates them; a non-Keycloak JWT issuer with neither an azp allowlist nor a required audience now fails startup (`app.security.jwt.allow-unrestricted-audience=true` opts out).
+
+- **Python Agent SDK: audit-chain ordering, truncation anchors and approval
+  defaults.** `evidence_bundle` (and `verify(sort_by_seq=True)`) verify in
+  `chain.seq` order, so a concurrently written log stored out of order is no
+  longer reported broken (Java parity). `verify`/`evidence_bundle` take optional
+  `expected_first_seq`/`expected_first_prev`/`expected_last_seq`/
+  `expected_head_hash` anchors to detect prefix/suffix deletion, and the bundle
+  exposes `head_hash`/`last_seq`. `ApprovalGate` now defaults to
+  `FourEyesAuthorizer` (opt out with `authorizer=allow_any`); resumption
+  failures store the exception type and a bounded, redacted message instead of
+  raw text; `ApprovalStore.update` documents the compare-and-set requirement for
+  multi-process use.
+- **Chat turns no longer linger on a denied tool call.** A model that repeated a tool name it was
+  already told is unavailable (e.g. one the agent's `allowedToolNames` allow-list leaves out) used
+  to burn the whole `max-unknown-calls-per-invocation` budget - one slow model round per retry - so
+  a turn on a local model could stream for minutes with no terminal event. The first call still gets
+  the "tool unavailable" result so the model can answer without it; a repeat of the same refused
+  name now ends the tool loop immediately with the closing reply (#295).
+- **`/agents` auto-selects the most recent saved agent again.** The agents
+  index had become the bare-`/agents` landing, so the workbench's agent
+  switcher and per-agent sections never mounted for tenants with saved
+  agents, and the workbench itself could sit in the draft/no-selection state
+  until the slowest of three parallel fetches (providers, agents,
+  collections) resolved. `/agents` now opens the workbench directly — it
+  auto-selects the agent with the latest `updatedAt` as soon as the agents
+  list returns (each of the three reads now stores its result independently
+  instead of after `allSettled`), or shows the deterministic first-run draft
+  for a tenant with none. The index remains available at
+  `/agents?view=index` via the workbench's "All agents" button, and
+  `?section=`/`?focus=` deep links without a chosen agent still land on the
+  "pick an agent" index.
+
+## [0.1.13] - 2026-10-28
+
+### Added
 
 - **Workflow effect journal: exactly-once effects for irreversible nodes.** New tenant table
   `workflow_effect_journal` (V680) and `WorkflowEffectJournal`: `bulk_email`, `tool`, `crm_lead`,
@@ -80,7 +199,52 @@ Release notes on GitHub are generated from the section for each version.
   owner (`KnowledgeSearchToolCallback.asOwner`). An unresolvable caller reads nothing. The
   `knowledge_collection` API gains `visibility`/`createdBy` fields.
 
+- **On-screen keyboard follows the selected language.** A keyboard toggle in
+  the topbar (next to the language switcher) opens a floating board in the
+  current locale's script — Arabic, Devanagari, Bengali, Punjabi, Kannada,
+  Malayalam, Odia, Telugu, Sindhi, Urdu, Chinese, Japanese, and the European
+  layouts — and types into whichever input has focus, so chat, search, and
+  forms all work without wiring. Layout data (`simple-keyboard-layouts`)
+  lazy-loads per locale so pages never pay for scripts they don't use;
+  Devanagari-script locales share the Hindi layout and Kashmiri the Urdu one.
+  Locales with no matching layout keep the toggle disabled rather than
+  offering a board in the wrong script.
+
+- **A2A console: `admin/a2a` and per-agent endpoint panels.** Tenant
+  managers get a console view of agent-to-agent traffic that the A2A protocol
+  itself will not list (the spec's `tasks/list` answers
+  UnsupportedOperationError): inbound "who called my agents" and outbound
+  "which remote agents did my agents call" rows with direction, state,
+  subject, timings and a bounded reply preview; a detail view with the full
+  record; cancel for in-flight inbound turns (an outbound cancel only
+  annotates local bookkeeping - the remote task stays authoritative); and a
+  read-only policy panel with the operator-set outbound allow-list and this
+  deployment's JSON-RPC, HTTP+JSON, agent card and JWKS endpoints. Each
+  agent's page also carries an `A2aEndpointPanel` with that agent's own
+  endpoints. The surface is manager-gated
+  (`PERM_MANAGE_AGENTS` / tenant-admin / platform-admin), cross-tenant task
+  ids answer 404, and it is off on personal installs
+  (`EditionFeature.A2A_DIRECTORY`).
+
 ### Fixed
+
+- **Release images moved off KEV-listed Node binaries.** Every image that
+  embeds Node shipped binaries vulnerable to CVE-2026-111497 (Critical, KEV,
+  EPSS 88%) and the publish-time grype gate refused them. Node pins bumped to
+  the fixed release on each line in use: 26.11.1 → 26.12.1 (core, web,
+  omnibus, tool-sandbox, http-gateway example), 22.23.3 → 22.23.4
+  (mcp-stdio-runner, workspace-runner, whatsapp-qr), and the piece-host
+  compose default 24.21.0 → 24.22.1.
+- **Release image builds no longer die on `tool-sandbox` (amd64) or `core-full` (arm64).**
+  Node 26.11's amd64 binary gained a `libatomic` link that was previously
+  arm64-only while the Dockerfile only installed it for aarch64, and
+  core-full's server-puppeteer `npx` pre-warm resolved the package from the
+  local toolchain tree instead of seeding `~/.npm/_npx`, leaving the patched
+  overlay nothing to copy.
+
+- **On-device media generation (`local_generate_image` / `local_generate_audio`) works after a reload, on bigger-window models, and on adapters without `shader-f16`.** Three wiring gaps left the tools dead: a model installed in a previous page session left the "cached" marker set but the worker cold, and the tools refused as if it were never installed — the facade now warms the worker from the local cache (a cache hit, not an acquisition, so the no-download consent rule is untouched), the same contract the vision model already follows. The tool-advertisement budget was a flat 3,200 chars for every model, which always trimmed the media tools out of the system prompt — it now scales with the session's context window (`toolAdvertisementBudgetFor`), so models that can afford the schema block are actually offered the tools. And MusicGen hard-required fp16 weights on the WebGPU path, so adapters without the `shader-f16` feature failed every load with a bare "Download failed" — the worker now always takes the model's q4 weights on WebGPU — fp32 and fp16 both fail session creation inside the browser's wasm heap (the fp16 decoder alone is ~850 MB, fp32 ~1.7 GB), while q4 is the supported WebGPU-quantized path at ~570 MB and needs no shader-f16; wasm+q8 stays the no-WebGPU path, while the image tool and its Edge-console card gate honestly on fp16 support since SD-Turbo ships fp16-only weights. Load failures also surface the worker's real error detail in the download chip instead of "Download failed" alone. Finally, models whose context window still can't afford a tool's schema now get a system-prompt note naming the omitted tools with an explicit "calls will be refused — do not substitute a different tool" instruction, so a request like "generate an image" no longer gets silently improvised into `generate_document` with a PNG type; if the model calls a trimmed name anyway, the refusal now says the schema didn't fit this model's prompt budget (and that a bigger-window model offers it) instead of the wrong "this device cannot run it".
+
+- **Personal sign-in explains why the PIN pad is absent on an unenrolled browser.** A PIN is deliberately per-browser (the digits only count together with that browser's device secret), but on a second browser the sign-in screen silently showed no pad — it read as "my PIN stopped working". When the account has a PIN and this browser isn't enrolled, the screen now says so and points at signing in another way and adding this browser in Account security; `docs/personal-mode.md` gained a matching "second browser or machine" entry.
 
 - **Auto-injected retrieval and inbound channel turns now propagate taint to tool gates.**
   Previously, only explicit `UNTRUSTED_EXTERNAL` tool calls (such as `fetch_web_page` or
@@ -217,6 +381,19 @@ Release notes on GitHub are generated from the section for each version.
   documented that non-localhost browser access requires HTTPS: the realm
   marks session cookies `Secure`, so plain-`http://` LAN/hostname installs
   silently drop them and the sign-in form loops.
+- **RTL locales now mirror the whole console, not just the text.** Arabic,
+  Urdu, Kashmiri and Sindhi already set `<html dir="rtl">`, but a large part
+  of the UI was written in physical terms: the language menu anchored
+  `right-0` and stayed on the LTR edge, drawers and side panels pinned to
+  physical `left-0`/`right-0` while their borders kept pointing inward on
+  the wrong side, search-input icons sat over the text the logical padding
+  opened, and sticky first table columns pinned the wrong edge. The audit
+  converted roughly 450 files to logical properties (`ps-`/`pe-`, `ms-`/`me-`,
+  `text-start`, `border-s`/`border-e`, logical corner radii, `start-`/`end-`
+  anchors where the anchor is leading-edge, `ltr:`/`rtl:` transform pairs on
+  slide-in drawers), one CSS rule mirrors the directional lucide icons
+  (arrows/chevrons; transport and media glyphs intentionally unmirrored),
+  and `global-error` now renders a direction-aware `<html>` as well.
 
 ### Added
 
@@ -244,6 +421,16 @@ Release notes on GitHub are generated from the section for each version.
   `en_US-lessac-medium` voice (sha256-verified at build); `PIPER_VOICE` /
   `PIPER_MODEL_DIR` / `PIPER_SPEAKER_ID` / `PIPER_SAMPLE_RATE` tune it, and
   `services/voice-agent/piper_voices_download.py` fetches additional voices.
+- **A2A interoperability console (`/admin/a2a`) and per-agent endpoint panel.**
+  The A2A protocol bindings deliberately answer ListTasks as unsupported, so
+  the console is served by a new manager-gated surface
+  (`/api/a2a/console/**`): a tenant-wide task list in both directions
+  (inbound calls into this workspace's agents plus outbound `a2a_call_agent`
+  bookkeeping), full task detail, cancel for in-flight inbound turns, the
+  deployment's inbound endpoints (JSON-RPC, HTTP+JSON, agent card, JWKS) and
+  a read-only view of the operator's outbound remote-agent allow-list. The
+  agent workbench also shows each agent's A2A endpoints and card URL.
+
 - **Docling-first document conversion for knowledge ingestion.** The new
   `services/docling` FastAPI adapter wraps IBM's Docling parser behind the
   sidecar's exact `/extract` contract (`X-Internal-Token` auth, `DOCLING_*`
@@ -275,6 +462,13 @@ Release notes on GitHub are generated from the section for each version.
   upload picker now lists `.pptx`/`.xlsx`/`.csv`/`.tiff`/`.tif`/`.bmp`
   alongside the existing types (PPT/XLS badges); a deployment without the
   `docling` profile still rejects them server-side with a clear error.
+- **Personal installs keep language packs off the device until asked.**
+  Picking a non-English language on a personal install no longer silently
+  fetches its ~0.6 MB catalog: the language menu first shows a consent card
+  naming the pack size, downloads it on approval (failure stays in the menu
+  with a retry instead of half-applying the locale), and remembers the grant
+  in localStorage so a restart never re-asks. Lite/full/hosted editions are
+  unchanged — they already treat every catalog as present.
 
 ## [0.1.12] - 2026-10-26
 
@@ -328,6 +522,7 @@ Release notes on GitHub are generated from the section for each version.
 ## [0.1.11] - 2026-10-26
 
 - Shared-agent voice works without server speech services: the public share page's call panel now offers one-tap downloads of the on-device models (whisper speech-to-text ~45 MB + kokoro voice ~90 MB) on the visitor's device. With whisper installed, hold-to-talk transcribes locally and only the text crosses the wire (the shared chat endpoint), so talking works even when the platform's STT, TTS and LiveKit legs are all down; any miss falls back to the server voice turn as before. Loading indicators on the share page were strengthened (larger spinner + clearer thinking bubble).
+
 ### Added
 
 - **`docs/api/openapi.json` now shows the real security of the local-auth routes.** The generator only mirrored the main security chain, so every `/api/auth/local/*` route claimed `bearerAuth` - including the anonymous `login`, `setup`, `refresh`, `config` and `unlock` sign-in routes. The spec now matches `LocalAuthSecurityConfig`: only `change-password` and the unlock-management routes require a session; the rest are public (and no longer claim an `Idempotency-Key` that anonymous calls never replay-protected).
@@ -370,8 +565,7 @@ Release notes on GitHub are generated from the section for each version.
   download), and report into a session media gallery in the Edge console where the
   person can preview and download artifacts.
 - **Windows support in `desktop-agent`** (`services/desktop-agent`): `win32`
-  hosts previously fell through to the Linux path and every action answered
-  501. Input now goes through user32 `SendInput`/`mouse_event` via an inline C#
+  hosts previously fell through to the Linux path and every action answered 501. Input now goes through user32 `SendInput`/`mouse_event` via an inline C#
   interop class, screen capture and monitor frames through
   `System.Drawing.CopyFromScreen`, and the clipboard through
   `Get/Set-Clipboard` - all via the bundled Windows PowerShell, no external
@@ -390,7 +584,6 @@ Release notes on GitHub are generated from the section for each version.
 
 - Personal install footprint: default memory ceilings tightened (tool-sandbox 1g to 512m, sidecar 2g to 1536m, browser-runner 2g to 1g; all stay env-overridable) and the sidecar build gained `SIDECAR_BAKE_EXTRA_MODELS=false` to slim a local image by ~550MB.
 
-
 ### Added
 
 - **Desktop tools are always offered when enabled**: `local_desktop_*` (and `run_desktop_recipe`) join the always-relevant tool set and the small-model intent table gets a desktop family — a request like "play minesweeper" or "open Notes" shares no word with `local_desktop_click`, and a relevance-trimmed turn hid the whole capability (the model then correctly answered "I have no desktop tools"). Only applies where the desktop sidecar is already opted in.
@@ -405,7 +598,7 @@ Release notes on GitHub are generated from the section for each version.
   pipeline - a PDF/DOCX/HTML/Markdown file gets a document row, dedup and text extraction,
   plain text lands as a fetched note. `POST /api/knowledge/ingest-url` is the same flow for
   the UI/API. Knowledge write is now configurable per agent: `PATCH
-  /api/agents/{id}/knowledge-write` opts in, `GET`/`PATCH /knowledge-write-access` manages
+/api/agents/{id}/knowledge-write` opts in, `GET`/`PATCH /knowledge-write-access` manages
   the deny-by-default writable-collection grant list, and the agent workbench shows both
   under Knowledge collections.
 - **Enabling a built-in MCP server that can't be served connects a per-tenant copy.** A
@@ -528,7 +721,6 @@ Release notes on GitHub are generated from the section for each version.
   now derived from the ceiling this turn actually enforces plus its grace; an explicit
   `app.chat.tools.max-rounds-per-invocation` still wins.
 
-
 - **`web_search` no longer vanishes silently when no provider is configured.** The tool was
   omitted from the payload unless a search provider was set up, so a misconfigured deployment
   made the model correctly conclude it had no web access and answer research requests from stale
@@ -573,7 +765,6 @@ Release notes on GitHub are generated from the section for each version.
   (capped by `APP_AGENT_JOBS_MAX_TURNS_CAP`, default 8) controls how many turns it
   may use. Opt-in per agent via the tool allow-list.
 
-
 ### Changed
 
 - Fresh personal, lite and full installs now start the out-of-box tool surface by
@@ -584,7 +775,6 @@ Release notes on GitHub are generated from the section for each version.
   install with `--no-search` / `--no-tools` / `--no-browser` or the matching
   `VEGADUTA_*=0` env var; `--minimal` still drops all of them. A remembered
   choice and installs that predate the defaults are left unchanged.
-
 
 ### Security
 
@@ -870,6 +1060,7 @@ Release notes on GitHub are generated from the section for each version.
 - **Downloads page shows the brand name correctly.** Headings use the `BrandName` wordmark (orange "Dūta") instead of plain text.
 
 ## [0.1.4] - 2026-10-19
+
 ### Changed
 
 - **License: Business Source License 1.1.** The platform (everything outside `sdk/`) is now under BSL-1.1: free for any use except offering the software itself to third parties as a competing hosted service, and each version converts to Apache-2.0 four years after its release. The `sdk/` directory stays Apache-2.0 so clients embed anywhere. Versions already released under Apache-2.0 remain under Apache-2.0.
@@ -964,7 +1155,7 @@ Release notes on GitHub are generated from the section for each version.
 - **Personal: continuation passes and background calls keep the tenant.** The tool-result continuation in the fast stream turn runs inside the captured tenant scope, so `llm_call_log` and `rl_episode` rows are written instead of failing with a missing-schema error.
 - **Personal: WhatsApp QR says what is wrong.** With no bridge configured the receiver stops instead of polling forever and the channel shows "WhatsApp bridge not configured"; the overlay passes `APP_WHATSAPPQR_BRIDGE_URL` and `APP_WHATSAPPQR_BRIDGE_SECRET` to core.
 - **Personal: share pages and A2A discovery reach core inside Docker.** The share-page layouts and the `/.well-known/agent-card.json` proxy fell back to `http://localhost:8080`, which inside the web container is the web container itself; both now prefer `CORE_INTERNAL_URL` (compose already sets it to `http://core:8080`).
-- **Setup preflight no longer fails on ports the running install owns.** Ports published by this stack's own containers are reported as in use *by VegaDūta* instead of blocking a re-run, matching what `doctor` already does.
+- **Setup preflight no longer fails on ports the running install owns.** Ports published by this stack's own containers are reported as in use _by VegaDūta_ instead of blocking a re-run, matching what `doctor` already does.
 - **Setup: the wizard finds a Docker CLI it did not put on PATH.** A Finder-launched app gets a minimal PATH and Docker Desktop links its CLI under `~/.docker/bin` first (the `/usr/local/bin` symlink appears only after the app's privileged first run), so a fresh install with a running engine still reported "docker command not found". The wizard now appends `~/.docker/bin` to its PATH for itself and every child process.
 - **Setup: a failed `brew install docker-desktop` says how to recover.** Stale root-owned files from an older Docker install make brew stop on a sudo prompt it cannot answer; the wizard now prints the cleanup command and the manual install link instead of a bare failure.
 - **Personal: host RAM and accelerator are persisted.** `HOST_RAM_GB`/`HOST_ACCELERATOR` were only exported for the `personal` run that computed them; a restart or doctor from another shell silently reported `0`. Both are now written to `.env` (and documented in `.env.example`).
@@ -1357,7 +1548,7 @@ Release notes on GitHub are generated from the section for each version.
   phase-1 Keycloak image to 26.7. Operator notes: **Langfuse** - a fresh
   install needs nothing; an existing v3 install must first upgrade ClickHouse
   to >= 25.12 while still on Langfuse v3 (`docker compose up -d
-  langfuse-clickhouse` with the new tag), then start v4, which migrates its
+langfuse-clickhouse` with the new tag), then start v4, which migrates its
   schema automatically and backfills history in the background (the worker's
   new healthcheck reports 503 while event propagation is stuck). Core's OTLP
   export is the v4-native ingestion path. **Prometheus 3** keeps the flags and

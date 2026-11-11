@@ -18,7 +18,7 @@ ARG WITH_BROWSERS=false
 # NODE_IMAGE: the Node base. services/piece-host/Dockerfile --target runner needs
 # Node >= 22, which the default already satisfies; override it (e.g.
 # --build-arg NODE_IMAGE=node:24.21.0-trixie-slim) only with a runner rollout plan.
-ARG NODE_IMAGE=node:22.23.3-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa
+ARG NODE_IMAGE=node:22.23.4-trixie-slim@sha256:2117f713a417f3aff682ac8f5bc2ebbdf1beed51f36e67ab1e0fd3866b6d2d8f
 
 # NPM_VERSION: the npm CLI bundled with the Node base carries High advisories in its own
 # dependencies (brace-expansion, ip-address, picomatch, pacote, sigstore) that the base tag
@@ -58,7 +58,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 # uv/uvx from astral's digest-pinned image instead of `curl | sh`
 # (supply-chain review 2026-10-10).
-COPY --from=ghcr.io/astral-sh/uv:0.13.0@sha256:cdc6093146eb3ff6a40107b38f008b789e050e77ad87865e381d9917da55a168 /uv /uvx /usr/local/bin/
+COPY --from=ghcr.io/astral-sh/uv:0.13.6@sha256:af22a52f5eafef3d78e551599d405c02df61919d18028f0cea8eda93bc9986d0 /uv /uvx /usr/local/bin/
 
 COPY framing.js server.js ./
 
@@ -100,7 +100,7 @@ ENV HOME=/home/mcprunner
 # other Python can still download one (into its own sandbox).
 # UNVERIFIED in a real image build as of this change (no docker on the dev
 # host): confirm `uvx <pkg requiring >=3.12>` picks 3.12 with no download.
-RUN UV_PYTHON_INSTALL_DIR=/opt/uv-python uv python install 3.12 \
+RUN UV_PYTHON_INSTALL_DIR=/opt/uv-python uv python install 3.12.16 \
     && ln -sf "$(UV_PYTHON_INSTALL_DIR=/opt/uv-python UV_PYTHON_PREFERENCE=only-managed uv python find 3.12)" \
         /usr/local/bin/python3.12 \
     && /usr/local/bin/python3.12 --version
@@ -138,7 +138,7 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers \
     PUPPETEER_CACHE_DIR=/opt/puppeteer-cache \
     # Single-quoted on purpose: ENV drops unquoted double quotes, which left this value as
     # `{executablePath:...}` (invalid JSON, "Failed to parse PUPPETEER_LAUNCH_OPTIONS").
-    PUPPETEER_LAUNCH_OPTIONS='{"executablePath":"/opt/puppeteer-cache/chrome/current/chrome-linux64/chrome"}'
+    PUPPETEER_LAUNCH_OPTIONS='{"executablePath":"/opt/puppeteer-cache/chrome/current/chrome"}'
 
 # This RUN executes as root (HOME=/home/mcprunner only points npm/npx at that
 # directory, it doesn't change the executing uid), so npx fetching the
@@ -197,9 +197,19 @@ RUN npx --yes playwright@1.64.0-alpha-1790635538000 install --with-deps chromium
     # went down mid-release on 2026-10-26 (HTTP 200, empty body); a literal
     # version skips that fetch entirely. Bump when the release scan flags it.
     && npx --yes puppeteer@23.11.1 browsers install chrome@${CHROME_FOR_TESTING_VERSION} \
-    && rm -rf /opt/puppeteer-cache/chrome/linux-131.0.6778.204 /opt/puppeteer-cache/chrome-headless-shell/linux-131.0.6778.204 \
-    && ln -sfn "$(ls -d /opt/puppeteer-cache/chrome/linux-* | sort -V | tail -n 1)" /opt/puppeteer-cache/chrome/current \
-    && test -x /opt/puppeteer-cache/chrome/current/chrome-linux64/chrome \
+    && rm -rf /opt/puppeteer-cache/chrome/linux-131.0.6778.204 /opt/puppeteer-cache/chrome/linux_arm-131.0.6778.204 \
+        /opt/puppeteer-cache/chrome-headless-shell/linux-131.0.6778.204 \
+        /opt/puppeteer-cache/chrome-headless-shell/linux_arm-131.0.6778.204 \
+    # Chrome-for-Testing now ships linux-arm builds for the pinned version, so
+    # the version dir and inner binary dir are arch-shaped (linux-<ver>/
+    # chrome-linux64 on amd64, linux_arm-<ver>/chrome-linux-arm64 on arm64);
+    # the old linux-* glob + chrome-linux64 path only matched amd64 and killed
+    # the arm64 leg at `current`. Resolve the installed binary itself and link
+    # `current` at the INNER dir - `current/chrome` is then the executable on
+    # both arches and PUPPETEER_LAUNCH_OPTIONS stays arch-agnostic.
+    && chrome_bin="$(ls /opt/puppeteer-cache/chrome/linux*/chrome-linux*/chrome | sort -V | tail -n 1)" \
+    && ln -sfn "$(dirname "$chrome_bin")" /opt/puppeteer-cache/chrome/current \
+    && test -x /opt/puppeteer-cache/chrome/current/chrome \
     # Drop the npx/npm cache the steps above filled. Each connection now runs with its OWN
     # private npm cache (server.js createSession), so nothing here is ever read at runtime,
     # while the frozen server-puppeteer/puppeteer trees in it carried High advisories

@@ -15,12 +15,12 @@ import java.util.Optional;
  * more often benign - but records a {@code screen_flags} marker on each affected chunk that search
  * results surface to the model. Credentials are refused on every path.
  */
-final class KnowledgeWriteScreen {
+public final class KnowledgeWriteScreen {
 
     private KnowledgeWriteScreen() {}
 
     /** A caller-safe reason the text must not be stored, or empty when it passes. */
-    static Optional<String> refusal(String content) {
+    public static Optional<String> refusal(String content) {
         return ContentWriteScreen.refusal(content);
     }
 }

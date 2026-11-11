@@ -156,10 +156,7 @@ export default function PathBand() {
             turns vertical (.mkt-flowline--v) and sits in the gap above each
             card after the first. */}
         <div className="relative mt-14">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute left-[8%] right-[8%] top-14 hidden lg:flex"
-          >
+          <div aria-hidden="true" className="pointer-events-none absolute start-[8%] end-[8%] top-14 hidden lg:flex">
             <span className="mkt-flowline" />
           </div>
 
@@ -179,9 +176,7 @@ export default function PathBand() {
                     </div>
                   )}
                   <article
-                    className={
-                      "mkt-card flex w-full flex-col p-6 sm:p-7 " + (here ? "mkt-card--raised" : "")
-                    }
+                    className={"mkt-card flex w-full flex-col p-6 sm:p-7 " + (here ? "mkt-card--raised" : "")}
                     style={
                       here
                         ? {
@@ -263,10 +258,7 @@ export default function PathBand() {
                           ))}
                         </div>
                         <p className="mkt-caption mkt-ink-2 mt-3 flex items-start gap-1.5">
-                          <ShieldCheck
-                            className="mt-0.5 size-3.5 shrink-0"
-                            style={{ color: "var(--mkt-positive)" }}
-                          />
+                          <ShieldCheck className="mt-0.5 size-3.5 shrink-0" style={{ color: "var(--mkt-positive)" }} />
                           {t("path_s3_thatsIt")}
                         </p>
                         <p
@@ -329,9 +321,7 @@ export default function PathBand() {
                       {s.n === "03" && (
                         <Link
                           href={journey.signupHref}
-                          className={
-                            "mkt-btn mkt-btn-lg w-full " + (tried ? "mkt-btn-primary" : "mkt-btn-secondary")
-                          }
+                          className={"mkt-btn mkt-btn-lg w-full " + (tried ? "mkt-btn-primary" : "mkt-btn-secondary")}
                           onClick={() => sendLandingEvent("path_signup_click")}
                         >
                           {tried ? t("path_s3_ctaKeep") : t("path_s3_cta")}

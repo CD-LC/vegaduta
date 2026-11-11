@@ -200,7 +200,7 @@ export default function PromptEditor({
           <TriangleAlert aria-hidden="true" />
           <AlertTitle>{t("regProblemsTitle")}</AlertTitle>
           <AlertDescription>
-            <ul className="list-disc pl-4">
+            <ul className="list-disc ps-4">
               {problems.map((p) => (
                 <li key={p}>{p}</li>
               ))}
@@ -255,7 +255,13 @@ export default function PromptEditor({
         <Button type="button" size="sm" disabled={!canSave} onClick={() => void save()}>
           {busy ? t("saving") : t("save")}
         </Button>
-        <Button type="button" size="sm" variant="outline" disabled={!canEdit || busy || !current} onClick={() => void revert()}>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          disabled={!canEdit || busy || !current}
+          onClick={() => void revert()}
+        >
           {t("regRevert", { to: t(`regSource_${below.source}`) })}
         </Button>
         <Button

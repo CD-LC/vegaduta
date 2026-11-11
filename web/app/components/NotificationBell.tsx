@@ -246,14 +246,16 @@ export default function NotificationBell() {
               onClick={() => markProblemRead(p.id)}
               className={cn(
                 bareButtonClass,
-                "w-full flex-col items-stretch gap-1 border-b border-border/60 px-3 py-2.5 text-left hover:bg-secondary",
+                "w-full flex-col items-stretch gap-1 border-b border-border/60 px-3 py-2.5 text-start hover:bg-secondary",
                 !p.read && "bg-secondary/40"
               )}
             >
               <span className="flex min-w-0 items-center gap-1.5">
                 <span
                   className="state-dot shrink-0"
-                  style={{ ["--state" as string]: p.kind === "error" ? SEVERITY_STATE_VAR.ERROR : SEVERITY_STATE_VAR.WARNING }}
+                  style={{
+                    ["--state" as string]: p.kind === "error" ? SEVERITY_STATE_VAR.ERROR : SEVERITY_STATE_VAR.WARNING,
+                  }}
                   aria-hidden="true"
                 />
                 <span className="sr-only">{t(p.kind === "error" ? "severityError" : "severityWarning") + ": "}</span>
@@ -261,7 +263,9 @@ export default function NotificationBell() {
                   {p.message}
                 </span>
               </span>
-              <span className="pl-3.5 text-[10px] text-muted-foreground">{timeAgo(new Date(p.createdAt).toISOString())}</span>
+              <span className="ps-3.5 text-[10px] text-muted-foreground">
+                {timeAgo(new Date(p.createdAt).toISOString())}
+              </span>
             </button>
           ))}
           {loaded && !listFailed && items.length === 0 && problems.length === 0 && (
@@ -274,7 +278,7 @@ export default function NotificationBell() {
               onClick={() => handleRowClick(n)}
               className={cn(
                 bareButtonClass,
-                "w-full flex-col items-stretch gap-1 border-b border-border/60 px-3 py-2.5 text-left last:border-b-0 hover:bg-secondary",
+                "w-full flex-col items-stretch gap-1 border-b border-border/60 px-3 py-2.5 text-start last:border-b-0 hover:bg-secondary",
                 !n.read && "bg-secondary/40"
               )}
             >
@@ -303,8 +307,8 @@ export default function NotificationBell() {
                   </span>
                 )}
               </span>
-              {n.body && <span className="truncate pl-3.5 text-[11px] text-muted-foreground">{firstLine(n.body)}</span>}
-              <span className="pl-3.5 text-[10px] text-muted-foreground">{timeAgo(n.createdAt)}</span>
+              {n.body && <span className="truncate ps-3.5 text-[11px] text-muted-foreground">{firstLine(n.body)}</span>}
+              <span className="ps-3.5 text-[10px] text-muted-foreground">{timeAgo(n.createdAt)}</span>
             </button>
           ))}
         </div>

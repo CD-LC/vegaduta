@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { barGeometry, toneClasses, type Tone } from "../../lib/opsFormat";
+import { useTranslations } from "../../../lib/i18n";
 
 // Small shared pieces for the Operations pages. Status is never colour alone:
 // every chip carries its word.
@@ -45,6 +46,7 @@ export function MiniBars({
   fmt: (n: number) => string;
   testId?: string;
 }) {
+  const tHC = useTranslations("hcPlatformadminComponentsOpsOpsWidgets");
   const width = 360;
   const height = 120;
   const padTop = 10;
@@ -61,7 +63,7 @@ export function MiniBars({
         <span className="font-mono text-[11px] text-muted-foreground">peak {values.length ? fmt(geo.max) : "—"}</span>
       </div>
       {values.length === 0 ? (
-        <p className="py-8 text-center text-xs text-muted-foreground">No data in this window.</p>
+        <p className="py-8 text-center text-xs text-muted-foreground">{tHC("s1")}</p>
       ) : (
         <svg
           viewBox={`0 0 ${width} ${height}`}

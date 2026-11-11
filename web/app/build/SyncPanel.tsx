@@ -17,6 +17,7 @@ import {
   type AppBuilderExternalEdits,
   type AppBuilderSyncStatus,
 } from "./syncLogic";
+import { useTranslations } from "../lib/i18n";
 
 const TONE: Record<string, string> = {
   ok: "var(--state-success)",
@@ -30,6 +31,7 @@ interface Props {
 }
 
 export default function SyncPanel({ project, onError }: Props) {
+    const tHC = useTranslations("hcBuildSyncPanel");
   const id = project?.project_id;
   const hasBranch = !!project?.github?.branch;
   const [status, setStatus] = useState<AppBuilderSyncStatus | null>(null);
@@ -111,10 +113,14 @@ export default function SyncPanel({ project, onError }: Props) {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center justify-between gap-2 text-sm">
           <span className="flex items-center gap-2">
-            <GitMerge aria-hidden="true" size={14} /> Sync with {status?.base_branch || "base"}
+            <GitMerge aria-hidden="true" size={14} /> {tHC("s7")} {status?.base_branch || "base"}
           </span>
-          <Button variant="ghost" size="sm" onClick={manualRefresh} disabled={loading} aria-label="Refresh sync status">
-            {loading ? <Loader2 aria-hidden="true" size={14} className="animate-spin" /> : <RefreshCw aria-hidden="true" size={14} />}
+          <Button variant="ghost" size="sm" onClick={manualRefresh} disabled={loading} aria-label={tHC("s6")}>
+            {loading ? (
+              <Loader2 aria-hidden="true" size={14} className="animate-spin" />
+            ) : (
+              <RefreshCw aria-hidden="true" size={14} />
+            )}
           </Button>
         </CardTitle>
       </CardHeader>
@@ -125,7 +131,7 @@ export default function SyncPanel({ project, onError }: Props) {
               <span className="state-dot" /> {c.label}
             </span>
           ))}
-          {!status && !loading && <span className="text-xs text-muted-foreground">Status unavailable.</span>}
+          {!status && !loading && <span className="text-xs text-muted-foreground">{tHC("s5")}</span>}
         </div>
 
         {extLine && (
@@ -136,25 +142,33 @@ export default function SyncPanel({ project, onError }: Props) {
 
         <div className="flex items-center gap-2">
           <Button size="sm" onClick={pull} disabled={pulling || !status?.can_pull}>
-            {pulling ? <Loader2 aria-hidden="true" size={14} className="animate-spin" /> : <GitMerge aria-hidden="true" size={14} />} Pull {status?.base_branch || "base"} into
-            branch
+            {pulling ? (
+              <Loader2 aria-hidden="true" size={14} className="animate-spin" />
+            ) : (
+              <GitMerge aria-hidden="true" size={14} />
+            )}{" "}
+            Pull {status?.base_branch || "base"} {tHC("s4")}
           </Button>
-          {status && !status.can_pull && <span className="text-xs text-muted-foreground">Nothing to pull.</span>}
+          {status && !status.can_pull && <span className="text-xs text-muted-foreground">{tHC("s3")}</span>}
         </div>
 
         {conflicts && (
-          <div className="rounded-lg border border-border bg-muted/30 p-3 text-xs" role="alert" data-testid="sync-conflicts">
+          <div
+            className="rounded-lg border border-border bg-muted/30 p-3 text-xs"
+            role="alert"
+            data-testid="sync-conflicts"
+          >
             <p className="mb-2 font-medium text-foreground">
-              Merge conflict - nothing was changed. Resolve these files on GitHub, then pull again.
+              {tHC("s2")}
             </p>
             {conflicts.length ? (
-              <ul className="list-disc space-y-0.5 pl-5 font-mono text-muted-foreground">
+              <ul className="list-disc space-y-0.5 ps-5 font-mono text-muted-foreground">
                 {conflicts.map((p) => (
                   <li key={p}>{p}</li>
                 ))}
               </ul>
             ) : (
-              <p className="text-muted-foreground">GitHub did not say which files conflict.</p>
+              <p className="text-muted-foreground">{tHC("s1")}</p>
             )}
           </div>
         )}

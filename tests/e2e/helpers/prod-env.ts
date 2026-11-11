@@ -140,7 +140,9 @@ export function assertLocalhostFree(value: string | null | undefined, what: stri
   if (!value) return;
   const offenders = value.match(/https?:\/\/(localhost|127\.0\.0\.1)(?=[:/?#\s"']|$)(:\d+)?/gi);
   if (offenders) {
-    throw new Error(`${what} contains a localhost URL (no browser-facing URL may be localhost): ${offenders.join(", ")}`);
+    throw new Error(
+      `${what} contains a localhost URL (no browser-facing URL may be localhost): ${offenders.join(", ")}`
+    );
   }
 }
 
@@ -154,3 +156,18 @@ export function assertLocalhostFree(value: string | null | undefined, what: stri
 // (e.g. staging when testing production). Unset = a sentinel that never
 // matches, so the leak checks pass vacuously.
 export const FOREIGN_DOMAIN = process.env.E2E_FOREIGN_DOMAIN || "no-foreign-domain-configured.invalid";
+
+/**
+ * Set when the tenant's model is a deterministic mock (E2E_LLM_IS_MOCK=1):
+ * output-content assertions cannot be judged on canned text, so specs call
+ * skipIfMockLlm to skip them. Defaults false - a real model serves the stack.
+ */
+export const LLM_IS_MOCK = process.env.E2E_LLM_IS_MOCK === "1";
+
+/** Skips (not fails) an output-content assertion when the model is the deterministic mock. */
+export function skipIfMockLlm(testInfo: TestInfo, what: string): void {
+  testInfo.skip(
+    LLM_IS_MOCK,
+    `the configured model is a deterministic mock - ${what} cannot be asserted on generated output`
+  );
+}

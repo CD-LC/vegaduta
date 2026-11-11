@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { PLATFORM_FACTS } from "../../lib/platform-facts";
+import { useTranslations } from "../../lib/i18n";
 
 // Plan prices come from the facts module, never a literal in this file.
 const PLAN_LINE = PLATFORM_FACTS.plans
@@ -9,6 +10,7 @@ const PLAN_LINE = PLATFORM_FACTS.plans
   .join(", ");
 
 export default function EnterpriseFaq() {
+  const tHC = useTranslations("hcComponentsEnterpriselandingEnterpriseFaq");
   const [openIdx, setOpenIdx] = useState<number | null>(null);
 
   // Answers rewritten 2026-10-03 against what exists. Removed: "4-8 weeks",
@@ -35,7 +37,7 @@ export default function EnterpriseFaq() {
     },
     {
       q: "Can we run it ourselves?",
-      a: "The code is licensed under the Business Source License 1.1 (free to self-host, including commercially; converts to Apache-2.0 four years after release) and includes a Docker Compose stack for self-hosting. The public repository is still being prepared, so ask us for access today. The managed service runs in one cloud region.",
+      a: "The code is licensed under the Business Source License 1.1 (free to self-host, including commercially; converts to Apache-2.0 four years after release) and includes a Docker Compose stack for self-hosting. The source code is public on GitHub. The managed service runs in one cloud region.",
     },
     {
       q: "How do we know what an agent did, and why?",
@@ -54,13 +56,10 @@ export default function EnterpriseFaq() {
   return (
     <section className="enterprise-faq">
       <div className="enterprise-faq-container">
-        <h2 className="enterprise-faq-title">Frequently Asked Questions</h2>
+        <h2 className="enterprise-faq-title">{tHC("s1")}</h2>
         <div className="enterprise-faq-list">
           {faqs.map((faq, idx) => (
-            <div
-              key={idx}
-              className={`enterprise-faq-item ${openIdx === idx ? "open" : ""}`}
-            >
+            <div key={idx} className={`enterprise-faq-item ${openIdx === idx ? "open" : ""}`}>
               <button
                 type="button"
                 className="enterprise-faq-question"

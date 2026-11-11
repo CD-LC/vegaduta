@@ -40,7 +40,7 @@ export default function BrowserPane({
 
   return (
     <aside
-      className="absolute inset-y-0 right-0 z-20 flex w-full flex-col border-l border-border bg-background shadow-lg lg:static lg:z-auto lg:w-[44%] lg:min-w-[22rem] lg:shadow-none"
+      className="absolute inset-y-0 end-0 z-20 flex w-full flex-col border-s border-border bg-background shadow-lg lg:static lg:z-auto lg:w-[44%] lg:min-w-[22rem] lg:shadow-none"
       data-testid="browser-pane"
       aria-label={t("title")}
     >
@@ -68,7 +68,12 @@ export default function BrowserPane({
                 </>
               }
               action={
-                <a className="btn btn-ghost mt-2" href={docPageHref("installation")} target="_blank" rel="noopener noreferrer">
+                <a
+                  className="btn btn-ghost mt-2"
+                  href={docPageHref("installation")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {tu("docsLink")}
                 </a>
               }
@@ -111,13 +116,18 @@ function ProfileLine({ profile, agentId }: { profile: BrowserProfile | null; age
         <>
           <p className="mt-1 break-words text-sm font-medium text-foreground">{profile.name}</p>
           <p className="mt-0.5 break-words text-muted-foreground">{profile.allowedDomains.join(", ")}</p>
-          <p className="mt-0.5 text-muted-foreground">{profile.hasState && !profile.expired ? t("profileSaved") : t("profileEmpty")}</p>
+          <p className="mt-0.5 text-muted-foreground">
+            {profile.hasState && !profile.expired ? t("profileSaved") : t("profileEmpty")}
+          </p>
         </>
       ) : (
         <p className="mt-1 text-muted-foreground">{t("profileNone")}</p>
       )}
       {agentId && (
-        <Link href={`/agents?agent=${encodeURIComponent(agentId)}`} className="mt-1.5 inline-block text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
+        <Link
+          href={`/agents?agent=${encodeURIComponent(agentId)}`}
+          className="mt-1.5 inline-block text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+        >
           {t("profileManage")}
         </Link>
       )}

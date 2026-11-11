@@ -88,7 +88,9 @@ export default function JobsList({ agentId }: { agentId?: string | null }) {
     () =>
       needle
         ? rows.filter((r) =>
-            [r.goalPreview, r.agentName, r.progressNote, r.errorCode].some((v) => typeof v === "string" && v.toLowerCase().includes(needle))
+            [r.goalPreview, r.agentName, r.progressNote, r.errorCode].some(
+              (v) => typeof v === "string" && v.toLowerCase().includes(needle)
+            )
           )
         : rows,
     [rows, needle]
@@ -116,11 +118,15 @@ export default function JobsList({ agentId }: { agentId?: string | null }) {
             {t(f.labelKey)}
           </Button>
         ))}
-        <div className="relative ml-auto min-w-0 basis-52">
-          <Search size={14} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <div className="relative ms-auto min-w-0 basis-52">
+          <Search
+            size={14}
+            aria-hidden="true"
+            className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
           <Input
             type="search"
-            className="pl-8"
+            className="ps-8"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={tj("searchPlaceholder")}

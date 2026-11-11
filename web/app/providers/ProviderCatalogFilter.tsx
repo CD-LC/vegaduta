@@ -39,7 +39,7 @@ export function useProviderCatalogFilter<T extends string>(
         <Search
           size={16}
           aria-hidden="true"
-          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
         />
         <Input
           type="search"
@@ -47,7 +47,7 @@ export function useProviderCatalogFilter<T extends string>(
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t("providersSearchPlaceholder")}
           aria-label={t("providersSearchLabel")}
-          className="pl-9"
+          className="ps-9"
         />
       </div>
       <div role="group" aria-label={t("providersStatusFilter")} className="flex flex-wrap gap-2">
@@ -64,7 +64,13 @@ export function useProviderCatalogFilter<T extends string>(
                 : "border-border bg-card text-muted-foreground hover:bg-accent/50 hover:text-foreground")
             }
           >
-            {t(o === "all" ? "providersFilterAll" : o === "active" ? "providersFilterActive" : "providersFilterNotConnected")}
+            {t(
+              o === "all"
+                ? "providersFilterAll"
+                : o === "active"
+                  ? "providersFilterActive"
+                  : "providersFilterNotConnected"
+            )}
           </button>
         ))}
       </div>

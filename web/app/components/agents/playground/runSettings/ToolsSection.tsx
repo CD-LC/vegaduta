@@ -10,13 +10,7 @@ import { Button } from "../../../ui/button";
 import { Skeleton } from "../../../ui/skeleton";
 import { Switch } from "../../../ui/switch";
 import { canEditAgent } from "../../agentAccess";
-import {
-  agentToolNames,
-  agentToolsHref,
-  effectiveRunTools,
-  flipRunTool,
-  toolRows,
-} from "../runSettingsModel";
+import { agentToolNames, agentToolsHref, effectiveRunTools, flipRunTool, toolRows } from "../runSettingsModel";
 import type { PlaygroundAgent } from "../types";
 
 type Available = Array<{ name: string; description?: string | null }>;
@@ -69,6 +63,21 @@ export function ToolsSection({
 
   useEffect(() => load(), [load]);
 
+  // Prune a stale run selection the moment the offered list arrives: a tool
+  // removed from the agent (or left over from a previous agent's selection)
+  // would otherwise stay checked and keep 400ing every send. Dropping unknown
+  // names here means the selection self-heals on every load - no version key
+  // needed. Only fires when something was actually stale, never on a clean
+  // selection.
+  useEffect(() => {
+    if (!available || runTools === null) return;
+    const offered = new Set(available.map((x) => x.name));
+    const kept = runTools.filter((n) => offered.has(n));
+    if (kept.length !== runTools.length) onRunToolsChange(kept.length > 0 ? kept : null);
+    // runTools/available/onRunToolsChange identity is what drives this; a
+    // change to any of them re-evaluates pruning correctly.
+  }, [available, runTools, onRunToolsChange]);
+
   // `enabled` on a row is whether the SAVED agent has the tool; whether the run uses it is the selection on top.
   const rows = toolRows(available, agent.allowedToolNames ?? []);
   const agentNames = agentToolNames(rows);
@@ -114,7 +123,13 @@ export function ToolsSection({
                 : t("rsToolsSummary", { on: agentNames.length, total: rows.length })}
             </p>
             {narrowed && (
-              <Button type="button" size="sm" variant="outline" onClick={() => onRunToolsChange(null)} data-testid="rs-tools-reset">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => onRunToolsChange(null)}
+                data-testid="rs-tools-reset"
+              >
                 {t("rsToolsReset")}
               </Button>
             )}
@@ -140,7 +155,11 @@ export function ToolsSection({
                       </p>
                     )}
                     {!agentHasIt && (
-                      <p id={`${id}-off`} className="m-0 text-[11px] text-muted-foreground" data-testid={`${id}-not-in-agent`}>
+                      <p
+                        id={`${id}-off`}
+                        className="m-0 text-[11px] text-muted-foreground"
+                        data-testid={`${id}-not-in-agent`}
+                      >
                         {t("rsToolsNotInAgent")}
                       </p>
                     )}

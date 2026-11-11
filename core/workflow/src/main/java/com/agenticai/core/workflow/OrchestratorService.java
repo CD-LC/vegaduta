@@ -262,6 +262,9 @@ public class OrchestratorService {
                         "Loop node '"
                                 + node.label()
                                 + "' has more than one outgoing connection - it can only repeat a single downstream node.");
+            } else {
+                WorkflowNodeConfigValidator.rejectApprovalGatedBody(
+                        "Loop", node, nodesById.get(outs.get(0)), errors);
             }
         }
 
@@ -338,6 +341,9 @@ public class OrchestratorService {
                                 + node.label()
                                 + "' has more than one outgoing connection - it runs a single worker node per item; "
                                 + "the item list comes from its runtime input, not from extra edges.");
+            } else {
+                WorkflowNodeConfigValidator.rejectApprovalGatedBody(
+                        "Fan-out", node, nodesById.get(outs.get(0)), errors);
             }
         }
 
@@ -352,9 +358,6 @@ public class OrchestratorService {
                 adjacency,
                 "temporal".equalsIgnoreCase(executionEngine),
                 errors);
-        // An approval / human-input halt inside a container body parks the run with a resume
-        // envelope that carries nodeId + input but no iteration cursor - same placement rule.
-        WorkflowApprovalPlacement.validate(graph.nodes(), nodesById, adjacency, errors);
 
         detectCycle(nodeIds, adjacency, errors);
 

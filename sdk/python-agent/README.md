@@ -183,6 +183,9 @@ processes must do the same (see the `ApprovalStore` docstring); one whose
 A resumption lives in the process that created the request, so in a
 multi-process setup the process that wins the decision but never held the
 resumption records the approval without executing it.
+own request. Opt out explicitly with `ApprovalGate(authorizer=allow_any)`. A
+custom `ApprovalStore` shared by several processes must make `update`
+compare-and-set on status, or an approval can run twice.
 
 `sign_receipt`/`verify_receipt` do the same for an approval decision: a signed
 record of who approved what, verifiable later. HMAC is in the box; plug in

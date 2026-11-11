@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "../lib/i18n";
 
 // /device — the browser device node. Pair this page (a pairing code from
 // Channels -> Mobile SDK, or the ?code= deep link a code page can hand out)
@@ -121,6 +122,7 @@ async function runCommand(cmd: Command, notify: (text: string) => void): Promise
 }
 
 export default function DevicePage() {
+  const tHC = useTranslations("hcDevicePage");
   const [device, setDevice] = useState<Device | null>(null);
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
@@ -227,26 +229,22 @@ export default function DevicePage() {
 
   return (
     <main style={{ maxWidth: 560, margin: "48px auto", padding: "0 16px", fontFamily: "system-ui" }}>
-      <h1 style={{ fontSize: 22, fontWeight: 700 }}>VegaDūta device</h1>
-      <p style={{ color: "#555", marginTop: 8 }}>
-        Pair this browser as a device your assistant can ask to do things — read your location, take a
-        photo, share a screen frame, write to the clipboard. Every capability asks for the browser&apos;s own
-        permission first.
-      </p>
+      <h1 style={{ fontSize: 22, fontWeight: 700 }}>{tHC("s6")}</h1>
+      <p style={{ color: "#555", marginTop: 8 }}>{tHC("s5")}</p>
 
       {!device ? (
         <div style={{ marginTop: 24, display: "grid", gap: 12 }}>
           <label style={{ display: "grid", gap: 4 }}>
-            <span style={{ fontSize: 13, color: "#555" }}>Pairing code</span>
+            <span style={{ fontSize: 13, color: "#555" }}>{tHC("s4")}</span>
             <input
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              placeholder="6-digit code from Channels → Mobile SDK"
+              placeholder={tHC("s3")}
               style={{ padding: 10, borderRadius: 8, border: "1px solid #ccc" }}
             />
           </label>
           <label style={{ display: "grid", gap: 4 }}>
-            <span style={{ fontSize: 13, color: "#555" }}>Device name</span>
+            <span style={{ fontSize: 13, color: "#555" }}>{tHC("s2")}</span>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -265,8 +263,7 @@ export default function DevicePage() {
       ) : (
         <div style={{ marginTop: 24 }}>
           <p>
-            <strong>{device.name}</strong> — paired. Keep this page open (Add to Home Screen keeps it alive
-            in the background on most phones).
+            <strong>{device.name}</strong> {tHC("s1")}
           </p>
           <p style={{ fontSize: 13, color: "#555", marginTop: 8 }}>Capabilities: {caps.join(", ") || "none"}</p>
           <button
@@ -274,7 +271,15 @@ export default function DevicePage() {
               localStorage.removeItem(STORE_KEY);
               setDevice(null);
             }}
-            style={{ marginTop: 8, fontSize: 13, color: "#b00020", background: "none", border: "none", padding: 0, textDecoration: "underline" }}
+            style={{
+              marginTop: 8,
+              fontSize: 13,
+              color: "#b00020",
+              background: "none",
+              border: "none",
+              padding: 0,
+              textDecoration: "underline",
+            }}
           >
             Unpair
           </button>

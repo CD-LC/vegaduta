@@ -424,6 +424,9 @@ services:
     # Runtime NEXT_PUBLIC_* (window.__ENV) with build-time fallback.
     environment:
       NEXT_PUBLIC_API_BASE_URL: ${PUBLIC_API_URL:-http://localhost:8080}
+      # Server-side fetch base for the /.well-known/agent-card.json proxy (web/app/.well-known):
+      # NEXT_PUBLIC_API_BASE_URL is the browser-facing URL, unreachable from inside this container.
+      CORE_INTERNAL_URL: ${CORE_INTERNAL_URL:-http://core:8080}
       NEXT_PUBLIC_KEYCLOAK_URL: ${PUBLIC_AUTH_URL:-http://localhost:8180}
       NEXT_PUBLIC_KEYCLOAK_REALM: ${KEYCLOAK_REALM:-agentic-ai}
       NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: agentic-ai-web

@@ -106,7 +106,7 @@ that ticks in the API shape.
 
 ### Also run in the API shape
 
-These tick in the API pod as well. <!-- gen-shapes:begin alsolocked -->All 22<!-- gen-shapes:end alsolocked --> take the Postgres advisory lock, so one pod wins each tick; they
+These tick in the API pod as well. <!-- gen-shapes:begin alsolocked -->All 23<!-- gen-shapes:end alsolocked --> take the Postgres advisory lock, so one pod wins each tick; they
 still borrow a pinned database connection in a chat pod, and each can move to the jobs family once its owner
 confirms it depends on no API-pod state. `AbuseSignalService` is the exception: it writes into the API JVM's
 throttle map, which the API's request filters read, so it stays on the API pods.
@@ -132,6 +132,7 @@ throttle map, which the API's request filters read, so it stays on the API pods.
 | `StalePendingUpgradeCleanup` | tenancy | yes | yes, unless its pool is on | billing | advisory lock |
 | `StepJournalRetentionPurge` | agents-jobs | yes | yes | - | advisory lock |
 | `StudyReviewReminderSweep` | app | yes | yes | - | advisory lock |
+| `TenantMigrationRetryJob` | tenancy | yes | yes | - | advisory lock |
 | `TurnJournalRetentionPurge` | agents-turn | yes | yes | - | advisory lock |
 | `VectorSchemaInitializer` | knowledge | yes | yes | - | advisory lock |
 | `WorkflowPollTriggerTicker` | workflow | yes | yes | - | advisory lock |
@@ -150,6 +151,7 @@ lock. Each carries `@AllowUnlockedSchedule(reason = ...)`.
 | `BrowserTakeoverService` | agents-browser | Acts on this JVM's own in-memory browser sessions; every replica must run its own sweep. |
 | `BrowserUseSessionManager` | agents-browser | Closes this JVM's own browser sessions (the local sessions map pinned to the executor thread); every replica must reap its own. |
 | `DynamicMcpConnectionManager` | agents-tools | Pings this JVM's own liveClients (subprocess/HTTP clients are per-JVM). |
+| `DynamicMcpSchedulers` | agents-tools | Pings this JVM's own liveClients (subprocess/HTTP clients are per-JVM). |
 | `ImpersonationService` | platform | Flushes THIS JVM's in-memory view-as request counters; every replica drains its own. |
 | `LandingEventBuffer` | platform | Flushes THIS JVM's own in-memory event queue to Redis; every replica must drain its own buffer. |
 | `McpOrphanAdopter` | agents-tools | Coordinated by the Redis ownership lease (adopt takes mcp:owner:* before connecting), not by a per-tick lock; exclusive-clients mode needs every replica to look for orphans. |
@@ -157,7 +159,7 @@ lock. Each carries `@AllowUnlockedSchedule(reason = ...)`.
 | `SandboxArtifactRetention` | agents-tools | Drains this JVM's own in-memory queue of artifacts it stored (pending); every replica deletes the artifacts it tracked. |
 <!-- gen-shapes:end perjvm -->
 
-<!-- gen-shapes:begin perjvmpools -->The `ingest`, `webhooks` and `billing` pools skip all of these: their jobs hold none of this state. The `intake` pool keeps 7 of them (every row except `AbuseDetectionService` and `ImpersonationService`).<!-- gen-shapes:end perjvmpools -->
+<!-- gen-shapes:begin perjvmpools -->The `ingest`, `webhooks` and `billing` pools skip all of these: their jobs hold none of this state. The `intake` pool keeps 7 of them (every row except `AbuseDetectionService`, `DynamicMcpSchedulers` and `ImpersonationService`).<!-- gen-shapes:end perjvmpools -->
 The `intake` pollers run agent turns, which is why that pool keeps per-JVM sweeps; the other pools' jobs run
 none.
 

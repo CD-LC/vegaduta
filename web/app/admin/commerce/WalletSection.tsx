@@ -135,7 +135,7 @@ export function WalletSection({
                 {statusBadge(w.status)}
                 <Badge variant="outline">{w.currency}</Badge>
                 <span className="font-mono text-sm">{t("balanceRow", { balance: w.balanceMinor })}</span>
-                <code className="ml-auto text-xs text-muted-foreground">{w.id}</code>
+                <code className="ms-auto text-xs text-muted-foreground">{w.id}</code>
                 {w.status === "ACTIVE" && (
                   <Button
                     type="button"

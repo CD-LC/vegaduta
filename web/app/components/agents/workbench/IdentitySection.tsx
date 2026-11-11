@@ -23,8 +23,10 @@ import { GUIDE_ANCHORS } from "../guide/agentChecklist";
 import { findStarterTemplate, isStarterTemplateKey } from "../starterTemplates";
 import { useWorkbench } from "./context";
 import { WorkbenchSection } from "./WorkbenchSection";
+import { useTranslations } from "../../../lib/i18n";
 
 export default function IdentitySection() {
+  const tHC = useTranslations("hcComponentsAgentsWorkbenchIdentitySection");
   const {
     headCategory,
     identityAgent,
@@ -96,7 +98,7 @@ export default function IdentitySection() {
           </div>
           {isDraft && (
             <p id="agent-name-help" className="mt-1 text-xs text-muted-foreground">
-              Name it after the job it does, for example “Order status helper”.
+              {tHC("s1")}
             </p>
           )}
           <div className={cn("mt-1.5", SUB_TEXT)}>
@@ -138,12 +140,12 @@ export default function IdentitySection() {
                     ? t("localModelBadgeLabelWithModel", { model: platformLlmInfo.model })
                     : t("localModelBadgeLabel")
                   : isFreePlan
-                  ? platformLlmInfo?.available
-                    ? t("platformLlmBadgeLabelWithModel", { model: platformLlmInfo.model })
-                    : t("platformLlmBadgeLabel")
-                  : platformLlmInfo?.available
-                    ? t("platformLlmBadgeLabelWithModelNeutral", { model: platformLlmInfo.model })
-                    : t("platformLlmBadgeLabelNeutral")}
+                    ? platformLlmInfo?.available
+                      ? t("platformLlmBadgeLabelWithModel", { model: platformLlmInfo.model })
+                      : t("platformLlmBadgeLabel")
+                    : platformLlmInfo?.available
+                      ? t("platformLlmBadgeLabelWithModelNeutral", { model: platformLlmInfo.model })
+                      : t("platformLlmBadgeLabelNeutral")}
               </span>
             )}
             {!isDraft && (

@@ -43,6 +43,7 @@ export function GrantWizard({
   wallets: AgentWallet[];
   onGranted: () => void;
 }) {
+  const tHC = useTranslations("hcAdminAgenttrustGrantWizard");
   const t = useTranslations("adminAgentTrustPage");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<GrantForm>(EMPTY_GRANT);
@@ -96,7 +97,15 @@ export function GrantWizard({
     <Card className="p-4">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold">{t("grantWizardTitle")}</h3>
-        <Button type="button" variant="ghost" size="sm" onClick={() => { setOpen(false); setError(null); }}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setOpen(false);
+            setError(null);
+          }}
+        >
           {t("cancel")}
         </Button>
       </div>
@@ -106,7 +115,7 @@ export function GrantWizard({
           <Input
             id="grant-audience"
             value={form.audience}
-            placeholder="x402://my-offer or vegaduta-api"
+            placeholder={tHC("s2")}
             onChange={(e) => setForm((f) => ({ ...f, audience: e.target.value }))}
           />
           <p className="text-xs text-muted-foreground">{t("fieldAudienceHint")}</p>
@@ -116,7 +125,7 @@ export function GrantWizard({
           <Input
             id="grant-scopes"
             value={form.scopes}
-            placeholder="read:data, pay:x402"
+            placeholder={tHC("s1")}
             onChange={(e) => setForm((f) => ({ ...f, scopes: e.target.value }))}
           />
           <p className="text-xs text-muted-foreground">{t("fieldScopesHint")}</p>

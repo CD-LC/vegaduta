@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { API_URL, requireUserCredentials } from "../helpers/prod-env";
 import { signInToConsole } from "../helpers/prod-session";
+import { fixStageApiBase } from "./local-stage-fix";
 import { collectProdErrors } from "../helpers/prod-console";
 import { authHeaders, getBearerToken, pickAnyAgent } from "../helpers/prod-api";
 import {
@@ -41,10 +42,12 @@ import {
  * enough, and the phone-width check sets its own 400px viewport.
  */
 test.describe("Six for everyone - signed-in smoke (live)", () => {
+  test.use({ bypassCSP: true }); // stage fix: console calls api.<domain>; its CSP only allows localhost:8280
   test.beforeEach(async ({ page }, testInfo) => {
     requireUserCredentials(testInfo);
     testInfo.skip(testInfo.project.name !== "chromium", "signed-in smoke runs once, on the desktop project");
     testInfo.setTimeout(150_000);
+    await fixStageApiBase(page);
     await signInToConsole(page);
   });
 

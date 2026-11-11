@@ -2,6 +2,7 @@
 
 import { useId, useRef } from "react";
 import { cn } from "../lib/utils";
+import { useTranslations } from "../lib/i18n";
 
 // Deliberately NOT a CodeMirror/Monaco/Prism dependency. This console's
 // "no dependency until it earns its keep" rule (see app/lib/api.ts's header
@@ -42,6 +43,7 @@ export default function CodeEditorTextarea({
   "aria-label"?: string;
   className?: string;
 }) {
+  const tHC = useTranslations("hcComponentsCodeEditorTextarea");
   const gutterRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const hintId = useId();
@@ -91,55 +93,55 @@ export default function CodeEditorTextarea({
 
   return (
     <div>
-    <div
-      className={cn(
-        "flex overflow-hidden rounded-md border border-border bg-secondary/40 shadow-sm",
-        "focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/40",
-        disabled && "opacity-50",
-        className
-      )}
-    >
       <div
-        ref={gutterRef}
-        aria-hidden="true"
-        className="shrink-0 select-none overflow-hidden border-r border-border bg-secondary/60 py-2 text-right font-mono text-xs leading-5 text-muted-foreground"
-        style={{ width: `${String(lineCount).length + 2}ch` }}
-      >
-        {Array.from({ length: lineCount }, (_, i) => (
-          <div key={i} className="px-1.5">
-            {i + 1}
-          </div>
-        ))}
-      </div>
-      <textarea
-        ref={textareaRef}
-        id={id}
-        rows={rows}
-        wrap="off"
-        spellCheck={false}
-        autoCapitalize="off"
-        autoCorrect="off"
-        autoComplete="off"
-        disabled={disabled}
-        placeholder={placeholder}
-        aria-label={ariaLabel}
-        aria-describedby={hintId}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onScroll={(e) => {
-          if (gutterRef.current) gutterRef.current.scrollTop = e.currentTarget.scrollTop;
-        }}
         className={cn(
-          "w-full flex-1 resize-none overflow-auto whitespace-pre bg-transparent px-3 py-2",
-          "font-mono text-xs leading-5 text-foreground outline-none",
-          "placeholder:text-muted-foreground disabled:cursor-not-allowed"
+          "flex overflow-hidden rounded-md border border-border bg-secondary/40 shadow-sm",
+          "focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/40",
+          disabled && "opacity-50",
+          className
         )}
-      />
-    </div>
-    <span id={hintId} className="text-xs text-muted-foreground">
-      Tab inserts a space; press Escape then Tab to leave
-    </span>
+      >
+        <div
+          ref={gutterRef}
+          aria-hidden="true"
+          className="shrink-0 select-none overflow-hidden border-e border-border bg-secondary/60 py-2 text-end font-mono text-xs leading-5 text-muted-foreground"
+          style={{ width: `${String(lineCount).length + 2}ch` }}
+        >
+          {Array.from({ length: lineCount }, (_, i) => (
+            <div key={i} className="px-1.5">
+              {i + 1}
+            </div>
+          ))}
+        </div>
+        <textarea
+          ref={textareaRef}
+          id={id}
+          rows={rows}
+          wrap="off"
+          spellCheck={false}
+          autoCapitalize="off"
+          autoCorrect="off"
+          autoComplete="off"
+          disabled={disabled}
+          placeholder={placeholder}
+          aria-label={ariaLabel}
+          aria-describedby={hintId}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onScroll={(e) => {
+            if (gutterRef.current) gutterRef.current.scrollTop = e.currentTarget.scrollTop;
+          }}
+          className={cn(
+            "w-full flex-1 resize-none overflow-auto whitespace-pre bg-transparent px-3 py-2",
+            "font-mono text-xs leading-5 text-foreground outline-none",
+            "placeholder:text-muted-foreground disabled:cursor-not-allowed"
+          )}
+        />
+      </div>
+      <span id={hintId} className="text-xs text-muted-foreground">
+        {tHC("s1")}
+      </span>
     </div>
   );
 }

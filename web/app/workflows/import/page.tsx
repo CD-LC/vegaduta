@@ -525,7 +525,7 @@ export default function WorkflowImportPage() {
                 ) : (
                   <>
                     <p className="text-xs text-muted-foreground">{t("issuesIntro")}</p>
-                    <ul className="list-disc space-y-1 pl-5 text-sm text-foreground">
+                    <ul className="list-disc space-y-1 ps-5 text-sm text-foreground">
                       {data.validationIssues.map((issue, i) => (
                         <li key={i} className="break-words">
                           {issue}

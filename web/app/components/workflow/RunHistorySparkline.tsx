@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { X } from "lucide-react";
 import { formatDuration, type RunRow } from "./runHistoryModel";
+import { useTranslations } from "../../lib/i18n";
 
 const SPARK_MAX = 40;
 const SPARK_W = 260;
@@ -25,6 +26,7 @@ interface SparklineProps {
  * at a glance.
  */
 export default function Sparkline({ rows, typical, selectedRunId, compareRunId, onPick }: SparklineProps) {
+  const tHC = useTranslations("hcComponentsWorkflowRunHistorySparkline");
   const pts = useMemo(() => {
     const recent = rows.slice(0, SPARK_MAX).reverse();
     const ds = recent.map((r) => r.duration).filter((d): d is number => d != null && d > 0);
@@ -133,7 +135,8 @@ export default function Sparkline({ rows, typical, selectedRunId, compareRunId, 
         {cmp && (
           <span>
             <i className="rh-lg-cmp" aria-hidden="true" />
-            compare #{cmp.row.flight}
+            {tHC("s1")}
+            {cmp.row.flight}
           </span>
         )}
       </figcaption>

@@ -21,6 +21,7 @@ import {
 // top of page.tsx): plain English until the next I18N-MIGRATION-PLAN batch.
 
 export default function ContentPolicyCard({ canManage }: { canManage: boolean }) {
+  const tHC = useTranslations("hcAdminGuardrailsContentPolicyCard");
   const tg = useTranslations("f2GapsAdmin");
   const [saved, setSaved] = useState<ContentPolicy>(DEFAULT_CONTENT_POLICY);
   const [draft, setDraft] = useState<ContentPolicy>(DEFAULT_CONTENT_POLICY);
@@ -78,22 +79,20 @@ export default function ContentPolicyCard({ canManage }: { canManage: boolean })
   return (
     <Card data-testid="content-policy-card">
       <CardHeader>
-        <CardTitle>Model call content policy</CardTitle>
-        <CardDescription>
-          Applied to every prompt this workspace sends to a model. Both checks are off until you turn them on.
-        </CardDescription>
+        <CardTitle>{tHC("s10")}</CardTitle>
+        <CardDescription>{tHC("s9")}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
         {loading ? (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="size-4 animate-spin" aria-hidden="true" /> Loading…
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" /> {tHC("s8")}
           </div>
         ) : (
           <>
             {error && (
               <Alert variant="destructive">
                 <TriangleAlert className="size-4" aria-hidden="true" />
-                <AlertTitle>That didn&apos;t work</AlertTitle>
+                <AlertTitle>{tHC("s7")}</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
@@ -103,9 +102,7 @@ export default function ContentPolicyCard({ canManage }: { canManage: boolean })
                 <AlertDescription>{notice}</AlertDescription>
               </Alert>
             )}
-            {!canManage && (
-              <p className="text-xs text-muted-foreground">Only workspace admins can change this policy.</p>
-            )}
+            {!canManage && <p className="text-xs text-muted-foreground">{tHC("s6")}</p>}
 
             <fieldset className="flex flex-col gap-2">
               <label className="flex cursor-pointer items-start gap-2 text-sm">
@@ -119,12 +116,10 @@ export default function ContentPolicyCard({ canManage }: { canManage: boolean })
                 />
                 <span>
                   <span className="font-medium">{tg("redactPii")}</span>
-                  <span className="block text-xs text-muted-foreground">
-                    Matching values in outgoing prompts are replaced with a placeholder.
-                  </span>
+                  <span className="block text-xs text-muted-foreground">{tHC("s5")}</span>
                 </span>
               </label>
-              <div className="ml-6 flex flex-col gap-1.5">
+              <div className="ms-6 flex flex-col gap-1.5">
                 {PII_CATEGORY_FIELDS.map(({ key, label }) => (
                   <label key={key} className="flex cursor-pointer items-center gap-2 text-sm">
                     <input
@@ -136,9 +131,7 @@ export default function ContentPolicyCard({ canManage }: { canManage: boolean })
                     {label}
                   </label>
                 ))}
-                {isPiiRedactionInert(draft) && (
-                  <p className="text-xs text-destructive">Pick at least one category, or nothing will be redacted.</p>
-                )}
+                {isPiiRedactionInert(draft) && <p className="text-xs text-destructive">{tHC("s4")}</p>}
               </div>
             </fieldset>
 
@@ -153,17 +146,19 @@ export default function ContentPolicyCard({ canManage }: { canManage: boolean })
                   onChange={(e) => patch({ injectionScreeningEnabled: e.target.checked })}
                 />
                 <span>
-                  <span className="font-medium">Screen for prompt-injection attempts</span>
-                  <span className="block text-xs text-muted-foreground">
-                    Detects messages that try to override the agent&apos;s instructions.
-                  </span>
+                  <span className="font-medium">{tHC("s3")}</span>
+                  <span className="block text-xs text-muted-foreground">{tHC("s2")}</span>
                 </span>
               </label>
-              <div className="ml-6 flex flex-col gap-1.5">
+              <div className="ms-6 flex flex-col gap-1.5">
                 {(
                   [
                     ["FLAG", "Flag only", "Record it in the audit log and let the call continue."],
-                    ["BLOCK", "Block", "Reject the call before it reaches the model. A false positive loses that turn."],
+                    [
+                      "BLOCK",
+                      "Block",
+                      "Reject the call before it reaches the model. A false positive loses that turn.",
+                    ],
                   ] as [InjectionAction, string, string][]
                 ).map(([value, title, help]) => (
                   <label key={value} className="flex cursor-pointer items-start gap-2 text-sm">
@@ -193,7 +188,7 @@ export default function ContentPolicyCard({ canManage }: { canManage: boolean })
                 onClick={() => void save()}
               >
                 {busy && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
-                Save policy
+                {tHC("s1")}
               </Button>
             </div>
           </>

@@ -210,7 +210,7 @@ function BuildSpec({ build }: { build: RecipeBuild }) {
       {build.guardrails.length > 0 ? (
         <div className="space-y-2">
           <SectionLabel>Guardrails</SectionLabel>
-          <ul className="list-disc space-y-1 pl-5 text-sm text-foreground">
+          <ul className="list-disc space-y-1 ps-5 text-sm text-foreground">
             {build.guardrails.map((g) => (
               <li key={g}>{g}</li>
             ))}

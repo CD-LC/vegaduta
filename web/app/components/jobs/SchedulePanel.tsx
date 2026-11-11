@@ -44,6 +44,7 @@ type Cadence = "interval" | "cron";
 type Target = "AGENT" | "WORKFLOW";
 
 export default function SchedulePanel({ agents }: { agents: any[] }) {
+  const tHC = useTranslations("hcComponentsJobsSchedulePanel");
   const t = useTranslations("schedulePanel");
   const { isAdmin } = useAuth();
   const [agentId, setAgentId] = useState<string>(agents[0]?.id || "");
@@ -287,7 +288,7 @@ export default function SchedulePanel({ agents }: { agents: any[] }) {
                     {t("sentinelBadge")}
                   </Badge>
                 )}
-                <div className="ml-auto flex items-center gap-2">
+                <div className="ms-auto flex items-center gap-2">
                   <Button size="sm" variant="outline" onClick={runNow} disabled={saving}>
                     <Play className="size-3.5" aria-hidden="true" /> {t("runNow")}
                   </Button>
@@ -414,7 +415,7 @@ export default function SchedulePanel({ agents }: { agents: any[] }) {
                     id="sched-cron"
                     value={cron}
                     onChange={(e) => setCron(e.target.value)}
-                    placeholder="0 9 * * MON-FRI"
+                    placeholder={tHC("s1")}
                     className="font-mono"
                     aria-describedby="sched-cron-hint"
                   />
@@ -493,7 +494,7 @@ export default function SchedulePanel({ agents }: { agents: any[] }) {
                 {saving && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
                 {absent ? t("create") : schedule && !schedule.enabled ? t("saveReenable") : t("save")}
               </Button>
-              {!isAdmin && <p className="ml-auto text-xs text-muted-foreground">{t("adminOnly")}</p>}
+              {!isAdmin && <p className="ms-auto text-xs text-muted-foreground">{t("adminOnly")}</p>}
             </div>
           </Card>
 

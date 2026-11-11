@@ -71,7 +71,7 @@ export function Panel({
     >
       <div className="flex items-center gap-2 border-b border-white/10 px-5 py-3 text-xs font-medium uppercase tracking-wider text-zinc-400">
         <Icon className="h-4 w-4 text-violet-300" /> {title}
-        <span className="ml-auto flex gap-1.5">
+        <span className="ms-auto flex gap-1.5">
           <i className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
           <i className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
           <i className="h-2.5 w-2.5 rounded-full bg-zinc-700" />

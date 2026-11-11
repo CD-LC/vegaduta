@@ -37,7 +37,7 @@ export default function SkillRow({
           <button
             type="button"
             onClick={onOpen}
-            className="min-w-0 flex-1 border-0 bg-transparent p-0 text-left shadow-none"
+            className="min-w-0 flex-1 border-0 bg-transparent p-0 text-start shadow-none"
           >
             <span className="flex flex-wrap items-center gap-2">
               <span className="font-mono text-sm font-semibold text-foreground">{skill.name}</span>
@@ -76,10 +76,7 @@ export default function SkillRow({
               )}
             </span>
             <span
-              className={cn(
-                "mt-1 block text-sm leading-relaxed text-muted-foreground",
-                !skill.enabled && "opacity-60"
-              )}
+              className={cn("mt-1 block text-sm leading-relaxed text-muted-foreground", !skill.enabled && "opacity-60")}
             >
               {skill.description}
             </span>

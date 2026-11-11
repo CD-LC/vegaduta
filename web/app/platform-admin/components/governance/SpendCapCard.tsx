@@ -21,6 +21,7 @@ import {
 } from "../../lib/governanceFormat";
 import { formatDay } from "../../lib/platformFormat";
 import { Checkbox } from "../../../components/ui/checkbox";
+import { useTranslations } from "../../../lib/i18n";
 
 // Tenant detail "Spend cap" card. Monthly (calendar month, UTC) cap on the
 // tenant's hosted-pool LLM spend; BYOK is never counted or blocked. At 100%
@@ -36,6 +37,7 @@ const TONE_BAR: Record<string, string> = {
 };
 
 export default function SpendCapCard({ tenantId, tenantName }: { tenantId: string; tenantName: string }) {
+  const tHC = useTranslations("hcPlatformadminComponentsGovernanceSpendCapCard");
   const [cap, setCap] = useState<TenantSpendCap | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -116,19 +118,23 @@ export default function SpendCapCard({ tenantId, tenantName }: { tenantId: strin
 
   return (
     <SectionCard
-      title="Spend cap"
+      title={tHC("s8")}
       icon={Wallet}
       subtitle="Monthly limit on hosted-pool LLM spend (calendar month, UTC). BYOK calls are never counted or blocked."
       actions={
         cap && !editing ? (
           <Button size="sm" variant="outline" onClick={startEdit}>
-            <Pencil /> Edit cap
+            <Pencil /> {tHC("s7")}
           </Button>
         ) : undefined
       }
     >
       {loading && !cap && <Skeleton className="h-16 w-full" />}
-      {error && !loading && <p className="text-xs text-muted-foreground">Spend cap unavailable: {error}</p>}
+      {error && !loading && (
+        <p className="text-xs text-muted-foreground">
+          {tHC("s6")} {error}
+        </p>
+      )}
 
       {cap && (
         <div className="space-y-3">
@@ -150,7 +156,7 @@ export default function SpendCapCard({ tenantId, tenantName }: { tenantId: strin
           <div className="max-w-md space-y-1">
             <div className="flex items-baseline justify-between text-xs">
               <span>
-                Month to date <span className="font-mono">{formatCapUsd(cap.monthToDateUsd)}</span>
+                {tHC("s5")} <span className="font-mono">{formatCapUsd(cap.monthToDateUsd)}</span>
                 {cap.monthStart ? (
                   <span className="text-muted-foreground"> since {formatDay(cap.monthStart)}</span>
                 ) : null}
@@ -161,7 +167,7 @@ export default function SpendCapCard({ tenantId, tenantName }: { tenantId: strin
               <div
                 className="relative h-2 w-full overflow-hidden rounded-full bg-muted"
                 role="meter"
-                aria-label="Month-to-date spend against cap"
+                aria-label={tHC("s4")}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-valuenow={capBarWidth(pct)}
@@ -170,16 +176,12 @@ export default function SpendCapCard({ tenantId, tenantName }: { tenantId: strin
                 <div
                   className="absolute inset-y-0 w-px bg-foreground/60"
                   style={{ left: "80%" }}
-                  title="80% alert"
+                  title={tHC("s3")}
                   aria-hidden="true"
                 />
               </div>
             )}
-            {cap.blocked && (
-              <p className="text-xs text-destructive">
-                Hosted LLM calls for this tenant are refused (HTTP 402) until the month rolls over or the cap is raised.
-              </p>
-            )}
+            {cap.blocked && <p className="text-xs text-destructive">{tHC("s2")}</p>}
           </div>
 
           {editing && (
@@ -187,7 +189,7 @@ export default function SpendCapCard({ tenantId, tenantName }: { tenantId: strin
               <div className="flex flex-wrap items-end gap-3">
                 <div className="space-y-1">
                   <Label htmlFor="spend-cap-input" className="text-xs text-muted-foreground">
-                    Monthly cap (USD)
+                    {tHC("s1")}
                   </Label>
                   <Input
                     id="spend-cap-input"

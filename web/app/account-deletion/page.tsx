@@ -50,13 +50,27 @@ export default function AccountDeletionPage() {
   return (
     <main className="vd-pub min-h-screen w-full bg-background text-foreground">
       <div className="mx-auto max-w-3xl px-5 py-16 sm:px-8">
-        <Link href="/" className="brand-name flex items-center gap-2.5 text-lg font-semibold tracking-tight" aria-label="VegaDūta home">
-          <Image src="/logo-mark.png" alt="" height={32} width={44} className="h-8 w-auto object-contain" style={{ height: 32, width: "auto" }} draggable={false} />
+        <Link
+          href="/"
+          className="brand-name flex items-center gap-2.5 text-lg font-semibold tracking-tight"
+          aria-label="VegaDūta home"
+        >
+          <Image
+            src="/logo-mark.png"
+            alt=""
+            height={32}
+            width={44}
+            className="h-8 w-auto object-contain"
+            style={{ height: 32, width: "auto" }}
+            draggable={false}
+          />
           <span>
             Vega<span className="text-primary">Dūta</span>
           </span>
         </Link>
-        <h1 className="mt-8 text-3xl font-semibold tracking-tight">Delete your <BrandName /> account</h1>
+        <h1 className="mt-8 text-3xl font-semibold tracking-tight">
+          Delete your <BrandName /> account
+        </h1>
         <p className="mt-2 text-pretty text-muted-foreground">
           This page explains how to delete your account, in the mobile app where your deployment offers it, and what
           happens to your data when you do.
@@ -64,7 +78,7 @@ export default function AccountDeletionPage() {
         <div className="mt-8 space-y-8">
           <section>
             <h2 className="text-lg font-semibold">1. Delete your account in the app (where available)</h2>
-            <ul className="mt-2 list-disc space-y-1.5 pl-5 text-muted-foreground">
+            <ul className="mt-2 list-disc space-y-1.5 ps-5 text-muted-foreground">
               <li>
                 <span className="font-medium text-foreground">Android:</span> open VegaDūta, then go to Profile → Delete
                 account.
@@ -81,7 +95,7 @@ export default function AccountDeletionPage() {
           </section>
           <section>
             <h2 className="text-lg font-semibold">2. What is deleted</h2>
-            <ul className="mt-2 list-disc space-y-1.5 pl-5 text-muted-foreground">
+            <ul className="mt-2 list-disc space-y-1.5 ps-5 text-muted-foreground">
               {DELETED.map((item) => (
                 <li key={item}>{item}</li>
               ))}
@@ -89,7 +103,7 @@ export default function AccountDeletionPage() {
           </section>
           <section>
             <h2 className="text-lg font-semibold">3. What is kept</h2>
-            <ul className="mt-2 list-disc space-y-1.5 pl-5 text-muted-foreground">
+            <ul className="mt-2 list-disc space-y-1.5 ps-5 text-muted-foreground">
               {RETAINED.map((item) => (
                 <li key={item}>{item}</li>
               ))}
@@ -98,8 +112,8 @@ export default function AccountDeletionPage() {
           <section>
             <h2 className="text-lg font-semibold">4. When it happens</h2>
             <p className="mt-1.5 text-pretty text-muted-foreground">
-              Your account is deleted as soon as you confirm, and you cannot sign in with it again. After that, data
-              is removed as described in our data-erasure process, and records we must keep for legal obligations are
+              Your account is deleted as soon as you confirm, and you cannot sign in with it again. After that, data is
+              removed as described in our data-erasure process, and records we must keep for legal obligations are
               retained only as long as the law requires. See the{" "}
               <Link href="/privacy" className="text-primary hover:underline">
                 Privacy Policy
@@ -113,11 +127,14 @@ export default function AccountDeletionPage() {
               {CONTACT_EMAIL ? (
                 <>
                   If you can no longer sign in, email{" "}
-                  <a href={`mailto:${CONTACT_EMAIL}?subject=Delete%20my%20VegaD%C5%ABta%20account`} className="text-primary hover:underline">
+                  <a
+                    href={`mailto:${CONTACT_EMAIL}?subject=Delete%20my%20VegaD%C5%ABta%20account`}
+                    className="text-primary hover:underline"
+                  >
                     {CONTACT_EMAIL}
                   </a>{" "}
-                  from the email address on your account, with the subject &quot;Delete my VegaDūta account&quot;. We will
-                  confirm the request with you and then delete the account as described above.
+                  from the email address on your account, with the subject &quot;Delete my VegaDūta account&quot;. We
+                  will confirm the request with you and then delete the account as described above.
                 </>
               ) : (
                 <>
@@ -130,9 +147,13 @@ export default function AccountDeletionPage() {
           </section>
         </div>
         <div className="mt-12 text-sm">
-          <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
+          <Link href="/privacy" className="text-primary hover:underline">
+            Privacy Policy
+          </Link>
           <span className="mx-2 text-muted-foreground">·</span>
-          <Link href="/terms" className="text-primary hover:underline">Terms of Service</Link>
+          <Link href="/terms" className="text-primary hover:underline">
+            Terms of Service
+          </Link>
         </div>
       </div>
     </main>

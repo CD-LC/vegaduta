@@ -23,6 +23,13 @@
 #   docling        docling document parser (services/docling): layout-aware
 #                  extraction ahead of the sidecar for PDF/Office/image formats
 #                  (the CLI exports DOCLING_BASE_URL=http://docling:8002)
+#   freellmapi     FreeLLMAPI (MIT): one OpenAI-compatible /v1 gateway over
+#                  ~34 free LLM providers - zero-key agent models via a
+#                  LOCAL_OPENAI provider row at http://freellmapi:3001/v1
+#                  (docs/local-models.md)
+#   hindsight     Hindsight (MIT): learning agent-memory server with a
+#                  per-bank MCP endpoint http://hindsight:8888/mcp/<bank>/
+#                  (catalog entry `hindsight`; docs/integrations/hindsight.md)
 #   code-intel     code-intel + its docker-in-docker executor (CODE_INTEL_ENABLED=true)
 #   builder        app-builder (pulls in code-intel)
 #   sandbox        tool-sandbox + mcp-stdio-runner
@@ -415,7 +422,7 @@ services:
     # S3 identity is generated from STORAGE_ACCESS_KEY/SECRET at start; core
     # creates STORAGE_BUCKET itself on boot. To use external S3 instead, set
     # STORAGE_ENDPOINT and stop this service (`docker compose stop seaweedfs`).
-    image: chrislusf/seaweedfs:4.48
+    image: chrislusf/seaweedfs:4.50
     <<: [*restart, *logging, *nnp]
     entrypoint: ["/bin/sh", "-c"]
     command:
@@ -447,7 +454,7 @@ services:
     networks: [data-tier, seaweedfs-metrics]
 
   keycloak-db:
-    image: postgres:18.4-alpine
+    image: postgres:18.6-alpine
     <<: [*restart, *logging, *nnp]
     environment:
       POSTGRES_USER: ${KEYCLOAK_DB_USER:-keycloak}
@@ -765,7 +772,7 @@ services:
     networks: [data-tier, agent-io, observability, mcp-stdio-net]
 
   temporal-postgresql:
-    image: postgres:18.4-alpine
+    image: postgres:18.6-alpine
     profiles: ["temporal", "jobs"]
     <<: [*restart, *logging, *nnp]
     environment:
@@ -825,7 +832,7 @@ services:
     networks: [agent-io]
 
   temporal-ui:
-    image: temporalio/ui:2.56.0
+    image: temporalio/ui:2.57.0
     profiles: ["temporal", "jobs"]
     <<: [*restart, *logging, *nnp]
     depends_on:
@@ -851,7 +858,7 @@ services:
     # Kafka-API event backbone for the `workflow` Spring profile. Redpanda is
     # BSL-1.1 (see NOTICE); any Kafka-compatible broker works via
     # WORKFLOW_KAFKA_BOOTSTRAP_SERVERS in core.env.
-    image: redpandadata/redpanda:v26.2.5
+    image: redpandadata/redpanda:v26.2.6
     profiles: ["events", "temporal", "jobs"]
     <<: [*restart, *logging, *nnp]
     command:
@@ -881,7 +888,7 @@ services:
 
   # ------------------------------------------------ profile: observability
   valkey-exporter:
-    image: oliver006/redis_exporter:v1.94.0
+    image: oliver006/redis_exporter:v1.96.0
     profiles: ["observability"]
     <<: [*restart, *logging, *nnp]
     depends_on:
@@ -902,7 +909,7 @@ services:
     networks: [data-tier, observability]
 
   loki:
-    image: grafana/loki:3.7.8
+    image: grafana/loki:3.7.9
     profiles: ["observability"]
     <<: [*restart, *logging, *nnp]
     command: -config.file=/etc/loki/loki-config.yaml
@@ -987,7 +994,7 @@ services:
     networks: [observability, docker-api]
 
   prometheus:
-    image: prom/prometheus:v3.15.0
+    image: prom/prometheus:v3.15.1
     profiles: ["observability"]
     <<: [*restart, *logging, *nnp]
     command:
@@ -1096,7 +1103,7 @@ services:
   # Self-hosted Langfuse v3 (MIT). Its own Postgres/ClickHouse/Valkey/S3 —
   # never shared with the app's data tier. Timezones MUST be UTC.
   langfuse-postgres:
-    image: postgres:18.4-alpine
+    image: postgres:18.6-alpine
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     environment:
@@ -1122,7 +1129,7 @@ services:
     networks: [observability]
 
   langfuse-clickhouse:
-    image: clickhouse/clickhouse-server:26.9.23.15
+    image: clickhouse/clickhouse-server:26.10.3.7
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     user: "101:101"
@@ -1170,7 +1177,7 @@ services:
     networks: [observability]
 
   langfuse-s3:
-    image: chrislusf/seaweedfs:4.48
+    image: chrislusf/seaweedfs:4.50
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     entrypoint: ["/bin/sh", "-c"]
@@ -1205,7 +1212,7 @@ services:
     networks: [observability]
 
   langfuse-worker:
-    image: langfuse/langfuse-worker:4.66.0
+    image: langfuse/langfuse-worker:4.70.0
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     depends_on: &langfuse-depends-on
@@ -1261,7 +1268,7 @@ services:
     networks: [observability]
 
   langfuse-web:
-    image: langfuse/langfuse:4.66.0
+    image: langfuse/langfuse:4.70.0
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     depends_on: *langfuse-depends-on
@@ -1303,7 +1310,7 @@ services:
     # Self-hosted WebRTC SFU (Apache-2.0). Media needs UDP LIVEKIT_RTC_PORT_RANGE_START-_END
     # (default 50000-50100; move it if another process on the host, e.g. adb, holds a port in it) and a
     # reachable public IP; see deploy/livekit/livekit.yaml for TURN.
-    image: livekit/livekit-server:v1.13.10
+    image: livekit/livekit-server:v1.13.11
     profiles: ["voice"]
     <<: [*restart, *logging, *nnp]
     command: --config /etc/livekit.yaml
@@ -1455,7 +1462,7 @@ services:
     # Still plaintext TCP: code-intel's docker client does not load TLS client
     # certs yet. Once it does, switch to DOCKER_TLS_CERTDIR=/certs and
     # tcp://code-intel-docker:2376 with a shared read-only client-cert volume.
-    image: docker:29.9.1-dind
+    image: docker:29.9.2-dind
     profiles: ["code-intel", "builder"]
     <<: [*restart, *logging]
     privileged: true
@@ -1593,6 +1600,71 @@ services:
           pids: 256
     networks: [mcp-stdio-net]
 
+  # ---------------------------------------------------------------------
+  # Optional third-party integrations
+  # ---------------------------------------------------------------------
+
+  freellmapi:
+    # FreeLLMAPI (github.com/tashfeenahmed/freellmapi, MIT): a single
+    # OpenAI-compatible /v1 gateway in front of ~34 free LLM providers, so an
+    # agent can call models with no per-provider API keys. Point a provider
+    # (or agent LLM override) of type LOCAL_OPENAI at
+    # http://freellmapi:3001/v1 - see docs/local-models.md. Its web console is
+    # single-user and stays on the loopback port; agent traffic is
+    # service-to-service over agent-io. `nnp` only: third-party image that
+    # may start as root.
+    image: ghcr.io/tashfeenahmed/freellmapi:latest
+    profiles: ["freellmapi"]
+    <<: [*restart, *logging, *nnp]
+    environment:
+      NODE_ENV: production
+      PORT: "3001"
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${FREELLMAPI_HOST_PORT:-3001}:3001"
+    volumes:
+      - freellmapi-data:/app/server/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/api/ping').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          memory: ${FREELLMAPI_MEM_LIMIT:-1g}
+    networks: [agent-io]
+
+  hindsight:
+    # Hindsight (github.com/vectorize-io/hindsight, MIT): a learning agent
+    # memory server - world facts, experiences, consolidated observations and
+    # mental models, grouped into per-topic "banks". It serves a built-in
+    # per-bank streamable-HTTP MCP endpoint at
+    # http://hindsight:8888/mcp/<bank_id>/ (catalog entry `hindsight`), which
+    # complements the platform's built-in pgvector/AGE memory. Needs an LLM
+    # for consolidation: any of 25+ providers or any OpenAI-compatible
+    # endpoint via HINDSIGHT_API_LLM_BASE_URL - e.g. pair it with the
+    # `freellmapi` profile for a fully key-free local stack. `nnp` only:
+    # third-party image that may start as root.
+    image: ghcr.io/vectorize-io/hindsight:latest
+    profiles: ["hindsight"]
+    <<: [*restart, *logging, *nnp]
+    environment:
+      HINDSIGHT_API_LLM_PROVIDER: ${HINDSIGHT_API_LLM_PROVIDER:-openai}
+      HINDSIGHT_API_LLM_API_KEY: ${HINDSIGHT_API_LLM_API_KEY:?set HINDSIGHT_API_LLM_API_KEY in deploy/compose/.env (a placeholder is fine when HINDSIGHT_API_LLM_BASE_URL points at a keyless endpoint)}
+      HINDSIGHT_API_LLM_MODEL: ${HINDSIGHT_API_LLM_MODEL:-gpt-4o-mini}
+      HINDSIGHT_API_LLM_BASE_URL: ${HINDSIGHT_API_LLM_BASE_URL:-}
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${HINDSIGHT_API_HOST_PORT:-8888}:8888"
+      - "${BIND_ADDR:-127.0.0.1}:${HINDSIGHT_UI_HOST_PORT:-9999}:9999"
+    volumes:
+      - hindsight-data:/home/hindsight/.pg0
+    deploy:
+      resources:
+        limits:
+          memory: ${HINDSIGHT_MEM_LIMIT:-2g}
+    networks: [agent-io]
+
 volumes:
   postgres-data:
   valkey-data:
@@ -1617,6 +1689,8 @@ volumes:
   code-intel-docker-data:
   app-builder-data:
   outreach-data:
+  freellmapi-data:
+  hindsight-data:
 
 # Segmented networks: a compromise of one group cannot reach another except
 # through a service that legitimately bridges both (core, keycloak).

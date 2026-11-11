@@ -152,7 +152,9 @@ export default function HostedWorkflowFormPage() {
         {phase === "done" && (
           <section className="rounded-xl border border-border bg-card p-6 text-center" role="status">
             <h1 className="text-xl font-semibold">{t("pageThanksTitle")}</h1>
-            <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{doneMessage || t("pageThanksBody")}</p>
+            <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
+              {doneMessage || t("pageThanksBody")}
+            </p>
             {redirecting && <p className="mt-3 text-xs text-muted-foreground">{t("pageRedirecting")}</p>}
             {!redirecting && form && (
               <Button
@@ -173,11 +175,18 @@ export default function HostedWorkflowFormPage() {
         )}
 
         {phase === "ready" && form && (
-          <form onSubmit={(e) => void onSubmit(e)} noValidate className="rounded-xl border border-border bg-card p-5 sm:p-6" aria-labelledby="wf-form-title">
+          <form
+            onSubmit={(e) => void onSubmit(e)}
+            noValidate
+            className="rounded-xl border border-border bg-card p-5 sm:p-6"
+            aria-labelledby="wf-form-title"
+          >
             <h1 id="wf-form-title" className="text-xl font-semibold tracking-tight">
               {title}
             </h1>
-            {form.description && <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{form.description}</p>}
+            {form.description && (
+              <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{form.description}</p>
+            )}
 
             <div className="mt-5 flex flex-col gap-5">
               {form.fields.map((field) => (
@@ -194,7 +203,10 @@ export default function HostedWorkflowFormPage() {
 
             {/* Honeypot: off-screen (not display:none, which some bots skip), skipped by keyboard and screen
                 readers. A person never fills it; a bot that does gets a normal-looking success and no run. */}
-            <div aria-hidden="true" style={{ position: "absolute", left: "-10000px", top: "auto", width: 1, height: 1, overflow: "hidden" }}>
+            <div
+              aria-hidden="true"
+              style={{ position: "absolute", left: "-10000px", top: "auto", width: 1, height: 1, overflow: "hidden" }}
+            >
               <input
                 type="text"
                 name={form.honeypotField}
@@ -252,7 +264,7 @@ function FieldControl({
     <label htmlFor={id} className="text-sm font-medium">
       {field.label}
       {field.required && (
-        <span className="ml-1 text-destructive" aria-hidden="true">
+        <span className="ms-1 text-destructive" aria-hidden="true">
           *
         </span>
       )}
@@ -310,10 +322,18 @@ function FieldControl({
         <input
           {...common}
           className={cls}
-          type={field.type === "number" ? "number" : field.type === "email" ? "email" : field.type === "date" ? "date" : "text"}
+          type={
+            field.type === "number"
+              ? "number"
+              : field.type === "email"
+                ? "email"
+                : field.type === "date"
+                  ? "date"
+                  : "text"
+          }
           inputMode={field.type === "number" ? "decimal" : undefined}
           autoComplete={field.type === "email" ? "email" : "off"}
-          maxLength={field.type === "text" ? field.maxLength ?? undefined : undefined}
+          maxLength={field.type === "text" ? (field.maxLength ?? undefined) : undefined}
           min={field.type === "number" && field.min != null ? field.min : undefined}
           max={field.type === "number" && field.max != null ? field.max : undefined}
           step={field.type === "number" ? "any" : undefined}

@@ -90,7 +90,7 @@ const SCRIPT_SPEECH_LANGS: [RegExp, string][] = [
   [/\p{Script=Kannada}/u, "kn-IN"],
   [/\p{Script=Tamil}/u, "ta-IN"],
   [/\p{Script=Telugu}/u, "te-IN"],
-  [/\p{Script=Malayalam}/u, "ml-IN"],
+  [/\p{Script=Malayalam}/u, "ms-IN"],
   [/\p{Script=Bengali}/u, "bn-IN"],
   [/\p{Script=Gujarati}/u, "gu-IN"],
   [/\p{Script=Gurmukhi}/u, "pa-IN"],
@@ -185,7 +185,8 @@ export interface StepControl {
  * failure. May also throw/reject - the chain treats that as a failure. */
 export type StepRunner = (control: StepControl) => Promise<boolean>;
 
-export type StepOutcome = "spoken" | "failed" | "threw" | "start-timeout" | "playback-timeout" | "no-runner" | "aborted";
+export type StepOutcome =
+  "spoken" | "failed" | "threw" | "start-timeout" | "playback-timeout" | "no-runner" | "aborted";
 
 export interface VoiceChainResult {
   /** Which voice the person actually heard; null = text only. */

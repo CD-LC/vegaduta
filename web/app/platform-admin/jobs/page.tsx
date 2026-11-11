@@ -18,6 +18,7 @@ import { failedJobCount, filterJobs, formatDurationMs, jobStatusMeta, sortJobs }
 import { useConfirm } from "../components/admin/ConfirmDialog";
 import { AdminEmptyState, AdminErrorState, AdminTableWrap } from "../components/admin/AdminKit";
 import { Checkbox } from "../../components/ui/checkbox";
+import { useTranslations } from "../../lib/i18n";
 
 // Every @Scheduled job core runs (GET /api/platform/jobs), with its last run as
 // recorded by core. Failed jobs sort first. "Run now" is offered only where
@@ -25,6 +26,7 @@ import { Checkbox } from "../../components/ui/checkbox";
 // for confirmation - it starts the job on the replica that answers.
 
 export default function JobsPage() {
+  const tHC = useTranslations("hcPlatformadminJobsPage");
   const askConfirm = useConfirm();
   const [jobs, setJobs] = useState<ScheduledJob[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -92,17 +94,14 @@ export default function JobsPage() {
 
   return (
     <AdminShell
-      title="Scheduled jobs"
+      title={tHC("s9")}
       actions={
         <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
           <RefreshCw className={loading ? "animate-spin" : undefined} /> Refresh
         </Button>
       }
     >
-      <PageHint>
-        Every scheduled job in core with its last run. Failed jobs are listed first. Run now is only offered for jobs
-        core marks as safe to trigger by hand, and needs the master key.
-      </PageHint>
+      <PageHint>{tHC("s8")}</PageHint>
 
       <SectionCard
         title="Jobs"
@@ -117,19 +116,19 @@ export default function JobsPage() {
             <div className="relative">
               <Search
                 size={14}
-                className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                className="pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
               />
               <Input
-                aria-label="Search jobs"
-                className="h-9 w-60 pl-8"
-                placeholder="Bean, method, schedule, error"
+                aria-label={tHC("s7")}
+                className="h-9 w-60 ps-8"
+                placeholder={tHC("s6")}
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
               />
             </div>
             <div className="flex items-center gap-1.5 text-xs">
               <Checkbox checked={onlyFailed} onCheckedChange={(v) => setOnlyFailed(v)} id="jobs-failed-only" />
-              <label htmlFor="jobs-failed-only">Failed only</label>
+              <label htmlFor="jobs-failed-only">{tHC("s5")}</label>
             </div>
           </div>
         }
@@ -141,14 +140,14 @@ export default function JobsPage() {
         )}
         {shown.length > 0 && (
           <AdminTableWrap>
-            <table className="w-full min-w-[760px] text-left text-sm">
+            <table className="w-full min-w-[760px] text-start text-sm">
               <thead className="text-xs text-muted-foreground">
                 <tr className="border-b border-border">
-                  <th className="py-2 pr-3 font-medium">Job</th>
-                  <th className="py-2 pr-3 font-medium">Schedule</th>
-                  <th className="py-2 pr-3 font-medium">Last status</th>
-                  <th className="py-2 pr-3 font-medium">Last started</th>
-                  <th className="py-2 pr-3 font-medium">Duration</th>
+                  <th className="py-2 pe-3 font-medium">Job</th>
+                  <th className="py-2 pe-3 font-medium">Schedule</th>
+                  <th className="py-2 pe-3 font-medium">{tHC("s4")}</th>
+                  <th className="py-2 pe-3 font-medium">{tHC("s3")}</th>
+                  <th className="py-2 pe-3 font-medium">Duration</th>
                   <th className="py-2 font-medium">
                     <span className="sr-only">Actions</span>
                   </th>
@@ -165,17 +164,17 @@ export default function JobsPage() {
                         data-testid="job-row"
                         data-status={j.lastStatus || "NONE"}
                       >
-                        <td className="py-2 pr-3">
+                        <td className="py-2 pe-3">
                           <div className="font-medium">{j.method}</div>
                           <div className="font-mono text-[11px] text-muted-foreground">{j.bean}</div>
                         </td>
-                        <td className="py-2 pr-3 font-mono text-xs">{j.schedule || UNAVAILABLE}</td>
-                        <td className="py-2 pr-3">
+                        <td className="py-2 pe-3 font-mono text-xs">{j.schedule || UNAVAILABLE}</td>
+                        <td className="py-2 pe-3">
                           <ToneChip tone={meta.tone} label={meta.label} />
                           {j.lastError && (
                             <button
                               type="button"
-                              className="ml-2 border-0 bg-transparent p-0 text-xs text-destructive underline underline-offset-2"
+                              className="ms-2 border-0 bg-transparent p-0 text-xs text-destructive underline underline-offset-2"
                               onClick={() => setExpanded(open ? null : j.id)}
                               aria-expanded={open}
                             >
@@ -183,11 +182,11 @@ export default function JobsPage() {
                             </button>
                           )}
                         </td>
-                        <td className="py-2 pr-3 text-xs" title={formatExact(j.lastStartedAt)}>
+                        <td className="py-2 pe-3 text-xs" title={formatExact(j.lastStartedAt)}>
                           {j.lastStartedAt ? formatRelative(j.lastStartedAt) : UNAVAILABLE}
                         </td>
-                        <td className="py-2 pr-3 font-mono text-xs">{formatDurationMs(j.lastDurationMs)}</td>
-                        <td className="py-2 text-right">
+                        <td className="py-2 pe-3 font-mono text-xs">{formatDurationMs(j.lastDurationMs)}</td>
+                        <td className="py-2 text-end">
                           {j.runNowAllowed ? (
                             <Button
                               size="sm"
@@ -198,11 +197,8 @@ export default function JobsPage() {
                               <Play /> {running === j.id ? "Starting..." : "Run now"}
                             </Button>
                           ) : (
-                            <span
-                              className="text-[11px] text-muted-foreground"
-                              title="Core does not allow this job to be triggered by hand."
-                            >
-                              schedule only
+                            <span className="text-[11px] text-muted-foreground" title={tHC("s2")}>
+                              {tHC("s1")}
                             </span>
                           )}
                         </td>

@@ -14,6 +14,7 @@ import TranslationAndCatalogCards from "./TranslationAndCatalogCards";
 import { HostedPoolCard } from "./HostedPoolCard";
 import { useHostedPool } from "./useHostedPool";
 import { TASK_INFO, type LlmTaskDraft, type TranslationJobDraft } from "./constants";
+import { useTranslations } from "../../lib/i18n";
 
 // LLM & Providers (PLATFORM-ADMIN-GOVERNANCE-AND-CONTROLS.md §3.2) - the hosted
 // pool, per-task model routing, the model catalog, and the translation job,
@@ -24,6 +25,7 @@ import { TASK_INFO, type LlmTaskDraft, type TranslationJobDraft } from "./consta
 // four provider/LLM cards below are unchanged from the original screen.
 
 export default function LlmProvidersPage() {
+  const tHC = useTranslations("hcPlatformadminLlmprovidersPage");
   const askConfirm = useConfirm();
   const [llmTasks, setLlmTasks] = useState([]);
   const [llmTasksError, setLlmTasksError] = useState(null);
@@ -230,19 +232,17 @@ export default function LlmProvidersPage() {
     return row?.capabilitySummary || null;
   }
 
-
   return (
     <AdminShell
-      title="LLM & Providers"
+      title={tHC("s3")}
       actions={
-        <Button variant="outline" size="sm" onClick={refresh} disabled={refreshing} title="Refresh telemetry">
+        <Button variant="outline" size="sm" onClick={refresh} disabled={refreshing} title={tHC("s2")}>
           <RefreshCw size={14} className={refreshing ? "animate-spin" : undefined} /> Refresh
         </Button>
       }
     >
       <PageHint>
-        The platform-hosted LLM pool that powers FREE-tier chat, per-task model routing for the platform&rsquo;s own
-        internal LLM calls, the model catalog behind every provider dropdown, and the weekly translation job.
+        {tHC("s1")}
         {lastChecked && ` Last checked ${lastChecked.toLocaleTimeString()}.`}
       </PageHint>
 

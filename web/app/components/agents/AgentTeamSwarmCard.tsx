@@ -169,7 +169,7 @@ export default function AgentTeamSwarmCard({
 
       <div className="mt-3 rounded-lg border border-border bg-background px-3 py-2" data-testid="team-swarm-limits">
         <div className="text-sm font-medium text-foreground">{t("teamSwarmLimitsTitle")}</div>
-        <ul className="mt-1 list-disc pl-5 text-[12.5px] text-muted-foreground">
+        <ul className="mt-1 list-disc ps-5 text-[12.5px] text-muted-foreground">
           <li>{t("teamSwarmLimitBranches", { max: SWARM_LIMITS.maxParallelBranches })}</li>
           <li>{t("teamSwarmLimitTimeout", { seconds: SWARM_LIMITS.branchTimeoutSeconds })}</li>
           <li>{t("teamSwarmLimitBudget", { usd: SWARM_LIMITS.defaultRunBudgetUsd })}</li>
@@ -263,7 +263,7 @@ export default function AgentTeamSwarmCard({
             <div className="text-[12.5px] text-foreground" data-testid="team-swarm-plan">
               <div className="font-medium">{t("teamSwarmWillCreate", { count: plan.toCreate.length })}</div>
               {plan.toCreate.length > 0 && (
-                <ul className="list-disc pl-5">
+                <ul className="list-disc ps-5">
                   {plan.toCreate.map((m) => (
                     <li key={m.name}>{m.name}</li>
                   ))}
@@ -272,7 +272,7 @@ export default function AgentTeamSwarmCard({
               {plan.toReuse.length > 0 && (
                 <>
                   <div className="mt-2 font-medium">{t("teamSwarmWillReuse", { count: plan.toReuse.length })}</div>
-                  <ul className="list-disc pl-5">
+                  <ul className="list-disc ps-5">
                     {plan.toReuse.map((m) => (
                       <li key={m.id}>{m.name}</li>
                     ))}

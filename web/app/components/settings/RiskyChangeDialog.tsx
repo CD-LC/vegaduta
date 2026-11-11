@@ -95,25 +95,42 @@ export default function RiskyChangeDialog({
       >
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
-            {hasSecurity ? <ShieldAlert aria-hidden="true" className="size-5 text-destructive" /> : <TriangleAlert aria-hidden="true" className="size-5 text-[var(--state-warning)]" />}
+            {hasSecurity ? (
+              <ShieldAlert aria-hidden="true" className="size-5 text-destructive" />
+            ) : (
+              <TriangleAlert aria-hidden="true" className="size-5 text-[var(--state-warning)]" />
+            )}
             {ui("risky.title", { count: changes.length })}
           </AlertDialogTitle>
-          <AlertDialogDescription>{ui(hasSecurity ? "risky.descriptionSecurity" : "risky.description")}</AlertDialogDescription>
+          <AlertDialogDescription>
+            {ui(hasSecurity ? "risky.descriptionSecurity" : "risky.description")}
+          </AlertDialogDescription>
         </AlertDialogHeader>
 
         <ul className="space-y-3" aria-label={ui("risky.listLabel")}>
           {changes.map((c) => (
-            <li key={c.key} className="rounded-md border border-border bg-secondary/30 p-3 text-sm" data-testid={`risky-change-${c.key}`}>
+            <li
+              key={c.key}
+              className="rounded-md border border-border bg-secondary/30 p-3 text-sm"
+              data-testid={`risky-change-${c.key}`}
+            >
               <p className="font-medium">
                 {c.label}
-                <span className="ml-2 text-xs font-normal text-muted-foreground">{ui(`risk.${c.risk}`)}</span>
+                <span className="ms-2 text-xs font-normal text-muted-foreground">{ui(`risk.${c.risk}`)}</span>
               </p>
               <p className="mt-1 text-xs">
                 <span className="text-muted-foreground">{ui("risky.from")}</span> <del>{c.fromText}</del>{" "}
-                <span className="text-muted-foreground">{ui("risky.to")}</span> <ins className="font-medium no-underline">{c.toText}</ins>
+                <span className="text-muted-foreground">{ui("risky.to")}</span>{" "}
+                <ins className="font-medium no-underline">{c.toText}</ins>
               </p>
-              {c.kind === "reset" ? <p className="mt-1 text-xs text-muted-foreground" data-testid="risky-reset-note">{ui("risky.resetNote")}</p> : null}
-              {c.risk === "security" ? <p className="mt-1 text-xs text-muted-foreground">{ui("risky.securityNote")}</p> : null}
+              {c.kind === "reset" ? (
+                <p className="mt-1 text-xs text-muted-foreground" data-testid="risky-reset-note">
+                  {ui("risky.resetNote")}
+                </p>
+              ) : null}
+              {c.risk === "security" ? (
+                <p className="mt-1 text-xs text-muted-foreground">{ui("risky.securityNote")}</p>
+              ) : null}
               {c.strictness ? (
                 <p className="mt-1 text-xs text-muted-foreground" data-testid="risky-strictness">
                   {c.strictness}
@@ -149,7 +166,12 @@ export default function RiskyChangeDialog({
 
         {hasSecurity ? (
           <div className="flex items-start gap-2 text-sm">
-            <Checkbox id={`${reasonId}-ack`} checked={ack} onCheckedChange={setAck} aria-labelledby={`${reasonId}-ack-label`} />
+            <Checkbox
+              id={`${reasonId}-ack`}
+              checked={ack}
+              onCheckedChange={setAck}
+              aria-labelledby={`${reasonId}-ack-label`}
+            />
             <label id={`${reasonId}-ack-label`} htmlFor={`${reasonId}-ack`}>
               {ui("risky.acknowledge")}
             </label>

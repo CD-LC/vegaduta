@@ -32,16 +32,16 @@ export default function DesktopMonitorPanel({
     >
       <button
         type="button"
-        className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs font-medium text-foreground"
+        className="flex w-full items-center gap-2 px-3 py-1.5 text-start text-xs font-medium text-foreground"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       >
         <MonitorPlay className="size-3.5 text-muted-foreground" aria-hidden="true" />
         {t("monitorPanelTitle")}
         {open ? (
-          <ChevronDown className="ml-auto size-3.5 text-muted-foreground" aria-hidden="true" />
+          <ChevronDown className="ms-auto size-3.5 text-muted-foreground" aria-hidden="true" />
         ) : (
-          <ChevronRight className="ml-auto size-3.5 text-muted-foreground" aria-hidden="true" />
+          <ChevronRight className="ms-auto size-3.5 text-muted-foreground" aria-hidden="true" />
         )}
       </button>
       {open && (

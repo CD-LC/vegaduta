@@ -19,6 +19,7 @@ import { cn } from "../../lib/utils";
 import McpAppFrame from "../McpAppFrame";
 import { MCP_APPS_ENABLED, parseAppPointer, type McpAppPointer } from "../../lib/mcpApps/mcpApps";
 import { FINISH_STEP_TYPES, lifecycleDetails, type StepDetails } from "../../lib/turnLifecycle";
+import { useTranslations } from "../../lib/i18n";
 
 /**
  * AG-UI-style live activity trace, shared by ChatPanel (/playground) and
@@ -57,7 +58,16 @@ import { FINISH_STEP_TYPES, lifecycleDetails, type StepDetails } from "../../lib
 /** Event types this component renders with a dedicated icon/label. Anything
  * else is still rendered - see renderGenericRow - just without one. */
 export type KnownActivityStepType =
-  "tool_call" | "tool_result" | "error" | "run_started" | "run_finished" | "plan" | "thinking" | "guardrail" | "handoff" | "memory";
+  | "tool_call"
+  | "tool_result"
+  | "error"
+  | "run_started"
+  | "run_finished"
+  | "plan"
+  | "thinking"
+  | "guardrail"
+  | "handoff"
+  | "memory";
 
 /** What a `memory` event says was placed in the turn's context: counts and
  * note labels only - core never sends the remembered text itself. */
@@ -284,10 +294,11 @@ export function buildTraceRows(steps: readonly ActivityStep[]): TraceRow[] {
 }
 
 function OnDeviceBadge() {
+  const tHC = useTranslations("hcComponentsAgentsAgentActivityTrace");
   return (
     <span
       className="shrink-0 rounded-full border border-border px-1.5 py-px text-[11px] uppercase tracking-wide text-muted-foreground"
-      title="This tool call was proposed by the on-device model and executed through the edge tool bridge"
+      title={tHC("s3")}
     >
       on-device
     </span>
@@ -412,6 +423,7 @@ export default function AgentActivityTrace({
    * message goes (the composer draft). Without it - or with the flag off - no card is ever mounted. */
   appHost?: { agentId: string; onAddMessage?: (text: string) => void };
 }) {
+  const tHC = useTranslations("hcComponentsAgentsAgentActivityTrace");
   const [open, setOpen] = useState(defaultOpen);
   if (!steps || steps.length === 0) return null;
 
@@ -447,7 +459,7 @@ export default function AgentActivityTrace({
         <ChevronRight size={12} className={cn("size-3 transition-transform", open && "rotate-90")} aria-hidden="true" />
         {stepCount === 1 ? "1 step" : `${stepCount} steps`}
         {running && (
-          <span className="ml-1 inline-flex items-center gap-1">
+          <span className="ms-1 inline-flex items-center gap-1">
             <span className="size-1.5 animate-pulse rounded-full bg-primary" aria-hidden="true" />
             running
           </span>
@@ -460,9 +472,9 @@ export default function AgentActivityTrace({
           target="_blank"
           rel="noopener noreferrer"
           data-testid="memory-used-chip"
-          title="See and edit what your assistants remember"
+          title={tHC("s2")}
           aria-label={`${memorySentence} - opens Memory in a new tab`}
-          className="ml-1 inline-flex max-w-full items-center gap-1 rounded-full border border-border px-2 py-0.5 align-middle text-[11px] text-muted-foreground hover:text-foreground"
+          className="ms-1 inline-flex max-w-full items-center gap-1 rounded-full border border-border px-2 py-0.5 align-middle text-[11px] text-muted-foreground hover:text-foreground"
         >
           <Brain size={12} className="size-3 shrink-0" aria-hidden="true" />
           <span className="truncate">{memorySentence}</span>
@@ -526,7 +538,7 @@ export default function AgentActivityTrace({
                   {closing?.ms != null && <span className="shrink-0 text-muted-foreground">{closing.ms} ms</span>}
                   {/* Still running - the tool_call arrived but nothing has
                       closed it yet. This is the live half of the trace. */}
-                  {!closing && <span className="shrink-0 text-muted-foreground">running…</span>}
+                  {!closing && <span className="shrink-0 text-muted-foreground">{tHC("s1")}</span>}
                   {call.origin === "on-device" && <OnDeviceBadge />}
                 </div>
                 {/* Server-redacted and length-capped before it ever left the

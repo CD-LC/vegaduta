@@ -173,7 +173,7 @@ export default function AgentsIndex({
               <Search
                 size={14}
                 aria-hidden="true"
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
               />
               <Input
                 type="search"
@@ -181,7 +181,7 @@ export default function AgentsIndex({
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t("searchPlaceholder")}
                 aria-label={t("searchLabel")}
-                className="pl-9"
+                className="ps-9"
               />
             </div>
             <Select
@@ -191,7 +191,7 @@ export default function AgentsIndex({
               options={providerOptions}
               aria-label={t("providerFilter")}
             />
-            <Button asChild size="sm" className="sm:ml-auto">
+            <Button asChild size="sm" className="sm:ms-auto">
               <Link href={newHref}>
                 <Plus size={14} aria-hidden="true" /> {t("newAgent")}
               </Link>
@@ -208,7 +208,7 @@ export default function AgentsIndex({
                     <TableHead>{t("colName")}</TableHead>
                     <TableHead>{t("colModel")}</TableHead>
                     <TableHead className="hidden md:table-cell">{t("colUpdated")}</TableHead>
-                    <TableHead className="text-right">{t("colActions")}</TableHead>
+                    <TableHead className="text-end">{t("colActions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

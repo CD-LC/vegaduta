@@ -113,10 +113,23 @@ export default function BulkDecisionBar({
           <span className="text-sm font-medium" aria-live="polite">
             {t("bulkSelected", { count: selected.length })}
           </span>
-          <Button type="button" size="sm" variant="destructive" disabled={!denyCheck.ok || running} onClick={(e) => open("deny", e)} data-testid="bulk-deny">
+          <Button
+            type="button"
+            size="sm"
+            variant="destructive"
+            disabled={!denyCheck.ok || running}
+            onClick={(e) => open("deny", e)}
+            data-testid="bulk-deny"
+          >
             {t("bulkDeny")}
           </Button>
-          <Button type="button" size="sm" disabled={!approveCheck.ok || running} onClick={(e) => open("approve", e)} data-testid="bulk-approve">
+          <Button
+            type="button"
+            size="sm"
+            disabled={!approveCheck.ok || running}
+            onClick={(e) => open("approve", e)}
+            data-testid="bulk-approve"
+          >
             {t("bulkApprove")}
           </Button>
           <Button type="button" size="sm" variant="ghost" onClick={onClear} disabled={running}>
@@ -132,11 +145,17 @@ export default function BulkDecisionBar({
       {result && (
         <div className="mt-1" role="status" data-testid="bulk-result">
           <p className="text-sm">{t("bulkResult", { done: result.done, failed: result.failed.length })}</p>
-          <Button type="button" size="sm" variant="ghost" onClick={() => setResult(null)} data-testid="bulk-result-dismiss">
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={() => setResult(null)}
+            data-testid="bulk-result-dismiss"
+          >
             {t("bulkDismiss")}
           </Button>
           {result.failed.length > 0 && (
-            <ul className="mt-1 list-disc pl-5 text-xs text-destructive" role="alert">
+            <ul className="mt-1 list-disc ps-5 text-xs text-destructive" role="alert">
               {result.failed.map((f) => (
                 <li key={f.id}>
                   <code className="font-mono">{f.id.slice(0, 8)}</code>: {f.message}
@@ -147,7 +166,12 @@ export default function BulkDecisionBar({
         </div>
       )}
 
-      <AlertDialog open={mode !== null} onOpenChange={(o) => { if (!running && !o) setMode(null); }}>
+      <AlertDialog
+        open={mode !== null}
+        onOpenChange={(o) => {
+          if (!running && !o) setMode(null);
+        }}
+      >
         <AlertDialogContent
           onCloseAutoFocus={(e) => {
             // Return focus to the control that opened the dialog.
@@ -159,7 +183,9 @@ export default function BulkDecisionBar({
         >
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {mode === "deny" ? t("bulkConfirmDenyTitle", { count: selected.length, tool }) : t("bulkConfirmApproveTitle", { count: selected.length, tool })}
+              {mode === "deny"
+                ? t("bulkConfirmDenyTitle", { count: selected.length, tool })
+                : t("bulkConfirmApproveTitle", { count: selected.length, tool })}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {mode === "deny" ? t("bulkConfirmDenyBody", { tool }) : t("bulkConfirmApproveBody", { tool })}
@@ -178,7 +204,9 @@ export default function BulkDecisionBar({
                   {argsLine(s) || t("previewNoArguments")}
                 </li>
               ))}
-              {selected.length > shown.length && <li className="text-muted-foreground">{t("bulkMore", { count: selected.length - shown.length })}</li>}
+              {selected.length > shown.length && (
+                <li className="text-muted-foreground">{t("bulkMore", { count: selected.length - shown.length })}</li>
+              )}
             </ul>
             {mode === "deny" && (
               <>
@@ -199,7 +227,11 @@ export default function BulkDecisionBar({
               </>
             )}
             {running && (
-              <p role="status" className="flex items-center gap-2 text-xs text-muted-foreground" data-testid="bulk-progress">
+              <p
+                role="status"
+                className="flex items-center gap-2 text-xs text-muted-foreground"
+                data-testid="bulk-progress"
+              >
                 <Loader2 size={12} className="animate-spin" aria-hidden="true" />
                 {t("bulkProgress", { done: progress, count: selected.length })}
               </p>
@@ -216,7 +248,9 @@ export default function BulkDecisionBar({
               onClick={() => void runConfirmed()}
               data-testid="bulk-confirm"
             >
-              {mode === "deny" ? t("bulkConfirmDeny", { count: selected.length }) : t("bulkConfirmApprove", { count: selected.length })}
+              {mode === "deny"
+                ? t("bulkConfirmDeny", { count: selected.length })
+                : t("bulkConfirmApprove", { count: selected.length })}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

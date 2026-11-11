@@ -163,6 +163,9 @@ export const EDITION_ROUTES: readonly EditionRoute[] = [
   rail("/admin/leads", "railLeads", "hosted", "building"),
   rail("/admin/branding", "railBrand", "hosted", "building"),
   rail("/admin/mcp-servers", "railMcp", "hosted", "network"),
+  // core/agents-interop (A2A_DIRECTORY edition feature) is off on personal - no
+  // a2a endpoints exist to manage, so the console page would 404 everything.
+  rail("/admin/a2a", "railA2a", "hosted", "network"),
   // Folded into /assistant on a personal install (the agent picker, "In background" and "Quick task"):
   // the page redirects there, so only the rail has to stop listing them as separate destinations.
   row("/playground", null, "hosted", "building", { gate: false, deny: false, redirectTo: "/assistant" }),

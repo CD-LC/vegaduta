@@ -17,9 +17,7 @@ export default function LatencyRoutingRow({
   return (
     <div className="defer-offscreen grid grid-cols-1 gap-4 sm:grid-cols-2">
       <Card className="gap-4 p-6">
-        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          {t("latencyLabel")}
-        </span>
+        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t("latencyLabel")}</span>
         <div className="grid grid-cols-3 gap-4">
           {[
             { k: t("p50"), v: fmtMs(llm?.p50LatencyMs), accent: false },
@@ -63,14 +61,12 @@ export default function LatencyRoutingRow({
             {t("modelRoutingLabel")}
           </div>
           <div className="mt-2 space-y-1">
-            {modelArcs.length === 0 && (
-              <span className="text-sm text-muted-foreground">{t("modelRoutingEmpty")}</span>
-            )}
+            {modelArcs.length === 0 && <span className="text-sm text-muted-foreground">{t("modelRoutingEmpty")}</span>}
             {modelArcs.map((arc) => (
               <div key={arc.model} className="flex items-center gap-2 text-sm">
                 <span className="size-2 rounded-full" style={{ background: arc.color }} />
                 <span className="truncate text-foreground">{arc.model}</span>
-                <span className="ml-auto tabular-nums text-muted-foreground">{arc.pct}%</span>
+                <span className="ms-auto tabular-nums text-muted-foreground">{arc.pct}%</span>
               </div>
             ))}
           </div>

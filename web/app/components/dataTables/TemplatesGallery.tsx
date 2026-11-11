@@ -136,7 +136,7 @@ export default function TemplatesGallery({ config, onCreated, onCancel }: Props)
                 type="button"
                 aria-pressed={on}
                 onClick={() => pick(tpl)}
-                className={`relative flex h-full w-full flex-col items-start gap-2 rounded-lg border p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40 ${
+                className={`relative flex h-full w-full flex-col items-start gap-2 rounded-lg border p-4 text-start transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40 ${
                   on
                     ? "border-primary bg-primary/5 ring-1 ring-primary"
                     : "border-border bg-card hover:border-primary/40 hover:bg-muted/30"

@@ -70,7 +70,7 @@ export function UsageBar({ label, used, cap }: { label: string; used: number | n
         <span className="text-muted-foreground">{label}</span>
         <span className="font-mono text-muted-foreground">
           {(atLimit || nearLimit) && (
-            <span className="mr-2 font-semibold" style={{ color: fill }}>
+            <span className="me-2 font-semibold" style={{ color: fill }}>
               {pct}%
             </span>
           )}

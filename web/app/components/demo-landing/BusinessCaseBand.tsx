@@ -232,8 +232,7 @@ export default function BusinessCaseBand() {
                     // carried by `.mkt-pill--accent` and the hover affordance
                     // by opacity, which nothing in the layer sets.
                     className={
-                      "mkt-pill cursor-pointer transition-opacity hover:opacity-80 " +
-                      (on ? "mkt-pill--accent" : "")
+                      "mkt-pill cursor-pointer transition-opacity hover:opacity-80 " + (on ? "mkt-pill--accent" : "")
                     }
                   >
                     <Icon className="size-3.5" aria-hidden="true" />
@@ -319,7 +318,7 @@ export default function BusinessCaseBand() {
                         {!last && (
                           <span
                             aria-hidden="true"
-                            className="absolute bottom-1 left-[13px] top-8 w-px bg-gradient-to-b from-primary/40 to-primary/10"
+                            className="absolute bottom-1 start-[13px] top-8 w-px bg-gradient-to-b from-primary/40 to-primary/10"
                           />
                         )}
                         <span className="mkt-num mkt-caption relative z-10 mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full border border-primary/40 bg-primary/10 font-bold text-primary">
@@ -392,10 +391,7 @@ export default function BusinessCaseBand() {
               <ul className="grid gap-2 sm:grid-cols-2 lg:shrink-0">
                 {FREE_ROW_KEYS.map((k) => (
                   <li key={k} className="mkt-small flex items-start gap-2 text-foreground/85">
-                    <Check
-                      className="mt-0.5 size-4 shrink-0"
-                      style={{ color: "var(--mkt-positive)" }}
-                    />
+                    <Check className="mt-0.5 size-4 shrink-0" style={{ color: "var(--mkt-positive)" }} />
                     <span>{t(k)}</span>
                   </li>
                 ))}

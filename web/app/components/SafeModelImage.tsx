@@ -1,6 +1,7 @@
 "use client";
 
 import { isTrustedImageUrl, imageHostLabel } from "../lib/safeImageUrl";
+import { useTranslations } from "../lib/i18n";
 
 // Renders an image that came from MODEL output. Trusted sources (platform
 // hosts, data:/blob:, same-origin paths) render normally. Anything else is NOT
@@ -18,6 +19,7 @@ export default function SafeModelImage({
   alt?: string;
   className?: string;
 }) {
+  const tHC = useTranslations("hcComponentsSafeModelImage");
   if (!src) return null;
   const origin = typeof window !== "undefined" ? window.location.origin : undefined;
   if (isTrustedImageUrl(src, origin)) {
@@ -32,7 +34,10 @@ export default function SafeModelImage({
       data-testid="blocked-image"
       className="inline-flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground"
     >
-      <span>Remote image blocked ({imageHostLabel(src)}){alt ? `: ${alt}` : ""}</span>
+      <span>
+        {tHC("s2")}
+        {imageHostLabel(src)}){alt ? `: ${alt}` : ""}
+      </span>
       {openable && (
         <a
           href={src}
@@ -40,7 +45,7 @@ export default function SafeModelImage({
           rel="noopener noreferrer nofollow"
           className="font-medium text-primary underline underline-offset-2"
         >
-          Open in new tab
+          {tHC("s1")}
         </a>
       )}
     </span>

@@ -19,7 +19,18 @@
 // just an Alert if the service turns out to be unreachable.
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Sparkles, Loader2, RotateCw, XCircle, Plus, FolderOpen, LayoutTemplate, Bot, Smartphone, X } from "lucide-react";
+import {
+  Sparkles,
+  Loader2,
+  RotateCw,
+  XCircle,
+  Plus,
+  FolderOpen,
+  LayoutTemplate,
+  Bot,
+  Smartphone,
+  X,
+} from "lucide-react";
 import { Github } from "../components/lucideBrandIcons";
 import AppShell from "../components/AppShell";
 import { usePageReady } from "../components/RouteTransition";
@@ -51,6 +62,7 @@ const SURFACE_TABS = S.surfaceTabs
   .map((tab) => ({ ...tab, Icon: SURFACE_ICONS[tab.value] }));
 
 export default function AppBuilderPage() {
+    const tHC = useTranslations("hcBuildPage");
   const t = useTranslations("appBuilder");
   const [error, setError] = useState(null);
   const [loaded, setLoaded] = useState(false);
@@ -75,12 +87,14 @@ export default function AppBuilderPage() {
   const [surface, setSurface] = useState("create");
   const surfaceTabs = (
     <Tabs value={surface} onValueChange={setSurface} className="mb-6">
-      <TabsList className={`grid h-auto w-full grid-cols-1 gap-1.5 rounded-2xl border border-border bg-card p-1.5 text-foreground ${SURFACE_TABS.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
+      <TabsList
+        className={`grid h-auto w-full grid-cols-1 gap-1.5 rounded-2xl border border-border bg-card p-1.5 text-foreground ${SURFACE_TABS.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}
+      >
         {SURFACE_TABS.map(({ value, label, line, Icon, startHere }: (typeof SURFACE_TABS)[number]) => (
           <TabsTrigger
             key={value}
             value={value}
-            className="group h-auto justify-start gap-3 rounded-xl px-3.5 py-3 text-left sm:justify-center sm:text-center data-[state=active]:bg-primary/10 data-[state=active]:shadow-none"
+            className="group h-auto justify-start gap-3 rounded-xl px-3.5 py-3 text-start sm:justify-center sm:text-center data-[state=active]:bg-primary/10 data-[state=active]:shadow-none"
           >
             <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground transition-colors group-data-[state=active]:bg-primary group-data-[state=active]:text-primary-foreground">
               <Icon size={17} />
@@ -94,9 +108,7 @@ export default function AppBuilderPage() {
                   </span>
                 )}
               </span>
-              <span className="mt-0.5 block text-xs font-normal leading-snug text-muted-foreground">
-                {line}
-              </span>
+              <span className="mt-0.5 block text-xs font-normal leading-snug text-muted-foreground">{line}</span>
             </span>
           </TabsTrigger>
         ))}
@@ -171,47 +183,44 @@ export default function AppBuilderPage() {
   usePageReady(loaded);
 
   const openReq = useRef(0);
-  const openProject = useCallback(
-    (id) => {
-      // A banner about the previous project must not follow you to the next.
-      setError(null);
-      setOpenFailed(false);
-      if (!id) {
-        openReq.current++;
-        setActiveProjectId(null);
-        setProject(null);
-        setProjectLoading(false);
-        return;
-      }
-      // Drop the previous project immediately and ignore late responses so a
-      // slow A can never land under B's selector.
-      const reqId = ++openReq.current;
-      setActiveProjectId(id);
+  const openProject = useCallback((id) => {
+    // A banner about the previous project must not follow you to the next.
+    setError(null);
+    setOpenFailed(false);
+    if (!id) {
+      openReq.current++;
+      setActiveProjectId(null);
       setProject(null);
-      setProjectLoading(true);
-      appBuilder
-        .getProject(id)
-        .then((p) => {
-          if (openReq.current !== reqId) return;
-          if (!p) {
-            setError("This project could not be loaded.");
-            setOpenFailed(true);
-            return;
-          }
-          setProject(p);
-        })
-        .catch((e) => {
-          if (openReq.current !== reqId) return;
-          setError(e.message);
-          setProject(null);
+      setProjectLoading(false);
+      return;
+    }
+    // Drop the previous project immediately and ignore late responses so a
+    // slow A can never land under B's selector.
+    const reqId = ++openReq.current;
+    setActiveProjectId(id);
+    setProject(null);
+    setProjectLoading(true);
+    appBuilder
+      .getProject(id)
+      .then((p) => {
+        if (openReq.current !== reqId) return;
+        if (!p) {
+          setError("This project could not be loaded.");
           setOpenFailed(true);
-        })
-        .finally(() => {
-          if (openReq.current === reqId) setProjectLoading(false);
-        });
-    },
-    []
-  );
+          return;
+        }
+        setProject(p);
+      })
+      .catch((e) => {
+        if (openReq.current !== reqId) return;
+        setError(e.message);
+        setProject(null);
+        setOpenFailed(true);
+      })
+      .finally(() => {
+        if (openReq.current === reqId) setProjectLoading(false);
+      });
+  }, []);
 
   const handleCreated = useCallback(
     (p) => {
@@ -296,16 +305,12 @@ export default function AppBuilderPage() {
           <div className="mb-4 inline-flex size-12 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
             <Sparkles aria-hidden="true" size={22} />
           </div>
-          <h2 className="text-lg font-semibold text-foreground">
-            App Builder is not available on this deployment
-          </h2>
+          <h2 className="text-lg font-semibold text-foreground">{tHC("s5")}</h2>
           <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-            The app-builder service is an optional add-on and is not running here yet.
-            Nothing is broken on your side — there is simply nothing to connect to.
+            {tHC("s4")}
           </p>
           <p className="mx-auto mt-3 max-w-md text-xs leading-relaxed text-muted-foreground">
-            Platform operators: deploy the app-builder service behind a public hostname,
-            then rebuild the web app with NEXT_PUBLIC_APP_BUILDER_URL set to it.
+            {tHC("s3")}
           </p>
         </div>
       </AppShell>
@@ -317,7 +322,7 @@ export default function AppBuilderPage() {
       {pageHeader}
       {surfaceTabs}
       {error && (
-        <Alert variant="destructive" className="relative mb-5 pr-10">
+        <Alert variant="destructive" className="relative mb-5 pe-10">
           <XCircle aria-hidden="true" />
           <AlertDescription>
             {error} {t("errorDismissSuffix")}
@@ -338,9 +343,7 @@ export default function AppBuilderPage() {
       {warming && (
         <Alert className="mb-5 border-[color-mix(in_srgb,var(--state-warning)_40%,transparent)] bg-[color-mix(in_srgb,var(--state-warning)_10%,transparent)]">
           <Loader2 aria-hidden="true" className="animate-spin text-[var(--state-warning)]" />
-          <AlertDescription className="text-[var(--state-warning)]">
-            {t("warmingUp")}
-          </AlertDescription>
+          <AlertDescription className="text-[var(--state-warning)]">{t("warmingUp")}</AlertDescription>
         </Alert>
       )}
 
@@ -358,7 +361,13 @@ export default function AppBuilderPage() {
                 onChange={(e) => openProject(e.target.value)}
                 options={projects.map((p) => ({
                   value: p.project_id,
-                  label: p.project_id + (p.archived_at ? S.projectOptionSuffix("archived") : p.lifecycle === "ephemeral" ? S.projectOptionSuffix("ephemeral") : ""),
+                  label:
+                    p.project_id +
+                    (p.archived_at
+                      ? S.projectOptionSuffix("archived")
+                      : p.lifecycle === "ephemeral"
+                        ? S.projectOptionSuffix("ephemeral")
+                        : ""),
                 }))}
                 placeholder={t("projectSelectPlaceholder")}
                 aria-label={t("projectSelectPlaceholder")}
@@ -430,10 +439,10 @@ export default function AppBuilderPage() {
             </p>
             <div className="flex flex-wrap gap-2">
               <Button size="sm" onClick={() => openProject(activeProjectId)}>
-                <RotateCw aria-hidden="true" size={14} /> Try again
+                <RotateCw aria-hidden="true" size={14} /> {tHC("s2")}
               </Button>
               <Button size="sm" variant="ghost" onClick={() => openProject(null)}>
-                Back to new app
+                {tHC("s1")}
               </Button>
             </div>
           </CardContent>
@@ -442,4 +451,3 @@ export default function AppBuilderPage() {
     </AppShell>
   );
 }
-

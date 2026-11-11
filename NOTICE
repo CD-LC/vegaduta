@@ -61,6 +61,24 @@ JavaScript vendored in this repository
     web/app/lib/vendor/qrcode-generator.js (license header retained).
     "QR Code" is a registered trademark of DENSO WAVE INCORPORATED.
 
+Agent skills vendored in this repository
+
+  - security-audit skill (MIT, LICENSES/MIT.txt),
+    Copyright (c) 2025-2026 Cloudflare, Inc.
+    (https://github.com/cloudflare/security-audit-skill)
+    core/agents-turn/src/main/resources/skills/security-audit/ - SKILL.md
+    lightly adapted for the built-in skill contract (description wording,
+    the write-isolation detail condensed, the cost-budget section moved to
+    the bundled COST-BUDGET.md); companion files unmodified.
+  - hyperframes, hyperframes-cli and media-use skills (Apache-2.0,
+    LICENSES/Apache-2.0.txt), Copyright HeyGen
+    (https://github.com/heygen-com/hyperframes)
+    core/agents-turn/src/main/resources/skills/{hyperframes,hyperframes-cli,
+    media-use}/ - markdown files only (SKILL.md + references); the skills'
+    executable scripts and binary assets are not vendored (the `npx
+    hyperframes` CLI ships its own). Descriptions adapted for the built-in
+    skill contract.
+
 Activepieces community pieces (MIT, LICENSES/MIT.txt)
 
   - Copyright (c) 2020-2024 Activepieces Inc. (https://github.com/activepieces/activepieces)
@@ -118,6 +136,8 @@ Optional, by Compose profile:
   - Langfuse (MIT; its image also contains separately licensed enterprise
     code that stays inactive without a license key), ClickHouse (Apache-2.0)
                                                     `tracing`
+  - FreeLLMAPI (MIT)                                `freellmapi`
+  - Hindsight (MIT)                                 `hindsight`
   - LiveKit server (Apache-2.0)                     `voice`
   - SearXNG (AGPL-3.0)                              `search`
                                          (deploy/compose/docker-compose.search.yml)

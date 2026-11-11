@@ -44,7 +44,15 @@ export function EmptyState({ templates, onCreated, onError }) {
         body.ttl_hours = Math.max(1, Math.min(720, parseInt(ttlRaw, 10) || 72));
       }
       const p = await appBuilder.createProject(body);
-      onCreated(p || { project_id, template_id: templateId, status: "creating", created_at: new Date().toISOString(), preview: null });
+      onCreated(
+        p || {
+          project_id,
+          template_id: templateId,
+          status: "creating",
+          created_at: new Date().toISOString(),
+          preview: null,
+        }
+      );
     } catch (e) {
       onError(e.message);
     } finally {
@@ -78,7 +86,7 @@ export function EmptyState({ templates, onCreated, onError }) {
                   type="button"
                   aria-pressed={active}
                   onClick={() => setTemplateId(tpl.template_id)}
-                  className={`rounded-xl border p-4 text-left transition-colors ${
+                  className={`rounded-xl border p-4 text-start transition-colors ${
                     active ? "border-primary bg-primary/5" : "border-border hover:bg-accent/50"
                   }`}
                 >
@@ -93,7 +101,10 @@ export function EmptyState({ templates, onCreated, onError }) {
 
       <Card>
         <CardContent className="pt-5">
-          <Label htmlFor={promptId} className="mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <Label
+            htmlFor={promptId}
+            className="mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground"
+          >
             {t("promptHeading")}
           </Label>
           <Textarea
@@ -116,7 +127,7 @@ export function EmptyState({ templates, onCreated, onError }) {
             </span>
           </label>
           {ephemeral && (
-            <div className="mt-2 flex items-center gap-2 pl-1">
+            <div className="mt-2 flex items-center gap-2 ps-1">
               <Label htmlFor={ttlId} className="text-xs text-muted-foreground">
                 {t("ttlLabel")}
               </Label>
@@ -134,7 +145,12 @@ export function EmptyState({ templates, onCreated, onError }) {
             </div>
           )}
           <Button className="mt-4" disabled={busy || !templateId} onClick={create}>
-            {busy ? <Loader2 aria-hidden="true" size={15} className="animate-spin" /> : <Sparkles aria-hidden="true" size={15} />} {t("createButton")}
+            {busy ? (
+              <Loader2 aria-hidden="true" size={15} className="animate-spin" />
+            ) : (
+              <Sparkles aria-hidden="true" size={15} />
+            )}{" "}
+            {t("createButton")}
           </Button>
         </CardContent>
       </Card>

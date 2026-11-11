@@ -1,5 +1,6 @@
 import { test, expect, type APIRequestContext, type APIResponse } from "@playwright/test";
-import { API_URL, requireUserCredentials, requireMutationOptIn, skipIfMockLlm } from "../helpers/prod-env";
+import { API_URL, requireUserCredentials, requireMutationOptIn } from "../helpers/prod-env";
+import { fixStageApiBase, skipIfMockLlm } from "./local-stage-fix";
 import { signInToConsole, skipIfHostedAllowanceExhausted } from "../helpers/prod-session";
 import { getBearerToken, authHeaders, parseChatSse } from "../helpers/prod-api";
 
@@ -43,6 +44,7 @@ function sendChat(
 }
 
 test.describe("LLM evaluation - real consumer rubric", () => {
+  test.use({ bypassCSP: true }); // stage fix: console calls api.<domain>; its CSP only allows localhost:8280 (see local-stage-fix.ts)
   // NOT serial: Playwright skips every dependent when a serial-group member
   // fails, which turns one rubric miss into a silent hole in the report.
   // Each test seeds its own session state instead - context retention's
@@ -55,6 +57,7 @@ test.describe("LLM evaluation - real consumer rubric", () => {
     requireMutationOptIn(testInfo);
     testInfo.skip(testInfo.project.name !== "chromium", "burns real tokens - one project only");
     testInfo.setTimeout(300_000);
+    await fixStageApiBase(page);
     await signInToConsole(page);
     await page.goto("/agents", { waitUntil: "domcontentloaded" });
     await skipIfHostedAllowanceExhausted(page, testInfo);

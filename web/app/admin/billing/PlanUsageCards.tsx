@@ -90,7 +90,7 @@ export function PlanCard(p: PlanCardProps) {
       <div className="mt-6 flex flex-wrap items-center gap-3">
         {p.canUpgrade ? (
           <Button type="button" className="mb-0" onClick={p.onUpgrade}>
-            <ArrowUpRightIcon width={14} height={14} className="mr-1" aria-hidden="true" />
+            <ArrowUpRightIcon width={14} height={14} className="me-1" aria-hidden="true" />
             {t("upgradePlanButton")}
           </Button>
         ) : (
@@ -122,7 +122,14 @@ interface UsageCardProps {
 }
 
 /** Real counts vs real tier caps; the inline upgrade button shows at 80%+ of any cap. */
-export function UsageCard({ settings, usersCount, agentsCount, workflowsCount, showUpgrade, onUpgrade }: UsageCardProps) {
+export function UsageCard({
+  settings,
+  usersCount,
+  agentsCount,
+  workflowsCount,
+  showUpgrade,
+  onUpgrade,
+}: UsageCardProps) {
   const t = useTranslations("adminBillingPage");
   return (
     <Card className="mb-0 gap-0 p-6">

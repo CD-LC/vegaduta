@@ -10,6 +10,7 @@ import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { NODE_META, type Recipe, type RecipeBuild } from "./recipes-types";
+import { useTranslations } from "../../lib/i18n";
 
 function TriggerRow({ label }: { label: string }) {
   return (
@@ -71,11 +72,14 @@ function CopyPromptButton({ text }: { text: string }) {
 // tab of a recipe. Visually distinct from the flow: a tinted inner panel so it
 // reads as a separate "spec" block.
 function BuildSpec({ build }: { build: RecipeBuild }) {
+  const tHC = useTranslations("hcHelpWorkflowrecipesRecipeCard");
   return (
     <div className="space-y-4 rounded-xl border border-border bg-secondary/20 p-4">
       {/* Header + agent count */}
       <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">Build spec</span>
+        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">
+          {tHC("s1")}
+        </span>
         <Badge variant="secondary" className="gap-1">
           <Bot className="size-3" aria-hidden="true" />
           {build.agents} {build.agents === 1 ? "agent" : "agents"}
@@ -107,7 +111,8 @@ function BuildSpec({ build }: { build: RecipeBuild }) {
         <div className="space-y-2">
           <SpecLabel>
             <Bot className="size-3" aria-hidden="true" />
-            Agent roster ({build.agentRoles.length})
+            {tHC("s5")}
+            {build.agentRoles.length})
           </SpecLabel>
           <div className="space-y-2">
             {build.agentRoles.map((a) => (
@@ -131,7 +136,7 @@ function BuildSpec({ build }: { build: RecipeBuild }) {
         <div className="space-y-2">
           <SpecLabel>
             <Wrench className="size-3" aria-hidden="true" />
-            MCP connectors
+            {tHC("s4")}
           </SpecLabel>
           <div className="flex flex-wrap gap-1.5">
             {build.mcp.map((m) => (
@@ -195,6 +200,7 @@ function BuildSpec({ build }: { build: RecipeBuild }) {
 // The flow tab: trigger, the numbered vertical stepper, connectors, and the
 // outcome/impact pair.
 function RecipeFlow({ recipe }: { recipe: Recipe }) {
+  const tHC = useTranslations("hcHelpWorkflowrecipesRecipeCard");
   return (
     <div className="space-y-5">
       {/* Trigger */}
@@ -203,7 +209,7 @@ function RecipeFlow({ recipe }: { recipe: Recipe }) {
       {/* The flow — a numbered vertical stepper */}
       <div className="space-y-2.5">
         <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-          The flow
+          {tHC("s3")}
         </span>
         <ol className="space-y-0">
           {recipe.steps.map((step, i) => {
@@ -242,7 +248,7 @@ function RecipeFlow({ recipe }: { recipe: Recipe }) {
       {/* Connectors */}
       <div className="space-y-2">
         <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-          Connectors used
+          {tHC("s2")}
         </span>
         <div className="flex flex-wrap gap-1.5">
           {recipe.connectors.map((c) => (
@@ -271,6 +277,7 @@ function RecipeFlow({ recipe }: { recipe: Recipe }) {
 }
 
 export function RecipeCard({ recipe }: { recipe: Recipe }) {
+  const tHC = useTranslations("hcHelpWorkflowrecipesRecipeCard");
   // Split the reading surface into Flow vs Build spec tabs so an open recipe is
   // a scannable two-view panel instead of one long scroll. Flow-only recipes
   // (no `build`) render the flow directly, no tab chrome.
@@ -300,7 +307,7 @@ export function RecipeCard({ recipe }: { recipe: Recipe }) {
               </TabsTrigger>
               <TabsTrigger value="build">
                 <Wrench className="size-3.5" aria-hidden="true" />
-                Build spec
+                {tHC("s1")}
               </TabsTrigger>
             </TabsList>
             <TabsContent value="flow" className="mt-1">

@@ -39,6 +39,7 @@ const DENIED_404 = [
   "/admin/leads",
   "/admin/branding",
   "/admin/mcp-servers",
+  "/admin/a2a",
   "/view-as",
   "/signup",
   "/try",

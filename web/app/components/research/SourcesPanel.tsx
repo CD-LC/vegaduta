@@ -119,7 +119,16 @@ export default function SourcesPanel({
               <div role="group" aria-label={RS.filterByCheck} className="flex flex-wrap gap-1.5">
                 {TONES.filter((k) => tones[k] > 0).map((k) => (
                   <Chip key={k} active={tone === k} onClick={() => setTone(tone === k ? null : k)}>
-                    <span className={tone === k ? undefined : TONE_CLASS[k].split(" ").filter((c) => c.startsWith("text-")).join(" ")}>
+                    <span
+                      className={
+                        tone === k
+                          ? undefined
+                          : TONE_CLASS[k]
+                              .split(" ")
+                              .filter((c) => c.startsWith("text-"))
+                              .join(" ")
+                      }
+                    >
                       {TONE_LABEL[k]}
                     </span>{" "}
                     <span className="tabular-nums">{tones[k]}</span>
@@ -130,7 +139,11 @@ export default function SourcesPanel({
             {domains.length > 1 && (
               <div role="group" aria-label={RS.filterByDomain} className="flex flex-wrap gap-1.5">
                 {domains.map((d) => (
-                  <Chip key={d.domain} active={domain === d.domain} onClick={() => setDomain(domain === d.domain ? null : d.domain)}>
+                  <Chip
+                    key={d.domain}
+                    active={domain === d.domain}
+                    onClick={() => setDomain(domain === d.domain ? null : d.domain)}
+                  >
                     {d.domain} <span className="tabular-nums">{d.count}</span>
                   </Chip>
                 ))}
@@ -196,7 +209,7 @@ export default function SourcesPanel({
                       const qt = verdictTone(q.verdict);
                       const labelKey = verdictLabelKey(q.verdict);
                       return (
-                        <div key={qi} className="space-y-1 border-l-2 border-border pl-3">
+                        <div key={qi} className="space-y-1 border-s-2 border-border ps-3">
                           <p className="text-sm italic text-foreground [overflow-wrap:anywhere]">“{q.quote}”</p>
                           {q.claim && (
                             <p className="text-xs text-muted-foreground">

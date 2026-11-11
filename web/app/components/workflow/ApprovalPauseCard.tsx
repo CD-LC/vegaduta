@@ -39,6 +39,7 @@ import {
 } from "./approvalPauseModel";
 import { useCardFocusReturn, useCardPlacement } from "./useApprovalCardLayout";
 import "./approval-card.css";
+import { useTranslations } from "../../lib/i18n";
 
 // Node-anchored decision card for a run parked on a person (the SSE
 // `run.awaiting` frame, or the polled run status when the stream is absent).
@@ -111,6 +112,7 @@ export default function ApprovalPauseCard({
   autoFocus = false,
   onFocusFallback,
 }: ApprovalPauseCardProps) {
+  const tHC = useTranslations("hcComponentsWorkflowApprovalPauseCard");
   const { status, nodeId, requestId } = awaiting;
   const meta = META[status] ?? META.PAUSED;
   const titleId = useId();
@@ -370,35 +372,31 @@ export default function ApprovalPauseCard({
           </p>
         </div>
         <span className="apc-pill">{done ? "Done" : meta.pill}</span>
-        <button type="button" className="apc-iconbtn" onClick={onClose} aria-label="Close decision card">
+        <button type="button" className="apc-iconbtn" onClick={onClose} aria-label={tHC("s15")}>
           <X size={15} aria-hidden="true" />
         </button>
       </header>
 
       <div className="apc-body" id={descId}>
         {summary && <p className="apc-summary">{summary}</p>}
-        {!summary && status === "PAUSED" && (
-          <p className="apc-summary apc-muted">The run is parked on this step and will continue from here.</p>
-        )}
+        {!summary && status === "PAUSED" && <p className="apc-summary apc-muted">{tHC("s14")}</p>}
 
         {phase === "loading" && (
           <p className="apc-muted apc-loading">
-            <Loader2 size={13} className="apc-spin" aria-hidden="true" /> Loading request...
+            <Loader2 size={13} className="apc-spin" aria-hidden="true" /> {tHC("s13")}
           </p>
         )}
 
-        {phase === "unavailable" && (
-          <p className="apc-muted">This request can&apos;t be decided from the canvas. Use the queue instead.</p>
-        )}
+        {phase === "unavailable" && <p className="apc-muted">{tHC("s12")}</p>}
 
         {payload && (
           <details className="apc-details">
             <summary>
-              <ChevronRight size={13} className="apc-chev" aria-hidden="true" /> What&apos;s being approved
+              <ChevronRight size={13} className="apc-chev" aria-hidden="true" /> {tHC("s11")}
             </summary>
             {/* Scrollable region: focusable so keyboard users can scroll a long payload. */}
             {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
-            <pre className="apc-payload" tabIndex={0} aria-label="Approval payload">
+            <pre className="apc-payload" tabIndex={0} aria-label={tHC("s10")}>
               {payload}
             </pre>
           </details>
@@ -406,13 +404,11 @@ export default function ApprovalPauseCard({
 
         {input?.message && <p className="apc-summary">{input.message}</p>}
 
-        {!canDecide && phase !== "loading" && (
-          <p className="apc-muted">You can view this pause, but deciding needs Runner access.</p>
-        )}
+        {!canDecide && phase !== "loading" && <p className="apc-muted">{tHC("s9")}</p>}
 
         {decidable && status === "AWAITING_APPROVAL" && approval && approval.formFields.length > 0 && (
           <fieldset className="apc-fields">
-            <legend>The workflow needs this from you</legend>
+            <legend>{tHC("s8")}</legend>
             {approval.formFields.map((f, i) => (
               <label key={f} className="apc-field">
                 <span>{f}</span>
@@ -433,7 +429,7 @@ export default function ApprovalPauseCard({
         {decidable && status === "AWAITING_APPROVAL" && approval && (
           <div className="apc-field">
             <label htmlFor={noteId}>
-              Note <span className="apc-muted">(optional, sent with Reject)</span>
+              Note <span className="apc-muted">{tHC("s7")}</span>
             </label>
             <textarea
               id={noteId}
@@ -450,7 +446,7 @@ export default function ApprovalPauseCard({
           status === "AWAITING_INPUT" &&
           input &&
           (input.fields.length === 0 ? (
-            <p className="apc-muted">No fields requested - submit to continue the run.</p>
+            <p className="apc-muted">{tHC("s6")}</p>
           ) : (
             <InputRequestFields fields={input.fields} idPrefix={noteId} values={values} setValues={setValues} />
           ))}
@@ -493,7 +489,7 @@ export default function ApprovalPauseCard({
                   aria-busy={busy === "reject"}
                 >
                   {busy === "reject" && <Loader2 size={13} className="apc-spin" aria-hidden="true" />}
-                  Confirm reject
+                  {tHC("s5")}
                 </button>
               </>
             ) : (
@@ -504,7 +500,7 @@ export default function ApprovalPauseCard({
                   onClick={() => setConfirmReject(true)}
                   disabled={busy !== null}
                 >
-                  Reject...
+                  {tHC("s4")}
                 </button>
                 <button
                   type="button"
@@ -513,7 +509,7 @@ export default function ApprovalPauseCard({
                   disabled={busy !== null}
                   aria-busy={busy === "approve"}
                   aria-keyshortcuts="Control+Enter"
-                  title="Approve (Ctrl+Enter)"
+                  title={tHC("s3")}
                 >
                   {busy === "approve" ? (
                     <Loader2 size={13} className="apc-spin" aria-hidden="true" />
@@ -532,7 +528,7 @@ export default function ApprovalPauseCard({
               disabled={busy !== null}
               aria-busy={busy === "submit"}
               aria-keyshortcuts="Control+Enter"
-              title="Submit (Ctrl+Enter)"
+              title={tHC("s2")}
             >
               {busy === "submit" ? (
                 <Loader2 size={13} className="apc-spin" aria-hidden="true" />
@@ -550,7 +546,7 @@ export default function ApprovalPauseCard({
               disabled={busy !== null}
               aria-busy={busy === "resume"}
               aria-keyshortcuts="Control+Enter"
-              title="Resume (Ctrl+Enter)"
+              title={tHC("s1")}
             >
               {busy === "resume" ? (
                 <Loader2 size={13} className="apc-spin" aria-hidden="true" />

@@ -1,12 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  AlertTriangle,
-  CalendarClock,
-  Plus,
-  Search,
-} from "lucide-react";
+import { AlertTriangle, CalendarClock, Plus, Search } from "lucide-react";
 import { api } from "../../lib/api";
 import { toast } from "../../lib/toastBus";
 import { useTranslations } from "../../lib/i18n";
@@ -334,7 +329,7 @@ export default function ScheduledTasksPanel({ onLoaded }: { onLoaded?: () => voi
               <div className="relative w-full sm:max-w-xs">
                 <Search
                   size={15}
-                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                   aria-hidden="true"
                 />
                 <Input
@@ -343,7 +338,7 @@ export default function ScheduledTasksPanel({ onLoaded }: { onLoaded?: () => voi
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={t("searchPlaceholder")}
                   aria-label={t("searchPlaceholder")}
-                  className="pl-9"
+                  className="ps-9"
                 />
               </div>
               <div className="flex flex-wrap gap-2" role="group" aria-label={t("filterLabel")}>

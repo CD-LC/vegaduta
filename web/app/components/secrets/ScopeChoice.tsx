@@ -29,7 +29,7 @@ export default function ScopeChoice({
       aria-pressed={active}
       data-testid={testid}
       className={cn(
-        "flex max-w-xs flex-col items-start gap-0.5 rounded-md px-3 py-2 text-left",
+        "flex max-w-xs flex-col items-start gap-0.5 rounded-md px-3 py-2 text-start",
         active && "border-primary bg-primary/10",
         disabled && "cursor-not-allowed opacity-50"
       )}

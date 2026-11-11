@@ -65,7 +65,7 @@ export default function InputRequestsPanel() {
     try {
       const data: InputRequestItem[] = await api.listInputRequests(status || undefined);
       setRequests(data);
-      setSelectedId((prev) => (prev && data.some((r) => r.id === prev) ? prev : data[0]?.id ?? null));
+      setSelectedId((prev) => (prev && data.some((r) => r.id === prev) ? prev : (data[0]?.id ?? null)));
     } catch (err: any) {
       setError(err.message || t("loadFailed"));
     }
@@ -122,8 +122,13 @@ export default function InputRequestsPanel() {
             <li key={r.id}>
               <button
                 type="button"
-                onClick={() => { setSelectedId(r.id); setFormValues({}); setError(null); setSuccess(null); }}
-                className={`w-full rounded-md border px-3 py-2 text-left text-xs transition-colors ${
+                onClick={() => {
+                  setSelectedId(r.id);
+                  setFormValues({});
+                  setError(null);
+                  setSuccess(null);
+                }}
+                className={`w-full rounded-md border px-3 py-2 text-start text-xs transition-colors ${
                   r.id === selectedId ? "border-primary bg-primary/5" : "border-border hover:bg-secondary/50"
                 }`}
               >
@@ -165,8 +170,16 @@ export default function InputRequestsPanel() {
               )}
             </div>
 
-            {error && <p className="mb-3 text-sm text-destructive" role="alert">{error}</p>}
-            {success && <p className="mb-3 text-sm text-[var(--state-success)]" role="status">{success}</p>}
+            {error && (
+              <p className="mb-3 text-sm text-destructive" role="alert">
+                {error}
+              </p>
+            )}
+            {success && (
+              <p className="mb-3 text-sm text-[var(--state-success)]" role="status">
+                {success}
+              </p>
+            )}
 
             {selected.status !== "PENDING" ? (
               <div className="text-sm text-muted-foreground">
@@ -179,53 +192,52 @@ export default function InputRequestsPanel() {
               </div>
             ) : (
               <div className="space-y-3">
-                {fields.length === 0 && (
-                  <p className="text-sm text-muted-foreground">{t("acknowledgeOnly")}</p>
-                )}
+                {fields.length === 0 && <p className="text-sm text-muted-foreground">{t("acknowledgeOnly")}</p>}
                 {fields.map((f) => {
                   const fieldId = `input-request-field-${f.key}`;
                   return (
-                  <div key={f.key} className="field">
-                    <label htmlFor={fieldId} className="mb-1 block text-xs font-medium">
-                      {f.label || f.key}{f.required ? " *" : ""}
-                    </label>
-                    {f.type === "select" ? (
-                      <Select
-                        id={fieldId}
-                        value={formValues[f.key] || ""}
-                        onChange={(e) => setFormValues((v) => ({ ...v, [f.key]: e.target.value }))}
-                        placeholder={t("selectPlaceholder")}
-                        options={(f.options || []).map((o) => ({ value: o, label: o }))}
-                      />
-                    ) : f.type === "boolean" ? (
-                      <Select
-                        id={fieldId}
-                        value={formValues[f.key] || ""}
-                        onChange={(e) => setFormValues((v) => ({ ...v, [f.key]: e.target.value }))}
-                        placeholder={t("selectPlaceholder")}
-                        options={[
-                          { value: "true", label: t("yesLabel") },
-                          { value: "false", label: t("noLabel") },
-                        ]}
-                      />
-                    ) : f.type === "number" ? (
-                      <input
-                        id={fieldId}
-                        type="number"
-                        className="w-full rounded-md border border-border bg-secondary/40 px-3 py-2 text-sm"
-                        value={formValues[f.key] || ""}
-                        onChange={(e) => setFormValues((v) => ({ ...v, [f.key]: e.target.value }))}
-                      />
-                    ) : (
-                      <input
-                        id={fieldId}
-                        type="text"
-                        className="w-full rounded-md border border-border bg-secondary/40 px-3 py-2 text-sm"
-                        value={formValues[f.key] || ""}
-                        onChange={(e) => setFormValues((v) => ({ ...v, [f.key]: e.target.value }))}
-                      />
-                    )}
-                  </div>
+                    <div key={f.key} className="field">
+                      <label htmlFor={fieldId} className="mb-1 block text-xs font-medium">
+                        {f.label || f.key}
+                        {f.required ? " *" : ""}
+                      </label>
+                      {f.type === "select" ? (
+                        <Select
+                          id={fieldId}
+                          value={formValues[f.key] || ""}
+                          onChange={(e) => setFormValues((v) => ({ ...v, [f.key]: e.target.value }))}
+                          placeholder={t("selectPlaceholder")}
+                          options={(f.options || []).map((o) => ({ value: o, label: o }))}
+                        />
+                      ) : f.type === "boolean" ? (
+                        <Select
+                          id={fieldId}
+                          value={formValues[f.key] || ""}
+                          onChange={(e) => setFormValues((v) => ({ ...v, [f.key]: e.target.value }))}
+                          placeholder={t("selectPlaceholder")}
+                          options={[
+                            { value: "true", label: t("yesLabel") },
+                            { value: "false", label: t("noLabel") },
+                          ]}
+                        />
+                      ) : f.type === "number" ? (
+                        <input
+                          id={fieldId}
+                          type="number"
+                          className="w-full rounded-md border border-border bg-secondary/40 px-3 py-2 text-sm"
+                          value={formValues[f.key] || ""}
+                          onChange={(e) => setFormValues((v) => ({ ...v, [f.key]: e.target.value }))}
+                        />
+                      ) : (
+                        <input
+                          id={fieldId}
+                          type="text"
+                          className="w-full rounded-md border border-border bg-secondary/40 px-3 py-2 text-sm"
+                          value={formValues[f.key] || ""}
+                          onChange={(e) => setFormValues((v) => ({ ...v, [f.key]: e.target.value }))}
+                        />
+                      )}
+                    </div>
                   );
                 })}
                 <Button type="button" size="sm" disabled={busy} onClick={handleSubmit}>

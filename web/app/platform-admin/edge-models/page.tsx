@@ -13,6 +13,7 @@ import PaginationControls from "../components/PaginationControls";
 import { usePagination } from "../lib/usePagination";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { useConfirm } from "../components/admin/ConfirmDialog";
+import { useTranslations } from "../../lib/i18n";
 
 // Edge AI model catalog - which on-device models consumers can see and
 // download in the web app's VegaDuta Edge surface. The client reads
@@ -81,6 +82,7 @@ function formatContextWindow(tokens: number): string {
 }
 
 export default function EdgeModelsPage() {
+  const tHC = useTranslations("hcPlatformadminEdgemodelsPage");
   const askConfirm = useConfirm();
   const [defaults, setDefaults] = useState<EdgeModelEntry[]>([]);
   const [effectiveVersion, setEffectiveVersion] = useState("1");
@@ -228,7 +230,7 @@ export default function EdgeModelsPage() {
 
   return (
     <AdminShell
-      title="Edge AI Models"
+      title={tHC("s16")}
       eyebrow="On-device catalog"
       actions={
         <div className="flex items-center gap-2 flex-wrap">
@@ -236,7 +238,7 @@ export default function EdgeModelsPage() {
             <RefreshCw size={14} aria-hidden /> Refresh
           </Button>
           <Button variant="outline" size="sm" onClick={resetToDefaults} disabled={saving || !overridePresent}>
-            <RotateCcw size={14} aria-hidden /> Reset to defaults
+            <RotateCcw size={14} aria-hidden /> {tHC("s15")}
           </Button>
           <Button size="sm" onClick={save} disabled={saving || !dirty}>
             <Save size={14} aria-hidden /> {saving ? "Saving…" : "Save catalog"}
@@ -245,10 +247,9 @@ export default function EdgeModelsPage() {
       }
     >
       <PageHint>
-        Controls which on-device models consumers can see and download in the web app&apos;s VegaDūta Edge surface
-        (marketplace, workbench picker). Disabling a model removes it from the served catalog — devices that already
-        downloaded it keep their local copy but stop seeing it offered. The whole edge surface has a separate kill
-        switch (<code>platform.edge-agents.enabled</code>) on the settings screen.
+        {tHC("s14")}
+        <code>platform.edge-agents.enabled</code>
+        {tHC("s13")}
       </PageHint>
 
       <div className="mb-4 flex items-center gap-2 flex-wrap">
@@ -266,11 +267,14 @@ export default function EdgeModelsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Catalog (manifest v{effectiveVersion})</CardTitle>
+          <CardTitle className="text-base">
+            {tHC("s12")}
+            {effectiveVersion})
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {loading ? (
-            <div className="text-sm text-muted-foreground">Loading catalog…</div>
+            <div className="text-sm text-muted-foreground">{tHC("s11")}</div>
           ) : (
             rows.map((m) => (
               <div key={m.id} className="flex items-start justify-between gap-4 rounded-md border p-3">
@@ -279,7 +283,7 @@ export default function EdgeModelsPage() {
                     <span className="font-medium">{m.displayName}</span>
                     <Badge variant="outline">{TIER_LABELS[m.tier] ?? `tier ${m.tier}`}</Badge>
                     <Badge variant="outline">{formatSize(m.sizeBytes)}</Badge>
-                    {m.requiresWebGpu && <Badge variant="secondary">needs WebGPU</Badge>}
+                    {m.requiresWebGpu && <Badge variant="secondary">{tHC("s6")}</Badge>}
                     {m.kind !== "llm" && <Badge variant="secondary">{m.kind}</Badge>}
                     {m.speedTier && <Badge variant="outline">{SPEED_TIER_LABELS[m.speedTier] ?? m.speedTier}</Badge>}
                     {m.contextWindowSize != null && m.contextWindowSize > 0 && (
@@ -320,15 +324,13 @@ export default function EdgeModelsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            Browse official registry
+            {tHC("s10")}
             <Badge variant="outline">{registryCandidates.length} available</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            Additional WebLLM chat models the on-device engine can already serve, curated by size and specialty, that
-            aren&apos;t in the catalog above yet. Adding one only stages it — nothing reaches consumers until you hit{" "}
-            <strong>Save catalog</strong>.
+            {tHC("s9")} <strong>{tHC("s8")}</strong>.
           </p>
           {registryError && (
             <Alert variant="destructive">
@@ -336,7 +338,7 @@ export default function EdgeModelsPage() {
             </Alert>
           )}
           {registryLoading ? (
-            <div className="text-sm text-muted-foreground">Loading registry…</div>
+            <div className="text-sm text-muted-foreground">{tHC("s7")}</div>
           ) : registryCandidates.length === 0 ? (
             <div className="text-sm text-muted-foreground">
               {registry.length === 0
@@ -351,7 +353,7 @@ export default function EdgeModelsPage() {
                     <span className="font-medium">{m.displayName}</span>
                     <Badge variant="outline">{TIER_LABELS[m.tier] ?? `tier ${m.tier}`}</Badge>
                     <Badge variant="outline">{formatSize(m.sizeBytes)}</Badge>
-                    {m.requiresWebGpu && <Badge variant="secondary">needs WebGPU</Badge>}
+                    {m.requiresWebGpu && <Badge variant="secondary">{tHC("s6")}</Badge>}
                     {m.speedTier && <Badge variant="outline">{SPEED_TIER_LABELS[m.speedTier] ?? m.speedTier}</Badge>}
                     {m.contextWindowSize != null && m.contextWindowSize > 0 && (
                       <Badge variant="outline">{formatContextWindow(m.contextWindowSize)}</Badge>
@@ -378,16 +380,14 @@ export default function EdgeModelsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Fixed on-device utilities</CardTitle>
+          <CardTitle className="text-base">{tHC("s5")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            Speech-to-text, text-to-speech, and vision each ship as a single fixed model — there&apos;s no alternative
-            to pick, so these are read-only. They&apos;re always part of the edge surface whenever it&apos;s enabled
-            (the <code>platform.edge-agents.enabled</code> kill switch on the settings screen covers them too).
+            {tHC("s4")} <code>platform.edge-agents.enabled</code> {tHC("s3")}
           </p>
           {fixedUtilities.length === 0 ? (
-            <div className="text-sm text-muted-foreground">Loading…</div>
+            <div className="text-sm text-muted-foreground">{tHC("s2")}</div>
           ) : (
             fixedUtilities.map((m) => (
               <div key={m.id} className="flex items-start justify-between gap-4 rounded-md border p-3">
@@ -401,7 +401,7 @@ export default function EdgeModelsPage() {
                   <p className="text-xs text-muted-foreground mt-1 font-mono break-all">{m.id}</p>
                 </div>
                 <Badge variant="secondary" className="shrink-0">
-                  Always on
+                  {tHC("s1")}
                 </Badge>
               </div>
             ))

@@ -121,7 +121,7 @@ export default function RetentionTab() {
                     </TableCell>
                     <TableCell className="tabular-nums">{r.retentionDays}</TableCell>
                     <TableCell className="text-muted-foreground">{fmtTime(r.updatedAt)}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-end">
                       <Button type="button" variant="ghost" size="sm" onClick={() => edit(r)}>
                         {t("edit")}
                       </Button>

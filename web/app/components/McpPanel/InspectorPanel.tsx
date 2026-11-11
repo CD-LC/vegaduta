@@ -104,6 +104,7 @@ export default function InspectorPanel({
   onDelete?: any;
   onCancelDelete?: any;
 }) {
+  const tHC = useTranslations("hcComponentsMcpPanelInspectorPanel");
   const t = useTranslations("mcpPanel");
   if (card.kind === "catalog") {
     const entry = card.data;
@@ -255,10 +256,7 @@ export default function InspectorPanel({
             <span className="text-muted-foreground">{t("updatedLabel")}</span>
             <span className="min-w-0 break-words font-medium">{new Date(server.updatedAt).toLocaleString()}</span>
           </div>
-          <p className="pt-1 text-xs text-muted-foreground">
-            Servers run isolated from platform secrets; credentials you add are encrypted at rest and sent only to this
-            server.
-          </p>
+          <p className="pt-1 text-xs text-muted-foreground">{tHC("s1")}</p>
         </CardContent>
       </Card>
 

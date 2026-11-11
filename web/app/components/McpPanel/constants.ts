@@ -13,6 +13,7 @@ import {
   Bug,
   BookOpen,
   Flame,
+  Shrink,
   Mail,
   Send,
   PhoneCall,
@@ -45,6 +46,7 @@ export const CATALOG_ICONS: Record<string, any> = {
   bug: Bug,
   book: BookOpen,
   flame: Flame,
+  compress: Shrink,
 };
 
 // Built-in Tools (#164) - native platform capabilities, not external MCP

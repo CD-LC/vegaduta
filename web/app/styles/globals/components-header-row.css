@@ -82,7 +82,7 @@
   }
 
   /* Right-hand cluster - status + theme + language + account, pinned to the
-   * end of the row via margin-left:auto so it stays right-aligned even as
+   * end of the row via margin-inline-start:auto so it stays right-aligned even as
    * the row wraps. */
   .app-topbar-controls {
     @apply ml-auto flex shrink-0 flex-wrap items-center justify-end gap-2;
@@ -109,8 +109,8 @@
      * now `position: fixed` and no longer reserves its own space in
      * document flow (see .ax-topbar's comment above). */
     padding-top: calc(60px + 1.5rem);
-    padding-left: clamp(1.25rem, 2.5vw, 3rem);
-    padding-right: clamp(1.25rem, 2.5vw, 3rem);
+    padding-inline-start: clamp(1.25rem, 2.5vw, 3rem);
+    padding-inline-end: clamp(1.25rem, 2.5vw, 3rem);
     view-transition-name: ax-chrome-content;
   }
 

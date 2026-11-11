@@ -77,7 +77,7 @@ export function MandateRow({ m, onChanged }: { m: CommerceMandate; onChanged: ()
             : t("cartRow", { total: m.cartTotalMinor ?? 0, ccy: m.currency, payee: m.payee || "—" })}
         </span>
         {m.signatureValid === true && <Badge variant="default">{t("signedBadge")}</Badge>}
-        <span className="ml-auto text-xs text-muted-foreground">{fmtTime(m.createdAt)}</span>
+        <span className="ms-auto text-xs text-muted-foreground">{fmtTime(m.createdAt)}</span>
         <Button type="button" variant="ghost" size="sm" onClick={toggleEvents}>
           {events ? <ChevronUp size={14} aria-hidden="true" /> : <ChevronDown size={14} aria-hidden="true" />}
           {t("events")}

@@ -307,6 +307,12 @@ export const channelsApi = {
     apiFetch(`/api/channels/imessage/credential`, { method: "POST", ...jsonBody(payload) }).then(toJson),
   updateImessageSettings: (payload: object) =>
     apiFetch(`/api/channels/imessage/credential/settings`, { method: "PUT", ...jsonBody(payload) }).then(toJson),
+  // The credential read carries only a masked webhookToken; the full value comes back solely from
+  // activate (one-time) and this explicit reveal call.
+  revealImessageWebhookToken: () =>
+    apiFetch(`/api/channels/imessage/credential/webhook-token`, { skipGetCache: true }).then(
+      toJson<{ webhookToken: string }>
+    ),
   disconnectImessageCredential: () =>
     apiFetch(`/api/channels/imessage/credential`, { method: "DELETE" }).then((res) =>
       res.status === 204 ? null : toJson(res)

@@ -155,7 +155,7 @@ export default function McpRemoteOAuthSection({
       <div className="flex flex-wrap gap-2">
         {(view.action === "connect" || view.action === "reauthorize") && (
           <Button type="button" size="sm" onClick={() => void connect()} disabled={busy !== null}>
-            {busy === "connect" && <Loader2 size={12} className="mr-1 animate-spin" aria-hidden="true" />}
+            {busy === "connect" && <Loader2 size={12} className="me-1 animate-spin" aria-hidden="true" />}
             {busy === "connect"
               ? t("connecting")
               : view.action === "reauthorize"

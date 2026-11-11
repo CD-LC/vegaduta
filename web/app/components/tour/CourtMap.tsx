@@ -263,7 +263,7 @@ export default function CourtMap() {
                     type="button"
                     onClick={() => walk(r.id)}
                     data-testid={`court-region-${r.id}`}
-                    className="flex w-full cursor-pointer items-start gap-3 rounded-lg border border-border bg-card p-3 text-left shadow-none outline-none transition-colors hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                    className="flex w-full cursor-pointer items-start gap-3 rounded-lg border border-border bg-card p-3 text-start shadow-none outline-none transition-colors hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50"
                     style={{ ["--cat" as string]: v.cat }}
                   >
                     <span className="cat-chip" aria-hidden="true">

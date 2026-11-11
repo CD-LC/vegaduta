@@ -16,6 +16,7 @@ import {
 import { Button } from "../../ui/button";
 import { cn } from "../../../lib/utils";
 import type { useTranslations } from "../../../lib/i18n";
+import { useTranslations as useTnsHC } from "../../../lib/i18n";
 
 type Translate = ReturnType<typeof useTranslations>;
 
@@ -53,6 +54,7 @@ export default function CallControlsBar({
   endCall,
   startCall,
 }: CallControlsBarProps) {
+  const tHC = useTnsHC("hcComponentsAgentsCallPanelCallControlsBar");
   const statusLabel =
     status === "connected"
       ? reconnecting
@@ -135,7 +137,7 @@ export default function CallControlsBar({
             >
               {agentAudioMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
             </Button>
-            <Button type="button" variant="destructive" size="icon" onClick={endCall} aria-label="End call">
+            <Button type="button" variant="destructive" size="icon" onClick={endCall} aria-label={tHC("s1")}>
               <PhoneOff size={14} />
             </Button>
           </div>

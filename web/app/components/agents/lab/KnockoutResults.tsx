@@ -26,7 +26,12 @@ const COPIED_MS = 1500;
  * label read off the first few cells would be issued from almost no baseline
  * data and could flip as more arrives.
  */
-export default function KnockoutResults(props: { context: KnockoutContext; run: LabRun; partial: boolean; live?: boolean }): ReactElement {
+export default function KnockoutResults(props: {
+  context: KnockoutContext;
+  run: LabRun;
+  partial: boolean;
+  live?: boolean;
+}): ReactElement {
   const { context, run, partial } = props;
   const live = props.live === true;
   const t = useTranslations("agentLab");
@@ -61,7 +66,9 @@ export default function KnockoutResults(props: { context: KnockoutContext; run: 
           <p className="text-xs text-muted-foreground">{t("koLiveNote")}</p>
         ) : result.noiseFloor !== null ? (
           <p className="text-xs text-muted-foreground">
-            <span className="font-medium text-foreground">{t("koNoiseFloor", { value: result.noiseFloor.toFixed(2) })}.</span>{" "}
+            <span className="font-medium text-foreground">
+              {t("koNoiseFloor", { value: result.noiseFloor.toFixed(2) })}.
+            </span>{" "}
             {t("koNoiseFloorHelp")}
           </p>
         ) : (
@@ -197,7 +204,9 @@ function SectionRow(props: {
       </div>
       <p className="text-xs text-muted-foreground">
         {detail}
-        {attribution.nItems > 0 && <> {t("koItemsAgree", { agree: attribution.agreeCount, total: attribution.nItems })}</>}
+        {attribution.nItems > 0 && (
+          <> {t("koItemsAgree", { agree: attribution.agreeCount, total: attribution.nItems })}</>
+        )}
       </p>
       <DeltaBar delta={attribution.delta} floor={live ? null : attribution.floor} domain={domain} tone={tone} />
       <div className="flex flex-wrap items-center gap-2">
@@ -218,13 +227,21 @@ function SectionRow(props: {
       </div>
       {open && (
         <div id={tableId} className="overflow-x-auto">
-          <table className="w-full min-w-[28rem] border-collapse text-left text-xs">
+          <table className="w-full min-w-[28rem] border-collapse text-start text-xs">
             <thead>
               <tr className="border-b border-border text-muted-foreground">
-                <th scope="col" className="py-1.5 pr-3 font-medium">{t("koColQuestion")}</th>
-                <th scope="col" className="px-3 py-1.5 text-right font-medium">{t("koColBaseline")}</th>
-                <th scope="col" className="px-3 py-1.5 text-right font-medium">{t("koColWithout")}</th>
-                <th scope="col" className="py-1.5 pl-3 text-right font-medium">{t("koColChange")}</th>
+                <th scope="col" className="py-1.5 pe-3 font-medium">
+                  {t("koColQuestion")}
+                </th>
+                <th scope="col" className="px-3 py-1.5 text-end font-medium">
+                  {t("koColBaseline")}
+                </th>
+                <th scope="col" className="px-3 py-1.5 text-end font-medium">
+                  {t("koColWithout")}
+                </th>
+                <th scope="col" className="py-1.5 ps-3 text-end font-medium">
+                  {t("koColChange")}
+                </th>
               </tr>
             </thead>
             {context.items.map((item, i) => {
@@ -235,7 +252,7 @@ function SectionRow(props: {
               return (
                 <tbody key={i} className="border-b border-border/60 align-top last:border-b-0">
                   <tr>
-                    <th scope="row" className="py-1.5 pr-3 font-normal text-foreground">
+                    <th scope="row" className="py-1.5 pe-3 font-normal text-foreground">
                       <span className="block">{clampText(item.message, QUESTION_PREVIEW_CHARS)}</span>
                       <Button
                         type="button"
@@ -248,14 +265,14 @@ function SectionRow(props: {
                         {showAnswers ? t("koHideAnswers") : t("koShowAnswers")}
                       </Button>
                     </th>
-                    <td className="px-3 py-1.5 text-right tabular-nums">
+                    <td className="px-3 py-1.5 text-end tabular-nums">
                       {itemMeans[i] !== null ? (itemMeans[i] as number).toFixed(2) : t("koNoScore")}
                     </td>
-                    <td className="px-3 py-1.5 text-right tabular-nums">
+                    <td className="px-3 py-1.5 text-end tabular-nums">
                       {withoutScore !== null ? withoutScore.toFixed(2) : t("koNoScore")}
                     </td>
                     {/* Without minus baseline, so the sign matches the two columns beside it. */}
-                    <td className="py-1.5 pl-3 text-right tabular-nums">{lost !== null ? formatSigned(-lost) : "–"}</td>
+                    <td className="py-1.5 ps-3 text-end tabular-nums">{lost !== null ? formatSigned(-lost) : "–"}</td>
                   </tr>
                   {showAnswers && (
                     <tr>

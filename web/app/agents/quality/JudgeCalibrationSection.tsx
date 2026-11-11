@@ -188,7 +188,7 @@ export default function JudgeCalibrationSection({ agentId }: { agentId: string |
             </p>
           )}
           {parsed.errors.length > 0 && (
-            <ul className="list-disc space-y-0.5 pl-5 text-xs text-destructive">
+            <ul className="list-disc space-y-0.5 ps-5 text-xs text-destructive">
               {parsed.errors.slice(0, 5).map((err) => (
                 <li key={err}>{err}</li>
               ))}
@@ -216,7 +216,7 @@ export default function JudgeCalibrationSection({ agentId }: { agentId: string |
                 <span className="text-sm font-medium text-foreground">{set.name}</span>
                 <Badge variant="secondary">{t("itemCount", { count: set.itemCount })}</Badge>
                 <span className="text-xs text-muted-foreground">{new Date(set.createdAt).toLocaleDateString()}</span>
-                <div className="ml-auto flex items-center gap-2">
+                <div className="ms-auto flex items-center gap-2">
                   <Button size="sm" onClick={() => void run(set)} disabled={runningId !== null}>
                     <Gauge size={14} aria-hidden="true" /> {runningId === set.id ? t("running") : t("run")}
                   </Button>
@@ -329,7 +329,7 @@ function RunResultCard({ setName, response }: { setName: string; response: Calib
           </Alert>
         )}
         {r.warnings.length > 0 && (
-          <ul className="list-disc space-y-0.5 pl-5 text-xs text-muted-foreground">
+          <ul className="list-disc space-y-0.5 ps-5 text-xs text-muted-foreground">
             {r.warnings.map((w) => (
               <li key={w}>{w}</li>
             ))}

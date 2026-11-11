@@ -38,6 +38,7 @@ import {
   localInputToIso,
   sumMetrics,
 } from "../lib/opsFormat";
+import { useTranslations } from "../../lib/i18n";
 
 // LLM observability: traces from Langfuse, proxied by core
 // (GET /api/platform/traces[/{id}|/metrics]) so no Langfuse key or origin
@@ -59,6 +60,7 @@ function levelTone(level: string | null | undefined) {
 }
 
 function TraceDrawer({ id, onClose }: { id: string | null; onClose: () => void }) {
+  const tHC = useTranslations("hcPlatformadminObservabilityPage");
   const [detail, setDetail] = useState<TraceDetailResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -105,7 +107,7 @@ function TraceDrawer({ id, onClose }: { id: string | null; onClose: () => void }
             aria-modal="true"
             aria-labelledby="trace-drawer-title"
             tabIndex={-1}
-            className="h-full w-full max-w-2xl overflow-y-auto border-l border-border bg-card p-5 shadow-xl outline-none"
+            className="h-full w-full max-w-2xl overflow-y-auto border-s border-border bg-card p-5 shadow-xl outline-none"
             initial={{ x: 40, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 40, opacity: 0 }}
@@ -122,7 +124,7 @@ function TraceDrawer({ id, onClose }: { id: string | null; onClose: () => void }
               <button
                 type="button"
                 onClick={onClose}
-                aria-label="Close trace"
+                aria-label={tHC("s20")}
                 className="rounded-md border-0 bg-transparent p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
               >
                 <X size={16} />
@@ -135,9 +137,7 @@ function TraceDrawer({ id, onClose }: { id: string | null; onClose: () => void }
               </Alert>
             )}
             {!detail && !error && <Skeleton className="h-64 w-full" />}
-            {detail && !detail.available && (
-              <UnavailableNote title="Langfuse is not available" reason={detail.reason} />
-            )}
+            {detail && !detail.available && <UnavailableNote title={tHC("s3")} reason={detail.reason} />}
             {detail?.available && t && (
               <div className="space-y-4 text-sm">
                 <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
@@ -153,7 +153,7 @@ function TraceDrawer({ id, onClose }: { id: string | null; onClose: () => void }
                   <dd>{formatDurationMs(t.latencyMs)}</dd>
                   <dt className="text-muted-foreground">Cost</dt>
                   <dd>{formatUsdOrUnavailable(t.totalCostUsd)}</dd>
-                  <dt className="text-muted-foreground">Tokens in / out</dt>
+                  <dt className="text-muted-foreground">{tHC("s19")}</dt>
                   <dd>
                     {formatCountOrUnavailable(t.inputTokens)} / {formatCountOrUnavailable(t.outputTokens)}
                   </dd>
@@ -168,24 +168,21 @@ function TraceDrawer({ id, onClose }: { id: string | null; onClose: () => void }
                   </div>
                 )}
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Input (truncated)
-                  </p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tHC("s18")}</p>
                   <pre className="mt-1 max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-md bg-secondary/40 p-2 font-mono text-[11px]">
                     {t.input || "—"}
                   </pre>
                 </div>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Output (truncated)
-                  </p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tHC("s17")}</p>
                   <pre className="mt-1 max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-md bg-secondary/40 p-2 font-mono text-[11px]">
                     {t.output || "—"}
                   </pre>
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Observations ({detail.observations?.length ?? 0})
+                    {tHC("s16")}
+                    {detail.observations?.length ?? 0})
                   </p>
                   <div className="mt-1 space-y-1.5">
                     {(detail.observations || []).map((o) => {
@@ -224,6 +221,7 @@ function TraceDrawer({ id, onClose }: { id: string | null; onClose: () => void }
 }
 
 function MetricsSection({ range }: { range: { from: string; to: string } }) {
+  const tHC = useTranslations("hcPlatformadminObservabilityPage");
   const [data, setData] = useState<TraceMetricsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -246,7 +244,7 @@ function MetricsSection({ range }: { range: { from: string; to: string } }) {
 
   return (
     <SectionCard
-      title="LLM metrics"
+      title={tHC("s15")}
       icon={BarChart3}
       subtitle="Daily traces, cost and latency from Langfuse, plus a per-model breakdown."
       delay={0.03}
@@ -258,40 +256,35 @@ function MetricsSection({ range }: { range: { from: string; to: string } }) {
       )}
       {!data && !error && <Skeleton className="h-40 w-full" />}
       {data && !data.available && (
-        <UnavailableNote
-          title="Langfuse is not available"
-          reason={data.reason || "Langfuse not configured or unreachable."}
-        />
+        <UnavailableNote title={tHC("s3")} reason={data.reason || "Langfuse not configured or unreachable."} />
       )}
       {data?.available && (
         <div className="space-y-5">
           <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
             <span>
-              Traces in window:{" "}
-              <span className="font-mono text-foreground">{formatCountOrUnavailable(totals.traces)}</span>
+              {tHC("s14")} <span className="font-mono text-foreground">{formatCountOrUnavailable(totals.traces)}</span>
             </span>
             <span>
-              Cost in window:{" "}
-              <span className="font-mono text-foreground">{formatUsdOrUnavailable(totals.costUsd)}</span>
+              {tHC("s13")} <span className="font-mono text-foreground">{formatUsdOrUnavailable(totals.costUsd)}</span>
             </span>
           </div>
           <div className="grid gap-5 md:grid-cols-3">
             <MiniBars
-              title="Traces / day"
+              title={tHC("s12")}
               labels={labels}
               values={days.map((d) => d.traces)}
               fmt={formatCompact}
               testId="chart-traces"
             />
             <MiniBars
-              title="Cost / day (USD)"
+              title={tHC("s11")}
               labels={labels}
               values={days.map((d) => d.costUsd)}
               fmt={formatUsdOrUnavailable}
               testId="chart-cost"
             />
             <MiniBars
-              title="p95 latency / day"
+              title={tHC("s10")}
               labels={labels}
               values={days.map((d) => d.p95LatencyMs)}
               fmt={formatDurationMs}
@@ -300,13 +293,13 @@ function MetricsSection({ range }: { range: { from: string; to: string } }) {
           </div>
           {data.byModel?.length > 0 && (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[560px] text-left text-sm">
+              <table className="w-full min-w-[560px] text-start text-sm">
                 <thead className="text-xs text-muted-foreground">
                   <tr className="border-b border-border">
-                    <th className="py-2 pr-3 font-medium">Model</th>
-                    <th className="py-2 pr-3 font-medium">Calls</th>
-                    <th className="py-2 pr-3 font-medium">Tokens in</th>
-                    <th className="py-2 pr-3 font-medium">Tokens out</th>
+                    <th className="py-2 pe-3 font-medium">Model</th>
+                    <th className="py-2 pe-3 font-medium">Calls</th>
+                    <th className="py-2 pe-3 font-medium">{tHC("s9")}</th>
+                    <th className="py-2 pe-3 font-medium">{tHC("s8")}</th>
                     <th className="py-2 font-medium">Cost</th>
                   </tr>
                 </thead>
@@ -315,10 +308,10 @@ function MetricsSection({ range }: { range: { from: string; to: string } }) {
                     .sort((a, b) => (b.costUsd ?? -1) - (a.costUsd ?? -1))
                     .map((m) => (
                       <tr key={m.model} className="border-b border-border/60">
-                        <td className="py-2 pr-3 font-mono text-xs">{m.model}</td>
-                        <td className="py-2 pr-3 font-mono text-xs">{formatCountOrUnavailable(m.calls)}</td>
-                        <td className="py-2 pr-3 font-mono text-xs">{formatCompact(m.inputTokens)}</td>
-                        <td className="py-2 pr-3 font-mono text-xs">{formatCompact(m.outputTokens)}</td>
+                        <td className="py-2 pe-3 font-mono text-xs">{m.model}</td>
+                        <td className="py-2 pe-3 font-mono text-xs">{formatCountOrUnavailable(m.calls)}</td>
+                        <td className="py-2 pe-3 font-mono text-xs">{formatCompact(m.inputTokens)}</td>
+                        <td className="py-2 pe-3 font-mono text-xs">{formatCompact(m.outputTokens)}</td>
                         <td className="py-2 font-mono text-xs">{formatUsdOrUnavailable(m.costUsd)}</td>
                       </tr>
                     ))}
@@ -333,6 +326,7 @@ function MetricsSection({ range }: { range: { from: string; to: string } }) {
 }
 
 export default function ObservabilityPage() {
+  const tHC = useTranslations("hcPlatformadminObservabilityPage");
   const [days, setDays] = useState(7);
   // Bumped by Refresh so a preset window ("last 7 days") slides forward to now.
   const [tick, setTick] = useState(0);
@@ -387,16 +381,13 @@ export default function ObservabilityPage() {
         </Button>
       }
     >
-      <PageHint>
-        Every LLM trace across tenants, read from Langfuse through core. Filter by tenant, user or trace name, open a
-        trace for its spans, and see daily cost and latency. External dashboards are linked at the bottom.
-      </PageHint>
+      <PageHint>{tHC("s7")}</PageHint>
 
       <div className="mb-4 flex flex-wrap items-end gap-3">
         <div
           className="flex items-center gap-1 rounded-md border border-border p-0.5"
           role="group"
-          aria-label="Time window"
+          aria-label={tHC("s6")}
         >
           {RANGES.map((r) => (
             <button
@@ -477,9 +468,9 @@ export default function ObservabilityPage() {
             }}
           >
             <Input
-              aria-label="Tenant id"
+              aria-label={tHC("s5")}
               className="h-9 w-40"
-              placeholder="Tenant id"
+              placeholder={tHC("s5")}
               value={tenantId}
               onChange={(e) => setTenantId(e.target.value)}
             />
@@ -491,9 +482,9 @@ export default function ObservabilityPage() {
               onChange={(e) => setUserId(e.target.value)}
             />
             <Input
-              aria-label="Trace name"
+              aria-label={tHC("s4")}
               className="h-9 w-40"
-              placeholder="Trace name"
+              placeholder={tHC("s4")}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -510,24 +501,19 @@ export default function ObservabilityPage() {
         )}
         {loading && !list && <Skeleton className="h-40 w-full" />}
         {list && !list.available && (
-          <UnavailableNote
-            title="Langfuse is not available"
-            reason={list.reason || "Langfuse not configured or unreachable."}
-          />
+          <UnavailableNote title={tHC("s3")} reason={list.reason || "Langfuse not configured or unreachable."} />
         )}
-        {list?.available && rows.length === 0 && (
-          <p className="text-sm text-muted-foreground">No traces match this window and filter.</p>
-        )}
+        {list?.available && rows.length === 0 && <p className="text-sm text-muted-foreground">{tHC("s2")}</p>}
         {list?.available && rows.length > 0 && (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-left text-sm">
+            <table className="w-full min-w-[760px] text-start text-sm">
               <thead className="text-xs text-muted-foreground">
                 <tr className="border-b border-border">
-                  <th className="py-2 pr-3 font-medium">Trace</th>
-                  <th className="py-2 pr-3 font-medium">When</th>
-                  <th className="py-2 pr-3 font-medium">Tenant / user</th>
-                  <th className="py-2 pr-3 font-medium">Latency</th>
-                  <th className="py-2 pr-3 font-medium">Tokens</th>
+                  <th className="py-2 pe-3 font-medium">Trace</th>
+                  <th className="py-2 pe-3 font-medium">When</th>
+                  <th className="py-2 pe-3 font-medium">{tHC("s1")}</th>
+                  <th className="py-2 pe-3 font-medium">Latency</th>
+                  <th className="py-2 pe-3 font-medium">Tokens</th>
                   <th className="py-2 font-medium">Cost</th>
                 </tr>
               </thead>
@@ -539,10 +525,10 @@ export default function ObservabilityPage() {
                     onClick={() => setOpenId(t.id)}
                     data-testid="trace-row"
                   >
-                    <td className="py-2 pr-3">
+                    <td className="py-2 pe-3">
                       <button
                         type="button"
-                        className="border-0 bg-transparent p-0 text-left font-medium text-foreground hover:underline"
+                        className="border-0 bg-transparent p-0 text-start font-medium text-foreground hover:underline"
                         onClick={(e) => {
                           e.stopPropagation();
                           setOpenId(t.id);
@@ -551,19 +537,19 @@ export default function ObservabilityPage() {
                         {t.name || t.id.slice(0, 12)}
                       </button>
                       {t.level && t.level !== "DEFAULT" && (
-                        <span className="ml-2">
+                        <span className="ms-2">
                           <ToneChip tone={levelTone(t.level)} label={t.level} />
                         </span>
                       )}
                     </td>
-                    <td className="py-2 pr-3 text-xs" title={formatExact(t.timestamp)}>
+                    <td className="py-2 pe-3 text-xs" title={formatExact(t.timestamp)}>
                       {formatRelative(t.timestamp)}
                     </td>
-                    <td className="py-2 pr-3 font-mono text-[11px] text-muted-foreground">
+                    <td className="py-2 pe-3 font-mono text-[11px] text-muted-foreground">
                       {(t.tenantId || "—").slice(0, 8)} / {(t.userId || "—").slice(0, 12)}
                     </td>
-                    <td className="py-2 pr-3 font-mono text-xs">{formatDurationMs(t.latencyMs)}</td>
-                    <td className="py-2 pr-3 font-mono text-xs">
+                    <td className="py-2 pe-3 font-mono text-xs">{formatDurationMs(t.latencyMs)}</td>
+                    <td className="py-2 pe-3 font-mono text-xs">
                       {formatCompact(t.inputTokens)} / {formatCompact(t.outputTokens)}
                     </td>
                     <td className="py-2 font-mono text-xs">{formatUsdOrUnavailable(t.totalCostUsd)}</td>

@@ -58,7 +58,7 @@ export function SessionSidebar({
     <>
       <button
         type="button"
-        className="flex w-full items-center gap-2 border-b border-border px-3 py-1.5 text-left text-xs font-medium text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+        className="flex w-full items-center gap-2 border-b border-border px-3 py-1.5 text-start text-xs font-medium text-muted-foreground hover:bg-accent/50 hover:text-foreground"
         aria-expanded={controlsOpen}
         data-testid="playground-controls-toggle"
         onClick={() => setControlsOpen((open) => !open)}

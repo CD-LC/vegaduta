@@ -147,17 +147,16 @@ export default function WhatsAppCostCalculatorPage() {
             <p className="text-sm leading-relaxed text-muted-foreground sm:text-base" data-testid="pricing-checked">
               Checked against Meta&apos;s documentation on{" "}
               <strong className="font-medium text-foreground">{PRICING_CHECKED_ON}</strong>. Since 1 July 2025 Meta
-              charges{" "}
-              <strong className="font-medium text-foreground">per delivered template message</strong>, by category:
-              marketing, utility or authentication. The rate depends on the category, your monthly volume tier and
-              the recipient&apos;s country calling code. Free-form replies inside an open 24-hour customer-service
+              charges <strong className="font-medium text-foreground">per delivered template message</strong>, by
+              category: marketing, utility or authentication. The rate depends on the category, your monthly volume tier
+              and the recipient&apos;s country calling code. Free-form replies inside an open 24-hour customer-service
               window are free, and so are utility templates sent inside that window.
             </p>
             <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
               <strong className="font-medium text-foreground">Check Meta&apos;s current rates.</strong> Meta&apos;s
-              documentation text does not publish the rates themselves: they sit in an interactive rate card by
-              market and currency, and Meta may change them on 1 January, 1 April, 1 July or 1 October. This page
-              therefore shows no rate. Open{" "}
+              documentation text does not publish the rates themselves: they sit in an interactive rate card by market
+              and currency, and Meta may change them on 1 January, 1 April, 1 July or 1 October. This page therefore
+              shows no rate. Open{" "}
               <a
                 href={META_RATE_CARD_URL}
                 target="_blank"
@@ -193,8 +192,9 @@ export default function WhatsAppCostCalculatorPage() {
               Real Meta billing has nuances this model skips on purpose: free-form replies inside an open
               customer-service window are not billed, utility templates inside that window are free, and volume tiers
               lower utility and authentication rates. Because the model treats every business-sent message as billable
-              at your blended rate, it is a <strong className="font-medium text-foreground">rough upper-bound estimate</strong>{" "}
-              on both sides of the comparison, not an invoice forecast.
+              at your blended rate, it is a{" "}
+              <strong className="font-medium text-foreground">rough upper-bound estimate</strong> on both sides of the
+              comparison, not an invoice forecast.
             </p>
             <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
               The most useful output is usually not the monthly total but the{" "}
@@ -206,7 +206,7 @@ export default function WhatsAppCostCalculatorPage() {
 
           <section className="space-y-4">
             <SectionHeading>Sources and disclaimer</SectionHeading>
-            <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground">
+            <ul className="list-disc space-y-2 ps-5 text-sm leading-relaxed text-muted-foreground">
               <li>
                 <a
                   href={META_PRICING_DOCS_URL}

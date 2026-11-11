@@ -12,8 +12,8 @@ images. Copyright lines and attributions are in [../NOTICE](../NOTICE).
 | License | Text | Applies to |
 |---|---|---|
 | BUSL-1.1 | [BUSL-1.1.txt](BUSL-1.1.txt) | this project outside `sdk/` |
-| Apache-2.0 | [Apache-2.0.txt](Apache-2.0.txt) | the `sdk/` directory; `@mlc-ai/web-llm`, `kokoro-js` and `@huggingface/transformers` copied into `web/public/vendored/` at build time |
-| MIT | [MIT.txt](MIT.txt) | `web/app/lib/vendor/qrcode-generator.js` (Copyright (c) 2009 Kazuhiko Arase); `@babel/standalone` and `onnxruntime-web` (inside `kokoro.web.js`) copied into `web/public/vendored/` |
+| Apache-2.0 | [Apache-2.0.txt](Apache-2.0.txt) | the `sdk/` directory; `@mlc-ai/web-llm`, `kokoro-js` and `@huggingface/transformers` copied into `web/public/vendored/` at build time; the `hyperframes`, `hyperframes-cli` and `media-use` built-in agent skills under `core/agents-turn/src/main/resources/skills/` (Copyright HeyGen, github.com/heygen-com/hyperframes) |
+| MIT | [MIT.txt](MIT.txt) | `web/app/lib/vendor/qrcode-generator.js` (Copyright (c) 2009 Kazuhiko Arase); `@babel/standalone` and `onnxruntime-web` (inside `kokoro.web.js`) copied into `web/public/vendored/`; the `security-audit` built-in agent skill under `core/agents-turn/src/main/resources/skills/` (Copyright (c) 2025-2026 Cloudflare, Inc., github.com/cloudflare/security-audit-skill) |
 | OFL-1.1 | [OFL-1.1.txt](OFL-1.1.txt) | every font file listed below |
 
 The MIT text here is the SPDX template: the copyright line of each MIT

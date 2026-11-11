@@ -32,7 +32,17 @@ import { usePagination } from "../lib/usePagination";
  * reading them), falling back to a truncated id if a match isn't found
  * (e.g. the resource was deleted after the grant was made).
  */
-function ResourceRow({ item, name, href, t }: { item: any; name: string | null; href: string; t: (key: string, values?: any) => string }) {
+function ResourceRow({
+  item,
+  name,
+  href,
+  t,
+}: {
+  item: any;
+  name: string | null;
+  href: string;
+  t: (key: string, values?: any) => string;
+}) {
   return (
     <Link
       href={href}
@@ -139,7 +149,12 @@ export default function SharedWithMePage() {
   const matches = useCallback(
     (i: any, names: Record<string, string>) => {
       const q = query.trim().toLowerCase();
-      return !q || String(names[i.resourceId] ?? i.resourceId).toLowerCase().includes(q);
+      return (
+        !q ||
+        String(names[i.resourceId] ?? i.resourceId)
+          .toLowerCase()
+          .includes(q)
+      );
     },
     [query]
   );
@@ -171,7 +186,7 @@ export default function SharedWithMePage() {
           <Search
             size={14}
             aria-hidden="true"
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
           <Input
             type="search"
@@ -179,7 +194,7 @@ export default function SharedWithMePage() {
             onChange={(e) => setQuery(e.target.value)}
             placeholder={tl("searchShared")}
             aria-label={tl("searchShared")}
-            className="pl-8"
+            className="ps-8"
           />
         </div>
       )}

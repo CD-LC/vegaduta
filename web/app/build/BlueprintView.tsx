@@ -31,6 +31,7 @@ import {
   type Level,
   type OutputKind,
 } from "../lib/build/blueprint";
+import { useTranslations } from "../lib/i18n";
 
 const SOURCE_META: Record<FieldSource, { label: string; icon: typeof User; tone: string }> = {
   default: { label: "Safe default", icon: Lock, tone: "text-muted-foreground" },
@@ -46,10 +47,24 @@ const LEVELS: { id: Level; label: string; blurb: string }[] = [
   { id: "advanced", label: "Advanced", blurb: "Every dial" },
 ];
 
-export function LevelPicker({ level, output = "agent", onChange }: { level: Level; output?: OutputKind; onChange: (l: Level) => void }) {
+export function LevelPicker({
+  level,
+  output = "agent",
+  onChange,
+}: {
+  level: Level;
+  output?: OutputKind;
+  onChange: (l: Level) => void;
+}) {
+    const tHC = useTranslations("hcBuildBlueprintView");
   return (
     // eslint-disable-next-line jsx-a11y/interactive-supports-focus -- roving tabindex lives on the radios; arrow keys bubble to the group
-    <div role="radiogroup" aria-label="How much detail to show" onKeyDown={radioGroupKeyDown} className="inline-flex flex-wrap rounded-xl border border-border bg-card p-1">
+    <div
+      role="radiogroup"
+      aria-label={tHC("s7")}
+      onKeyDown={radioGroupKeyDown}
+      className="inline-flex flex-wrap rounded-xl border border-border bg-card p-1"
+    >
       {LEVELS.map((l) => (
         <button
           key={l.id}
@@ -59,8 +74,10 @@ export function LevelPicker({ level, output = "agent", onChange }: { level: Leve
           tabIndex={level === l.id ? 0 : -1}
           onClick={() => onChange(l.id)}
           className={cn(
-            "rounded-lg px-3 py-1.5 text-left transition-colors",
-            level === l.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground"
+            "rounded-lg px-3 py-1.5 text-start transition-colors",
+            level === l.id
+              ? "bg-primary text-primary-foreground"
+              : "text-muted-foreground hover:bg-accent hover:text-foreground"
           )}
         >
           <span className="block text-xs font-semibold">{l.label}</span>
@@ -89,6 +106,7 @@ function SourceTag({ source }: { source: FieldSource }) {
 }
 
 function Control({ spec, bp, onChange }: { spec: FieldSpec; bp: Blueprint; onChange: (next: Blueprint) => void }) {
+    const tHC = useTranslations("hcBuildBlueprintView");
   const c = spec.control;
   const value = spec.read(bp);
   const write = (v: string | number | boolean) => spec.write && onChange(spec.write(bp, v));
@@ -97,8 +115,8 @@ function Control({ spec, bp, onChange }: { spec: FieldSpec; bp: Blueprint; onCha
       <span className="text-sm text-foreground">
         {value}
         {spec.href && (
-          <Link href={spec.href} className="ml-2 text-xs text-primary underline-offset-2 hover:underline">
-            Change later
+          <Link href={spec.href} className="ms-2 text-xs text-primary underline-offset-2 hover:underline">
+            {tHC("s6")}
           </Link>
         )}
       </span>
@@ -113,7 +131,12 @@ function Control({ spec, bp, onChange }: { spec: FieldSpec; bp: Blueprint; onCha
     );
   }
   if (c.kind === "multiselect") {
-    const chosen = new Set(value.split(",").map((s) => s.trim().toUpperCase()).filter(Boolean));
+    const chosen = new Set(
+      value
+        .split(",")
+        .map((s) => s.trim().toUpperCase())
+        .filter(Boolean)
+    );
     return (
       <div className="flex flex-wrap gap-1.5">
         {c.options.map((o) => {
@@ -131,7 +154,9 @@ function Control({ spec, bp, onChange }: { spec: FieldSpec; bp: Blueprint; onCha
               }}
               className={cn(
                 "rounded-full border px-2.5 py-1 text-xs transition-colors",
-                on ? "border-primary bg-primary/10 text-foreground" : "border-border text-muted-foreground hover:bg-accent"
+                on
+                  ? "border-primary bg-primary/10 text-foreground"
+                  : "border-border text-muted-foreground hover:bg-accent"
               )}
             >
               {o.label}
@@ -145,7 +170,12 @@ function Control({ spec, bp, onChange }: { spec: FieldSpec; bp: Blueprint; onCha
     const current = c.options.find((o) => o.label === value || o.value === value)?.value ?? "";
     return (
       <div className="w-full max-w-xs">
-        <Select aria-label={spec.label} value={current} onChange={(e: any) => write(e.target.value)} options={c.options.map((o) => ({ value: o.value, label: o.hint ? `${o.label} - ${o.hint}` : o.label }))} />
+        <Select
+          aria-label={spec.label}
+          value={current}
+          onChange={(e: any) => write(e.target.value)}
+          options={c.options.map((o) => ({ value: o.value, label: o.hint ? `${o.label} - ${o.hint}` : o.label }))}
+        />
       </div>
     );
   }
@@ -163,12 +193,19 @@ function Control({ spec, bp, onChange }: { spec: FieldSpec; bp: Blueprint; onCha
           aria-label={spec.label}
           className="h-1.5 flex-1 cursor-pointer accent-[var(--primary)]"
         />
-        <span className="w-12 text-right font-mono text-xs text-foreground">{value}</span>
+        <span className="w-12 text-end font-mono text-xs text-foreground">{value}</span>
       </div>
     );
   }
   if (c.kind === "textarea") {
-    return <Textarea value={value} onChange={(e) => write(e.target.value)} className="min-h-32 text-sm" aria-label={spec.label} />;
+    return (
+      <Textarea
+        value={value}
+        onChange={(e) => write(e.target.value)}
+        className="min-h-32 text-sm"
+        aria-label={spec.label}
+      />
+    );
   }
   // Free-text rows whose "empty" reads as a label ("Provider default", "None") edit as empty.
   const display = /^(Provider default|Random|None)$/.test(value) ? "" : value;
@@ -219,7 +256,15 @@ function Row({ spec, bp, onChange }: { spec: FieldSpec; bp: Blueprint; onChange:
   );
 }
 
-export function SettingsSections({ bp, level, onChange }: { bp: Blueprint; level: Level; onChange: (next: Blueprint) => void }) {
+export function SettingsSections({
+  bp,
+  level,
+  onChange,
+}: {
+  bp: Blueprint;
+  level: Level;
+  onChange: (next: Blueprint) => void;
+}) {
   const visible = new Set(fieldsForLevel(level, bp.output ?? "agent").map((f) => f.key));
   return (
     <div className="space-y-4">
@@ -256,6 +301,7 @@ const KIND_STYLE: Record<FlowKind, string> = {
 const ADDABLE: FlowKind[] = ["agent", "branch", "approval", "action"];
 
 export function FlowEditor({ bp, onChange }: { bp: Blueprint; onChange: (next: Blueprint) => void }) {
+    const tHC = useTranslations("hcBuildBlueprintView");
   const wf = bp.workflow;
   return (
     <section className="rounded-xl border border-border bg-card p-4">
@@ -263,11 +309,15 @@ export function FlowEditor({ bp, onChange }: { bp: Blueprint; onChange: (next: B
         <div>
           <h3 className="text-sm font-semibold text-foreground">Workflow</h3>
           <p className="text-xs text-muted-foreground">
-            A repeatable path around the agent - triggers, decisions and human approvals.
+            {tHC("s5")}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Switch checked={!!wf} onCheckedChange={(v) => onChange(withWorkflow(bp, v))} aria-label="Build a workflow too" />
+          <Switch
+            checked={!!wf}
+            onCheckedChange={(v) => onChange(withWorkflow(bp, v))}
+            aria-label={tHC("s4")}
+          />
           <span className="text-sm text-foreground">{wf ? "Build one" : "Agent only"}</span>
         </div>
       </div>
@@ -276,12 +326,14 @@ export function FlowEditor({ bp, onChange }: { bp: Blueprint; onChange: (next: B
         <>
           <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
             <SourceTag source={bp.sources["workflow.steps"] ?? "default"} />
-            <span>Named &ldquo;{wf.name}&rdquo;. The AI lays out the canvas from these steps when you build.</span>
+            <span>Named &ldquo;{wf.name}{tHC("s3")}</span>
           </div>
           <ol className="mt-3">
             {wf.steps.map((s, i) => (
-              <li key={s.id} className="relative pl-8">
-                {i < wf.steps.length - 1 && <span className="absolute left-[11px] top-8 h-[calc(100%-1rem)] w-px bg-border" aria-hidden />}
+              <li key={s.id} className="relative ps-8">
+                {i < wf.steps.length - 1 && (
+                  <span className="absolute start-[11px] top-8 h-[calc(100%-1rem)] w-px bg-border" aria-hidden />
+                )}
                 <span
                   className="absolute left-0 top-2 flex size-6 items-center justify-center rounded-full border border-border bg-background text-[10px] font-semibold text-muted-foreground"
                   aria-hidden
@@ -290,15 +342,35 @@ export function FlowEditor({ bp, onChange }: { bp: Blueprint; onChange: (next: B
                 </span>
                 <div className={cn("mb-2 rounded-lg border p-3", KIND_STYLE[s.kind])}>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{FLOW_KIND_LABEL[s.kind]}</span>
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      {FLOW_KIND_LABEL[s.kind]}
+                    </span>
                     <span className="flex items-center gap-0.5">
-                      <button type="button" aria-label={`Move step ${i + 1} up`} disabled={i === 0} onClick={() => onChange(moveStep(bp, i, -1))} className="flex size-8 items-center justify-center rounded text-muted-foreground hover:bg-accent disabled:opacity-30">
+                      <button
+                        type="button"
+                        aria-label={`Move step ${i + 1} up`}
+                        disabled={i === 0}
+                        onClick={() => onChange(moveStep(bp, i, -1))}
+                        className="flex size-8 items-center justify-center rounded text-muted-foreground hover:bg-accent disabled:opacity-30"
+                      >
                         <ArrowUp aria-hidden="true" size={14} />
                       </button>
-                      <button type="button" aria-label={`Move step ${i + 1} down`} disabled={i === wf.steps.length - 1} onClick={() => onChange(moveStep(bp, i, 1))} className="flex size-8 items-center justify-center rounded text-muted-foreground hover:bg-accent disabled:opacity-30">
+                      <button
+                        type="button"
+                        aria-label={`Move step ${i + 1} down`}
+                        disabled={i === wf.steps.length - 1}
+                        onClick={() => onChange(moveStep(bp, i, 1))}
+                        className="flex size-8 items-center justify-center rounded text-muted-foreground hover:bg-accent disabled:opacity-30"
+                      >
                         <ArrowDown aria-hidden="true" size={14} />
                       </button>
-                      <button type="button" aria-label={`Remove step ${i + 1}`} disabled={wf.steps.length <= 2} onClick={() => onChange(removeStep(bp, i))} className="flex size-8 items-center justify-center rounded text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-30">
+                      <button
+                        type="button"
+                        aria-label={`Remove step ${i + 1}`}
+                        disabled={wf.steps.length <= 2}
+                        onClick={() => onChange(removeStep(bp, i))}
+                        className="flex size-8 items-center justify-center rounded text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-30"
+                      >
                         <Trash2 aria-hidden="true" size={14} />
                       </button>
                     </span>
@@ -322,7 +394,7 @@ export function FlowEditor({ bp, onChange }: { bp: Blueprint; onChange: (next: B
             ))}
           </ol>
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
-            <span className="text-xs text-muted-foreground">Add a step:</span>
+            <span className="text-xs text-muted-foreground">{tHC("s2")}</span>
             {ADDABLE.map((k) => (
               <button
                 key={k}
@@ -338,8 +410,8 @@ export function FlowEditor({ bp, onChange }: { bp: Blueprint; onChange: (next: B
       )}
       {!wf && (
         <p className="mt-3 text-xs text-muted-foreground">
-          <Sparkles aria-hidden="true" size={11} className="mr-1 inline text-primary" />
-          Turn this on when the job has steps, decisions or needs a person to approve something before it goes out.
+          <Sparkles aria-hidden="true" size={11} className="me-1 inline text-primary" />
+          {tHC("s1")}
         </p>
       )}
     </section>

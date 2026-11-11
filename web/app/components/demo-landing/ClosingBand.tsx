@@ -153,7 +153,7 @@ export default function ClosingBand({
                 wrap to 2-3 lines on a phone, and centred ragged multi-line
                 body copy is the exact readability regression the hero's own
                 sub-lead comment records being told to fix. */}
-            <div className="mkt-card mkt-card--sunken mx-auto mt-6 max-w-md px-4 py-3.5 text-left">
+            <div className="mkt-card mkt-card--sunken mx-auto mt-6 max-w-md px-4 py-3.5 text-start">
               <p className="mkt-small flex items-start gap-2.5 font-medium">
                 <ShieldCheck
                   className="mt-0.5 size-4 shrink-0"
@@ -234,7 +234,6 @@ export default function ClosingBand({
           </div>
         </section>
       </SectionReach>
-
     </>
   );
 }

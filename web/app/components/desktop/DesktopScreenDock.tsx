@@ -108,7 +108,7 @@ export default function DesktopScreenDock() {
             {pipApi() && (
               <button
                 type="button"
-                className="ml-auto text-muted-foreground hover:text-foreground"
+                className="ms-auto text-muted-foreground hover:text-foreground"
                 aria-label={t("screenDockPopOut")}
                 title={t("screenDockPopOut")}
                 data-testid="desktop-screen-dock-popout"
@@ -119,7 +119,7 @@ export default function DesktopScreenDock() {
             )}
             <button
               type="button"
-              className={`${pipApi() ? "" : "ml-auto "}text-muted-foreground hover:text-foreground`}
+              className={`${pipApi() ? "" : "ms-auto "}text-muted-foreground hover:text-foreground`}
               aria-label={t("screenDockClose")}
               onClick={() => setOpen(false)}
             >

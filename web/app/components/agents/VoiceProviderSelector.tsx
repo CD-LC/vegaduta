@@ -3,6 +3,7 @@
 import { Volume2 } from "lucide-react";
 import TranscriptionProviderOptions from "./TranscriptionProviderOptions";
 import { useModalityCatalog } from "./useModalityCatalog";
+import { useTranslations } from "../../lib/i18n";
 
 /**
  * Voice STT provider selector - a thin, provider-agnostic wrapper over
@@ -42,6 +43,7 @@ export default function VoiceProviderSelector({
   onEdit,
   isBusy = false,
 }: VoiceProviderSelectorProps) {
+  const tHC = useTranslations("hcComponentsAgentsVoiceProviderSelector");
   const { providers, providerStatus } = useModalityCatalog("speechToText", {
     name: "Platform Default",
     description: "Intelligent fallback across the deployment's STT providers",
@@ -51,18 +53,12 @@ export default function VoiceProviderSelector({
     <TranscriptionProviderOptions
       providers={providers}
       icon={Volume2}
-      label="Voice Provider (Speech-to-Text)"
-      tooltipContent={
-        <>
-          Pick which speech-to-text backend transcribes voice input for this agent, or leave the
-          platform default fallback. Options marked &quot;Needs setup&quot; need a credential on the
-          Providers page first.
-        </>
-      }
+      label={tHC("s5")}
+      tooltipContent={<>{tHC("s4")}</>}
       freePlanWarningText={
         <>
-          Voice provider selection is a <strong>Premium feature</strong>. Your agents use the
-          platform default fallback.
+          {tHC("s3")} <strong>{tHC("s2")}</strong>
+          {tHC("s1")}
         </>
       }
       editorLockedTitle="Voice provider selection is a Premium feature"

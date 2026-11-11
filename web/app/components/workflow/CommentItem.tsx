@@ -4,9 +4,18 @@
 // @mentions, and the author's own edit/delete actions.
 import { useMemo, useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
-import { isEdited, mentionLabels, personLabel, relativeTime, splitMentions, type CommentPerson, type CommentView } from "./comments";
+import {
+  isEdited,
+  mentionLabels,
+  personLabel,
+  relativeTime,
+  splitMentions,
+  type CommentPerson,
+  type CommentView,
+} from "./comments";
 import { fullTime, initials, type MentionPerson } from "./commentCardShared";
 import { CommentComposer } from "./CommentComposer";
+import { useTranslations } from "../../lib/i18n";
 
 interface CommentItemProps {
   comment: CommentView;
@@ -18,7 +27,12 @@ interface CommentItemProps {
   busy: boolean;
   onEdit: () => void;
   onCancelEdit: () => void;
-  onSaveEdit: (body: string, ids: string[], mentioned: CommentPerson[], meta: { pickedDuringEdit: boolean }) => Promise<boolean>;
+  onSaveEdit: (
+    body: string,
+    ids: string[],
+    mentioned: CommentPerson[],
+    meta: { pickedDuringEdit: boolean }
+  ) => Promise<boolean>;
   onDelete: () => void;
 }
 
@@ -42,10 +56,23 @@ function mentionVariants(list: CommentPerson[], byId: Map<string, MentionPerson>
 }
 
 export default function CommentItem({
-  comment: c, isRoot, now, people, peopleById, editing, busy, onEdit, onCancelEdit, onSaveEdit, onDelete,
+  comment: c,
+  isRoot,
+  now,
+  people,
+  peopleById,
+  editing,
+  busy,
+  onEdit,
+  onCancelEdit,
+  onSaveEdit,
+  onDelete,
 }: CommentItemProps) {
+  const tHC = useTranslations("hcComponentsWorkflowCommentItem");
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const author = c.author.displayName ? c.author : { id: c.author.id, displayName: peopleById.get(c.author.id)?.displayName ?? null };
+  const author = c.author.displayName
+    ? c.author
+    : { id: c.author.id, displayName: peopleById.get(c.author.id)?.displayName ?? null };
   const who = personLabel(author);
   const mentions = withNames(c.mentions, peopleById);
   const highlight = useMemo(() => mentionVariants(c.mentions, peopleById), [c.mentions, peopleById]);
@@ -55,7 +82,9 @@ export default function CommentItem({
   if (c.deleted) {
     return (
       <li className="wfc-item" data-deleted="true">
-        <p className="wfc-deleted">{isRoot ? "The first comment in this thread was deleted." : "This comment was deleted."}</p>
+        <p className="wfc-deleted">
+          {isRoot ? "The first comment in this thread was deleted." : "This comment was deleted."}
+        </p>
       </li>
     );
   }
@@ -63,7 +92,9 @@ export default function CommentItem({
   return (
     <li className="wfc-item" data-pending={c.pending || undefined} aria-busy={c.pending || undefined}>
       <div className="wfc-item-head">
-        <span className="wfc-avatar" aria-hidden="true">{initials(who)}</span>
+        <span className="wfc-avatar" aria-hidden="true">
+          {initials(who)}
+        </span>
         <span className="wfc-author">{who}</span>
         <time className="wfc-time" dateTime={c.createdAt} title={fullTime(c.createdAt)}>
           {c.pending ? "Sending…" : relativeTime(c.createdAt, now)}
@@ -75,10 +106,22 @@ export default function CommentItem({
         )}
         {canAct && !editing && !confirmDelete && (
           <span className="wfc-item-actions">
-            <button type="button" className="wfc-icon" aria-label={`Edit comment by ${who}`} onClick={onEdit} disabled={busy}>
+            <button
+              type="button"
+              className="wfc-icon"
+              aria-label={`Edit comment by ${who}`}
+              onClick={onEdit}
+              disabled={busy}
+            >
               <Pencil size={12} aria-hidden="true" />
             </button>
-            <button type="button" className="wfc-icon" aria-label={`Delete comment by ${who}`} onClick={() => setConfirmDelete(true)} disabled={busy}>
+            <button
+              type="button"
+              className="wfc-icon"
+              aria-label={`Delete comment by ${who}`}
+              onClick={() => setConfirmDelete(true)}
+              disabled={busy}
+            >
               <Trash2 size={12} aria-hidden="true" />
             </button>
           </span>
@@ -87,7 +130,7 @@ export default function CommentItem({
 
       {editing ? (
         <CommentComposer
-          label="Edit comment"
+          label={tHC("s3")}
           people={people}
           initialText={c.body ?? ""}
           initialMentions={mentions}
@@ -102,17 +145,19 @@ export default function CommentItem({
         <p className="wfc-body">
           {splitMentions(c.body ?? "", highlight).map((seg, i) =>
             seg.mention ? (
-              <span key={i} className="wfc-mention">{seg.text}</span>
+              <span key={i} className="wfc-mention">
+                {seg.text}
+              </span>
             ) : (
               <span key={i}>{seg.text}</span>
-            ),
+            )
           )}
         </p>
       )}
 
       {confirmDelete && (
-        <div className="wfc-confirm" role="group" aria-label="Confirm delete">
-          <span>Delete this comment?</span>
+        <div className="wfc-confirm" role="group" aria-label={tHC("s2")}>
+          <span>{tHC("s1")}</span>
           <button
             type="button"
             className="wfc-btn"

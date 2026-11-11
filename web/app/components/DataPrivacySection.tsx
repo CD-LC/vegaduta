@@ -7,6 +7,7 @@ import { filenameFromContentDisposition } from "../lib/contentDisposition";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { viewAsHeaders } from "../lib/viewAs";
+import { useTranslations } from "../lib/i18n";
 
 // Master Roadmap 2026 item #22 (GDPR/data-residency basics, §G) - tenant-wide
 // "Request data export" / "Request account deletion", extracted verbatim from
@@ -21,6 +22,7 @@ import { viewAsHeaders } from "../lib/viewAs";
 // file download, POST /api/tenant/data-deletion a JSON ack - both now gated
 // by PERM_MANAGE_DATA_GOVERNANCE server-side (SecurityConfig).
 export default function DataPrivacySection() {
+  const tHC = useTranslations("hcComponentsDataPrivacySection");
   const [organizationName, setOrganizationName] = useState<string | null>(null);
   const [exportStatus, setExportStatus] = useState("idle"); // idle | loading | error | done
   const [exportError, setExportError] = useState<string | null>(null);
@@ -112,7 +114,7 @@ export default function DataPrivacySection() {
       <div className="ax-mnt-head">
         <div>
           <h2 className="ax-mnt-title" id="data-privacy-heading">
-            Data &amp; privacy
+            {tHC("s7")}
           </h2>
           <div className="ax-mnt-sub">
             Tenant-wide export and deletion. Applies to the entire workspace, not a single user.
@@ -141,14 +143,11 @@ export default function DataPrivacySection() {
               marginBottom: "0.25rem",
             }}
           >
-            Request data export
+            {tHC("s6")}
           </div>
-          <p style={hintStyle}>
-            Downloads a JSON file containing your agents, workflows, knowledge documents, chat/ session history, and
-            audit log. Platform-internal configuration is not included.
-          </p>
+          <p style={hintStyle}>{tHC("s5")}</p>
           {exportStatus === "done" && (
-            <p style={{ ...hintStyle, marginTop: "0.5rem", color: "var(--success-text)" }}>Export downloaded.</p>
+            <p style={{ ...hintStyle, marginTop: "0.5rem", color: "var(--success-text)" }}>{tHC("s4")}</p>
           )}
           {exportStatus === "error" && (
             <div className="error-box" style={{ margin: "0.5rem 0 0" }}>
@@ -179,15 +178,10 @@ export default function DataPrivacySection() {
           maxWidth: "44rem",
         }}
       >
-        <div style={{ fontWeight: 600, fontSize: "0.8125rem", color: "var(--danger-text)" }}>
-          Request account deletion
-        </div>
-        <p style={hintStyle}>
-          This permanently deletes your entire workspace - every agent, workflow, knowledge document, chat history, and
-          user. This cannot be undone.
-        </p>
+        <div style={{ fontWeight: 600, fontSize: "0.8125rem", color: "var(--danger-text)" }}>{tHC("s3")}</div>
+        <p style={hintStyle}>{tHC("s2")}</p>
         {deletionStatus === "done" ? (
-          <p style={hintStyle}>This workspace&apos;s data has been deleted. You will be signed out shortly.</p>
+          <p style={hintStyle}>{tHC("s1")}</p>
         ) : (
           <>
             <label

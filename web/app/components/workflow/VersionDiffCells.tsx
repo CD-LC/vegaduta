@@ -3,7 +3,15 @@
 // Small presentational pieces of the version compare panel: id/author labels
 // and the before/after field table with its word-level highlights.
 import { Lock } from "lucide-react";
-import { formatWhen, hasRedaction, isRedacted, wordDiff, type WordSegment, type WorkflowVersionRow } from "./versionDiff";
+import {
+  formatWhen,
+  hasRedaction,
+  isRedacted,
+  wordDiff,
+  type WordSegment,
+  type WorkflowVersionRow,
+} from "./versionDiff";
+import { useTranslations } from "../../lib/i18n";
 
 export function shortId(id: string | null | undefined): string {
   if (!id) return "unknown";
@@ -15,13 +23,19 @@ export function shortId(id: string | null | undefined): string {
  * when the host can supply one; the option label then drops an unresolved
  * author entirely (a UUID would swamp a native select at 375px).
  */
-export function versionOptionLabel(v: WorkflowVersionRow, personLabel?: (userId: string) => string | undefined): string {
+export function versionOptionLabel(
+  v: WorkflowVersionRow,
+  personLabel?: (userId: string) => string | undefined
+): string {
   const when = formatWhen(v.createdAt);
   const who = v.createdBy ? personLabel?.(v.createdBy) : undefined;
   return [`v${v.versionNumber}`, when, who ?? ""].filter(Boolean).join(" · ");
 }
 
-export function authorLabel(id: string | null | undefined, personLabel?: (userId: string) => string | undefined): string | null {
+export function authorLabel(
+  id: string | null | undefined,
+  personLabel?: (userId: string) => string | undefined
+): string | null {
   if (!id) return null;
   return personLabel?.(id) || shortId(id);
 }
@@ -42,17 +56,26 @@ function Segments({ segs, kind }: { segs: WordSegment[]; kind: "del" | "ins" }) 
           )
         ) : (
           <span key={i}>{s.text}</span>
-        ),
+        )
       )}
     </>
   );
 }
 
-export function ValueCell({ value, segs, side }: { value: string | null; segs: WordSegment[] | null; side: "before" | "after" }) {
+export function ValueCell({
+  value,
+  segs,
+  side,
+}: {
+  value: string | null;
+  segs: WordSegment[] | null;
+  side: "before" | "after";
+}) {
+  const tHC = useTranslations("hcComponentsWorkflowVersionDiffCells");
   if (value == null) return <span className="wf-vdiff-none">(none)</span>;
   if (isRedacted(value)) {
     return (
-      <span className="wf-vdiff-lock" title="Credential values are never shown">
+      <span className="wf-vdiff-lock" title={tHC("s3")}>
         <Lock size={11} aria-hidden="true" />
         redacted
       </span>
@@ -62,16 +85,22 @@ export function ValueCell({ value, segs, side }: { value: string | null; segs: W
     <span className="wf-vdiff-val">
       {segs ? <Segments segs={segs} kind={side === "before" ? "del" : "ins"} /> : value}
       {hasRedaction(value) && (
-        <span className="wf-vdiff-lock" data-inline="true" title="Part of this value is a hidden credential">
+        <span className="wf-vdiff-lock" data-inline="true" title={tHC("s2")}>
           <Lock size={11} aria-hidden="true" />
-          <span className="wf-vdiff-sr">contains redacted values</span>
+          <span className="wf-vdiff-sr">{tHC("s1")}</span>
         </span>
       )}
     </span>
   );
 }
 
-export function ChangeTable({ rows, caption }: { rows: { key: string; label: string; before: string | null; after: string | null }[]; caption: string }) {
+export function ChangeTable({
+  rows,
+  caption,
+}: {
+  rows: { key: string; label: string; before: string | null; after: string | null }[];
+  caption: string;
+}) {
   return (
     <table className="wf-vdiff-table">
       <caption className="wf-vdiff-sr">{caption}</caption>

@@ -44,9 +44,9 @@ export default function AgentDesktopAutomation({
           onClick={() => setWatching((w) => !w)}
         >
           {watching ? (
-            <EyeOff className="mr-1 size-3.5" aria-hidden="true" />
+            <EyeOff className="me-1 size-3.5" aria-hidden="true" />
           ) : (
-            <Eye className="mr-1 size-3.5" aria-hidden="true" />
+            <Eye className="me-1 size-3.5" aria-hidden="true" />
           )}
           {watching ? t("stopWatching") : t("watchLive")}
         </Button>

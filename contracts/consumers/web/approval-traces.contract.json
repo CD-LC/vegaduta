@@ -1,0 +1,26 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-approval-traces-requestId",
+      "method": "GET",
+      "path": "/api/approval-traces/{requestId}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.actionType",
+          "$.calls",
+          "$.callsTruncated",
+          "$.conversation",
+          "$.decidedAt",
+          "$.decidedBy",
+          "$.requestId",
+          "$.status",
+          "$.traceNote",
+          "$.windowEnd"
+        ]
+      }
+    }
+  ]
+}

@@ -74,6 +74,7 @@ interface WorkflowDesignerPanelProps {
 }
 
 export default function WorkflowDesignerPanel({ onOpen, initialTemplateKey }: WorkflowDesignerPanelProps) {
+  const tHC = useTranslations("hcComponentsWorkflowDesignerPanel");
   const t = useTranslations("workflowDesignerPanel");
   const portable = usePortabilityEnabled();
   const tTemplates = useTranslations("workflowTemplates");
@@ -285,7 +286,7 @@ export default function WorkflowDesignerPanel({ onOpen, initialTemplateKey }: Wo
           <Search
             aria-hidden="true"
             size={15}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
           <Input
             type="text"
@@ -293,7 +294,7 @@ export default function WorkflowDesignerPanel({ onOpen, initialTemplateKey }: Wo
             aria-label={t("searchPlaceholder")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="pl-9"
+            className="ps-9"
           />
         </div>
 
@@ -361,7 +362,7 @@ export default function WorkflowDesignerPanel({ onOpen, initialTemplateKey }: Wo
                     autoFocus
                   />
                   <p id="wf-new-name-help" className="text-xs text-muted-foreground">
-                    A short name teammates will recognise in the list, for example “Support triage”.
+                    {tHC("s2")}
                   </p>
                 </div>
                 <div className="space-y-1.5">
@@ -426,7 +427,7 @@ export default function WorkflowDesignerPanel({ onOpen, initialTemplateKey }: Wo
                 href="/help#workflows"
                 className="text-sm font-medium text-primary underline-offset-4 hover:underline"
               >
-                Learn how workflows work
+                {tHC("s1")}
               </Link>
             </div>
           }
@@ -442,7 +443,7 @@ export default function WorkflowDesignerPanel({ onOpen, initialTemplateKey }: Wo
                 <TableHead className="w-28">{t("colStatus")}</TableHead>
                 <TableHead className="hidden w-40 md:table-cell">{t("colStructure")}</TableHead>
                 <TableHead className="hidden w-40 lg:table-cell">{t("colUpdated")}</TableHead>
-                <TableHead className={portable ? "w-52 text-right" : "w-40 text-right"}>{t("colActions")}</TableHead>
+                <TableHead className={portable ? "w-52 text-end" : "w-40 text-end"}>{t("colActions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

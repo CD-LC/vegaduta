@@ -62,8 +62,14 @@
   animation: asst-enter 0.22s ease-out both;
 }
 @keyframes asst-enter {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .asst-composer-bar {
@@ -72,7 +78,9 @@
 .asst-composer-box {
   background: var(--card, var(--background));
   border-color: var(--border);
-  box-shadow: 0 6px 24px -14px color-mix(in srgb, var(--foreground) 35%, transparent), 0 1px 2px rgb(0 0 0 / 0.04);
+  box-shadow:
+    0 6px 24px -14px color-mix(in srgb, var(--foreground) 35%, transparent),
+    0 1px 2px rgb(0 0 0 / 0.04);
 }
 
 .asst-mark {
@@ -84,7 +92,10 @@
 .asst-chip {
   background: var(--card, var(--background));
   border-color: var(--border);
-  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    transform 0.15s ease;
 }
 .asst-chip:hover {
   transform: translateY(-1px);
@@ -111,8 +122,15 @@
   animation: asst-mark-busy 1.6s ease-in-out infinite;
 }
 @keyframes asst-mark-busy {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.18); opacity: 0.6; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.6;
+  }
 }
 
 /* Live activity line: a soft light sweep across the words while the turn works ("Searching the web…"). */
@@ -132,8 +150,12 @@
   animation: asst-shimmer 2.2s linear infinite;
 }
 @keyframes asst-shimmer {
-  from { background-position: 100% 0; }
-  to { background-position: -150% 0; }
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -150% 0;
+  }
 }
 
 /* Streaming reply: a blinking caret after the last block, gone the moment the turn settles. */
@@ -142,7 +164,7 @@
   display: inline-block;
   width: 0.45em;
   height: 1em;
-  margin-left: 0.15em;
+  margin-inline-start: 0.15em;
   vertical-align: -0.12em;
   border-radius: 1px;
   background: currentColor;
@@ -150,16 +172,30 @@
   animation: asst-caret 1s steps(2, start) infinite;
 }
 @keyframes asst-caret {
-  to { visibility: hidden; }
+  to {
+    visibility: hidden;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .asst-chip,
-  .asst-turn .asst-actions { transition: none; }
-  .asst-chip:hover { transform: none; }
+  .asst-turn .asst-actions {
+    transition: none;
+  }
+  .asst-chip:hover {
+    transform: none;
+  }
   .asst-enter,
   .asst-jump,
-  .asst-mark-busy { animation: none; }
-  .asst-shimmer { animation: none; background: none; -webkit-text-fill-color: currentColor; }
-  .asst-streaming > :last-child > :last-child::after { animation: none; }
+  .asst-mark-busy {
+    animation: none;
+  }
+  .asst-shimmer {
+    animation: none;
+    background: none;
+    -webkit-text-fill-color: currentColor;
+  }
+  .asst-streaming > :last-child > :last-child::after {
+    animation: none;
+  }
 }

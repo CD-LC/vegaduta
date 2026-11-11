@@ -3,6 +3,7 @@
 import { Badge } from "../components/ui/badge";
 import Select from "../components/Select";
 import { SwitchToggle } from "../components/sections/common";
+import { useTranslations } from "../../lib/i18n";
 
 /** The per-row badges of a hosted-pool row: credential type, region label and the V484 "Free" flag. */
 export function HostedRowBadges({
@@ -21,6 +22,7 @@ export function HostedRowBadges({
   };
   credentialTypeLabels: Record<string, string>;
 }) {
+  const tHC = useTranslations("hcPlatformadminLlmprovidersHostedRowParts");
   return (
     <>
       {row.authType && row.authType !== "API_KEY" && (
@@ -35,15 +37,12 @@ export function HostedRowBadges({
         </Badge>
       )}
       {row.region && (
-        <Badge variant="secondary" title="Admin-facing region label - not automatic routing, see help text below">
+        <Badge variant="secondary" title={tHC("s11")}>
           {row.region}
         </Badge>
       )}
       {row.zeroCost && (
-        <Badge
-          variant="secondary"
-          title="Self-hosted model: calls are priced at $0, never debit a user budget, and this row is tried first. A pool of only free rows is not token-metered."
-        >
+        <Badge variant="secondary" title={tHC("s10")}>
           Free
         </Badge>
       )}
@@ -61,11 +60,9 @@ export function HostedRowBadges({
         </Badge>
       )}
       {row.smallModelActive && (
-        <Badge
-          variant="secondary"
-          title="Small-model mode: turns on this row offer at most six tools (by relevance), use the compact prompt directives and run at Fast reasoning depth. Derived from the model's size (8B or less) unless overridden."
-        >
-          Small model{row.parameterBillions ? ` · ${row.parameterBillions}B` : ""}
+        <Badge variant="secondary" title={tHC("s9")}>
+          {tHC("s8")}
+          {row.parameterBillions ? ` · ${row.parameterBillions}B` : ""}
         </Badge>
       )}
     </>
@@ -113,15 +110,13 @@ export function ToolCallGradeBadge({ grade }: { grade?: string | null }) {
  * which are always metered.
  */
 export function ZeroCostToggle({ authType, on, onToggle }: { authType?: string; on: boolean; onToggle: () => void }) {
+  const tHC = useTranslations("hcPlatformadminLlmprovidersHostedRowParts");
   if (authType === "VERTEX_ADC" || authType === "VERTEX_SERVICE_ACCOUNT") return null;
   return (
     <div className="flex items-center gap-2">
-      <SwitchToggle on={on} label="Free (self-hosted)" onClick={onToggle} />
-      <span
-        className="text-xs text-muted-foreground"
-        title="Calls are recorded at $0, never debit the per-user daily budget, and this row is tried first. When every enabled row is free, the monthly token quota is not applied either (app.free-tier.meter-zero-cost-rows restores it)."
-      >
-        Free (self-hosted): $0, tried first, unmetered
+      <SwitchToggle on={on} label={tHC("s7")} onClick={onToggle} />
+      <span className="text-xs text-muted-foreground" title={tHC("s6")}>
+        {tHC("s5")}
       </span>
     </div>
   );
@@ -151,7 +146,13 @@ function TriStateControl({
       <label className="text-xs text-muted-foreground" htmlFor={id} title={title}>
         {label}
       </label>
-      <Select id={id} className="text-xs" value={value} onChange={(e) => onChange(e.target.value)} options={TRI_STATE} />
+      <Select
+        id={id}
+        className="text-xs"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        options={TRI_STATE}
+      />
     </div>
   );
 }
@@ -168,6 +169,7 @@ export function LocalModelControls({
   draft: { authType?: string; zeroCost?: boolean; toolRouterEnabled?: string; smallModel?: string };
   setDraft: (update: (d: any) => any) => void;
 }) {
+  const tHC = useTranslations("hcPlatformadminLlmprovidersHostedRowParts");
   if (draft.authType === "VERTEX_ADC" || draft.authType === "VERTEX_SERVICE_ACCOUNT") return null;
   return (
     <div className="space-y-2">
@@ -178,15 +180,15 @@ export function LocalModelControls({
       />
       <TriStateControl
         id="hosted-tool-router"
-        label="Constrained tool router"
-        title="Auto: on when the save-time probe graded the model TEXT or NONE and the server can enforce a reply schema (Ollama, llama.cpp) or tool_choice=required (vLLM); off for STRUCTURED rows. On and Off force it."
+        label={tHC("s4")}
+        title={tHC("s3")}
         value={draft.toolRouterEnabled ?? ""}
         onChange={(v) => setDraft((d) => ({ ...d, toolRouterEnabled: v }))}
       />
       <TriStateControl
         id="hosted-small-model"
-        label="Small-model mode"
-        title="Auto: on when the model has 8B parameters or fewer (as the server reports, or as written in the tag). Turns then offer at most six tools by relevance, use the compact directives and run at Fast depth. On and Off force it."
+        label={tHC("s2")}
+        title={tHC("s1")}
         value={draft.smallModel ?? ""}
         onChange={(v) => setDraft((d) => ({ ...d, smallModel: v }))}
       />

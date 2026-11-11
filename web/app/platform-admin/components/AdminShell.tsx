@@ -15,6 +15,7 @@ import { useConfirm } from "./admin/ConfirmDialog";
 import { NAV_SECTIONS, filterEditionNav, isNavItemActive, sectionHasActive, type AdminNavItem } from "./adminNav";
 import { isPersonalEdition } from "../../lib/edition";
 import { NAV_COLLAPSED_KEY, parseCollapsed, serializeCollapsed } from "./navCollapsed";
+import { useTranslations } from "../../lib/i18n";
 
 // Governance & Operations Console IA (PLATFORM-ADMIN-GOVERNANCE-AND-CONTROLS.md
 // §3 + §10) - the admin console is organized into ten sections so an admin
@@ -70,6 +71,7 @@ export default function AdminShell({
   actions?: ReactNode;
   children: ReactNode;
 }) {
+  const tHC = useTranslations("hcPlatformadminComponentsAdminShell");
   const askConfirm = useConfirm();
   const { username, logout } = useAuth();
   const pathname = usePathname();
@@ -262,9 +264,9 @@ export default function AdminShell({
 
       {/* Sidebar */}
       <nav
-        aria-label="Platform admin sections"
-        className={`fixed inset-y-0 left-0 z-50 flex w-56 flex-col border-r border-border bg-card/60 backdrop-blur-xl transition-transform duration-300 ease-out lg:sticky lg:top-0 lg:h-dvh lg:translate-x-0 ${
-          mobileNavOpen ? "translate-x-0" : "-translate-x-full"
+        aria-label={tHC("s6")}
+        className={`fixed inset-y-0 start-0 z-50 flex w-56 flex-col border-e border-border bg-card/60 backdrop-blur-xl transition-transform duration-300 ease-out lg:sticky lg:top-0 lg:h-dvh lg:translate-x-0 ${
+          mobileNavOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"
         }`}
         // `inert` isn't in this React version's HTML attribute types (it
         // predates React's own typings for it) but is a real, well-supported
@@ -280,7 +282,7 @@ export default function AdminShell({
         <div className="flex h-16 shrink-0 items-center gap-2.5 border-b border-border px-4">
           <button
             type="button"
-            aria-label="VegaDūta brand identity"
+            aria-label={tHC("s5")}
             onClick={() => setBrandOpen(true)}
             className="flex h-9 shrink-0 items-center transition-opacity hover:opacity-80"
           >
@@ -323,7 +325,7 @@ export default function AdminShell({
                     aria-expanded={open}
                     aria-controls={`admin-nav-${groupId}`}
                     disabled={hasActive}
-                    className="flex w-full items-center justify-between rounded-md border-0 bg-transparent px-3 pb-1 pt-1 text-left text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground shadow-none select-none hover:text-foreground disabled:cursor-default disabled:hover:text-muted-foreground"
+                    className="flex w-full items-center justify-between rounded-md border-0 bg-transparent px-3 pb-1 pt-1 text-start text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground shadow-none select-none hover:text-foreground disabled:cursor-default disabled:hover:text-muted-foreground"
                   >
                     {section.label}
                     <ChevronDown
@@ -357,7 +359,7 @@ export default function AdminShell({
                             />
                             <motion.span
                               layoutId="admin-rail-accent"
-                              className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-primary"
+                              className="absolute start-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-e-full bg-primary"
                               transition={{ type: "spring", stiffness: 420, damping: 34 }}
                             />
                           </>
@@ -371,7 +373,7 @@ export default function AdminShell({
                         <span className="min-w-0 flex-1 truncate">{item.label}</span>
                         {count != null && count > 0 && (
                           <span
-                            className="ml-auto inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--warning-bg)] px-1 font-mono text-xs font-semibold text-[var(--warning-text)]"
+                            className="ms-auto inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--warning-bg)] px-1 font-mono text-xs font-semibold text-[var(--warning-text)]"
                             title={`${count} pending`}
                           >
                             {count}
@@ -403,8 +405,8 @@ export default function AdminShell({
             <button
               type="button"
               onClick={logout}
-              title="Sign out"
-              aria-label="Sign out"
+              title={tHC("s4")}
+              aria-label={tHC("s4")}
               className="flex size-8 shrink-0 items-center justify-center rounded-md border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-accent hover:text-foreground"
             >
               <Power size={15} />
@@ -449,7 +451,7 @@ export default function AdminShell({
                 type="button"
                 onClick={() => setMode("dark")}
                 aria-pressed={mode === "dark"}
-                aria-label="Dark theme"
+                aria-label={tHC("s3")}
                 className={`flex size-7 items-center justify-center rounded border-0 bg-transparent p-0 transition-colors ${mode === "dark" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
               >
                 <Moon size={13} />
@@ -458,7 +460,7 @@ export default function AdminShell({
                 type="button"
                 onClick={() => setMode("light")}
                 aria-pressed={mode === "light"}
-                aria-label="Light theme"
+                aria-label={tHC("s2")}
                 className={`flex size-7 items-center justify-center rounded border-0 bg-transparent p-0 transition-colors ${mode === "light" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
               >
                 <Sun size={13} />
@@ -489,7 +491,8 @@ export default function AdminShell({
             <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-destructive">
               <Siren size={15} className="shrink-0" aria-hidden="true" />
               <span className="truncate">
-                PLATFORM STOPPED{killSwitch.reason ? ` — ${killSwitch.reason}` : ""}
+                {tHC("s1")}
+                {killSwitch.reason ? ` — ${killSwitch.reason}` : ""}
                 {killSwitch.stoppedAt ? ` · since ${new Date(killSwitch.stoppedAt).toLocaleString()}` : ""}
               </span>
             </div>

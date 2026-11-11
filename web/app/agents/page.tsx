@@ -46,36 +46,54 @@ function AgentsPageInner() {
   // before providers/agents arrive (see usePageReady / RouteTransition).
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  // /agents is the index of agents; the workbench opens for a chosen agent
-  // (?agentId=), a new draft (?new=1), a template or the Agent Lab deep link.
-  const showWorkbench =
+  // /agents is the workbench: once the agents list lands it auto-selects the
+  // most recent saved agent (useWorkbenchBase), and a tenant with none gets
+  // the deterministic first-run draft - the behaviour the console's /agents
+  // links and e2e specs assume. The index of agents is the explicit
+  // ?view=index surface, reached through the workbench's "All agents" button;
+  // the ?section/&focus= deep links without a chosen agent also land there
+  // ("pick an agent"). Every other param combination opens the workbench.
+  const wantedSection = searchParams.get("section");
+  const wantedFocus = searchParams.get("focus");
+  const view = searchParams.get("view");
+  const agentPicked =
     !!selectedAgentId ||
     searchParams.get("new") === "1" ||
     !!searchParams.get("template") ||
     searchParams.get("lab") === "open" ||
-    searchParams.get("view") === "workbench";
+    view === "workbench";
+  const showWorkbench = agentPicked || (view !== "index" && !wantedSection && !wantedFocus);
 
   const refresh = useCallback(async () => {
     // All three reads are independent - firing them together instead of
     // awaiting collections after providers+agents removes a full backend
-    // round trip from this page's time-to-ready on every mount. allSettled
-    // keeps the previous per-source failure semantics exactly: a collections
-    // failure still leaves providers/agents populated (and vice versa).
-    const [providersRes, agentsRes, collectionsRes] = await Promise.allSettled([
-      api.listProviders(),
-      api.listAgents(),
-      api.listCollections(),
-    ]);
-    // Surfaced by the workbench's own "activate a provider first" validation
-    // if providers/agents stay empty - no separate banner needed here.
-    if (providersRes.status === "fulfilled") setProviders(providersRes.value);
-    if (agentsRes.status === "fulfilled") {
-      setAgents(agentsRes.value);
-      setLoadError(null);
-    } else {
-      setLoadError(tu("loadError"));
-    }
-    setCollections(collectionsRes.status === "fulfilled" ? collectionsRes.value : []);
+    // round trip from this page's time-to-ready on every mount. Each slice is
+    // stored as its OWN fetch resolves rather than after allSettled: the
+    // workbench auto-selects off `agents`, and holding it until the slowest
+    // of the three resolved left the page in the draft/no-selection state
+    // for as long as the slowest read took (issue #294: 20-30s+ on stacks
+    // where collections is slow). Per-source failure semantics unchanged - a
+    // collections failure still leaves providers/agents populated (and vice
+    // versa); `loaded` still waits for all three so agentsLoaded and the
+    // route-transition hold keep their old meaning.
+    const providersP = api
+      .listProviders()
+      .then(setProviders)
+      // Surfaced by the workbench's own "activate a provider first"
+      // validation if providers stay empty - no separate banner needed here.
+      .catch(() => {});
+    const agentsP = api
+      .listAgents()
+      .then((list) => {
+        setAgents(list);
+        setLoadError(null);
+      })
+      .catch(() => setLoadError(tu("loadError")));
+    const collectionsP = api
+      .listCollections()
+      .then(setCollections)
+      .catch(() => setCollections([]));
+    await Promise.allSettled([providersP, agentsP, collectionsP]);
     setLoaded(true);
   }, [tu]);
 
@@ -120,8 +138,6 @@ function AgentsPageInner() {
 
   // A link that arrived here without an agent but asking for a place inside one (?section=behavior&focus=<setting>,
   // from the "Where do I control...?" page) keeps that request through the choice of agent.
-  const wantedSection = searchParams.get("section");
-  const wantedFocus = searchParams.get("focus");
   const agentHref = (id: string) => openAgentHref(id, { section: wantedSection, focus: wantedFocus });
 
   return (
@@ -133,7 +149,8 @@ function AgentsPageInner() {
           <>
             {showWorkbench && (
               <Button asChild variant="outline" size="sm">
-                <Link href="/agents">
+                {/* Bare /agents auto-opens the most recent agent again - the index needs the explicit view param. */}
+                <Link href="/agents?view=index">
                   <LayoutList size={14} aria-hidden="true" /> {tu("allAgents")}
                 </Link>
               </Button>

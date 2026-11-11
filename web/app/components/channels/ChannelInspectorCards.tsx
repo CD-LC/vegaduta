@@ -205,7 +205,7 @@ export function TestSendCard({
     }
   }
   return (
-    <form className="w-full space-y-2 rounded-xl border border-border bg-muted/40 p-4 text-left" onSubmit={submit}>
+    <form className="w-full space-y-2 rounded-xl border border-border bg-muted/40 p-4 text-start" onSubmit={submit}>
       <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("testSendTitle")}</div>
       <div className="flex items-center gap-2">
         <Input
@@ -271,7 +271,7 @@ export function ChannelHealthCard({ channelKey, t }: { channelKey: any; t: any }
     }
   }
   return (
-    <div className="w-full rounded-xl border border-border bg-muted/40 p-4 text-left">
+    <div className="w-full rounded-xl border border-border bg-muted/40 p-4 text-start">
       <div className="flex items-center justify-between gap-2">
         <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           {t("testConnectionTitle")}
@@ -327,7 +327,7 @@ export function InboundRoutingCard({
   const savedAgent = savedValue ? (agents || []).find((a) => a.id === savedValue) : undefined;
   const dirty = (value || "") !== (savedValue || "");
   return (
-    <div className="w-full rounded-xl border border-border bg-muted/40 p-4 text-left" data-testid="route-box">
+    <div className="w-full rounded-xl border border-border bg-muted/40 p-4 text-start" data-testid="route-box">
       <div className="mb-3 flex items-center justify-between gap-2">
         <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           {t("inboundRoutingTitle")}

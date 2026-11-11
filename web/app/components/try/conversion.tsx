@@ -243,7 +243,7 @@ export function RegisterBanner({
           >
             <X aria-hidden="true" className="size-3.5" />
           </button>
-          <p className="pr-8 text-sm font-medium text-foreground">{headline}</p>
+          <p className="pe-8 text-sm font-medium text-foreground">{headline}</p>
           <div className="mt-3">
             <OneTapButtons token={token} signupHref={signupHref} />
           </div>

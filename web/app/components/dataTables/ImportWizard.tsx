@@ -310,13 +310,13 @@ export default function ImportWizard({ config, onCreated, onCancel }: Props) {
                 {t("impPreviewHeading", { count: preview.length })}
               </h4>
               <div className="overflow-x-auto rounded-lg border border-border">
-                <table className="w-full text-left text-xs">
+                <table className="w-full text-start text-xs">
                   <thead className="bg-muted">
                     <tr>
                       {columns.map((c, i) => (
                         <th key={i} className="whitespace-nowrap px-3 py-2 font-medium text-muted-foreground">
                           {c.name}
-                          <span className="ml-1.5 font-normal">{t(`type_${c.type}`)}</span>
+                          <span className="ms-1.5 font-normal">{t(`type_${c.type}`)}</span>
                         </th>
                       ))}
                     </tr>
@@ -342,7 +342,7 @@ export default function ImportWizard({ config, onCreated, onCancel }: Props) {
               <p className="mb-1 flex items-center gap-2 text-xs font-medium text-foreground">
                 <AlertTriangle size={14} aria-hidden="true" /> {t("impProblemsHeading", { count: mapped.skipped })}
               </p>
-              <ul className="list-disc pl-5 text-xs text-muted-foreground">
+              <ul className="list-disc ps-5 text-xs text-muted-foreground">
                 {mapped.problems.slice(0, 5).map((p) => (
                   <li key={`${p.row}-${p.column}`}>
                     {t("impProblem", { row: p.row, column: p.column, message: t(`cellError_${p.error}`) })}

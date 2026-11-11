@@ -25,7 +25,7 @@ export default function McpAccessHint() {
           <p className="m-0 font-medium text-foreground">{t("keysHintTitle")}</p>
           <p className="m-0 text-muted-foreground">{t("keysHintMcp")}</p>
           <p className="m-0 text-muted-foreground">
-            <KeyRound size={12} className="mr-1 inline" aria-hidden="true" />
+            <KeyRound size={12} className="me-1 inline" aria-hidden="true" />
             {t("keysHintRest")}{" "}
             <Link href="/admin/api-keys" className="font-medium text-primary underline-offset-4 hover:underline">
               {t("keysHintRestLink")}

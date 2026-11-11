@@ -242,7 +242,7 @@ export default function CodingTasksPanel({ onLoaded }: { onLoaded?: () => void }
                     type="button"
                     aria-pressed={task.taskId === selectedId}
                     onClick={() => setSelectedId(task.taskId)}
-                    className={`flex w-full flex-col gap-1 rounded-md border px-3 py-2 text-left text-sm transition-colors ${
+                    className={`flex w-full flex-col gap-1 rounded-md border px-3 py-2 text-start text-sm transition-colors ${
                       task.taskId === selectedId ? "border-ring bg-secondary" : "border-border hover:bg-secondary/50"
                     }`}
                   >

@@ -154,7 +154,7 @@ export default function AgentTemplatesPage() {
         <Search
           size={16}
           aria-hidden="true"
-          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
         />
         <Input
           type="search"
@@ -162,7 +162,7 @@ export default function AgentTemplatesPage() {
           onChange={(e) => setQuery(e.target.value)}
           placeholder={tp("templatesSearchPlaceholder")}
           aria-label={tp("templatesSearchLabel")}
-          className="pl-9"
+          className="ps-9"
         />
       </div>
 
@@ -197,9 +197,7 @@ export default function AgentTemplatesPage() {
               aria-expanded={showAllStarters}
               onClick={() => setShowAllStarters((v) => !v)}
             >
-              {showAllStarters
-                ? tp("templatesShowFewer")
-                : tp("templatesShowAll", { count: matchingStarters.length })}
+              {showAllStarters ? tp("templatesShowFewer") : tp("templatesShowAll", { count: matchingStarters.length })}
             </Button>
           </div>
         )}
@@ -254,7 +252,7 @@ export default function AgentTemplatesPage() {
       </div>
 
       <div className="-mt-4 mb-8 flex flex-wrap items-center gap-2" role="group" aria-label={t("forWhoLabel")}>
-        <span className="mr-1 text-sm font-medium text-muted-foreground">{t("forWhoLabel")}</span>
+        <span className="me-1 text-sm font-medium text-muted-foreground">{t("forWhoLabel")}</span>
         <Button
           variant={activePersona === "all" ? "default" : "outline"}
           size="sm"

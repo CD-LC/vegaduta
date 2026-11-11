@@ -297,7 +297,14 @@ def apply_files(workspaces_dir: str, ws_id: str, files: list[dict]) -> dict:
                 deleted.append(rel)
             continue
         os.makedirs(os.path.dirname(abs_path), exist_ok=True)
-        with open(abs_path, "w", encoding="utf-8") as out:
+        # realpath-then-open is a TOCTOU window in local run mode: a process
+        # still alive in the workspace could swap a path component for a
+        # symlink between the check above and this open. O_NOFOLLOW refuses
+        # the final component being a link; directories are covered because
+        # makedirs never follows an attacker-planted symlink out of ws_path
+        # (it only creates missing components inside it).
+        fd = os.open(abs_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o644)
+        with os.fdopen(fd, "w", encoding="utf-8") as out:
             out.write(f.get("content", ""))
         written.append(rel)
     meta["iterations"] += 1

@@ -17,6 +17,7 @@
 // empty shell, which is too early).
 
 import { useEffect, useMemo, useRef, type IframeHTMLAttributes, type Ref } from "react";
+import { useTranslations } from "../lib/i18n";
 
 export const SANDBOX_FRAME_SRC = "/sandbox-frame.html";
 
@@ -44,6 +45,7 @@ export function sandboxWithoutSameOrigin(sandbox: string): string {
 }
 
 export default function SandboxFrame({ html, sandbox = "allow-scripts", onLoad, ref, ...rest }: Props) {
+    const tHC = useTranslations("hcBuildSandboxFrame");
   const own = useRef<HTMLIFrameElement | null>(null);
   const htmlRef = useRef(html);
   const onLoadRef = useRef(onLoad);
@@ -74,7 +76,7 @@ export default function SandboxFrame({ html, sandbox = "allow-scripts", onLoad, 
 
   return (
     <iframe
-      title="Sandboxed preview"
+      title={tHC("s1")}
       {...rest}
       key={frameKey}
       ref={(el) => {

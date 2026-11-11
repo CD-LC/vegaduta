@@ -1,12 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  FlaskConical,
-  Plus,
-  RefreshCw,
-  Sparkles,
-} from "lucide-react";
+import { FlaskConical, Plus, RefreshCw, Sparkles } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "../../components/ui/alert";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
@@ -35,6 +30,7 @@ import { repeatsOption } from "./evalRunOptions";
 import { DatasetCardHeader } from "./evalDatasets/DatasetCardHeader";
 import { EvalDatasetsUnavailable } from "./evalDatasets/EvalDatasetsUnavailable";
 import { useEvalDownloads } from "./evalDatasets/useEvalDownloads";
+import { useTranslations } from "../../lib/i18n";
 
 /**
  * Eval datasets + regression-run history for one agent — the offline half of
@@ -63,11 +59,18 @@ import { useEvalDownloads } from "./evalDatasets/useEvalDownloads";
 const POLL_MS = 5000;
 
 // A new dataset pins no mode (null): its runs follow the workspace default, the full pipeline as shipped.
-const EMPTY_CREATE_DRAFT: CreateDatasetDraft = { name: "", description: "", threshold: "0.7", toolExec: null, autoApprove: false };
+const EMPTY_CREATE_DRAFT: CreateDatasetDraft = {
+  name: "",
+  description: "",
+  threshold: "0.7",
+  toolExec: null,
+  autoApprove: false,
+};
 const EMPTY_CASE_DRAFT: CaseDraft = { message: "", expected: "", tools: "" };
 const DEFAULT_RUN_OPTS: RunOptionValues = { judgeModel: "", strictJudge: false, repeats: "1", budget: "5", mode: "" };
 
 export default function EvalDatasetsSection({ agentId }: { agentId: string | null }) {
+  const tHC = useTranslations("hcAgentsQualityEvalDatasetsSection");
   // resolveEvalApi() is stable per bundle — memo once.
   const evalApi = useMemo(() => resolveEvalApi(), []);
   // Evals hooks (2026-09-09): seed-golden is feature-detected twice - the
@@ -421,7 +424,7 @@ export default function EvalDatasetsSection({ agentId }: { agentId: string | nul
 
   return (
     <Section
-      title="Eval datasets & regression runs"
+      title={tHC("s7")}
       description="Golden test cases replayed against this agent and scored by the same judges as live turns — so a prompt or model change has a before/after number."
       actions={
         <div className={SECTION_ACTION_GROUP_CLASS}>
@@ -429,19 +432,13 @@ export default function EvalDatasetsSection({ agentId }: { agentId: string | nul
             <RefreshCw size={14} className={loading ? "animate-spin" : undefined} aria-hidden="true" /> Refresh
           </Button>
           {hooksApi && !seedHidden && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={seedGolden}
-              disabled={seeding || busy}
-              title="Create a dataset from the platform's built-in golden regression cases"
-            >
+            <Button variant="outline" size="sm" onClick={seedGolden} disabled={seeding || busy} title={tHC("s6")}>
               <Sparkles size={14} className={seeding ? "animate-pulse" : undefined} aria-hidden="true" />
               {seeding ? "Seeding…" : "Seed from golden set"}
             </Button>
           )}
           <Button size="sm" onClick={() => setShowCreate((v) => !v)}>
-            <Plus size={14} aria-hidden="true" /> New dataset
+            <Plus size={14} aria-hidden="true" /> {tHC("s2")}
           </Button>
         </div>
       }
@@ -449,9 +446,9 @@ export default function EvalDatasetsSection({ agentId }: { agentId: string | nul
       {datasetsFailed && (
         // Failure banner — distinct from the empty state below on purpose.
         <Alert variant="destructive">
-          <AlertTitle>Couldn&apos;t load eval datasets</AlertTitle>
+          <AlertTitle>{tHC("s5")}</AlertTitle>
           <AlertDescription className="flex items-center gap-3">
-            This is a load failure, not an empty list.
+            {tHC("s4")}
             <Button variant="outline" size="sm" onClick={refreshDatasets}>
               Retry
             </Button>
@@ -477,12 +474,12 @@ export default function EvalDatasetsSection({ agentId }: { agentId: string | nul
       {!datasetsFailed && datasets.length === 0 && !loading ? (
         <EmptyState
           icon={FlaskConical}
-          title="No eval datasets yet"
+          title={tHC("s3")}
           description="Create a dataset of golden questions (and optionally expected answers), then run it after every prompt or model change to catch regressions before your customers do."
           action={
             <div className="flex flex-wrap items-center justify-center gap-2">
               <Button size="sm" onClick={() => setShowCreate(true)}>
-                <Plus size={14} aria-hidden="true" /> New dataset
+                <Plus size={14} aria-hidden="true" /> {tHC("s2")}
               </Button>
               {hooksApi && !seedHidden && (
                 <Button variant="outline" size="sm" onClick={seedGolden} disabled={seeding}>
@@ -510,14 +507,14 @@ export default function EvalDatasetsSection({ agentId }: { agentId: string | nul
                     onDelete={() => deleteDataset(dataset.id)}
                   />
                   {dataset.description && (
-                    <p className="mt-1 pl-6 text-sm text-muted-foreground">{dataset.description}</p>
+                    <p className="mt-1 ps-6 text-sm text-muted-foreground">{dataset.description}</p>
                   )}
 
                   {expanded && (
                     <div className="mt-4 space-y-6 border-t border-border pt-4">
                       {detailFailed && (
                         <Alert variant="destructive">
-                          <AlertTitle>Couldn&apos;t load this dataset</AlertTitle>
+                          <AlertTitle>{tHC("s1")}</AlertTitle>
                           <AlertDescription className="flex items-center gap-3">
                             <Button variant="outline" size="sm" onClick={() => refreshDetail(dataset.id)}>
                               Retry

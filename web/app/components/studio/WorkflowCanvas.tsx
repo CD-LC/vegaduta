@@ -33,6 +33,7 @@ import { chainFromAgents, newStepId, type StarterChain } from "./studioContent";
 import { EMPTY_RUN, applyRunEvent, type RunState, type StepState } from "./workflowRun";
 import WorkflowRunPanel from "./WorkflowRunPanel";
 import { AddMenu, StepIcon } from "./workflowStepParts";
+import { useTranslations } from "../../lib/i18n";
 
 // The workflow designer + runner. Steps are the production designer's own
 // vocabulary (trigger / agent / condition / approval / output); a run
@@ -79,6 +80,7 @@ export default function WorkflowCanvas({
   onWorkflowsChanged,
   onFirstRun,
 }: Props) {
+  const tHC = useTranslations("hcComponentsStudioWorkflowCanvas");
   const [selectedId, setSelectedId] = useState<string | null>(workflows.find((w) => w.mine)?.id ?? null);
   const [name, setName] = useState("");
   const [def, setDef] = useState<WorkflowDefinition>({ steps: [] });
@@ -87,6 +89,10 @@ export default function WorkflowCanvas({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const [run, setRun] = useState<RunState>(EMPTY_RUN);
+  // busy = anything in flight that must freeze the canvas: a live run OR a
+  // draft save/create. Without `saving` here, the AddMenu and step cards stay
+  // editable while the draft POST is in flight - edits could land after the
+  // server stored the draft and silently diverge from what was persisted.
   const [deciding, setDeciding] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const firstRunRef = useRef(false);
@@ -233,7 +239,8 @@ export default function WorkflowCanvas({
   const stop = () => abortRef.current?.abort();
 
   const agentName = (id: unknown) => agents.find((a) => a.id === id)?.name ?? "(pick an agent)";
-  const canRun = def.steps.length > 0 && !readOnly && !outOfBudget && !run.running && !saving;
+  const busy = run.running || saving;
+  const canRun = def.steps.length > 0 && !readOnly && !outOfBudget && !busy;
 
   return (
     <div className="space-y-5">
@@ -255,17 +262,17 @@ export default function WorkflowCanvas({
         ))}
         {!readOnly && workflows.length < workflowsMax && chainFromAgents(agents) && (
           <Button variant="outline" size="sm" onClick={() => startNew(chainFromAgents(agents))}>
-            <Layers aria-hidden="true" className="mr-1 h-3.5 w-3.5 shrink-0" /> Chain my agents
+            <Layers aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" /> {tHC("s18")}
           </Button>
         )}
         {!readOnly && workflows.length < workflowsMax && (
           <Button variant="outline" size="sm" onClick={() => startNew()}>
-            <Plus aria-hidden="true" className="mr-1 h-3.5 w-3.5 shrink-0" /> Blank
+            <Plus aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" /> Blank
           </Button>
         )}
         {workflows.length >= workflowsMax && (
           <span className="text-xs text-muted-foreground">
-            This sandbox holds {workflowsMax} workflows. Delete one to design another.
+            {tHC("s17")} {workflowsMax} {tHC("s16")}
           </span>
         )}
       </div>
@@ -293,15 +300,15 @@ export default function WorkflowCanvas({
             />
             <Button variant="outline" size="sm" onClick={save} disabled={!dirty || saving || readOnly}>
               {saving ? (
-                <Loader2 aria-hidden="true" className="mr-1 h-3.5 w-3.5 animate-spin shrink-0" />
+                <Loader2 aria-hidden="true" className="me-1 h-3.5 w-3.5 animate-spin shrink-0" />
               ) : (
-                <Save aria-hidden="true" className="mr-1 h-3.5 w-3.5 shrink-0" />
+                <Save aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" />
               )}{" "}
               Save
             </Button>
             {selected && !readOnly && (
-              <Button variant="ghost" size="sm" onClick={remove} disabled={run.running}>
-                <Trash2 aria-hidden="true" className="mr-1 h-3.5 w-3.5 shrink-0" /> Delete
+              <Button variant="ghost" size="sm" onClick={remove} disabled={busy}>
+                <Trash2 aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" /> Delete
               </Button>
             )}
             {saveError && <span className="text-sm text-destructive">{saveError}</span>}
@@ -319,14 +326,14 @@ export default function WorkflowCanvas({
                       state={st}
                       agents={agents}
                       agentName={agentName}
-                      readOnly={readOnly || run.running}
+                      readOnly={readOnly || busy}
                       onChange={(patch) => updateStep(step.id, patch)}
                       onRemove={step.type === "trigger" ? undefined : () => removeStep(step.id)}
                     />
                     {i < def.steps.length - 1 || step.type !== "output" ? (
                       <div className="flex flex-col items-center justify-center">
                         <ArrowRight aria-hidden="true" className="h-4 w-4 text-muted-foreground shrink-0" />
-                        {!readOnly && !run.running && def.steps.length < 8 && <AddMenu onAdd={(t) => addStep(t, i)} />}
+                        {!readOnly && !busy && def.steps.length < 8 && <AddMenu onAdd={(t) => addStep(t, i)} />}
                       </div>
                     ) : null}
                   </div>
@@ -344,18 +351,18 @@ export default function WorkflowCanvas({
               value={input}
               rows={2}
               maxLength={2000}
-              disabled={readOnly || run.running}
-              placeholder="The job, in your own words."
+              disabled={readOnly || busy}
+              placeholder={tHC("s15")}
               onChange={(e) => setInput(e.target.value)}
             />
             <div className="mt-2 flex flex-wrap items-center gap-2">
               {!run.running ? (
                 <Button onClick={execute} disabled={!canRun}>
-                  <Play aria-hidden="true" className="mr-2 h-4 w-4 shrink-0" /> Run workflow
+                  <Play aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> {tHC("s14")}
                 </Button>
               ) : (
                 <Button variant="outline" onClick={stop}>
-                  <Square aria-hidden="true" className="mr-2 h-4 w-4 shrink-0" /> Stop watching
+                  <Square aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> {tHC("s13")}
                 </Button>
               )}
               {run.status && (
@@ -369,7 +376,7 @@ export default function WorkflowCanvas({
                   {run.ms != null ? ` · ${(run.ms / 1000).toFixed(1)} s` : ""}
                 </span>
               )}
-              {outOfBudget && <span className="text-sm text-muted-foreground">Message allowance used up.</span>}
+              {outOfBudget && <span className="text-sm text-muted-foreground">{tHC("s12")}</span>}
               {run.error && <span className="text-sm text-destructive">{run.error}</span>}
             </div>
           </div>
@@ -398,6 +405,7 @@ function StepCard({
   onChange: (patch: Partial<WorkflowStep>) => void;
   onRemove?: () => void;
 }) {
+  const tHC = useTranslations("hcComponentsStudioWorkflowCanvas");
   const status = state?.status ?? "idle";
   const ring =
     status === "running" || status === "waiting"
@@ -436,7 +444,7 @@ function StepCard({
             type="button"
             onClick={onRemove}
             className="text-muted-foreground hover:text-destructive"
-            aria-label="Remove step"
+            aria-label={tHC("s11")}
           >
             <Trash2 aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
           </button>
@@ -446,11 +454,7 @@ function StepCard({
         {step.type}
       </Badge>
 
-      {step.type === "trigger" && (
-        <p className="text-xs text-muted-foreground">
-          Starts with what you type below. On a real account: a WhatsApp message, a form, a webhook, a schedule.
-        </p>
-      )}
+      {step.type === "trigger" && <p className="text-xs text-muted-foreground">{tHC("s10")}</p>}
       {step.type === "agent" && (
         <div className="space-y-2">
           <select
@@ -459,7 +463,7 @@ function StepCard({
             onChange={(e) => onChange({ config: { agentId: e.target.value } })}
             className="w-full rounded-lg border border-border/60 bg-background px-2 py-1.5 text-xs"
           >
-            <option value="">Pick an agent…</option>
+            <option value="">{tHC("s9")}</option>
             {agents
               .filter((a) => a.mine || a.id === step.config.agentId)
               .map((a) => (
@@ -478,21 +482,21 @@ function StepCard({
             placeholder="Instruction. Use {{input}} and {{previous}}."
           />
           <p className="text-[10px] text-muted-foreground">
-            {agentName(step.config.agentId)} · {"{{input}}"} = trigger text, {"{{previous}}"} = last step&apos;s output
+            {agentName(step.config.agentId)} · {"{{input}}"} {tHC("s8")} {"{{previous}}"} {tHC("s7")}
           </p>
         </div>
       )}
       {step.type === "condition" && (
         <div className="space-y-2">
           <label className="block text-xs">
-            Continue only if the previous output contains
+            {tHC("s6")}
             <input
               value={String(step.config.contains ?? "")}
               disabled={readOnly}
               maxLength={80}
               onChange={(e) => onChange({ config: { contains: e.target.value } })}
               className="mt-1 w-full rounded-lg border border-border/60 bg-background px-2 py-1 text-xs"
-              placeholder="e.g. urgency: high"
+              placeholder={tHC("s5")}
             />
           </label>
           <label className="block text-xs">
@@ -503,8 +507,8 @@ function StepCard({
               onChange={(e) => onChange({ config: { onFalse: e.target.value } })}
               className="mt-1 w-full rounded-lg border border-border/60 bg-background px-2 py-1 text-xs"
             >
-              <option value="stop">stop the workflow</option>
-              <option value="skip">skip the next step</option>
+              <option value="stop">{tHC("s4")}</option>
+              <option value="skip">{tHC("s3")}</option>
             </select>
           </label>
         </div>
@@ -517,14 +521,10 @@ function StepCard({
           maxLength={200}
           onChange={(e) => onChange({ config: { message: e.target.value } })}
           className="w-full rounded-lg border border-border/60 bg-background p-2 text-xs"
-          placeholder="What to ask the human."
+          placeholder={tHC("s2")}
         />
       )}
-      {step.type === "output" && (
-        <p className="text-xs text-muted-foreground">
-          Shown here. On a real account: email, WhatsApp, Telegram, Google Drive, a webhook.
-        </p>
-      )}
+      {step.type === "output" && <p className="text-xs text-muted-foreground">{tHC("s1")}</p>}
       {state?.summary && status !== "idle" && (
         <p className="mt-2 border-t border-border/40 pt-2 text-[11px] text-muted-foreground">{state.summary}</p>
       )}

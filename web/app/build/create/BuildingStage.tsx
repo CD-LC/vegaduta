@@ -8,7 +8,7 @@ import { summariseApply } from "../../components/brief/logic";
 import type { Blueprint } from "../../lib/build/blueprint";
 import type { explainBuildError, RawBuildError } from "../../lib/build/explainError";
 import type { ApplyJob } from "../../components/brief/types";
-
+import { useTranslations } from "../../lib/i18n";
 
 /** Stage 3: build progress, or the explained failure. */
 export default function BuildingStage({
@@ -36,6 +36,7 @@ export default function BuildingStage({
   onRetry: () => void;
   onBack: () => void;
 }) {
+    const tHC = useTranslations("hcBuildCreateBuildingStage");
   return (
     <motion.div
       key="building"
@@ -69,17 +70,35 @@ export default function BuildingStage({
               {bp.output === "agent" ? `Building ${bp.agent.name || "your agent"}…` : "Saving your app to Git…"}
             </h2>
             {/* The ticking clock is visual only; announcing it every second would drown the real updates. */}
-            <span className="text-xs tabular-nums text-muted-foreground" aria-hidden>{elapsed}s</span>
+            <span className="text-xs tabular-nums text-muted-foreground" aria-hidden>
+              {elapsed}s
+            </span>
           </div>
-          <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct ?? undefined} aria-label="Build progress">
+          <div
+            className="mt-3 h-2 overflow-hidden rounded-full bg-muted"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={pct ?? undefined}
+            aria-label={tHC("s1")}
+          >
             {pct == null ? (
               reduceMotion ? (
                 <div className="h-full w-1/3 rounded-full bg-primary/70" />
               ) : (
-                <motion.div className="h-full w-1/3 rounded-full bg-primary" animate={{ x: ["-100%", "300%"] }} transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }} />
+                <motion.div
+                  className="h-full w-1/3 rounded-full bg-primary"
+                  animate={{ x: ["-100%", "300%"] }}
+                  transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+                />
               )
             ) : (
-              <motion.div className="h-full rounded-full bg-primary" initial={false} animate={{ width: `${Math.max(pct, 6)}%` }} transition={{ duration: 0.4 }} />
+              <motion.div
+                className="h-full rounded-full bg-primary"
+                initial={false}
+                animate={{ width: `${Math.max(pct, 6)}%` }}
+                transition={{ duration: 0.4 }}
+              />
             )}
           </div>
           <p className="mt-2 text-sm text-muted-foreground" role="status" aria-live="polite">
@@ -98,11 +117,13 @@ export default function BuildingStage({
                   ) : s.status === "FAILED" ? (
                     <XCircle aria-hidden="true" className="size-4 text-destructive" />
                   ) : s.status === "PENDING" ? (
-                    <span className="ml-1.5 mr-0.5 size-2 rounded-full bg-muted-foreground/40" />
+                    <span className="ms-1.5 me-0.5 size-2 rounded-full bg-muted-foreground/40" />
                   ) : (
                     <Loader2 aria-hidden="true" className="size-4 animate-spin text-primary" />
                   )}
-                  <span className={s.status === "PENDING" ? "text-muted-foreground" : "text-foreground"}>{stepLabel(s.kind)}</span>
+                  <span className={s.status === "PENDING" ? "text-muted-foreground" : "text-foreground"}>
+                    {stepLabel(s.kind)}
+                  </span>
                 </li>
               ))}
             </ol>

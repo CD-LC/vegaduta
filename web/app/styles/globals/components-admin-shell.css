@@ -20,7 +20,7 @@
     flex-direction: column;
     gap: 3px;
     padding: 18px 14px;
-    border-right: 1px solid var(--ax-border2);
+    border-inline-end: 1px solid var(--ax-border2);
   }
 
   /* Below 900px the two-column admin shell (216px subnav rail + main panel)
@@ -48,7 +48,7 @@
        * this reads as a tab strip rather than a broken/overflowing list. */
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
-      border-right: none;
+      border-inline-end: none;
       border-bottom: 1px solid var(--ax-border2);
     }
 

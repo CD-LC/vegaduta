@@ -75,7 +75,7 @@ export default function ElevenLabsVoicesSection({ el }: { el: ElevenLabsVoices }
           type="file"
           accept="audio/*"
           onChange={(e) => el.setVoiceFile(e.target.files?.[0] || null)}
-          className="block w-full text-xs text-muted-foreground file:mr-2 file:rounded-md file:border file:border-border file:bg-background file:px-2 file:py-1 file:text-xs file:font-medium file:text-foreground"
+          className="block w-full text-xs text-muted-foreground file:me-2 file:rounded-md file:border file:border-border file:bg-background file:px-2 file:py-1 file:text-xs file:font-medium file:text-foreground"
           required
         />
         <div className="flex flex-wrap items-center gap-2">

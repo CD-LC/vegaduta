@@ -9,6 +9,7 @@ import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import type { PluginEntry } from "./serverFetch";
 import { pluginDownloadPath } from "./serverFetch";
+import { useTranslations } from "../../lib/i18n";
 
 // One marketplace card. Honesty rule (same as TemplateCard): every figure
 // shown - version, release date, size, sha256 - is real API data computed
@@ -81,6 +82,7 @@ function Sha256Chip({ sha256 }: { sha256: string }) {
 }
 
 export default function PluginCard({ plugin }: { plugin: PluginEntry }) {
+  const tHC = useTranslations("hcComponentsPluginsPluginCard");
   const Icon = PLUGIN_ICONS[plugin.id] ?? Puzzle;
   const released = plugin.releasedAt ? formatReleasedAt(plugin.releasedAt) : null;
   const downloadUrl =
@@ -103,7 +105,7 @@ export default function PluginCard({ plugin }: { plugin: PluginEntry }) {
             </span>
           ) : (
             <span className="rounded-full border border-border/70 px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Coming soon
+              {tHC("s4")}
             </span>
           )}
         </div>
@@ -128,17 +130,18 @@ export default function PluginCard({ plugin }: { plugin: PluginEntry }) {
                   download from the API, never a client-side navigation. */}
               <a href={downloadUrl} download={plugin.artifact.fileName}>
                 <Download size={14} strokeWidth={2} aria-hidden="true" />
-                Download ({formatSize(plugin.artifact.sizeBytes)})
+                {tHC("s3")}
+                {formatSize(plugin.artifact.sizeBytes)})
               </a>
             </Button>
           ) : (
-            <span className="text-xs text-muted-foreground">No build published yet - check back soon.</span>
+            <span className="text-xs text-muted-foreground">{tHC("s2")}</span>
           )}
           {plugin.externalStoreUrl && (
             <Button asChild variant="outline" size="sm">
               <a href={plugin.externalStoreUrl} target="_blank" rel="noopener noreferrer">
                 <ExternalLink size={14} strokeWidth={2} aria-hidden="true" />
-                Official store
+                {tHC("s1")}
               </a>
             </Button>
           )}

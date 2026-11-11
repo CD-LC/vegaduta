@@ -41,7 +41,7 @@ export default function AttachMenu({
   if (!canFiles && !onCamera && !onCall) return null;
 
   const item =
-    "flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left text-sm hover:bg-accent focus-visible:bg-accent focus-visible:outline-none disabled:opacity-50";
+    "flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-start text-sm hover:bg-accent focus-visible:bg-accent focus-visible:outline-none disabled:opacity-50";
 
   return (
     <>
@@ -82,7 +82,9 @@ export default function AttachMenu({
               <FileUp size={16} aria-hidden="true" className="shrink-0 text-muted-foreground" />
               <span className="min-w-0">
                 <span className="block font-medium text-foreground">{t("attachUpload")}</span>
-                <span className="block text-xs text-muted-foreground">{searchable ? t("attachUploadSearchable") : t("attachUploadPlain")}</span>
+                <span className="block text-xs text-muted-foreground">
+                  {searchable ? t("attachUploadSearchable") : t("attachUploadPlain")}
+                </span>
               </span>
             </button>
           )}

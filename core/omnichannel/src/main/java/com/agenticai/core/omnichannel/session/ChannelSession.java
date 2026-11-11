@@ -9,41 +9,44 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Maps one external channel identity (a WhatsApp phone number today, a
- * Telegram chat id once Stage 3 lands) to the {@code sessionId}
- * {@link com.agenticai.core.agents.memory.SessionMemoryService} already uses
- * for Redis-backed conversation memory, and to which agent handles it - PRD
- * Section 3.2's "each user channel must map to a unique session_id" rule.
+ * Maps one external channel identity (a WhatsApp phone number today, a Telegram chat id once Stage
+ * 3 lands) to the {@code sessionId} {@link com.agenticai.core.agents.memory.SessionMemoryService}
+ * already uses for Redis-backed conversation memory, and to which agent handles it - PRD Section
+ * 3.2's "each user channel must map to a unique session_id" rule.
  *
- * <p>{@code agentId} is a plain UUID column, not a JPA {@code @ManyToOne} -
- * resolving a session only needs to know which agent to route to, not to
- * eagerly load the full {@code Agent} entity graph every inbound message.
+ * <p>{@code agentId} is a plain UUID column, not a JPA {@code @ManyToOne} - resolving a session
+ * only needs to know which agent to route to, not to eagerly load the full {@code Agent} entity
+ * graph every inbound message.
  *
- * <p><b>Pairing (Autonomy/Guardrails Strategy Stage A, migration V13):</b>
- * a brand-new session (first contact from an external identity never seen
- * before) is created {@code paired = false} with a random 6-digit {@code
- * pairingCode} - OpenClaw's "treat inbound DMs as untrusted input" pattern,
- * adapted to this codebase's tenant model. {@code TwilioWebhookController}
- * (and any future Telegram equivalent) must check {@link #isPaired()}
- * before routing an inbound message to an agent at all; an unpaired sender
- * gets a one-time pairing notice instead (see {@link #isPairingNoticeSent()}
- * - deliberately only sent once per still-unpaired session, not on every
- * retry message, so a determined unknown sender can't turn this into a free
- * outbound-send-quota drain). A tenant-admin approves via
- * {@code ChannelPairingController}, which is the only thing that ever calls
- * {@link #approvePairing()}.
+ * <p><b>Pairing (Autonomy/Guardrails Strategy Stage A, migration V13):</b> a brand-new session
+ * (first contact from an external identity never seen before) is created {@code paired = false}
+ * with a random 6-digit {@code pairingCode} - OpenClaw's "treat inbound DMs as untrusted input"
+ * pattern, adapted to this codebase's tenant model. {@code TwilioWebhookController} (and any future
+ * Telegram equivalent) must check {@link #isPaired()} before routing an inbound message to an agent
+ * at all; an unpaired sender gets a one-time pairing notice instead (see {@link
+ * #isPairingNoticeSent()} - deliberately only sent once per still-unpaired session, not on every
+ * retry message, so a determined unknown sender can't turn this into a free outbound-send-quota
+ * drain). A tenant-admin approves via {@code ChannelPairingController}, which is the only thing
+ * that ever calls {@link #approvePairing()}.
  */
 @Entity
 @Table(
-    name = "channel_session",
-    uniqueConstraints = @UniqueConstraint(name = "uq_channel_session_channel_external", columnNames = {"channel", "external_id"})
-)
+        name = "channel_session",
+        uniqueConstraints =
+                @UniqueConstraint(
+                        name = "uq_channel_session_channel_external",
+                        columnNames = {"channel", "external_id"}))
 public class ChannelSession {
+
+    // The pairing code gates whether an unknown external sender is ever
+    // routed to an agent, so it must not come from a predictable PRNG -
+    // same fix DevicePairingService took for its pairing code.
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -135,13 +138,22 @@ public class ChannelSession {
         this(channel, externalId, sessionId, agentId, null);
     }
 
-    public ChannelSession(ChannelType channel, String externalId, String sessionId, UUID agentId, String firstMessagePreview) {
+    public ChannelSession(
+            ChannelType channel,
+            String externalId,
+            String sessionId,
+            UUID agentId,
+            String firstMessagePreview) {
         this(channel, externalId, sessionId, agentId, firstMessagePreview, null);
     }
 
     public ChannelSession(
-        ChannelType channel, String externalId, String sessionId, UUID agentId, String firstMessagePreview, String resolvedPhoneNumber
-    ) {
+            ChannelType channel,
+            String externalId,
+            String sessionId,
+            UUID agentId,
+            String firstMessagePreview,
+            String resolvedPhoneNumber) {
         this.channel = channel;
         this.externalId = externalId;
         this.sessionId = sessionId;
@@ -162,25 +174,26 @@ public class ChannelSession {
     }
 
     private static String generatePairingCode() {
-        return String.format("%06d", ThreadLocalRandom.current().nextInt(0, 1_000_000));
+        return String.format("%06d", SECURE_RANDOM.nextInt(1_000_000));
     }
 
     public void touch() {
         touch(null);
     }
 
-    /** Same as {@link #touch()}, plus records a preview of this message (see {@code last_message_preview}, migration V49). */
+    /**
+     * Same as {@link #touch()}, plus records a preview of this message (see {@code
+     * last_message_preview}, migration V49).
+     */
     public void touch(String messagePreview) {
         touch(messagePreview, null);
     }
 
     /**
-     * Same as {@link #touch(String)}, plus opportunistically records a
-     * resolved real phone number for display (migration V51). {@code
-     * resolvedPhoneNumber} is only ever written when non-null/non-blank -
-     * a message that doesn't carry one (WhatsApp didn't attach senderPn
-     * this time) must never blank out a value a PREVIOUS message already
-     * resolved.
+     * Same as {@link #touch(String)}, plus opportunistically records a resolved real phone number
+     * for display (migration V51). {@code resolvedPhoneNumber} is only ever written when
+     * non-null/non-blank - a message that doesn't carry one (WhatsApp didn't attach senderPn this
+     * time) must never blank out a value a PREVIOUS message already resolved.
      */
     public void touch(String messagePreview, String resolvedPhoneNumber) {
         this.lastMessageAt = Instant.now();
@@ -212,16 +225,13 @@ public class ChannelSession {
     }
 
     /**
-     * Re-points this ALREADY-EXISTING session to a different agent (#590
-     * follow-up: "quick task ... selecting wrong agent for telegram message
-     * sending"). {@code agentId} is otherwise only ever set once, at
-     * construction, from whatever the tenant's default-agent binding
-     * happened to be at first contact ({@code
-     * ChannelSessionService#resolveOrCreate}) - later changing that default
-     * (Channels screen's "ROUTE INBOUND TO" picker) has NO effect on
-     * sessions that already exist, which is exactly the gap this method
-     * closes: an admin can now fix one specific stuck conversation (see
-     * {@code ChannelPairingController#rebindAgent}) without waiting for a
+     * Re-points this ALREADY-EXISTING session to a different agent (#590 follow-up: "quick task ...
+     * selecting wrong agent for telegram message sending"). {@code agentId} is otherwise only ever
+     * set once, at construction, from whatever the tenant's default-agent binding happened to be at
+     * first contact ({@code ChannelSessionService#resolveOrCreate}) - later changing that default
+     * (Channels screen's "ROUTE INBOUND TO" picker) has NO effect on sessions that already exist,
+     * which is exactly the gap this method closes: an admin can now fix one specific stuck
+     * conversation (see {@code ChannelPairingController#rebindAgent}) without waiting for a
      * brand-new external identity to pick up the corrected default.
      */
     public void rebind(UUID agentId) {
@@ -234,13 +244,12 @@ public class ChannelSession {
     }
 
     /**
-     * Reverse of {@link #approvePairing()} - "unmaps" an already-paired
-     * conversation back into the pending-pairing inbox WITHOUT deleting it or
-     * its history: clears the paired flag, mints a fresh pairing code, and
-     * re-arms the one-time pairing notice so the sender is re-challenged on
-     * their next message. An admin action distinct from reject (which deletes
-     * an unpaired pending session outright) and rebind (which only swaps the
-     * agent) - use it to undo a wrong pairing or force re-verification.
+     * Reverse of {@link #approvePairing()} - "unmaps" an already-paired conversation back into the
+     * pending-pairing inbox WITHOUT deleting it or its history: clears the paired flag, mints a
+     * fresh pairing code, and re-arms the one-time pairing notice so the sender is re-challenged on
+     * their next message. An admin action distinct from reject (which deletes an unpaired pending
+     * session outright) and rebind (which only swaps the agent) - use it to undo a wrong pairing or
+     * force re-verification.
      */
     public void unpair() {
         this.paired = false;
@@ -258,14 +267,12 @@ public class ChannelSession {
     }
 
     /**
-     * Live human handoff (V214) - flags this conversation as needing a
-     * person, WITHOUT suppressing the agent yet (see {@link HandoffState}'s
-     * javadoc for why AWAITING_HUMAN deliberately keeps the agent talking).
-     * Idempotent-by-refresh: escalating an already-escalated session updates
-     * the reason and timestamp rather than erroring - the newest cry for
-     * help is the one the operator inbox should show. A session already
-     * HELD by a human is left untouched: there is nothing more escalation
-     * could achieve, and stomping {@code escalatedAt} would corrupt the
+     * Live human handoff (V214) - flags this conversation as needing a person, WITHOUT suppressing
+     * the agent yet (see {@link HandoffState}'s javadoc for why AWAITING_HUMAN deliberately keeps
+     * the agent talking). Idempotent-by-refresh: escalating an already-escalated session updates
+     * the reason and timestamp rather than erroring - the newest cry for help is the one the
+     * operator inbox should show. A session already HELD by a human is left untouched: there is
+     * nothing more escalation could achieve, and stomping {@code escalatedAt} would corrupt the
      * "how long did they wait" signal the inbox sorts by.
      */
     public void escalateToHuman(String reason) {
@@ -278,15 +285,13 @@ public class ChannelSession {
     }
 
     /**
-     * Live human handoff (V214) - a named operator claims this conversation.
-     * From this moment {@code ChannelSessionService#resolveOrCreate} throws
-     * {@link ConversationHeldByHumanException} for every inbound message, so
-     * the agent and the channel workflow trigger both stay silent until
-     * {@link #releaseToAgent()}. Guards (paired-only, never VOICE, not held
-     * by a DIFFERENT operator) live in {@code OperatorInboxService#takeOver},
-     * which is the only caller - kept there rather than here so the error
-     * messages can carry HTTP-facing context this entity has no business
-     * knowing about.
+     * Live human handoff (V214) - a named operator claims this conversation. From this moment
+     * {@code ChannelSessionService#resolveOrCreate} throws {@link ConversationHeldByHumanException}
+     * for every inbound message, so the agent and the channel workflow trigger both stay silent
+     * until {@link #releaseToAgent()}. Guards (paired-only, never VOICE, not held by a DIFFERENT
+     * operator) live in {@code OperatorInboxService#takeOver}, which is the only caller - kept
+     * there rather than here so the error messages can carry HTTP-facing context this entity has no
+     * business knowing about.
      */
     public void takeOver(String operatorSubject) {
         this.handoffState = HandoffState.HUMAN;
@@ -295,14 +300,12 @@ public class ChannelSession {
     }
 
     /**
-     * Live human handoff (V214) - hands the conversation back to the agent,
-     * clearing every handoff field so the session is indistinguishable from
-     * one that was never escalated. Deliberately clears the escalation
-     * fields too (not just the takeover ones): a released conversation that
-     * still read AWAITING_HUMAN would sit in the operator inbox forever, and
-     * the durable record of who held what when already lives in the audit
-     * log ({@code OperatorInboxService} records every transition), not on
-     * this row.
+     * Live human handoff (V214) - hands the conversation back to the agent, clearing every handoff
+     * field so the session is indistinguishable from one that was never escalated. Deliberately
+     * clears the escalation fields too (not just the takeover ones): a released conversation that
+     * still read AWAITING_HUMAN would sit in the operator inbox forever, and the durable record of
+     * who held what when already lives in the audit log ({@code OperatorInboxService} records every
+     * transition), not on this row.
      */
     public void releaseToAgent() {
         this.handoffState = HandoffState.AGENT;
@@ -312,7 +315,10 @@ public class ChannelSession {
         this.escalatedAt = null;
     }
 
-    /** @return {@code true} when a human operator holds this conversation and the agent must not reply - see {@link HandoffState#HUMAN}. */
+    /**
+     * @return {@code true} when a human operator holds this conversation and the agent must not
+     *     reply - see {@link HandoffState#HUMAN}.
+     */
     public boolean isHeldByHuman() {
         return handoffState == HandoffState.HUMAN;
     }
@@ -321,7 +327,10 @@ public class ChannelSession {
         this.pairingNoticeSent = true;
     }
 
-    /** @return {@code true} if this call is the one that should carry the AI-disclosure notice (i.e. it just flipped from false to true); {@code false} if it was already sent. */
+    /**
+     * @return {@code true} if this call is the one that should carry the AI-disclosure notice (i.e.
+     *     it just flipped from false to true); {@code false} if it was already sent.
+     */
     public boolean markAiDisclosureSentIfNeeded() {
         if (aiDisclosureSent) {
             return false;

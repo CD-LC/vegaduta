@@ -11,9 +11,7 @@ import { Skeleton } from "../ui/skeleton";
 import { useSettingsText } from "./useSettingsText";
 
 type State =
-  | { status: "loading" }
-  | { status: "error"; message: string }
-  | { status: "ready"; items: SettingHistoryItem[] };
+  { status: "loading" } | { status: "error"; message: string } | { status: "ready"; items: SettingHistoryItem[] };
 
 function formatWhen(iso: string, locale: string): string {
   const d = new Date(iso);
@@ -84,16 +82,25 @@ export default function SettingHistoryDrawer({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className="relative flex h-full w-full max-w-md flex-col overflow-y-auto border-l border-border bg-card p-4 text-card-foreground shadow-xl sm:p-6"
+        className="relative flex h-full w-full max-w-md flex-col overflow-y-auto border-s border-border bg-card p-4 text-card-foreground shadow-xl sm:p-6"
       >
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <h2 id={titleId} className="text-base font-semibold">
               {ui("history.title", { label: label(entry) })}
             </h2>
-            <p className="text-xs text-muted-foreground">{ui(scope === "agent" ? "history.scopeAgent" : "history.scopeTenant")}</p>
+            <p className="text-xs text-muted-foreground">
+              {ui(scope === "agent" ? "history.scopeAgent" : "history.scopeTenant")}
+            </p>
           </div>
-          <Button ref={closeRef} type="button" variant="ghost" size="icon" aria-label={ui("history.close")} onClick={onClose}>
+          <Button
+            ref={closeRef}
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label={ui("history.close")}
+            onClick={onClose}
+          >
             <X aria-hidden="true" />
           </Button>
         </div>
@@ -119,7 +126,11 @@ export default function SettingHistoryDrawer({
         ) : (
           <ol className="space-y-3" aria-label={ui("history.listLabel")}>
             {state.items.map((h) => (
-              <li key={h.version} className="rounded-md border border-border p-3 text-sm" data-testid={`history-item-${h.version}`}>
+              <li
+                key={h.version}
+                className="rounded-md border border-border p-3 text-sm"
+                data-testid={`history-item-${h.version}`}
+              >
                 <div className="flex flex-wrap items-baseline justify-between gap-x-3 text-xs text-muted-foreground">
                   <span>{ui("history.version", { version: h.version })}</span>
                   <time dateTime={h.at}>{formatWhen(h.at, locale)}</time>
@@ -132,7 +143,8 @@ export default function SettingHistoryDrawer({
                   <ins className="font-medium no-underline">{formatValue(entry, h.value)}</ins>
                 </p>
                 <p className="mt-1 text-xs">
-                  <span className="text-muted-foreground">{ui("history.by")}</span> {h.actor || ui("history.unknownActor")}
+                  <span className="text-muted-foreground">{ui("history.by")}</span>{" "}
+                  {h.actor || ui("history.unknownActor")}
                 </p>
                 {h.reason ? (
                   <p className="mt-1 text-xs">

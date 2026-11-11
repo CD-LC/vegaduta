@@ -6,8 +6,10 @@
 // wireframe - as removable chips.
 import { ImagePlus, LayoutTemplate, Palette, X } from "lucide-react";
 import { BUILD_STRINGS as S } from "./buildStrings";
+import { useTranslations } from "../lib/i18n";
 
 export function DesignInputChips({ designInputs, sketchBlockCount, onOpenSketch, onRemove }) {
+    const tHC = useTranslations("hcBuildDesignInputChips");
   return (
     <div className="mb-2 flex shrink-0 flex-wrap items-center gap-1.5">
       {sketchBlockCount > 0 && (
@@ -16,7 +18,7 @@ export function DesignInputChips({ designInputs, sketchBlockCount, onOpenSketch,
           onClick={onOpenSketch}
           className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-0.5 text-xs text-foreground hover:bg-accent/60"
         >
-          <LayoutTemplate aria-hidden="true" size={11} /> wireframe ({sketchBlockCount} blocks)
+          <LayoutTemplate aria-hidden="true" size={11} /> {tHC("s1")}{sketchBlockCount} blocks)
         </button>
       )}
       {designInputs.map((d) => (

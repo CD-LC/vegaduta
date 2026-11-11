@@ -94,6 +94,8 @@ now lives in `mcp-stdio-runner` (and its `-browser` variant), or in the opt-in
 | core-full image | alternative | stdio MCP servers inside the core container, for hosts that cannot run the runner (single-user only: no isolation) | `CORE_IMAGE_VARIANT=-full` + `CORE_MCP_PROFILE=,mcp` | `global.core.mcpToolchain=full` (API only) | `MCP_STDIO_SIDECAR_ENABLED=false` |
 | sidecar | plug-and-play | document ingestion, embeddings, rerank, STT/TTS, rendering | always in full; lite profile `rag` | `global.components.sidecar` (default on) | `SIDECAR_BASE_URL` |
 | docling | plug-and-play | optional Docling-first document conversion (layout-aware PDF, tables, pptx/xlsx/csv) ahead of the sidecar extractor | profile `docling` | — | `DOCLING_BASE_URL`, `DOCLING_SHARED_SECRET` |
+| freellmapi | plug-and-play | FreeLLMAPI: one OpenAI-compatible `/v1` gateway over ~34 free LLM providers (docs/local-models.md) | profile `freellmapi` | — | `FREELLMAPI_HOST_PORT` |
+| hindsight | plug-and-play | Hindsight learning agent-memory server; per-bank MCP endpoint (docs/integrations/hindsight.md) | profile `hindsight` | — | `HINDSIGHT_API_LLM_*`, `HINDSIGHT_*_HOST_PORT` |
 | tool-sandbox | plug-and-play | tenant-authored Java/Python/JavaScript/TypeScript tools (and agent-authored `create_custom_tool`) | profile `sandbox` (full), `tools` (personal/lite) | | `global.components.toolSandbox` + RuntimeClass | `TOOL_SANDBOX_ENABLED=true` |
 | code-intel | plug-and-play | code intelligence, repository indexing | profile `code-intel` | `global.components.codeIntel` | `CODE_INTEL_ENABLED=true` |
 | app-builder | plug-and-play | the App Builder (`/build`) | profile `builder` | `global.components.appBuilder` | `APP_BUILDER_CORE_SERVICE_TOKEN` |
@@ -613,7 +615,7 @@ effective defaults are the ones in this table and now in the yml. Seeding keys a
 | `SIGNUP_DISPOSABLE_EMAIL_BLOCK_ENABLED` | `true` | block disposable email domains at signup | |
 | `NEXT_PUBLIC_EDITION` (web; Compose: `VEGADUTA_EDITION`) | derived: `personal` when `NEXT_PUBLIC_AUTH_MODE=local`, else `NEXT_PUBLIC_DEPLOY_ENV` when that is `lite` or `full`, else every page on | `personal` \| `lite` \| `full`: which pages the console has. On `personal` the rail, deep links and the proxy (a real 404) leave out the pages for features core does not run; `lite` and `full` hide nothing. Read at runtime, so an old image without it behaves as before. The console compares it with the `edition` core reports on `GET /api/public/status` and warns on a mismatch (see [Edition tier and features](#edition-tier-and-features)) |
 | `NEXT_PUBLIC_BILLING_ENABLED` (web; Compose: `WEB_BILLING_ENABLED`) | off | plans, prices, upgrade prompts and billing pages; off redirects `/billing`, `/features` and `/admin/billing` and hides every upgrade CTA | `1` to turn on (runtime, see `web/docs/RUNTIME-CONFIG.md`) |
-| `NEXT_PUBLIC_SITE_MODE` (web; Compose: `WEB_SITE_MODE`) | `oss` | which signed-out pages are served: `oss` is the technical open-source landing and About, and redirects the pricing, enterprise, hire, earn, compare and similar sales pages to `/`; `classic` restores the original marketing pages (tag `backup/classic-marketing-pages-2026-10-12`) | `oss` or `classic` (runtime) |
+| `NEXT_PUBLIC_SITE_MODE` (web; Compose: `WEB_SITE_MODE`) | `oss` | which signed-out pages are served: `oss` is the technical source-available landing and About, and redirects the pricing, enterprise, hire, earn, compare and similar sales pages to `/`; `classic` restores the original marketing pages (tag `backup/classic-marketing-pages-2026-10-12`) | `oss` or `classic` (runtime) |
 | `NEXT_PUBLIC_DOCS_URL` (web; Compose: `WEB_DOCS_URL`) | empty | absolute URL of the published documentation site; when set, the public pages' "Docs" links and the in-app help banner point there, otherwise at the in-app `/docs` help ([site modes](site-modes.md)) | a URL (runtime) |
 | `NEXT_PUBLIC_ACADEMY_URL` (web) | `https://academy.vegaduta.ai` | origin of the separate (proprietary) Academy learning portal; compose's `WEB_ACADEMY_URL` defaults to the hosted Academy — point it at a self-hosted Academy, or empty in a fork that does not want the links | a URL (runtime) |
 | `NEXT_PUBLIC_CONTACT_EMAIL` (web; Compose: `WEB_CONTACT_EMAIL`; Helm: `web.env.NEXT_PUBLIC_CONTACT_EMAIL`) | empty | contact address on `/plugins` and `/account-deletion`. Empty shows a placeholder; set an address you own | an e-mail address (runtime) |
@@ -1156,6 +1158,12 @@ lean on (the notes say which).
 | `app.chat.local-model.providers` | `APP_CHAT_LOCAL_MODEL_PROVIDERS` | `OLLAMA,LOCAL_OPENAI` | bring-your-own providers that are servers on the person's machine |
 | `app.providers.small-model-max-billions` | `APP_PROVIDERS_SMALL_MODEL_MAX_BILLIONS` | `8.0` | a pool row whose model has this many billions of parameters or fewer runs in small-model mode unless its "Small-model mode" control says otherwise; negative = never by size |
 
+The serving row's own console settings (Providers → Local model → "Speed and behaviour",
+`PUT /api/local-models/settings`) can also override, for that model's turns only:
+`numBatch` over `app.llm.ollama.num-batch`, `responseTimeoutMs` over
+`app.llm.http.stream-idle-timeout`, and `toolDeferral` over `app.tools.search.enabled`
+(see [local-models.md](local-models.md#response-speed)).
+
 **Turn limits** (`app.chat.limits.*`, `app.chat.semantic-cache.*`, and additions to `app.chat.parity.*` and `app.chat.resilience.*`)
 
 | Property | Environment variable | Default | Effect |
@@ -1430,6 +1438,8 @@ to `core.env` or the Helm `core.env` map when you need them.
 | `app.security.jwt.allow-unrestricted-audience` | `APP_SECURITY_JWT_ALLOW_UNRESTRICTED_AUDIENCE` | `false`. A `generic` provider (`app.security.oidc.provider`) with both `app.keycloak.allowed-azp` and `app.security.jwt.required-audience` empty fails startup; `true` downgrades that to an ERROR log |
 | `app.tenant.status-fail-open-on-schema-check-error` | `APP_TENANT_STATUS_FAIL_OPEN_ON_SCHEMA_CHECK_ERROR` | `false`: a SQL error while checking an untracked tenant's schema refuses the request; `true` restores fail-open |
 | `app.tenancy.migrate-retry-interval` | `APP_TENANCY_MIGRATE_RETRY_INTERVAL` | `60s`: how often tenant schemas whose startup migration failed are retried; until one succeeds the tenant gets 403 on every shape (api, jobs, worker, other pods): the failure is persisted on the control-plane tenant row (`migration_failed_at`, `migration_error`; migration V690), read through the `app.tenant.status-cache-ttl` cache, and cleared by the next successful migration |
+| `app.security.jwt.allow-unrestricted-audience` | `APP_SECURITY_JWT_ALLOW_UNRESTRICTED_AUDIENCE` | `false`. A non-Keycloak issuer (no `/realms/` in the issuer URI) with both `app.keycloak.allowed-azp` and `app.security.jwt.required-audience` empty fails startup; `true` downgrades that to an ERROR log |
+| `app.tenancy.migrate-retry-interval` | `APP_TENANCY_MIGRATE_RETRY_INTERVAL` | `60s`: how often tenant schemas whose startup migration failed are retried; until one succeeds the tenant gets 403 |
 | `app.oauth.state.require-browser-cookie` | `APP_OAUTH_STATE_REQUIRE_BROWSER_COOKIE` | `false` |
 | `app.agent.share.visitor-token-secret` | `APP_AGENT_SHARE_VISITOR_TOKEN_SECRET` | empty: derived from `APP_ENCRYPTION_KEY` |
 | `app.storage.local.legacy-unprefixed-fallback` | `APP_STORAGE_LOCAL_LEGACY_UNPREFIXED_FALLBACK` | `false` |
@@ -1546,6 +1556,8 @@ mode is unchanged when this is left at `keycloak`. Needs the `security` profile 
 | `app.auth.local.data-dir` | `${user.home}/.vegaduta/auth` | signing keys (`signing-keys.json`, file `0600`, directory `0700`) and the one-time `first-run-setup.txt`. Keep it on a persistent volume: losing the key signs everyone out. One core process per directory. `personal.yml` sets `APP_AUTH_LOCAL_DATA_DIR=/data/storage/.auth` |
 | `app.auth.local.issuer` / `.audience` | `https://auth.local.vegaduta.invalid` / `vegaduta-api` | `iss` and `aud` of the tokens; the issuer is an identifier nobody dereferences |
 | `app.auth.local.access-token-ttl` | `15m` | access token lifetime |
+| `app.auth.local.setup-link-in-logs` | `true` | print the one-time first-run setup link in the core log. Set `false` on log-aggregated deploys; read `first-run-setup.txt` from the data dir instead |
+| `app.tenant.comp.allowed-tenants` | _(empty)_ | comma-separated tenant ids that `CompGrantController` may grant complimentary plans to. Empty means any tenant; a non-empty list rejects every other tenant id |
 | `app.auth.local.refresh-token-ttl` | `30d` | idle lifetime of one refresh token |
 | `app.auth.local.session-max-ttl` | `90d` | absolute lifetime of a login; refreshing never extends it |
 | `app.auth.local.key-rotation-interval` | `90d` | the key is rotated lazily when older than this |
@@ -1575,9 +1587,9 @@ Read by `scripts/vegaduta personal` and the personal profile; see
 
 | Variable / property | Default | Meaning |
 |---|---|---|
-| `VEGADUTA_SEARCH` | unset (on for a fresh personal install) | `0`, `off`, `false` or `no` in `.env` or the environment turns private web search off; `1`, `on`, `true` or `yes` forces it on. A `--search` / `--no-search` flag wins for that run; this wins over the remembered answer (`search=` in `.vegaduta-state`). Read by the launcher only (`scripts\vegaduta.ps1` too, where web search is off unless `-Search` or this asks for it) |
-| `VEGADUTA_TOOLS` | unset (on for a fresh personal install) | the same for the MCP runner (compose profile `tools`). Not used with `--native-core` |
-| `VEGADUTA_VALKEY` | unset (always on) | `0` leaves the Valkey container out of a **personal** install; rate limits, budget windows and spend counters run in core's bounded in-process fallback (they stay enforced and fail closed). `--no-valkey` / `--valkey` wins for that run; this wins over the remembered answer (`valkey=` in `.vegaduta-state`). Ignored on lite/full - shared installs keep the shared store |
+| `VEGADUTA_SEARCH` | unset (off for a fresh personal install, which is lean) | `1`, `on`, `true` or `yes` in `.env` or the environment turns private web search on at the first start; `0`, `off`, `false` or `no` keeps it off. A `--search` / `--no-search` flag wins for that run; this wins over the remembered answer (`search=` in `.vegaduta-state`). Read by the launcher only (`scripts\vegaduta.ps1` too, where web search is off unless `-Search` or this asks for it) |
+| `VEGADUTA_TOOLS` | unset (off for a fresh personal install) | the same for the MCP runner (compose profile `tools`). Not used with `--native-core` |
+| `VEGADUTA_VALKEY` | unset (off for a fresh personal install; an existing one keeps its remembered choice) | `1` adds the Valkey container to a **personal** install, `0` leaves it out; rate limits, budget windows and spend counters run in core's bounded in-process fallback (they stay enforced and fail closed). `--no-valkey` / `--valkey` wins for that run; this wins over the remembered answer (`valkey=` in `.vegaduta-state`). Ignored on lite/full - shared installs keep the shared store |
 | `app.mcp.starter.enabled` / `APP_MCP_STARTER_ENABLED` | `true` in the `personal` profile (the class is not loaded elsewhere) | `false` registers no starter connectors even when the runner is on. They are also registered only when `MCP_STDIO_SIDECAR_ENABLED=true` |
 | `MCP_STDIO_SIDECAR_ENABLED` | `false`; the launcher exports `true` with the runner | in `personal.yml` this was hard-coded `false`; it now reads the variable, so a raw `docker compose --profile tools` needs it in `.env` |
 | `MCP_STDIO_RUNNER_MEM_LIMIT` | `768m` in `personal.yml` (`1g` in the full stack) | memory limit of the runner container |
@@ -2001,6 +2013,7 @@ stay unbounded. See [List endpoint paging](api/LIST-ENDPOINT-PAGING.md).
 | `app.knowledge.vector-index.interval-ms` | `21600000` | Time between pgvector index maintenance passes (6 hours). |
 | `app.llm.spend-counter.reconcile-initial-delay-ms` | `120000` | Delay after startup before the first tick of the spend-counter reconciler (the pass itself runs every `app.llm.spend-counter.reconcile-interval`). |
 | `app.llm.spend-counter.reconcile-tick-ms` | `60000` | How often the reconciler checks whether a pass is due; a pass in progress continues on each tick. |
+| `app.mcp.max-response-bytes` | `33554432` (32 MiB) | Heap ceiling on one remote-MCP response body; a peer streaming past it fails the call rather than growing the heap. `<= 0` disables. Env `APP_MCP_MAX_RESPONSE_BYTES`. |
 | `app.mcp.max-stdio-connections-per-tenant` | `5` | How many local (STDIO) MCP servers one workspace may keep connected at once; the next one is refused with a message to disable another or ask the operator to raise this. |
 | `app.mcp.registry-store` | `memory` | `memory`: each replica connects MCP servers on its own. `redis`: replicas share an ownership registry so one registration has one live client (set this when running more than one replica). |
 | `app.mcp.registry-heartbeat-ms` | `15000` | With `registry-store=redis`: how often a replica renews its leases and its own registration. |
@@ -2270,6 +2283,7 @@ The Default column is read from the code, not typed: `make config-docs` (`script
 | `app.agent.share.max-voice-turns-per-minute` | `20` | shapes that load the module | see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/share/AgentShareService.java` |
 | `app.agents.default-temperature` | `0.7` | all shapes | see source: `core/agents/src/main/java/com/agenticai/core/agents/core/AgentDefaults.java` |
 | `app.agents.default-top-p` | `1.0` | all shapes | see source: `core/agents/src/main/java/com/agenticai/core/agents/core/AgentDefaults.java` |
+| `app.app-builder.allowed-tenants` | `${APP_BUILDER_ALLOWED_TENANTS:}` | all shapes | Comma-separated tenant-schema allow-list for `X-Tenant-Id` on the internal app-builder endpoints. Empty (default) means the service token may act for ANY tenant id - set it to bound a leaked token. |
 | `app.app-builder.max-tokens` | `8000` | all shapes | Mirrors app.agents.default-max-tokens' role for AssistService, but app-builder writes whole files (potentially several per turn), so the default ceiling is meaningfully higher. |
 | `app.app-builder.service-token` | `${APP_BUILDER_CORE_SERVICE_TOKEN:}` | all shapes | App Builder generation routing fix (2026-08-06, see AppBuilderCompletionController's javadoc). |
 | `app.attestation.issuer` |  | shapes that load the module | see source: `core/agents/src/main/java/com/agenticai/core/agents/attestation/AgentAttestationService.java` |

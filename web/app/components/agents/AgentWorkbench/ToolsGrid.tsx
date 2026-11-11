@@ -219,7 +219,7 @@ export function ToolsGrid({
       <div className="relative">
         <Search
           size={13}
-          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           aria-hidden="true"
         />
         <Input
@@ -230,7 +230,7 @@ export function ToolsGrid({
             setPage(0);
           }}
           placeholder={t("toolsSearchPlaceholder")}
-          className="h-9 pl-8"
+          className="h-9 ps-8"
         />
       </div>
       {filtered.length === 0 ? (

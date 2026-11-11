@@ -19,6 +19,7 @@ import {
   Send,
 } from "lucide-react";
 import { TONES } from "./studioTheme";
+import { useTranslations } from "../../lib/i18n";
 
 // "Jobs that sound like a hire, not a tool." Each card is a brief the visitor
 // can drop into the launcher with one click - it only FILLS the text box, the
@@ -150,19 +151,17 @@ const CARDS: Card[] = [
 ];
 
 export default function Possibilities({ onPick }: { onPick: (job: string) => void }) {
+  const tHC = useTranslations("hcComponentsStudioPossibilities");
   return (
     <section aria-labelledby="possible-title" className="mt-24">
       <div className="max-w-2xl">
         <div className="mb-2 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
-          <Sprout aria-hidden="true" className="h-4 w-4 shrink-0" /> What people hand to agents
+          <Sprout aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("s5")}
         </div>
         <h2 id="possible-title" className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          Jobs that used to need a hire. Pick one, or invent your own.
+          {tHC("s4")}
         </h2>
-        <p className="mt-3 text-muted-foreground">
-          Each card fills the launcher with a brief - you still decide every word before anything is built. The sandbox
-          runs the thinking, reading and tool use for real; a free workspace adds the schedules and the sending.
-        </p>
+        <p className="mt-3 text-muted-foreground">{tHC("s3")}</p>
       </div>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -195,7 +194,7 @@ export default function Possibilities({ onPick }: { onPick: (job: string) => voi
             </div>
             <dl className="mt-3 space-y-1.5 text-xs">
               <div className="flex gap-2">
-                <dt className="w-[74px] shrink-0 font-medium text-emerald-700 dark:text-emerald-300">In this page</dt>
+                <dt className="w-[74px] shrink-0 font-medium text-emerald-700 dark:text-emerald-300">{tHC("s2")}</dt>
                 <dd className="text-muted-foreground">{c.here}</dd>
               </div>
               <div className="flex gap-2">
@@ -208,7 +207,7 @@ export default function Possibilities({ onPick }: { onPick: (job: string) => voi
               onClick={() => onPick(c.job)}
               className="mt-4 inline-flex items-center gap-1.5 self-start rounded-lg bg-violet-500/10 px-3 py-1.5 text-sm font-medium text-violet-700 transition-colors hover:bg-violet-600 hover:text-white dark:text-violet-300"
             >
-              Build this one{" "}
+              {tHC("s1")}{" "}
               <ArrowRight
                 aria-hidden="true"
                 className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 shrink-0"

@@ -77,9 +77,9 @@ public class TenantMigrationService {
         if (this.parallelism < Math.max(1, parallelism)) {
             log.warn(
                     "app.tenancy.migrate-parallelism={} needs about {} pooled connections but the"
-                        + " pool has {}; running {} schema(s) at a time so Flyway runs do not"
-                        + " starve each other of connections. Raise DB_HIKARI_MAX_POOL_SIZE to use"
-                        + " the full parallelism.",
+                            + " pool has {}; running {} schema(s) at a time so Flyway runs do not"
+                            + " starve each other of connections. Raise DB_HIKARI_MAX_POOL_SIZE to use"
+                            + " the full parallelism.",
                     parallelism,
                     RESERVED_CONNECTIONS + CONNECTIONS_PER_FLYWAY_RUN * parallelism,
                     poolSize,
@@ -146,8 +146,7 @@ public class TenantMigrationService {
         int skippedBefore = schemaMigrator.skippedUpToDate();
         ExecutorService pool =
                 TenantAwareExecutors.newFixedThreadPool(
-                        workers,
-                        TenantAwareExecutors.threadFactory("tenant-migrate", true));
+                        workers, TenantAwareExecutors.threadFactory("tenant-migrate", true));
         try {
             List<Future<?>> futures = new ArrayList<>(tenants.size());
             for (Tenant tenant : tenants) {
@@ -205,8 +204,8 @@ public class TenantMigrationService {
             failures.recordFailure(schema, e.toString());
             log.error(
                     "Startup migration failed for tenant '{}' (schema {}) - that tenant may still"
-                        + " be missing recently-added tables/columns until this is fixed and core"
-                        + " is restarted",
+                            + " be missing recently-added tables/columns until this is fixed and core"
+                            + " is restarted",
                     tenant.getName(),
                     schema,
                     e);

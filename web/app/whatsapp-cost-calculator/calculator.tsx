@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { META_RATE_CARD_URL, PRICING_CHECKED_ON, parseRate } from "./pricing-facts";
+import { useTranslations } from "../lib/i18n";
 
 // ---------------------------------------------------------------------------
 // WhatsApp Business API cost calculator — the interactive half of
@@ -92,7 +93,7 @@ function SliderField({
           id={id}
           type="number"
           inputMode="numeric"
-          className="h-9 w-24 shrink-0 text-right tabular-nums"
+          className="h-9 w-24 shrink-0 text-end tabular-nums"
           min={min}
           max={max}
           step={step}
@@ -117,6 +118,7 @@ function ResultRow({ label, value, precise }: { label: string; value: number; pr
 }
 
 export default function WhatsAppCostCalculator() {
+  const tHC = useTranslations("hcWhatsappcostcalculatorCalculator");
   // Volume + behaviour inputs. Every value here is a starting point, not a
   // claim — the user owns both sides of the comparison.
   const [conversations, setConversations] = useState(1000);
@@ -151,16 +153,13 @@ export default function WhatsAppCostCalculator() {
       {/* ------------------------------------------------------------ Inputs */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Your numbers</CardTitle>
-          <CardDescription>
-            Every field is yours to set — the results below are computed from these inputs and
-            nothing else.
-          </CardDescription>
+          <CardTitle className="text-base">{tHC("s30")}</CardTitle>
+          <CardDescription>{tHC("s29")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <SliderField
             id="wa-conversations"
-            label="Customer conversations per month"
+            label={tHC("s28")}
             value={conversations}
             onChange={setConversations}
             min={0}
@@ -169,7 +168,7 @@ export default function WhatsAppCostCalculator() {
           />
           <SliderField
             id="wa-msgs-broadcast"
-            label="Messages per conversation — broadcast / human workflow"
+            label={tHC("s27")}
             hint="Business-sent messages it typically takes to resolve one customer today: the blast, the follow-ups, the back-and-forth."
             value={msgsBroadcast}
             onChange={setMsgsBroadcast}
@@ -180,7 +179,7 @@ export default function WhatsAppCostCalculator() {
           />
           <SliderField
             id="wa-msgs-agent"
-            label="Messages per conversation — AI agent"
+            label={tHC("s26")}
             hint="What you expect an agent that answers precisely to need. The default is only a starting point — set it to whatever you believe."
             value={msgsAgent}
             onChange={setMsgsAgent}
@@ -191,7 +190,7 @@ export default function WhatsAppCostCalculator() {
           />
           <SliderField
             id="wa-marketing-pct"
-            label="Marketing share of messages"
+            label={tHC("s25")}
             hint="Marketing templates bill at the high rate; the remainder is priced at the utility/authentication rate."
             value={marketingPct}
             onChange={setMarketingPct}
@@ -202,9 +201,7 @@ export default function WhatsAppCostCalculator() {
           />
 
           <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              Per-message rates (₹) — copy from Meta&apos;s rate card
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{tHC("s24")}</p>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="wa-rate-marketing" className="text-xs">
@@ -216,15 +213,15 @@ export default function WhatsAppCostCalculator() {
                   inputMode="decimal"
                   step={0.0001}
                   min={0}
-                  placeholder="from rate card"
-                  className="h-9 text-right tabular-nums"
+                  placeholder={tHC("s22")}
+                  className="h-9 text-end tabular-nums"
                   value={marketingRateText}
                   onChange={(e) => setMarketingRateText(e.target.value)}
                 />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="wa-rate-utility" className="text-xs">
-                  Utility / authentication
+                  {tHC("s23")}
                 </Label>
                 <Input
                   id="wa-rate-utility"
@@ -232,26 +229,25 @@ export default function WhatsAppCostCalculator() {
                   inputMode="decimal"
                   step={0.001}
                   min={0}
-                  placeholder="from rate card"
-                  className="h-9 text-right tabular-nums"
+                  placeholder={tHC("s22")}
+                  className="h-9 text-end tabular-nums"
                   value={utilityRateText}
                   onChange={(e) => setUtilityRateText(e.target.value)}
                 />
               </div>
             </div>
             <p className="text-xs leading-relaxed text-muted-foreground" data-testid="wa-rates-note">
-              Pricing model checked against Meta&apos;s documentation on {PRICING_CHECKED_ON}: per-message,
-              by category (marketing, utility, authentication). Meta&apos;s documentation text publishes no
-              rates, so none are pre-filled. Read yours from{" "}
+              {tHC("s21")} {PRICING_CHECKED_ON}
+              {tHC("s20")}{" "}
               <a
                 href={META_RATE_CARD_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-medium text-primary underline-offset-4 hover:underline"
               >
-                Meta&apos;s rate card
+                {tHC("s19")}
               </a>{" "}
-              (pick your market and currency) and type them here.
+              {tHC("s18")}
             </p>
           </div>
         </CardContent>
@@ -262,113 +258,100 @@ export default function WhatsAppCostCalculator() {
         {r === null ? (
           <Card>
             <CardContent className="space-y-2" data-testid="wa-no-rates">
-              <p className="text-sm font-medium text-foreground">Check Meta&apos;s current rates</p>
+              <p className="text-sm font-medium text-foreground">{tHC("s17")}</p>
               <p className="text-xs leading-relaxed text-muted-foreground">
-                Enter the marketing and utility rates from Meta&apos;s rate card on the left and the
-                estimate appears here. Rates last checked: not published in Meta&apos;s documentation
-                text as of {PRICING_CHECKED_ON}.
+                {tHC("s16")} {PRICING_CHECKED_ON}.
               </p>
             </CardContent>
           </Card>
         ) : (
           <>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Card className="gap-4">
-            <CardHeader className="gap-2">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Megaphone className="size-4" aria-hidden="true" />
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Broadcast / human workflow
-                </CardTitle>
-              </div>
-              <p className="text-2xl font-semibold tracking-tight text-foreground tabular-nums sm:text-3xl">
-                {inr.format(r.costBroadcast)}
-                <span className="ml-1 text-sm font-normal text-muted-foreground">/ month</span>
-              </p>
-            </CardHeader>
-            <CardContent>
-              <ResultRow label="Cost per resolved conversation" value={r.perConvBroadcast} precise />
-            </CardContent>
-          </Card>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Card className="gap-4">
+                <CardHeader className="gap-2">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Megaphone className="size-4" aria-hidden="true" />
+                    <CardTitle className="text-sm font-medium text-muted-foreground">{tHC("s15")}</CardTitle>
+                  </div>
+                  <p className="text-2xl font-semibold tracking-tight text-foreground tabular-nums sm:text-3xl">
+                    {inr.format(r.costBroadcast)}
+                    <span className="ms-1 text-sm font-normal text-muted-foreground">/ month</span>
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <ResultRow label={tHC("s13")} value={r.perConvBroadcast} precise />
+                </CardContent>
+              </Card>
 
-          <Card className="gap-4 border-primary/40">
-            <CardHeader className="gap-2">
-              <div className="flex items-center gap-2 text-primary">
-                <Bot className="size-4" aria-hidden="true" />
-                <CardTitle className="text-sm font-medium text-primary">
-                  AI agent that answers precisely
-                </CardTitle>
-              </div>
-              <p className="text-2xl font-semibold tracking-tight text-foreground tabular-nums sm:text-3xl">
-                {inr.format(r.costAgent)}
-                <span className="ml-1 text-sm font-normal text-muted-foreground">/ month</span>
-              </p>
-            </CardHeader>
-            <CardContent>
-              <ResultRow label="Cost per resolved conversation" value={r.perConvAgent} precise />
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card>
-          <CardContent className="space-y-3">
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <span className="text-sm font-medium text-foreground">
-                Monthly difference implied by your inputs
-              </span>
-              <span
-                className={`text-xl font-semibold tabular-nums ${
-                  r.delta >= 0 ? "text-primary" : "text-destructive"
-                }`}
-                data-testid="wa-calc-delta"
-              >
-                {r.delta >= 0 ? "−" : "+"}
-                {inr.format(Math.abs(r.delta))}
-              </span>
+              <Card className="gap-4 border-primary/40">
+                <CardHeader className="gap-2">
+                  <div className="flex items-center gap-2 text-primary">
+                    <Bot className="size-4" aria-hidden="true" />
+                    <CardTitle className="text-sm font-medium text-primary">{tHC("s14")}</CardTitle>
+                  </div>
+                  <p className="text-2xl font-semibold tracking-tight text-foreground tabular-nums sm:text-3xl">
+                    {inr.format(r.costAgent)}
+                    <span className="ms-1 text-sm font-normal text-muted-foreground">/ month</span>
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <ResultRow label={tHC("s13")} value={r.perConvAgent} precise />
+                </CardContent>
+              </Card>
             </div>
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              {r.delta >= 0
-                ? "That is what the messaging bill shrinks by if — and only if — an agent really resolves conversations in the fewer messages you entered above."
-                : "With these inputs the agent side sends more messages, so it costs more. The calculator only reflects what you entered."}
-            </p>
 
-            {/* The formula, verbatim — no hidden math. */}
-            <div className="rounded-md border border-border bg-muted/30 p-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                The whole formula
-              </p>
-              <p className="mt-2 font-mono text-xs leading-relaxed text-muted-foreground">
-                blended rate = {marketingPct}% × ₹{marketingRate} + {100 - marketingPct}% × ₹
-                {utilityRate} = ₹{r.blendedRate.toFixed(4)} per message
-                <br />
-                side A = {conversations.toLocaleString("en-IN")} conversations ×{" "}
-                {msgsBroadcast} msgs × blended rate = {inrPrecise.format(r.costBroadcast)}
-                <br />
-                side B = {conversations.toLocaleString("en-IN")} conversations × {msgsAgent} msgs ×
-                blended rate = {inrPrecise.format(r.costAgent)}
-                <br />
-                per resolved conversation = side ÷ conversations
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+            <Card>
+              <CardContent className="space-y-3">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <span className="text-sm font-medium text-foreground">{tHC("s12")}</span>
+                  <span
+                    className={`text-xl font-semibold tabular-nums ${
+                      r.delta >= 0 ? "text-primary" : "text-destructive"
+                    }`}
+                    data-testid="wa-calc-delta"
+                  >
+                    {r.delta >= 0 ? "−" : "+"}
+                    {inr.format(Math.abs(r.delta))}
+                  </span>
+                </div>
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  {r.delta >= 0
+                    ? "That is what the messaging bill shrinks by if — and only if — an agent really resolves conversations in the fewer messages you entered above."
+                    : "With these inputs the agent side sends more messages, so it costs more. The calculator only reflects what you entered."}
+                </p>
 
+                {/* The formula, verbatim — no hidden math. */}
+                <div className="rounded-md border border-border bg-muted/30 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                    {tHC("s11")}
+                  </p>
+                  <p className="mt-2 font-mono text-xs leading-relaxed text-muted-foreground">
+                    {tHC("s10")} {marketingPct}% × ₹{marketingRate} + {100 - marketingPct}% × ₹{utilityRate} = ₹
+                    {r.blendedRate.toFixed(4)} {tHC("s9")}
+                    <br />
+                    {tHC("s8")} {conversations.toLocaleString("en-IN")} {tHC("s6")} {msgsBroadcast} {tHC("s5")}{" "}
+                    {inrPrecise.format(r.costBroadcast)}
+                    <br />
+                    {tHC("s7")} {conversations.toLocaleString("en-IN")} {tHC("s6")} {msgsAgent} {tHC("s5")}{" "}
+                    {inrPrecise.format(r.costAgent)}
+                    <br />
+                    {tHC("s4")}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </>
         )}
 
         <Card className="border-primary/40 bg-primary/5">
           <CardContent className="flex flex-wrap items-center justify-between gap-4">
             <div className="space-y-1">
-              <p className="text-sm font-medium text-foreground">
-                See an agent answer for your business
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Free, no signup — a live sandbox, not a video.
-              </p>
+              <p className="text-sm font-medium text-foreground">{tHC("s3")}</p>
+              <p className="text-xs text-muted-foreground">{tHC("s2")}</p>
             </div>
             <Button asChild>
               <Link href="/try">
-                Try it now <ArrowRight className="size-4" aria-hidden="true" />
+                {tHC("s1")} <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
             </Button>
           </CardContent>

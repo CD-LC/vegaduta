@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
+import { useTranslations } from "../lib/i18n";
 
 // Tiny offline mini-game for the MaintenanceScreen ("We'll be back" page).
 // Deliberately featherweight: one <canvas>, requestAnimationFrame, zero
@@ -24,6 +25,7 @@ const BEST_KEY = "vd-minigame-best";
 type Spark = { x: number; y: number; v: number; r: number };
 
 export default function MiniCatchGame() {
+  const tHC = useTranslations("hcComponentsMiniCatchGame");
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [running, setRunning] = useState(true);
   const [score, setScore] = useState(0);
@@ -140,8 +142,7 @@ export default function MiniCatchGame() {
 
         const kept: Spark[] = [];
         for (const s of sparks) {
-          const caught =
-            s.y >= H - 22 && s.y <= H - 6 && Math.abs(s.x - trayX) <= TRAY_W / 2 + s.r;
+          const caught = s.y >= H - 22 && s.y <= H - 6 && Math.abs(s.x - trayX) <= TRAY_W / 2 + s.r;
           if (caught) {
             points += 1;
             setScore(points);
@@ -241,31 +242,27 @@ export default function MiniCatchGame() {
           ref={canvasRef}
           style={{ width: "100%", height: "auto", aspectRatio: `${W} / ${H}`, touchAction: "none" }}
           className="block rounded-xl border border-border/70 bg-secondary/20"
-          aria-label="Catch the sparks mini-game. Use arrow keys or drag to move the tray."
+          aria-label={tHC("s5")}
         />
         {over && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl bg-background/85 backdrop-blur-[2px]">
-            <div className="text-sm font-semibold">
-              {score >= best && score > 0 ? "New best!" : "Nice run!"}
-            </div>
+            <div className="text-sm font-semibold">{score >= best && score > 0 ? "New best!" : "Nice run!"}</div>
             <div className="text-xs text-muted-foreground">
-              You caught {score} spark{score === 1 ? "" : "s"}
+              {tHC("s4")} {score} spark{score === 1 ? "" : "s"}
             </div>
             <Button size="sm" className="mt-1" onClick={() => setRound((r) => r + 1)}>
-              Play again
+              {tHC("s3")}
             </Button>
           </div>
         )}
       </div>
-      <p className="mt-2 text-[11px] text-muted-foreground">
-        Arrow keys, mouse, or drag to catch the falling sparks.
-      </p>
+      <p className="mt-2 text-[11px] text-muted-foreground">{tHC("s2")}</p>
       <button
         type="button"
         onClick={() => setRunning(false)}
         className="mt-1 border-0 bg-transparent p-0 text-[11px] text-muted-foreground underline-offset-2 hover:underline"
       >
-        Hide game
+        {tHC("s1")}
       </button>
     </div>
   );

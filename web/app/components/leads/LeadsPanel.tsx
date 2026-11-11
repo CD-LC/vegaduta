@@ -142,7 +142,10 @@ export default function LeadsPanel({ onLoaded }: { onLoaded?: () => void }) {
   }, [debouncedQ, debouncedSource, stageFilter]);
 
   const grouped = useMemo(() => groupLeadsByStage(leads), [leads]);
-  const totalsByStage = useMemo(() => Object.fromEntries(totals.map((s) => [s.stage, s])) as Record<LeadStage, StageTotal>, [totals]);
+  const totalsByStage = useMemo(
+    () => Object.fromEntries(totals.map((s) => [s.stage, s])) as Record<LeadStage, StageTotal>,
+    [totals]
+  );
   const openValue = openPipelineValue(totals);
   const allCount = totals.reduce((n, s) => n + s.count, 0);
   // Pipeline totals ignore the search/source filters, so truncation hints only apply to the unfiltered board.
@@ -223,8 +226,17 @@ export default function LeadsPanel({ onLoaded }: { onLoaded?: () => void }) {
 
   const scoreChip = (score: number) => {
     const tone = scoreTone(score);
-    const cls = tone === "high" ? "text-[var(--state-success)]" : tone === "mid" ? "text-[var(--state-warning)]" : "text-muted-foreground";
-    return <span className={`font-mono text-xs ${cls}`} title={t("fieldScore")}>{score}</span>;
+    const cls =
+      tone === "high"
+        ? "text-[var(--state-success)]"
+        : tone === "mid"
+          ? "text-[var(--state-warning)]"
+          : "text-muted-foreground";
+    return (
+      <span className={`font-mono text-xs ${cls}`} title={t("fieldScore")}>
+        {score}
+      </span>
+    );
   };
 
   const leadCard = (lead: Lead) => (
@@ -238,33 +250,47 @@ export default function LeadsPanel({ onLoaded }: { onLoaded?: () => void }) {
       className="rounded-md border border-border bg-card p-3 shadow-sm"
       data-testid="lead-card"
     >
-      <button type="button" className="block w-full text-left" onClick={() => setDrawer({ lead })}>
+      <button type="button" className="block w-full text-start" onClick={() => setDrawer({ lead })}>
         <div className="flex items-start justify-between gap-2">
           <span className="truncate text-sm font-medium">{leadDisplayName(lead)}</span>
           {scoreChip(lead.score)}
         </div>
         {(lead.company || lead.title) && (
-          <div className="truncate text-xs text-muted-foreground">{[lead.title, lead.company].filter(Boolean).join(" · ")}</div>
+          <div className="truncate text-xs text-muted-foreground">
+            {[lead.title, lead.company].filter(Boolean).join(" · ")}
+          </div>
         )}
         {lead.value != null && <div className="mt-1 font-mono text-xs">{formatValue(lead.value)}</div>}
         {(lead.tags?.length ?? 0) > 0 && (
           <div className="mt-1 flex flex-wrap gap-1">
             {lead.tags!.slice(0, 3).map((tag) => (
-              <Badge key={tag} variant="secondary">{tag}</Badge>
+              <Badge key={tag} variant="secondary">
+                {tag}
+              </Badge>
             ))}
           </div>
         )}
       </button>
       <div className="mt-2 flex justify-between">
         <Button
-          type="button" variant="ghost" size="icon" className="size-7"
-          disabled={lead.stage === LEAD_STAGES[0]} aria-label={t("movePrev")} onClick={() => shiftStage(lead, -1)}
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="size-7"
+          disabled={lead.stage === LEAD_STAGES[0]}
+          aria-label={t("movePrev")}
+          onClick={() => shiftStage(lead, -1)}
         >
           <ChevronLeft size={14} />
         </Button>
         <Button
-          type="button" variant="ghost" size="icon" className="size-7"
-          disabled={lead.stage === LEAD_STAGES[LEAD_STAGES.length - 1]} aria-label={t("moveNext")} onClick={() => shiftStage(lead, 1)}
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="size-7"
+          disabled={lead.stage === LEAD_STAGES[LEAD_STAGES.length - 1]}
+          aria-label={t("moveNext")}
+          onClick={() => shiftStage(lead, 1)}
         >
           <ChevronRight size={14} />
         </Button>
@@ -276,29 +302,69 @@ export default function LeadsPanel({ onLoaded }: { onLoaded?: () => void }) {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-[12rem] flex-1 sm:max-w-xs">
-          <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input className="pl-8" value={q} placeholder={t("searchPlaceholder")} aria-label={t("searchPlaceholder")} onChange={(e) => setQ(e.target.value)} />
+          <Search
+            size={14}
+            className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
+          <Input
+            className="ps-8"
+            value={q}
+            placeholder={t("searchPlaceholder")}
+            aria-label={t("searchPlaceholder")}
+            onChange={(e) => setQ(e.target.value)}
+          />
         </div>
-        <Input className="w-36" value={source} placeholder={t("sourceFilter")} aria-label={t("sourceFilter")} onChange={(e) => setSource(e.target.value)} />
+        <Input
+          className="w-36"
+          value={source}
+          placeholder={t("sourceFilter")}
+          aria-label={t("sourceFilter")}
+          onChange={(e) => setSource(e.target.value)}
+        />
         {view === "table" && (
           <div className="w-40">
             <Select
               value={stageFilter}
               onChange={(e: any) => setStageFilter(e.target.value)}
-              options={[{ value: "", label: t("allStages") }, ...LEAD_STAGES.map((s) => ({ value: s, label: t(`stage_${s}`) }))]}
+              options={[
+                { value: "", label: t("allStages") },
+                ...LEAD_STAGES.map((s) => ({ value: s, label: t(`stage_${s}`) })),
+              ]}
             />
           </div>
         )}
-        <div className="ml-auto flex flex-wrap items-center gap-2">
-          <div role="group" aria-label={t("viewToggle")} className="inline-flex overflow-hidden rounded-md border border-border">
-            <Button type="button" size="sm" variant={view === "board" ? "secondary" : "ghost"} aria-pressed={view === "board"} onClick={() => changeView("board")}>
+        <div className="ms-auto flex flex-wrap items-center gap-2">
+          <div
+            role="group"
+            aria-label={t("viewToggle")}
+            className="inline-flex overflow-hidden rounded-md border border-border"
+          >
+            <Button
+              type="button"
+              size="sm"
+              variant={view === "board" ? "secondary" : "ghost"}
+              aria-pressed={view === "board"}
+              onClick={() => changeView("board")}
+            >
               <LayoutGrid size={14} /> {t("viewBoard")}
             </Button>
-            <Button type="button" size="sm" variant={view === "table" ? "secondary" : "ghost"} aria-pressed={view === "table"} onClick={() => changeView("table")}>
+            <Button
+              type="button"
+              size="sm"
+              variant={view === "table" ? "secondary" : "ghost"}
+              aria-pressed={view === "table"}
+              onClick={() => changeView("table")}
+            >
               <Rows3 size={14} /> {t("viewTable")}
             </Button>
           </div>
-          <Button type="button" variant="outline" size="sm" onClick={() => setShowImport((v) => !v)} aria-expanded={showImport}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowImport((v) => !v)}
+            aria-expanded={showImport}
+          >
             <Upload size={14} /> {t("importButton")}
           </Button>
           <Button type="button" variant="outline" size="sm" onClick={runExport}>
@@ -310,7 +376,9 @@ export default function LeadsPanel({ onLoaded }: { onLoaded?: () => void }) {
         </div>
       </div>
 
-      <p className="text-sm text-muted-foreground">{t("summary", { count: allCount, value: formatValue(openValue) || "0" })}</p>
+      <p className="text-sm text-muted-foreground">
+        {t("summary", { count: allCount, value: formatValue(openValue) || "0" })}
+      </p>
 
       {showImport && (
         <Card>
@@ -333,9 +401,15 @@ export default function LeadsPanel({ onLoaded }: { onLoaded?: () => void }) {
             </div>
             {importResult && (
               <div className="text-sm" role="status">
-                <p>{t("importSummary", { created: importResult.created, updated: importResult.updated, skipped: importResult.skipped })}</p>
+                <p>
+                  {t("importSummary", {
+                    created: importResult.created,
+                    updated: importResult.updated,
+                    skipped: importResult.skipped,
+                  })}
+                </p>
                 {importResult.errors.length > 0 && (
-                  <ul className="mt-1 list-disc pl-5 text-xs text-muted-foreground">
+                  <ul className="mt-1 list-disc ps-5 text-xs text-muted-foreground">
                     {importResult.errors.slice(0, 10).map((msg) => (
                       <li key={msg}>{msg}</li>
                     ))}
@@ -350,12 +424,18 @@ export default function LeadsPanel({ onLoaded }: { onLoaded?: () => void }) {
       {error && (
         <div className="flex items-center gap-3 rounded-md border border-border p-3 text-sm" role="alert">
           <span>{t("loadFailed")}</span>
-          <Button type="button" size="sm" variant="outline" onClick={() => void refresh()}>{t("retry")}</Button>
+          <Button type="button" size="sm" variant="outline" onClick={() => void refresh()}>
+            {t("retry")}
+          </Button>
         </div>
       )}
 
       {view === "board" && unfiltered && !loading && boardIsTruncated(allCount, leads.length) && (
-        <p className="rounded-md border border-border bg-secondary/30 p-3 text-sm text-muted-foreground" role="status" data-testid="board-truncated">
+        <p
+          className="rounded-md border border-border bg-secondary/30 p-3 text-sm text-muted-foreground"
+          role="status"
+          data-testid="board-truncated"
+        >
           {tg("leadsTruncated", { shown: leads.length, total: allCount })}
         </p>
       )}
@@ -363,7 +443,10 @@ export default function LeadsPanel({ onLoaded }: { onLoaded?: () => void }) {
       {loading && leads.length === 0 && !error ? (
         <p className="text-sm text-muted-foreground">{t("loading")}</p>
       ) : view === "board" ? (
-        <div className="grid auto-cols-[minmax(15rem,1fr)] grid-flow-col gap-3 overflow-x-auto pb-2" data-testid="lead-board">
+        <div
+          className="grid auto-cols-[minmax(15rem,1fr)] grid-flow-col gap-3 overflow-x-auto pb-2"
+          data-testid="lead-board"
+        >
           {LEAD_STAGES.map((stage) => {
             const stageTotal = totalsByStage[stage];
             return (
@@ -392,12 +475,21 @@ export default function LeadsPanel({ onLoaded }: { onLoaded?: () => void }) {
                       {stageTotal && stageTotal.value > 0 ? ` · ${formatValue(stageTotal.value)}` : ""}
                     </div>
                   </div>
-                  <Button type="button" variant="ghost" size="icon" className="size-7" aria-label={t("addToStage", { stage: t(`stage_${stage}`) })} onClick={() => setDrawer({ lead: null, stage })}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-7"
+                    aria-label={t("addToStage", { stage: t(`stage_${stage}`) })}
+                    onClick={() => setDrawer({ lead: null, stage })}
+                  >
                     <Plus size={14} />
                   </Button>
                 </header>
                 {grouped[stage].map(leadCard)}
-                {grouped[stage].length === 0 && <p className="px-1 py-4 text-center text-xs text-muted-foreground">{t("columnEmpty")}</p>}
+                {grouped[stage].length === 0 && (
+                  <p className="px-1 py-4 text-center text-xs text-muted-foreground">{t("columnEmpty")}</p>
+                )}
                 {unfiltered && remainingInColumn(stageTotal?.count ?? 0, grouped[stage].length) > 0 && (
                   <Button
                     type="button"
@@ -415,7 +507,9 @@ export default function LeadsPanel({ onLoaded }: { onLoaded?: () => void }) {
           })}
         </div>
       ) : leads.length === 0 && !error ? (
-        <p className="rounded-md border border-dashed border-border p-6 text-center text-sm text-muted-foreground">{t("emptyState")}</p>
+        <p className="rounded-md border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+          {t("emptyState")}
+        </p>
       ) : (
         <>
           <div className="hidden sm:block">
@@ -435,11 +529,22 @@ export default function LeadsPanel({ onLoaded }: { onLoaded?: () => void }) {
                 {leads.map((lead) => (
                   <TableRow key={lead.id} className="cursor-pointer" onClick={() => setDrawer({ lead })}>
                     <TableCell>
-                      <button type="button" className="flex items-center gap-2 text-left" onClick={(e) => { e.stopPropagation(); setDrawer({ lead }); }}>
-                        <span className="grid size-7 shrink-0 place-items-center rounded-md bg-secondary font-mono text-[11px]">{initials(lead)}</span>
+                      <button
+                        type="button"
+                        className="flex items-center gap-2 text-start"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDrawer({ lead });
+                        }}
+                      >
+                        <span className="grid size-7 shrink-0 place-items-center rounded-md bg-secondary font-mono text-[11px]">
+                          {initials(lead)}
+                        </span>
                         <span>
                           <span className="block text-sm font-medium">{leadDisplayName(lead)}</span>
-                          {lead.email && lead.name && <span className="block text-xs text-muted-foreground">{lead.email}</span>}
+                          {lead.email && lead.name && (
+                            <span className="block text-xs text-muted-foreground">{lead.email}</span>
+                          )}
                         </span>
                       </button>
                     </TableCell>
@@ -457,12 +562,18 @@ export default function LeadsPanel({ onLoaded }: { onLoaded?: () => void }) {
           <ul className="flex flex-col gap-2 sm:hidden">
             {leads.map((lead) => (
               <li key={lead.id}>
-                <button type="button" className="w-full rounded-md border border-border bg-card p-3 text-left" onClick={() => setDrawer({ lead })}>
+                <button
+                  type="button"
+                  className="w-full rounded-md border border-border bg-card p-3 text-start"
+                  onClick={() => setDrawer({ lead })}
+                >
                   <div className="flex items-center justify-between gap-2">
                     <span className="truncate text-sm font-medium">{leadDisplayName(lead)}</span>
                     {stageBadge(lead.stage)}
                   </div>
-                  <div className="truncate text-xs text-muted-foreground">{[lead.company, lead.source].filter(Boolean).join(" · ")}</div>
+                  <div className="truncate text-xs text-muted-foreground">
+                    {[lead.company, lead.source].filter(Boolean).join(" · ")}
+                  </div>
                 </button>
               </li>
             ))}

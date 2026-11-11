@@ -100,6 +100,7 @@ function AppShellBody({
   collapsibleRail = true,
   quietStatus = false,
 }: AppShellBodyProps) {
+  const tHC = useTranslations("hcComponentsAppShell");
   const bleed = bleedProp || fillViewport;
   const pathname = usePathname();
   useDocumentTitle(title, eyebrow);
@@ -250,7 +251,7 @@ function AppShellBody({
         ref={navRef}
         aria-label={tNav("primaryNavAriaLabel")}
         style={{ backgroundColor: "var(--surface-card)" }}
-        className={`group/rail fixed inset-y-0 left-0 z-50 flex w-56 flex-col border-r border-[var(--surface-border)] ease-out lg:top-0 lg:h-screen lg:translate-x-0 ${
+        className={`group/rail fixed inset-y-0 start-0 z-50 flex w-56 flex-col border-e border-[var(--surface-border)] ease-out lg:top-0 lg:h-screen lg:translate-x-0 ${
           collapsibleRail
             ? hubMode
               ? // Hub mode: the rail is a permanent 64px icon lane - it no
@@ -258,7 +259,7 @@ function AppShellBody({
                 "transition-[width,transform] duration-200 lg:fixed lg:w-16 lg:overflow-x-hidden"
               : "transition-[width,transform] duration-200 lg:fixed lg:w-16 lg:overflow-x-hidden lg:hover:w-56 lg:hover:shadow-2xl"
             : "transition-transform duration-300 lg:sticky lg:w-56"
-        } ${mobileNavOpen ? "translate-x-0" : "-translate-x-full"}`}
+        } ${mobileNavOpen ? "translate-x-0" : "max-lg:ltr:-translate-x-full max-lg:rtl:translate-x-full"}`}
         // Below lg, a closed drawer is only translated off-screen - its links
         // and buttons stayed fully focusable while invisible (a11y audit
         // follow-up). `inert` drops the whole subtree out of both the tab
@@ -414,7 +415,8 @@ function AppShellBody({
             workflow designer page scroll. */}
         {!fillViewport && (
           <footer className="mt-auto border-t border-border px-4 py-4 text-xs text-muted-foreground sm:px-6 lg:px-8">
-            © {new Date().getFullYear()} {LEGAL_ENTITY}. All rights reserved.
+            © {new Date().getFullYear()} {LEGAL_ENTITY}
+            {tHC("s1")}
           </footer>
         )}
       </div>

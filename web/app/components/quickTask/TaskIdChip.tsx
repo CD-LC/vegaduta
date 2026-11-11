@@ -31,14 +31,14 @@ export default function TaskIdChip({ taskId }: { taskId: string }) {
 
   return (
     <span className="inline-flex items-center overflow-hidden rounded-md border border-border bg-secondary/40 text-xs">
-      <span className="inline-flex items-center gap-1.5 py-1 pl-2.5 pr-2 font-mono text-muted-foreground">
+      <span className="inline-flex items-center gap-1.5 py-1 ps-2.5 pe-2 font-mono text-muted-foreground">
         <span className="size-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
         {t("taskIdLabel", { id: taskId.slice(0, 8) })}
       </span>
       <button
         type="button"
         className={cn(
-          "flex items-center border-0 border-l border-border bg-transparent px-2 py-1.5 shadow-none transition-colors hover:bg-accent",
+          "flex items-center border-0 border-s border-border bg-transparent px-2 py-1.5 shadow-none transition-colors hover:bg-accent",
           copied ? "text-emerald-500" : "text-muted-foreground hover:text-foreground"
         )}
         onClick={handleCopy}

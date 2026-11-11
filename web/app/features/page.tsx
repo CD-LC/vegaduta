@@ -13,6 +13,7 @@ import { Badge } from "../components/ui/badge";
 import { Card } from "../components/ui/card";
 import { useAuth } from "../components/AuthProvider";
 import { errorMessage } from "../lib/errors";
+import { useTranslations } from "../lib/i18n";
 
 // Tenant-facing "Plans & Features" comparison (direct request: "display all
 // the features available for the unlimited user, disabled for the free user").
@@ -213,6 +214,7 @@ function cellValue(feature: Feature, planKey: string, settings: TenantSettings |
 }
 
 function BoolCell({ on }: { on: FeatureValue }) {
+  const tHC = useTranslations("hcFeaturesPage");
   return on ? (
     <span
       role="img"
@@ -227,7 +229,7 @@ function BoolCell({ on }: { on: FeatureValue }) {
       role="img"
       className="inline-flex h-6 w-6 items-center justify-center rounded-full"
       style={{ background: "var(--ax-track)", color: "var(--text-faint)" }}
-      aria-label="Not included"
+      aria-label={tHC("s9")}
     >
       <Minus className="size-3.5" aria-hidden="true" />
     </span>
@@ -247,7 +249,10 @@ function FeatureCell({ feature, planKey, settings, currentPlan }: FeatureCellPro
   return (
     <span
       className="font-mono text-sm"
-      style={{ color: value === -1 ? "var(--accent-700)" : "var(--text-primary)", fontWeight: value === -1 ? 600 : 500 }}
+      style={{
+        color: value === -1 ? "var(--accent-700)" : "var(--text-primary)",
+        fontWeight: value === -1 ? 600 : 500,
+      }}
     >
       {limitDisplay(value)}
     </span>
@@ -255,6 +260,7 @@ function FeatureCell({ feature, planKey, settings, currentPlan }: FeatureCellPro
 }
 
 export default function FeaturesPage() {
+  const tHC = useTranslations("hcFeaturesPage");
   // /features is also reachable by a logged-out visitor and by crawlers (see
   // AuthProvider's ANONYMOUS_RENDER_ROUTES) - only a signed-in tenant has
   // settings to fetch, so skip the call entirely rather than firing an
@@ -291,21 +297,21 @@ export default function FeaturesPage() {
   return (
     <AppShell eyebrow="Plans">
       <PageHeader
-        title="Plans & features"
+        title={tHC("s8")}
         subtitle="Everything each plan unlocks. Your current plan is highlighted — its column reflects your workspace's live entitlements."
         actions={
           isAuthed ? (
             canUpgrade ? (
               <Button type="button" style={{ marginBottom: 0 }} onClick={() => setUpgradeOpen(true)}>
                 <ArrowUpRight width={14} height={14} style={{ marginRight: 4, verticalAlign: -2 }} />
-                Upgrade plan
+                {tHC("s7")}
               </Button>
             ) : null
           ) : (
             <Button type="button" style={{ marginBottom: 0 }} asChild>
               <Link href="/signup">
                 <ArrowUpRight width={14} height={14} style={{ marginRight: 4, verticalAlign: -2 }} />
-                Get started free
+                {tHC("s6")}
               </Link>
             </Button>
           )
@@ -322,14 +328,16 @@ export default function FeaturesPage() {
           anonymous visitor/crawler has no plan to be "on", so show a neutral
           compare-plans framing instead. */}
       <Card className="mb-4 gap-0 border-[var(--accent-200)] bg-[var(--accent-50)] p-5">
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+        <div
+          style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}
+        >
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <Sparkles width={18} height={18} style={{ color: "var(--accent-600)" }} />
             <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
               {isAuthed ? (
                 <>
-                  You&apos;re on the{" "}
-                  <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{currentPlanLabel}</span> plan.
+                  {tHC("s5")} <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{currentPlanLabel}</span>{" "}
+                  plan.
                 </>
               ) : (
                 "Compare what every plan unlocks."
@@ -338,8 +346,7 @@ export default function FeaturesPage() {
           </div>
           {isAuthed && canUpgrade ? (
             <span className="text-sm text-muted-foreground" style={{ fontSize: "0.8rem" }}>
-              Rows marked <Minus width={12} height={12} style={{ display: "inline", verticalAlign: -2 }} /> aren&apos;t
-              available on your plan yet.
+              {tHC("s4")} <Minus width={12} height={12} style={{ display: "inline", verticalAlign: -2 }} /> {tHC("s3")}
             </span>
           ) : isAuthed ? (
             <Badge
@@ -347,7 +354,7 @@ export default function FeaturesPage() {
               className="border-[var(--success-border)] bg-[var(--success-bg)] text-[var(--success-text)]"
               style={{ fontSize: "0.75rem" }}
             >
-              Everything unlocked
+              {tHC("s2")}
             </Badge>
           ) : null}
         </div>
@@ -362,7 +369,12 @@ export default function FeaturesPage() {
                 <th style={{ textAlign: "left", padding: "1rem 1.5rem", width: "40%" }}>
                   <span
                     className="font-mono"
-                    style={{ fontSize: "0.75rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}
+                    style={{
+                      fontSize: "0.75rem",
+                      letterSpacing: "0.1em",
+                      textTransform: "uppercase",
+                      color: "var(--text-muted)",
+                    }}
                   >
                     Feature
                   </span>
@@ -399,7 +411,7 @@ export default function FeaturesPage() {
                             className="border-[var(--accent-200)] bg-transparent text-[var(--accent-700)]"
                             style={{ fontSize: "0.75rem", marginTop: 2 }}
                           >
-                            Your plan
+                            {tHC("s1")}
                           </Badge>
                         )}
                       </div>
@@ -422,7 +434,12 @@ export default function FeaturesPage() {
                     >
                       <span
                         className="font-mono"
-                        style={{ fontSize: "0.75rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}
+                        style={{
+                          fontSize: "0.75rem",
+                          letterSpacing: "0.12em",
+                          textTransform: "uppercase",
+                          color: "var(--text-muted)",
+                        }}
                       >
                         {section.title}
                       </span>
@@ -434,7 +451,10 @@ export default function FeaturesPage() {
                         <div style={{ fontWeight: 600, fontSize: "0.85rem", color: "var(--text-primary)" }}>
                           {feature.label}
                         </div>
-                        <p className="text-sm text-muted-foreground" style={{ margin: "2px 0 0", fontSize: "0.75rem", lineHeight: 1.5 }}>
+                        <p
+                          className="text-sm text-muted-foreground"
+                          style={{ margin: "2px 0 0", fontSize: "0.75rem", lineHeight: 1.5 }}
+                        >
                           {feature.desc}
                         </p>
                       </td>
@@ -449,7 +469,12 @@ export default function FeaturesPage() {
                               background: isCurrent ? "var(--accent-50)" : "transparent",
                             }}
                           >
-                            <FeatureCell feature={feature} planKey={plan.key} settings={settings} currentPlan={currentPlan} />
+                            <FeatureCell
+                              feature={feature}
+                              planKey={plan.key}
+                              settings={settings}
+                              currentPlan={currentPlan}
+                            />
                           </td>
                         );
                       })}

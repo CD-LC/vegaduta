@@ -31,7 +31,13 @@ export default function StreamReconnectingNotice({ state }: { state: StreamRecon
       <span className="min-w-0 truncate">
         {state.restoring ? t("restoring") : t("reconnecting", { attempt: state.attempt, max: state.max })}
       </span>
-      <Button type="button" variant="ghost" size="sm" className="ml-auto h-6 shrink-0 px-2 text-xs" onClick={state.cancel}>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="ms-auto h-6 shrink-0 px-2 text-xs"
+        onClick={state.cancel}
+      >
         {t("reconnectingStop")}
       </Button>
     </div>

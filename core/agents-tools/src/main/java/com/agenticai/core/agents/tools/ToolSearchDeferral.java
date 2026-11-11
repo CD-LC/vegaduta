@@ -154,7 +154,23 @@ final class ToolSearchDeferral {
             String sessionId,
             Wrapper wrapper,
             org.springframework.ai.chat.client.ChatClient chatClient) {
-        if (!enabled || allowed == null || allowed.size() <= threshold) {
+        return apply(allowed, agentId, sessionId, wrapper, chatClient, false);
+    }
+
+    /**
+     * As {@link #apply(List, UUID, String, Wrapper, ChatClient)}, with {@code forced} applying the
+     * policy even when {@code app.tools.search.enabled} is off: the serving row's own tool-deferral
+     * switch (V674, the local model's "hide most tools behind search" setting). The threshold and
+     * always-on list still apply - forcing only overrides the master switch.
+     */
+    List<ToolCallback> apply(
+            List<ToolCallback> allowed,
+            UUID agentId,
+            String sessionId,
+            Wrapper wrapper,
+            org.springframework.ai.chat.client.ChatClient chatClient,
+            boolean forced) {
+        if ((!enabled && !forced) || allowed == null || allowed.size() <= threshold) {
             return allowed;
         }
         String tenantId = TenantContext.current().map(TenantContext::getTenantId).orElse(null);

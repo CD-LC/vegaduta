@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import type { UiNode, UiSpec } from "./schema";
 import SafeModelImage from "../SafeModelImage";
 import ApiCallPanel from "./ApiCallPanel";
+import { useTranslations } from "../../lib/i18n";
 
 /**
  * Renders a validated {@link UiSpec} (see schema.ts for the contract) as real
@@ -44,9 +45,10 @@ const TONE: Record<string, string> = {
 };
 
 function Unsupported({ type }: { type: string }) {
+  const tHC = useTranslations("hcComponentsGenerativeuiGenerativeUiRenderer");
   return (
     <div className="rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
-      Unsupported UI element: {type}
+      {tHC("s2")} {type}
     </div>
   );
 }
@@ -127,7 +129,7 @@ function Node({ node, onAction }: { node: UiNode; onAction: GenerativeUiActionHa
       const items = Array.isArray(p.items) ? p.items.filter((i): i is string => typeof i === "string") : [];
       const Tag = p.ordered ? "ol" : "ul";
       return (
-        <Tag className={`text-sm text-foreground ${p.ordered ? "list-decimal" : "list-disc"} space-y-1 pl-5`}>
+        <Tag className={`text-sm text-foreground ${p.ordered ? "list-decimal" : "list-disc"} space-y-1 ps-5`}>
           {items.map((i, k) => (
             <li key={k} className="break-words">
               {i}
@@ -145,7 +147,7 @@ function Node({ node, onAction }: { node: UiNode; onAction: GenerativeUiActionHa
             <thead>
               <tr className="border-b border-border bg-muted/40">
                 {cols.map((c, i) => (
-                  <th key={i} className="px-3 py-2 text-left font-medium text-foreground">
+                  <th key={i} className="px-3 py-2 text-start font-medium text-foreground">
                     {c}
                   </th>
                 ))}
@@ -389,6 +391,7 @@ export function GenerativeUiRenderer({
   onAction?: GenerativeUiActionHandler;
   errors?: string[];
 }) {
+  const tHC = useTranslations("hcComponentsGenerativeuiGenerativeUiRenderer");
   const [fired, setFired] = useState(false);
   const handle = useCallback<GenerativeUiActionHandler>(
     (action, values) => {
@@ -400,7 +403,10 @@ export function GenerativeUiRenderer({
   return (
     <div className="generative-ui rounded-xl border border-border bg-background/60 p-3">
       {errors && errors.length > 0 && (
-        <p className="mb-2 text-xs text-muted-foreground">Some elements were adjusted for safety ({errors.length}).</p>
+        <p className="mb-2 text-xs text-muted-foreground">
+          {tHC("s1")}
+          {errors.length}).
+        </p>
       )}
       <Node node={spec.root} onAction={handle} />
       {fired && <p className="mt-2 text-xs text-muted-foreground">Sent.</p>}

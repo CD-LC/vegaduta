@@ -3,7 +3,7 @@
 # from docs/requirements.txt). The Markdown under docs/ stays readable on GitHub
 # without this file; nothing here is required to read the docs.
 site_name: VegaDūta documentation
-site_description: Open-source platform for building, governing and running AI agents, and the Java Agent SDK.
+site_description: Source-available (BSL-1.1) platform for building, governing and running AI agents, and the Java Agent SDK.
 site_url: https://cd-lc.github.io/vegaduta/
 repo_url: https://github.com/CD-LC/vegaduta
 repo_name: vegaduta
@@ -141,6 +141,7 @@ nav:
       - Connector specs: connectors/README.md
       - Google Calendar booking and Sheets: connectors/google-calendar-sheets.md
       - n8n bridge: integrations/n8n.md
+      - Hindsight agent memory: integrations/hindsight.md
   - SDKs and dependencies:
       - Overview: sdk/README.md
       - Java Agent SDK: sdk/java-agent-sdk.md
@@ -156,6 +157,8 @@ nav:
       - Plugins, apps and mobile: plugins-and-apps.md
   - Architecture:
       - Overview: architecture/overview.md
+      - Database architecture: architecture/database.md
+      - Database reference (generated): architecture/database-reference.md
       - Repository structure: repository-structure.md
       - Core module graph: architecture/core-module-graph.md
       - Agents module decomposition:
@@ -174,6 +177,7 @@ nav:
       - Deployment shapes and pools: deploy/DEPLOYMENT-SHAPES.md
       - Cloud portability: architecture/ADR-cloud-portability.md
       - Structural audit (2026-10-14): architecture/STRUCTURAL-AUDIT-2026-10-14.md
+      - Design-patterns review (2026-10-29): architecture/DESIGN-PATTERNS-REVIEW-2026-10-29.md
       - MCP specification alignment: architecture/mcp-spec-alignment.md
       - A2A conformance: architecture/a2a-conformance.md
       - Personal assistant surface (2026-10-17): architecture/PERSONAL-ASSISTANT-SURFACE-2026-10-17.md
@@ -252,6 +256,7 @@ nav:
       - Repository setup: maintainers/repo-setup.md
       - Branch protection: maintainers/branch-protection.md
       - Releasing: maintainers/releasing.md
+      - Signing the Setup app: maintainers/release-signing.md
       - Dependabot pull requests: maintainers/dependabot-prs.md
       - v1.0.0 definition of done: maintainers/v1.0.0-definition-of-done.md
       - Agent coordination: maintainers/agent-coordination.md

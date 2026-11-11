@@ -40,6 +40,7 @@ import CoachButton from "../components/brief/CoachDrawer";
  * fetched once here and passed down rather than duplicated.
  */
 export default function ToolsPage() {
+  const tHC = useTranslations("hcToolsPage");
   const t = useTranslations("toolsPage");
   const tOpenApi = useTranslations("openApiTools");
   const tOAuth = useTranslations("mcpOAuth");
@@ -154,7 +155,7 @@ export default function ToolsPage() {
   // catalog.length is McpCatalogService's real static list size.
   // Tool pinning is a deployment-wide mode, so one registration's status is enough to show it persistently.
   const pinProbeId = (servers as Array<{ id: string; dynamic?: boolean; enabled?: boolean }>).find(
-    (s) => s.dynamic && s.enabled,
+    (s) => s.dynamic && s.enabled
   )?.id;
   const pinProbe = useToolPinStatuses(pinProbeId ? [pinProbeId] : [], servers);
 
@@ -175,12 +176,11 @@ export default function ToolsPage() {
             // Suppress the counter rather than print a wrong one - see the
             // loadFailed comment above.
             <>
-              Connect the tools and services your agents are allowed to call.{" "}
-              <span className="text-muted-foreground">Tool status unavailable right now.</span>
+              {tHC("s7")} <span className="text-muted-foreground">{tHC("s8")}</span>
             </>
           ) : (
             <>
-              Connect the tools and services your agents are allowed to call.{" "}
+              {tHC("s7")}{" "}
               <span className="whitespace-nowrap">
                 <span className="font-medium text-foreground tabular-nums">{enabledCount}</span> {t("enabledSuffix")}{" "}
                 <span className="tabular-nums">/ {totalCount}</span> {t("availableSuffix")}
@@ -193,7 +193,7 @@ export default function ToolsPage() {
             <div className="relative">
               <Search
                 size={14}
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                 aria-hidden="true"
               />
               <Input
@@ -202,7 +202,7 @@ export default function ToolsPage() {
                 aria-label={t("searchPlaceholder")}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="h-8 w-48 pl-8 text-xs sm:w-56"
+                className="h-8 w-48 ps-8 text-xs sm:w-56"
               />
             </div>
             {/* Follow-through screen (MCP-UX task, 2026-07-26): every enabled
@@ -211,7 +211,7 @@ export default function ToolsPage() {
              * replace it. */}
             <Button variant="outline" size="sm" asChild>
               <Link href="/tools/servers">
-                <ListChecks size={14} aria-hidden="true" /> Enabled servers
+                <ListChecks size={14} aria-hidden="true" /> {tHC("s6")}
               </Link>
             </Button>
             <CoachButton />
@@ -268,14 +268,11 @@ export default function ToolsPage() {
       {loadFailed && (
         <Alert variant="destructive" className="mb-6">
           <AlertTriangle aria-hidden="true" />
-          <AlertTitle>Couldn&apos;t load your MCP servers</AlertTitle>
+          <AlertTitle>{tHC("s5")}</AlertTitle>
           <AlertDescription>
-            <p>
-              The request for this workspace&apos;s connected servers failed. Anything you had enabled is still enabled
-              — we just can&apos;t show it right now.
-            </p>
+            <p>{tHC("s4")}</p>
             <Button variant="outline" size="sm" className="mt-2" onClick={refresh}>
-              Try again
+              {tHC("s3")}
             </Button>
           </AlertDescription>
         </Alert>
@@ -306,10 +303,10 @@ export default function ToolsPage() {
             Classification
           </TabsTrigger>
           <TabsTrigger value="custom-code" className="flex-none gap-1.5 px-3 py-1.5">
-            Custom Code
+            {tHC("s2")}
           </TabsTrigger>
           <TabsTrigger value="openapi" className="flex-none gap-1.5 px-3 py-1.5">
-            OpenAPI Sources
+            {tHC("s1")}
           </TabsTrigger>
         </TabsList>
 

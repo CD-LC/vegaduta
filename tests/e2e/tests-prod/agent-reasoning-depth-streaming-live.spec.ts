@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
-import { requireUserCredentials, requireMutationOptIn, LLM_IS_MOCK } from "../helpers/prod-env";
+import { requireUserCredentials, requireMutationOptIn } from "../helpers/prod-env";
 import { signInToConsole, skipIfHostedAllowanceExhausted, expandReasoningAutonomySection } from "../helpers/prod-session";
+import { fixStageApiBase, LLM_IS_MOCK } from "./local-stage-fix";
 
 /**
  * REAL-TENANT platform-hosted-provider RESPONSE validation across Reasoning
@@ -54,6 +55,7 @@ import { signInToConsole, skipIfHostedAllowanceExhausted, expandReasoningAutonom
  */
 test.describe("Agent reasoning depth - real platform-provider responses across depths (live production scenario)", () => {
   test.setTimeout(4 * 60 * 1000);
+  test.use({ bypassCSP: true }); // stage fix: console calls api.<domain>; its CSP only allows localhost:8280
 
   test("Fast and Rigorous both return a real, on-topic reply from the platform-hosted model", async ({
     page,
@@ -62,6 +64,7 @@ test.describe("Agent reasoning depth - real platform-provider responses across d
     requireMutationOptIn(testInfo);
     testInfo.skip(testInfo.project.name !== "chromium", "writes real data - one project only");
 
+    await fixStageApiBase(page);
     await signInToConsole(page);
     await page.goto("/agents", { waitUntil: "domcontentloaded" });
     await skipIfHostedAllowanceExhausted(page, testInfo);

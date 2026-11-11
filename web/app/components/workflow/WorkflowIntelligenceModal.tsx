@@ -39,7 +39,9 @@ export default function WorkflowIntelligenceModal({
 }: any) {
   // Focus in on open, Tab trap, Escape closes, focus back to the opener on close (FE-041).
   const dialogRef = useRef<HTMLDivElement>(null);
-  useDialogFocus(dialogRef, null, () => setShowIntelligenceModal(false), { enabled: !!(showIntelligenceModal && workflow) });
+  useDialogFocus(dialogRef, null, () => setShowIntelligenceModal(false), {
+    enabled: !!(showIntelligenceModal && workflow),
+  });
 
   return (
     <>
@@ -51,7 +53,9 @@ export default function WorkflowIntelligenceModal({
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
           role="presentation"
-          onClick={(e) => { if (e.target === e.currentTarget) setShowIntelligenceModal(false); }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowIntelligenceModal(false);
+          }}
         >
           <div
             className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-border bg-card p-6 shadow-xl"
@@ -64,7 +68,7 @@ export default function WorkflowIntelligenceModal({
               <h2 className="text-lg font-semibold tracking-tight text-foreground">{t("intelligenceModalTitle")}</h2>
               <button
                 type="button"
-                className="-mr-1 -mt-1 flex size-8 items-center justify-center rounded-md border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-accent hover:text-foreground"
+                className="-me-1 -mt-1 flex size-8 items-center justify-center rounded-md border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-accent hover:text-foreground"
                 onClick={() => setShowIntelligenceModal(false)}
                 aria-label={t("close")}
               >
@@ -129,8 +133,12 @@ export default function WorkflowIntelligenceModal({
               {/* Step caching - a single checkbox, live-patched on toggle. */}
               <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-secondary/20 px-3.5 py-2.5">
                 <div>
-                  <div id="wf-step-caching-label" className="text-sm font-medium text-foreground">{t("stepCachingLabel")}</div>
-                  <div id="wf-step-caching-hint" className="text-xs text-muted-foreground">{t("stepCachingHint")}</div>
+                  <div id="wf-step-caching-label" className="text-sm font-medium text-foreground">
+                    {t("stepCachingLabel")}
+                  </div>
+                  <div id="wf-step-caching-hint" className="text-xs text-muted-foreground">
+                    {t("stepCachingHint")}
+                  </div>
                 </div>
                 <span className="flex items-center gap-1.5 text-sm text-foreground">
                   <input
@@ -251,7 +259,13 @@ export default function WorkflowIntelligenceModal({
                     {costRoutingBusy ? t("saving") : t("save")}
                   </Button>
                   {workflow.economyProviderName && (
-                    <Button type="button" variant="outline" size="sm" disabled={costRoutingBusy} onClick={handleClearCostRouting}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={costRoutingBusy}
+                      onClick={handleClearCostRouting}
+                    >
                       {t("clearCostRouting")}
                     </Button>
                   )}
@@ -298,7 +312,9 @@ export default function WorkflowIntelligenceModal({
                       min={1}
                       max={300}
                       value={executionLimitsDraft.stepTimeoutSeconds}
-                      onChange={(e) => setExecutionLimitsDraft((d: any) => ({ ...d, stepTimeoutSeconds: e.target.value }))}
+                      onChange={(e) =>
+                        setExecutionLimitsDraft((d: any) => ({ ...d, stepTimeoutSeconds: e.target.value }))
+                      }
                       className="w-28"
                     />
                   </div>
@@ -312,7 +328,9 @@ export default function WorkflowIntelligenceModal({
                       min={0}
                       max={5}
                       value={executionLimitsDraft.maxRetryAttempts}
-                      onChange={(e) => setExecutionLimitsDraft((d: any) => ({ ...d, maxRetryAttempts: e.target.value }))}
+                      onChange={(e) =>
+                        setExecutionLimitsDraft((d: any) => ({ ...d, maxRetryAttempts: e.target.value }))
+                      }
                       className="w-28"
                     />
                   </div>

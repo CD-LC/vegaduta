@@ -114,10 +114,7 @@ export default function AdminCommercePage() {
   return (
     <AppShell eyebrow={tl("eyebrowAdministration")}>
       <>
-        <PageHeader
-          title={t("pageTitle")}
-          subtitle={t("pageSubtitle")}
-        />
+        <PageHeader title={t("pageTitle")} subtitle={t("pageSubtitle")} />
 
         <div className="mb-5 max-w-md">
           <Label htmlFor="commerce-agent">{t("agentPickerLabel")}</Label>
@@ -141,7 +138,9 @@ export default function AdminCommercePage() {
           </Link>
         </p>
 
-        {error && <ErrorRetry message={error} onRetry={() => (agentId ? loadForAgent(agentId) : window.location.reload())} />}
+        {error && (
+          <ErrorRetry message={error} onRetry={() => (agentId ? loadForAgent(agentId) : window.location.reload())} />
+        )}
 
         {agentId && dataLoading && wallets.length === 0 && mandates.length === 0 && <ListSkeleton />}
 
@@ -195,7 +194,7 @@ export default function AdminCommercePage() {
                       {o.title} · {o.priceMinor} {o.currency}
                     </span>
                     {o.evm && <Badge variant="outline">EVM</Badge>}
-                    <span className="ml-auto text-xs text-muted-foreground">{fmtTime(o.createdAt)}</span>
+                    <span className="ms-auto text-xs text-muted-foreground">{fmtTime(o.createdAt)}</span>
                     {o.status === "ACTIVE" && (
                       <Button type="button" variant="destructive" size="sm" onClick={() => handleDisableOffer(o)}>
                         {t("disable")}

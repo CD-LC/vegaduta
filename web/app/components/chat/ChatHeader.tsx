@@ -19,6 +19,7 @@ export default function ChatHeader({
   sending: boolean;
   onNewSession: () => void;
 }) {
+  const tHC = useTranslations("hcComponentsChatChatHeader");
   const t = useTranslations("chatPanel");
   return (
     <header className="flex items-center justify-between gap-3 border-b border-border px-6 py-4">
@@ -29,8 +30,8 @@ export default function ChatHeader({
         <span className="block truncate text-xs text-muted-foreground" title={sessionId || undefined}>
           {sessionId ? t("sessionPrefix", { sessionId }) : t("noSessionYet")}
         </span>
-        <RunCostCard agentId={agent.id} sessionId={sessionId} turnInFlight={sending} className="-ml-1.5" />
-        <ChatExportMenu agentId={agent.id} sessionId={sessionId} className="-ml-1.5" />
+        <RunCostCard agentId={agent.id} sessionId={sessionId} turnInFlight={sending} className="-ms-1.5" />
+        <ChatExportMenu agentId={agent.id} sessionId={sessionId} className="-ms-1.5" />
       </div>
       {/* "Clear context" (user ask 2026-08-07) - same newSession handler as
         the old New-session control: a null sessionId makes the next
@@ -41,12 +42,10 @@ export default function ChatHeader({
         <TooltipTrigger asChild>
           <Button type="button" variant="ghost" size="sm" onClick={onNewSession}>
             <RotateCcw aria-hidden="true" size={12} className="size-3" />
-            Clear context
+            {tHC("s2")}
           </Button>
         </TooltipTrigger>
-        <TooltipContent>
-          Start a fresh conversation — clears on-device and server-side session memory for this chat
-        </TooltipContent>
+        <TooltipContent>{tHC("s1")}</TooltipContent>
       </Tooltip>
     </header>
   );

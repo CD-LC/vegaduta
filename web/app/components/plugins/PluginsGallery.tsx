@@ -12,6 +12,7 @@ import PluginCard from "./PluginCard";
 import PaginationControls from "../PaginationControls";
 import { usePagination } from "../../lib/usePagination";
 import type { PluginCatalog, PluginEntry } from "./serverFetch";
+import { useTranslations } from "../../lib/i18n";
 
 // The plugins marketplace client (same seeded-SSR + client-takeover contract
 // as TemplatesGallery): rendered with whatever the server component managed
@@ -39,6 +40,7 @@ export function filterPlugins(
 }
 
 export default function PluginsGallery({ initialCatalog }: { initialCatalog: PluginCatalog | null }) {
+  const tHC = useTranslations("hcComponentsPluginsPluginsGallery");
   const [catalog, setCatalog] = useState<PluginCatalog | null>(initialCatalog);
   const [status, setStatus] = useState<"loading" | "ready" | "error">(initialCatalog ? "ready" : "loading");
   const [error, setError] = useState<string | null>(null);
@@ -103,12 +105,12 @@ export default function PluginsGallery({ initialCatalog }: { initialCatalog: Plu
           <span className="cat-chip cat-chip-lg" style={{ ["--cat" as string]: "var(--state-error)" }}>
             <AlertCircle size={18} strokeWidth={2} aria-hidden="true" />
           </span>
-          <p className="text-sm font-medium text-foreground">We couldn&apos;t load the plugin catalog</p>
+          <p className="text-sm font-medium text-foreground">{tHC("s4")}</p>
           <p className="max-w-sm text-sm text-muted-foreground">
             {error || "Couldn't load the plugin catalog. Please try again."}
           </p>
           <Button variant="outline" size="sm" onClick={load}>
-            <RefreshCw size={14} strokeWidth={2} aria-hidden="true" /> Try again
+            <RefreshCw size={14} strokeWidth={2} aria-hidden="true" /> {tHC("s3")}
           </Button>
         </CardContent>
       </Card>
@@ -119,14 +121,18 @@ export default function PluginsGallery({ initialCatalog }: { initialCatalog: Plu
     <>
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <div className="relative min-w-0 flex-1 basis-56">
-          <Search size={14} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Search
+            size={14}
+            aria-hidden="true"
+            className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
           <Input
             type="search"
-            className="pl-8"
+            className="ps-8"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search plugins"
-            aria-label="Search plugins"
+            placeholder={tHC("s2")}
+            aria-label={tHC("s2")}
           />
         </div>
         <Select
@@ -142,8 +148,11 @@ export default function PluginsGallery({ initialCatalog }: { initialCatalog: Plu
         />
       </div>
       {filtered.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground" role="status">
-          No plugins match your search.
+        <p
+          className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground"
+          role="status"
+        >
+          {tHC("s1")}
         </p>
       ) : null}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

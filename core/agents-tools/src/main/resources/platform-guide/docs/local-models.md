@@ -25,11 +25,12 @@ key added later in the console, or a model you choose from the catalog
 terminal) are not asked and keep the cloud default; pass `--cloud` to skip the
 question, or `--local-ai` / `--local-model` to answer it up front.
 
-`./scripts/vegaduta personal` (and the Setup app, which runs it) does not ask:
-it picks the model that fits the memory it can use and downloads it. On macOS
-and Windows it installs Ollama on the computer when it is missing. Only
-`--cloud` (`-Cloud` on Windows), or a machine with less than 4 GB of memory,
-skips the model. See [Personal mode](personal-mode.md#picking-a-local-model).
+A first `./scripts/vegaduta personal` (and the Setup app, which runs it) is lean and
+downloads **no** model: add a cloud provider key in the console, or opt in with `--local-ai` /
+`--local-model TAG` (`-LocalAi` / `-LocalModel` on Windows, or tick a model pack in Setup). It then
+picks the model that fits the memory it can use, says how big the download is and asks before it
+pulls it. On macOS and Windows it installs Ollama on the computer when it is missing. An install
+that already chose keeps its choice. See [Personal mode](personal-mode.md#picking-a-local-model).
 
 ### Your first agent, no setup
 
@@ -227,6 +228,29 @@ or anything if the proxy has no master key. Model ids on the row are the
 names LiteLLM's `model_list` declares (find them with
 `curl http://<proxy>:4000/v1/models`), not the backends' raw ids.
 
+### A free-provider aggregator: FreeLLMAPI
+
+[FreeLLMAPI](https://github.com/tashfeenahmed/freellmapi) (MIT) is the same
+idea pointed the other way: one OpenAI-compatible `/v1` gateway in front of
+~34 *free* LLM providers (Groq, Gemini, OpenRouter free tiers, and more), so
+an agent gets a working model with **zero per-provider API keys**. Run it as
+an opt-in Compose profile:
+
+```bash
+docker compose -f deploy/compose/docker-compose.yml --env-file deploy/compose/.env \
+  --profile freellmapi up -d freellmapi
+```
+
+Then register a provider row of type **Local/OpenAI-compatible**
+(`LOCAL_OPENAI`) with base URL `http://freellmapi:3001/v1` and any model id
+the gateway exposes. The `freellmapi` service sits on the `agent-io` network
+with core, so its compose DNS name works out of the box - if the SSRF guard
+still refuses a private address, add `freellmapi:3001` to
+`APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS` as with any BYOK endpoint. The
+gateway's own console listens on the loopback-only `${FREELLMAPI_HOST_PORT:-3001}`;
+free providers rate-limit by the minute and day, so keep it behind - not in
+front of - a paid or local row in the pool's priority order.
+
 ## Choosing a model
 
 These are starting points to try on your own hardware, not benchmark results.
@@ -292,8 +316,8 @@ as `cache hit total=... cached=... left=...`: `left` is what had to be read.
 | 8 GB of memory or less | `qwen3.5:2b` | Close other apps; a model that is swapped out answers erratically |
 
 **Memory.** The model, Docker's virtual machine and your other apps share the machine's memory, and a model that is
-pushed into swap writes in fits and starts. The personal stack's containers are limited to about 2.5-3.8 GB (see
-[personal-mode.md](personal-mode.md)), so Docker needs about 4 GB; a much larger Docker allowance (Docker Desktop,
+pushed into swap writes in fits and starts. The personal stack's containers are limited to about 2.3 GB for the lean first install and up to about 3.8 GB with
+search and the connector runner (see [personal-mode.md](personal-mode.md)), so Docker needs about 4 GB; a much larger Docker allowance (Docker Desktop,
 Settings, Resources) only leaves less for the model on a small machine. Check with `ollama ps` (what is loaded) and
 your system's swap use (on a Mac, `sysctl vm.swapusage`); remove models you do not use (`ollama rm`).
 
@@ -306,6 +330,17 @@ your system's swap use (on a Mac, `sysctl vm.swapusage`); remove models you do n
 | `app.chat.small-model.tool-cap` | `6` | tools on a small-model turn |
 | `app.llm.ollama.reasoning-effort` | `none` | `low`, `medium` or `high` turn thinking on: better on hard questions, much later first word |
 | `LOCAL_LLM_NUM_CTX` | by Docker memory | a smaller window saves memory on a small machine |
+
+**Per-model runtime knobs.** The "Speed and behaviour" card saves these on the model's serving row
+(`PUT /api/local-models/settings`), so they change at runtime with no restart and apply to this
+model's turns only; each is nullable, and unset means the server or the configured default:
+
+| Field | Effect |
+|---|---|
+| `numBatch` | sent as Ollama's `num_batch` on every request - tokens evaluated per prompt-processing step. A larger batch (e.g. `2048`, kept `<=` the context) parallelises the multi-thousand-token fixed prefix eval that dominates turn latency on a local model. `app.llm.ollama.num-batch` stays the default for a row that has not chosen |
+| `numParallel` | Ollama's runner-level `num_parallel` (1, 2 or 4). It is not a per-request option, so it is applied by deriving a `{model}-parN` variant through `/api/create`, the same weights-sharing mechanism the `-ctxNk` context variants use, and the tag carries the setting |
+| `responseTimeoutMs` | how long this model may stay silent before its stream is declared idle - overrides `app.llm.http.stream-idle-timeout` (90 s, tuned for hosted APIs) for this row's turns only. Raise it on a laptop CPU whose first token takes minutes |
+| `toolDeferral` | `true` forces `search_tools`/`call_tool` on-demand tool loading on this model's turns even when `app.tools.search.enabled` is off - a model that reads its prompt at a few hundred tokens a second should not re-read every tool schema each turn |
 
 ### Tool calls from small models
 

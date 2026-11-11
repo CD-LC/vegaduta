@@ -49,12 +49,20 @@ export function useWorkbenchBase(p: WorkbenchProps) {
 
   const isDraft = !selectedAgent;
 
-  // Land on the most recently created agent instead of an empty draft when
+  // Land on the most recently saved agent instead of an empty draft when
   // agents already exist and the page hasn't been given a selection yet -
   // matches the mockup always showing a concrete agent in its breadcrumb.
+  // GET /api/agents has no documented order (AgentCatalogOps.listAll is a
+  // repository.findAll() + visibility filter), so "most recent" is decided
+  // by updatedAt/createdAt, not list position. A ?template= deep link is a
+  // draft intent too - selecting over it would silently discard the
+  // pre-filled draft the link just opened.
   useEffect(() => {
-    if (!selectedAgentId && agents.length > 0 && !startInDraft) {
-      onSelect(agents[agents.length - 1].id);
+    if (!selectedAgentId && agents.length > 0 && !startInDraft && !initialTemplateKey) {
+      const latest = agents.reduce((a, b) =>
+        (b.updatedAt || b.createdAt || "") > (a.updatedAt || a.createdAt || "") ? b : a
+      );
+      onSelect(latest.id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agents.length]);

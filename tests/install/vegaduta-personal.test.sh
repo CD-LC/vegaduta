@@ -67,15 +67,15 @@ PTY="$ROOT/tests/install/pty_run.py"
 new_home
 out="$(python3 "$PTY" "-|-" "$CLI" personal --build --dry-run 2>&1)"
 check "personal asks which model should power agents" "$(has "$out" 'Which model should power your agents?'; echo $?)" "$out"
-check "default answer picks a local model and registers it" "$([ -n "$(state local_ai)" ] && [ -n "$(state local_model)" ]; echo $?)" "$(cat "$VEGADUTA_STATE_FILE")"
+check "with no answer a first install stays lean: no local model registered, cloud-key path remembered" "$([ -z "$(state local_ai)" ] && [ -z "$(state local_model)" ] && [ "$(state cloud)" = 1 ]; echo $?)" "$(cat "$VEGADUTA_STATE_FILE")"
 
 new_home
 out="$(python3 "$PTY" "3|qwen3:8b|n" "$CLI" personal --build --dry-run 2>&1)"
 check "declining the search question on a personal install is remembered, not read as never asked" "$([ "$(state search)" = 0 ] && ! has "$out" '--profile search'; echo $?)" "$(cat "$VEGADUTA_STATE_FILE")"
 
 new_home
-out="$(python3 "$PTY" "3|qwen3:8b|y" "$CLI" personal --build --dry-run 2>&1)"
-check "accepting it turns search on" "$([ "$(state search)" = 1 ] && has "$out" '--profile search'; echo $?)" "$(cat "$VEGADUTA_STATE_FILE")"
+out="$(python3 "$PTY" "-|-" "$CLI" personal --build --search --dry-run 2>&1)"
+check "--search turns search on and remembers it" "$([ "$(state search)" = 1 ] && has "$out" '--profile search'; echo $?)" "$(cat "$VEGADUTA_STATE_FILE")"
 
 new_home
 out="$(python3 "$PTY" "2" "$CLI" personal --build --dry-run 2>&1)"
@@ -91,15 +91,30 @@ check "rag is accepted without a warning" "$(! has "$out" 'is not available in p
 echo "day-one defaults (fresh install)"
 new_home
 out="$("$CLI" personal --build --cloud --dry-run </dev/null 2>&1)"
-check "a fresh install plans web search, the MCP runner and the browser" "$(has "$out" 'search=1 tools=1 browser=1' && has "$out" '--profile search' && has "$out" '--profile tools' && has "$out" '--profile browser'; echo $?)" "$out"
+check "a fresh install is lean: no web search, no MCP runner, no browser" "$(has "$out" 'search=0 tools=0 browser=0' && ! has "$out" '--profile search' && ! has "$out" '--profile tools' && ! has "$out" '--profile browser' && ! has "$out" '--profile valkey'; echo $?)" "$out"
+check "a fresh install says what lean and full cost before anything is pulled" "$(has "$out" 'Lean install: about 3 GB' && has "$out" 'Full: about 8 GB'; echo $?)" "$out"
+new_home
+out="$("$CLI" personal --build --dry-run </dev/null 2>&1)"
+check "with no model flag a fresh install stays cloud-key: no download, and says so" "$(has "$out" 'No local model on a first install' && has "$out" 'local_ai=none' && [ "$(state cloud)" = 1 ]; echo $?)" "$out"
 check "tools is a choice, not a profile: the profile list stays empty" "$(has "$out" 'profiles=none'; echo $?)" "$out"
-check "all three are remembered" "$([ "$(state search)" = 1 ] && [ "$(state tools)" = 1 ] && [ "$(state browser)" = 1 ]; echo $?)" "$(cat "$VEGADUTA_STATE_FILE")"
+check "the lean answers are remembered as 0, not left empty" "$([ "$(state search)" = 0 ] && [ "$(state tools)" = 0 ] && [ "$(state browser)" = 0 ] && [ "$(state valkey)" = 0 ] && [ "$(state cloud)" = 1 ]; echo $?)" "$(cat "$VEGADUTA_STATE_FILE")"
+out="$("$CLI" personal --cloud --dry-run </dev/null 2>&1)"
+check "a plain re-run of a lean install stays lean (and does not print the first-install banner)" "$(has "$out" 'search=0 tools=0 browser=0' && ! has "$out" 'Lean install: about'; echo $?)" "$out"
+new_home
+out="$("$CLI" personal --build --cloud --search --profile tools --browser --valkey --dry-run </dev/null 2>&1)"
+check "the add-ons are one flag each: search, tools, browser and valkey plan as before" "$(has "$out" 'search=1 tools=1 browser=1' && has "$out" '--profile search' && has "$out" '--profile tools' && has "$out" '--profile browser' && has "$out" '--profile valkey'; echo $?)" "$out"
+check "the opted-in add-ons are remembered" "$([ "$(state search)" = 1 ] && [ "$(state tools)" = 1 ] && [ "$(state browser)" = 1 ] && [ "$(state valkey)" = 1 ]; echo $?)" "$(cat "$VEGADUTA_STATE_FILE")"
+out="$("$CLI" personal --cloud --dry-run </dev/null 2>&1)"
+check "a later plain run keeps the opted-in add-ons" "$(has "$out" 'search=1 tools=1 browser=1'; echo $?)" "$out"
+new_home
 out="$("$CLI" personal --profile workspace --cloud --dry-run </dev/null 2>&1)"
-check "a caller that passes its own profiles (the Setup app) keeps both" "$(has "$out" 'profiles=workspace' && has "$out" 'search=1 tools=1' && has "$out" '--profile tools'; echo $?)" "$out"
+check "a caller that passes its own profiles (the Setup app) gets exactly those on top of the lean floor" "$(has "$out" 'profiles=workspace' && has "$out" 'search=0 tools=0' && ! has "$out" '--profile tools'; echo $?)" "$out"
+new_home
+out="$("$CLI" personal --local-model qwen3.5:2b --local-ai --build --dry-run </dev/null 2>&1)"
+check "a model flag opts in and says how big the download is" "$(has "$out" "local model 'qwen3.5:2b' is about" && has "$out" 'GB to download'; echo $?)" "$out"
+check "an opted-in model is not remembered as cloud" "$([ "$(state cloud)" != 1 ] && [ -n "$(state local_model)" ]; echo $?)" "$(cat "$VEGADUTA_STATE_FILE")"
 out="$("$CLI" personal --no-search --no-tools --cloud --dry-run </dev/null 2>&1)"
 check "--no-search --no-tools declines both" "$(has "$out" 'search=0 tools=0' && ! has "$out" '--profile search' && ! has "$out" '--profile tools'; echo $?)" "$out"
-out="$("$CLI" personal --cloud --dry-run </dev/null 2>&1)"
-check "the browser add-on default is remembered on a plain re-run" "$(has "$out" 'browser=1' && has "$out" 'browser.yml' && has "$out" '--profile browser'; echo $?)" "$out"
 out="$("$CLI" personal --browser --cloud --dry-run </dev/null 2>&1)"
 check "--browser layers browser.yml and the browser profile" "$(has "$out" 'browser=1' && has "$out" 'browser.yml' && has "$out" '--profile browser'; echo $?)" "$out"
 check "the browser choice is remembered by a later plain run" "$([ "$(state browser)" = 1 ]; echo $?)" "$(cat "$VEGADUTA_STATE_FILE")"
@@ -135,7 +150,7 @@ out="$("$CLI" personal --build --cloud --dry-run </dev/null 2>&1)"
 check "an install that predates the defaults (state file, no answer) is left as it was" "$(has "$out" 'search=0 tools=0' && ! has "$out" '--profile tools'; echo $?)" "$out"
 
 new_home
-out="$("$CLI" personal --native-core --build --cloud --dry-run </dev/null 2>&1)"
+out="$("$CLI" personal --native-core --build --cloud --search --profile tools --dry-run </dev/null 2>&1)"
 check "a host JVM plans search but no runner container" "$(has "$out" 'search=1 tools=1' && has "$out" 'docker-compose.search.native.yml' && ! has "$out" '--profile tools'; echo $?)" "$out"
 
 echo "lite and full are unchanged"
@@ -155,11 +170,11 @@ if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; 
   svcs="$("$CLI" compose config --services 2>/dev/null | sort | tr '\n' ' ')"
   check "no Keycloak and no Kafka/Temporal services" "$(! has "$svcs" keycloak && ! has "$svcs" kafka && ! has "$svcs" temporal; echo $?)" "$svcs"
   new_home
-  "$CLI" personal --native-core --build --cloud --dry-run >/dev/null 2>&1
+  "$CLI" personal --native-core --build --cloud --valkey --dry-run >/dev/null 2>&1
   svcs="$("$CLI" compose config --services 2>/dev/null | sort | tr '\n' ' ')"
   check "native core leaves postgres, valkey and web, and no core container" "$(has "$svcs" postgres && has "$svcs" valkey && has "$svcs" web && ! has "$svcs" core; echo $?)" "$svcs"
   new_home
-  "$CLI" personal --native-core --build --cloud --dry-run >/dev/null 2>&1
+  "$CLI" personal --native-core --build --cloud --valkey --dry-run >/dev/null 2>&1
   # Even with a LAN-facing console (BIND_ADDR=0.0.0.0) the database and Valkey stay on loopback.
   hosts="$(BIND_ADDR=0.0.0.0 "$CLI" compose config --format json 2>/dev/null | python3 -c 'import json,sys; s=json.load(sys.stdin)["services"]; print(" ".join(p.get("host_ip","") for n in ("postgres","valkey") for p in s[n].get("ports",[])))')"
   check "native overlay publishes postgres and valkey on 127.0.0.1 only" "$([ "$hosts" = "127.0.0.1 127.0.0.1" ]; echo $?)" "host_ips: $hosts"
@@ -174,7 +189,7 @@ if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; 
   nweb="$(CORE_HOST_PORT=8081 "$CLI" compose config --format json 2>/dev/null | python3 -c 'import json,sys; s=json.load(sys.stdin)["services"]; print(s["web"]["environment"]["CORE_INTERNAL_URL"], s["web"]["extra_hosts"][0] if isinstance(s["web"].get("extra_hosts"), list) else sorted(s["web"]["extra_hosts"].items())[0], [p.get("host_ip")+":"+str(p.get("published")) for n in ("sidecar","searxng") for p in s[n].get("ports",[])])' 2>&1)"
   check "native core: web reaches the host JVM; sidecar and searxng are published on loopback" "$(has "$nweb" 'http://host.docker.internal:8081' && has "$nweb" '127.0.0.1:8001' && has "$nweb" '127.0.0.1:8888'; echo $?)" "native env: $nweb"
   new_home
-  "$CLI" personal --build --cloud --dry-run >/dev/null 2>&1
+  "$CLI" personal --build --cloud --search --profile tools --browser --dry-run >/dev/null 2>&1
   runner="$("$CLI" compose config --format json 2>/dev/null | python3 -c '
 import json,sys
 c=json.load(sys.stdin); s=c["services"]; r=s.get("mcp-stdio-runner")
@@ -195,7 +210,7 @@ s=json.load(sys.stdin)["services"]
 print("runner" if "mcp-stdio-runner" in s else "no-runner", s["core"]["environment"]["MCP_STDIO_SIDECAR_ENABLED"])')"
   check "--no-tools: no runner container and core spawns nothing through it" "$([ "$runner" = "no-runner false" ]; echo $?)" "runner: $runner"
   new_home
-  "$CLI" personal --native-core --build --cloud --dry-run >/dev/null 2>&1
+  "$CLI" personal --native-core --build --cloud --valkey --dry-run >/dev/null 2>&1
   svcs="$("$CLI" compose config --services 2>/dev/null | sort | tr '\n' ' ')"
   check "a host JVM gets no runner container" "$(! has "$svcs" mcp-stdio-runner; echo $?)" "$svcs"
   new_home

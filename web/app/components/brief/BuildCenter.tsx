@@ -428,7 +428,7 @@ function Door({
           type="button"
           onClick={onClick}
           disabled={!onClick}
-          className="border-0 bg-transparent p-0 text-left text-sm font-semibold text-foreground shadow-none after:absolute after:inset-0 after:content-[''] disabled:cursor-not-allowed"
+          className="border-0 bg-transparent p-0 text-start text-sm font-semibold text-foreground shadow-none after:absolute after:inset-0 after:content-[''] disabled:cursor-not-allowed"
         >
           {title}
         </button>
@@ -459,7 +459,7 @@ function EnvoyCard({ envoy, opening, onOpen }: { envoy: BriefListItem; opening: 
           type="button"
           onClick={onOpen}
           disabled={opening}
-          className="min-w-0 border-0 bg-transparent p-0 text-left text-sm font-semibold text-foreground shadow-none after:absolute after:inset-0 after:content-['']"
+          className="min-w-0 border-0 bg-transparent p-0 text-start text-sm font-semibold text-foreground shadow-none after:absolute after:inset-0 after:content-['']"
         >
           {envoy.title}
         </button>

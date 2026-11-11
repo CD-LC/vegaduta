@@ -13,6 +13,7 @@ import { Label } from "../ui/label";
 import { Alert, AlertDescription } from "../ui/alert";
 import { Badge } from "../ui/badge";
 import { SectionCard } from "./common";
+import { useTranslations } from "../../../lib/i18n";
 
 // Generic platform_setting editor - the same row editor that used to live on
 // the Abuse & Rate Control page, extracted so it can serve two audiences:
@@ -33,6 +34,7 @@ export function PlatformSettingsSection({
   keyFilter?: (key: string) => boolean;
   delay?: number;
 }) {
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsPlatformsettings");
   const [settings, setSettings] = useState<any[]>([]);
   const [settingsError, setSettingsError] = useState<any>(null);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
@@ -63,7 +65,8 @@ export function PlatformSettingsSection({
     let rows = settings;
     if (keyFilter) rows = rows.filter((r) => keyFilter(r.key));
     const q = search.trim().toLowerCase();
-    if (q) rows = rows.filter((r) => r.key.toLowerCase().includes(q) || (r.description || "").toLowerCase().includes(q));
+    if (q)
+      rows = rows.filter((r) => r.key.toLowerCase().includes(q) || (r.description || "").toLowerCase().includes(q));
     return rows;
   }, [settings, keyFilter, search]);
 
@@ -97,13 +100,11 @@ export function PlatformSettingsSection({
       )}
       {settings.length > 0 && (
         <div className="relative mb-1 max-w-sm">
-          <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Filter settings by key or description…"
-            className="pl-8"
+          <Search
+            size={14}
+            className="pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={tHC("s2")} className="ps-8" />
         </div>
       )}
       {visible.length === 0 && !settingsError && (
@@ -131,8 +132,11 @@ export function PlatformSettingsSection({
             {row.description && <p className="mt-0.5 text-xs text-muted-foreground">{row.description}</p>}
             <div className="mt-2 flex flex-wrap items-end gap-3">
               <div className="w-full max-w-56 space-y-1.5">
-                <Label htmlFor={`setting-value-${row.key}`} className="text-xs text-muted-foreground">Value</Label>
-                <Input id={`setting-value-${row.key}`}
+                <Label htmlFor={`setting-value-${row.key}`} className="text-xs text-muted-foreground">
+                  Value
+                </Label>
+                <Input
+                  id={`setting-value-${row.key}`}
                   value={drafts[row.key] ?? row.value}
                   onChange={(e) => setDrafts((prev) => ({ ...prev, [row.key]: e.target.value }))}
                 />
@@ -147,7 +151,7 @@ export function PlatformSettingsSection({
             </div>
             {row.updatedAt && (
               <div className="mt-2 font-mono text-xs text-muted-foreground">
-                Last updated {new Date(row.updatedAt).toLocaleString()}
+                {tHC("s1")} {new Date(row.updatedAt).toLocaleString()}
                 {row.updatedBy ? ` by ${row.updatedBy}` : ""}
               </div>
             )}

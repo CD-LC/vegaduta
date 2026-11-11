@@ -34,7 +34,7 @@ export function useEdgeModelFilter<T extends { id: string; displayName: string }
         <Search
           size={16}
           aria-hidden="true"
-          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
         />
         <Input
           type="search"
@@ -42,7 +42,7 @@ export function useEdgeModelFilter<T extends { id: string; displayName: string }
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t("edgeModelSearchPlaceholder")}
           aria-label={t("edgeModelSearchLabel")}
-          className="pl-9"
+          className="ps-9"
         />
       </div>
       <label className="flex items-center gap-2 text-sm text-foreground">

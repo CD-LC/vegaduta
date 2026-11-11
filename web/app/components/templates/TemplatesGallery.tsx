@@ -12,6 +12,7 @@ import { Button } from "../ui/button";
 import PaginationControls from "../PaginationControls";
 import TemplateCard from "./TemplateCard";
 import { TEMPLATE_CATEGORIES, TEMPLATE_KINDS } from "./categories";
+import { useTranslations } from "../../lib/i18n";
 
 const PAGE_SIZE = 12;
 const GALLERY_PAGE_SIZES = [12, 24, 48];
@@ -35,6 +36,7 @@ export default function TemplatesGallery({
   initialResult: CommunityTemplatePage | null;
   initialFilters: GalleryFilters;
 }) {
+  const tHC = useTranslations("hcComponentsTemplatesTemplatesGallery");
   const router = useRouter();
   const [filters, setFilters] = useState<GalleryFilters>(initialFilters);
   const [result, setResult] = useState<CommunityTemplatePage | null>(initialResult);
@@ -47,27 +49,30 @@ export default function TemplatesGallery({
   const skipNextFetch = useRef<boolean>(!!initialResult);
   const reqId = useRef(0);
 
-  const load = useCallback(async (f: GalleryFilters) => {
-    const myReq = ++reqId.current;
-    setStatus("loading");
-    setError(null);
-    try {
-      const res = await api.listGalleryTemplates({
-        kind: f.kind === "all" ? undefined : f.kind,
-        category: f.category === "all" ? undefined : f.category,
-        tag: f.tag ?? undefined,
-        page: f.page,
-        pageSize,
-      });
-      if (myReq !== reqId.current) return; // a newer request superseded this one
-      setResult(res);
-      setStatus("ready");
-    } catch (e: any) {
-      if (myReq !== reqId.current) return;
-      setError(e?.message || "Couldn't load templates. Please try again.");
-      setStatus("error");
-    }
-  }, [pageSize]);
+  const load = useCallback(
+    async (f: GalleryFilters) => {
+      const myReq = ++reqId.current;
+      setStatus("loading");
+      setError(null);
+      try {
+        const res = await api.listGalleryTemplates({
+          kind: f.kind === "all" ? undefined : f.kind,
+          category: f.category === "all" ? undefined : f.category,
+          tag: f.tag ?? undefined,
+          page: f.page,
+          pageSize,
+        });
+        if (myReq !== reqId.current) return; // a newer request superseded this one
+        setResult(res);
+        setStatus("ready");
+      } catch (e: any) {
+        if (myReq !== reqId.current) return;
+        setError(e?.message || "Couldn't load templates. Please try again.");
+        setStatus("error");
+      }
+    },
+    [pageSize]
+  );
 
   useEffect(() => {
     if (skipNextFetch.current) {
@@ -111,7 +116,7 @@ export default function TemplatesGallery({
         {/* Kind */}
         <div className="flex flex-wrap items-center gap-2">
           <FilterButton active={filters.kind === "all"} onClick={() => update({ kind: "all" })}>
-            All types
+            {tHC("s7")}
           </FilterButton>
           {TEMPLATE_KINDS.map((k) => {
             const Icon = k.icon;
@@ -126,7 +131,7 @@ export default function TemplatesGallery({
         {/* Category */}
         <div className="flex flex-wrap items-center gap-2">
           <FilterButton active={filters.category === "all"} onClick={() => update({ category: "all" })}>
-            <LayoutGrid size={13} strokeWidth={2} aria-hidden="true" /> All categories
+            <LayoutGrid size={13} strokeWidth={2} aria-hidden="true" /> {tHC("s6")}
           </FilterButton>
           {TEMPLATE_CATEGORIES.map((c) => (
             <FilterButton key={c.id} active={filters.category === c.id} onClick={() => update({ category: c.id })}>
@@ -167,10 +172,10 @@ export default function TemplatesGallery({
             <span className="cat-chip cat-chip-lg" style={{ ["--cat" as string]: "var(--state-error)" }}>
               <AlertCircle size={18} strokeWidth={2} aria-hidden="true" />
             </span>
-            <p className="text-sm font-medium text-foreground">We couldn&apos;t load the template gallery</p>
+            <p className="text-sm font-medium text-foreground">{tHC("s5")}</p>
             <p className="max-w-sm text-sm text-muted-foreground">{error}</p>
             <Button variant="outline" size="sm" onClick={() => load(filters)}>
-              <RefreshCw size={14} strokeWidth={2} aria-hidden="true" /> Try again
+              <RefreshCw size={14} strokeWidth={2} aria-hidden="true" /> {tHC("s4")}
             </Button>
           </CardContent>
         </Card>
@@ -182,17 +187,15 @@ export default function TemplatesGallery({
             <span className="cat-chip cat-chip-lg" style={{ ["--cat" as string]: "var(--cat-assistant)" }}>
               <Search size={18} strokeWidth={2} aria-hidden="true" />
             </span>
-            <p className="text-sm font-medium text-foreground">No templates match these filters yet</p>
-            <p className="max-w-sm text-sm text-muted-foreground">
-              Try a different category or type. Approved community templates will appear here as members share them.
-            </p>
+            <p className="text-sm font-medium text-foreground">{tHC("s3")}</p>
+            <p className="max-w-sm text-sm text-muted-foreground">{tHC("s2")}</p>
             {(filters.kind !== "all" || filters.category !== "all" || filters.tag) && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setFilters({ kind: "all", category: "all", tag: null, page: 1 })}
               >
-                Clear filters
+                {tHC("s1")}
               </Button>
             )}
           </CardContent>

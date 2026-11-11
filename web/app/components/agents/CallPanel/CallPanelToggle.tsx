@@ -29,7 +29,7 @@ export default function CallPanelToggle({ open, status, reconnecting, onToggle }
   return (
     <button
       type="button"
-      className="flex w-full items-center gap-2 text-left text-xs font-medium text-muted-foreground hover:text-foreground"
+      className="flex w-full items-center gap-2 text-start text-xs font-medium text-muted-foreground hover:text-foreground"
       aria-expanded={open}
       data-testid="call-panel-toggle"
       onClick={onToggle}
@@ -55,9 +55,9 @@ export default function CallPanelToggle({ open, status, reconnecting, onToggle }
       {title}
       <span className="text-muted-foreground/70">· {statusLabel}</span>
       {open ? (
-        <ChevronUp className="ml-auto size-3.5" aria-hidden="true" />
+        <ChevronUp className="ms-auto size-3.5" aria-hidden="true" />
       ) : (
-        <ChevronDown className="ml-auto size-3.5" aria-hidden="true" />
+        <ChevronDown className="ms-auto size-3.5" aria-hidden="true" />
       )}
     </button>
   );

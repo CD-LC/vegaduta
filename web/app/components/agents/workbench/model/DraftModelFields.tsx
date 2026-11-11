@@ -10,9 +10,11 @@ import TextToSpeechProviderSelector from "../../TextToSpeechProviderSelector";
 import VideoProviderSelector from "../../VideoProviderSelector";
 import VoiceProviderSelector from "../../VoiceProviderSelector";
 import { useWorkbench } from "../context";
+import { useTranslations } from "../../../../lib/i18n";
 
 /** Creation form only: provider health, the default-model notice, the model picker and the transcription and voice-reply providers. */
 export default function DraftModelFields() {
+  const tHC = useTranslations("hcComponentsAgentsWorkbenchModelDraftModelFields");
   const {
     t,
     isDraft,
@@ -146,7 +148,7 @@ export default function DraftModelFields() {
             Transcription
           </span>
           <div>
-            <div className="mb-1 text-xs text-muted-foreground">For voice calls</div>
+            <div className="mb-1 text-xs text-muted-foreground">{tHC("s3")}</div>
             <VoiceProviderSelector
               value={voiceModelProvider}
               onChange={(provider, model) => {
@@ -160,7 +162,7 @@ export default function DraftModelFields() {
             />
           </div>
           <div>
-            <div className="mb-1 text-xs text-muted-foreground">For video calls</div>
+            <div className="mb-1 text-xs text-muted-foreground">{tHC("s2")}</div>
             <VideoProviderSelector
               value={videoModelProvider}
               onChange={(provider, model) => {
@@ -174,7 +176,7 @@ export default function DraftModelFields() {
             />
           </div>
           <div>
-            <div className="mb-1 text-xs text-muted-foreground">For voice replies</div>
+            <div className="mb-1 text-xs text-muted-foreground">{tHC("s1")}</div>
             <TextToSpeechProviderSelector
               value={ttsProvider}
               onChange={(provider, model) => {

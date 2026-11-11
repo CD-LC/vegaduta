@@ -14,6 +14,7 @@ import {
   AlertDialogTitle,
 } from "../../components/ui/alert-dialog";
 import { MAX_DATA_CHARS, dataSummary, dataToCsv, formatAppData, parseAppData, tabularKeys, type AppData } from "./dataTab";
+import { useTranslations } from "../../lib/i18n";
 
 function saveText(filename: string, text: string, mime: string): void {
   const url = URL.createObjectURL(new Blob([text], { type: mime }));
@@ -42,6 +43,7 @@ export function DataPanel({
   disabled?: boolean;
   onApply: (next: AppData) => void;
 }) {
+    const tHC = useTranslations("hcBuildStudioDataPanel");
   const [draft, setDraft] = useState(() => formatAppData(data));
   const [dirty, setDirty] = useState(false);
   const [msg, setMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
@@ -83,7 +85,7 @@ export function DataPanel({
       <div>
         <p className="text-sm font-semibold text-foreground">Data</p>
         <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-          What this app has saved while you tried it: {keys} item{keys === 1 ? "" : "s"}, {Math.max(1, Math.round(bytes / 1024))} KB. Edit it, take a copy, or start fresh.
+          {tHC("s12")} {keys} item{keys === 1 ? "" : "s"}, {Math.max(1, Math.round(bytes / 1024))} {tHC("s11")}
         </p>
       </div>
       <textarea
@@ -95,7 +97,7 @@ export function DataPanel({
         spellCheck={false}
         disabled={disabled}
         className="h-64 w-full resize-y rounded-lg border border-border bg-neutral-950 p-2 font-mono text-[11px] leading-snug text-neutral-100 disabled:opacity-60"
-        aria-label="App data as JSON"
+        aria-label={tHC("s10")}
       />
       {msg && (
         <p role={msg.tone === "err" ? "alert" : "status"} className={`text-xs ${msg.tone === "err" ? "text-destructive" : "text-emerald-600"}`}>
@@ -120,7 +122,7 @@ export function DataPanel({
         </Button>
       </div>
       <div className="flex flex-col gap-2 border-t border-border pt-3">
-        <p className="text-xs font-medium text-foreground">Export / import</p>
+        <p className="text-xs font-medium text-foreground">{tHC("s9")}</p>
         <div className="flex flex-wrap items-center gap-2">
           <Button size="sm" variant="outline" className="gap-1.5" disabled={keys === 0} onClick={() => saveText(`${fileSafe(name)}-data.json`, formatted + "\n", "application/json")}>
             <Download aria-hidden="true" size={13} /> JSON
@@ -136,7 +138,7 @@ export function DataPanel({
           </Button>
           {tables.length > 0 && (
             <select value={csvKey} onChange={(e) => setCsvKey(e.target.value)} aria-label="Which data to export as CSV" className="rounded-md border border-border bg-background px-2 py-1.5 text-xs">
-              <option value="">Everything (key, value)</option>
+              <option value="">{tHC("s8")}</option>
               {tables.map((k) => (
                 <option key={k} value={k}>
                   Table: {k}
@@ -145,27 +147,26 @@ export function DataPanel({
             </select>
           )}
           <Button size="sm" variant="outline" className="gap-1.5" disabled={disabled} onClick={() => fileRef.current?.click()}>
-            <Upload aria-hidden="true" size={13} /> Import JSON
+            <Upload aria-hidden="true" size={13} /> {tHC("s7")}
           </Button>
-          <input ref={fileRef} type="file" accept="application/json,.json" className="hidden" aria-label="Import data file" onChange={(e) => void onFile(e.target.files?.[0])} />
+          <input ref={fileRef} type="file" accept="application/json,.json" className="hidden" aria-label={tHC("s6")} onChange={(e) => void onFile(e.target.files?.[0])} />
         </div>
       </div>
       <div className="border-t border-border pt-3">
         <Button size="sm" variant="outline" className="gap-1.5 text-destructive" disabled={keys === 0 || disabled} onClick={() => setConfirmReset(true)}>
-          <RotateCcw aria-hidden="true" size={13} /> Reset data
+          <RotateCcw aria-hidden="true" size={13} /> {tHC("s1")}
         </Button>
       </div>
       <AlertDialog open={confirmReset} onOpenChange={setConfirmReset}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Reset this app&apos;s data?</AlertDialogTitle>
+            <AlertDialogTitle>{tHC("s5")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Everything the app saved ({keys} item{keys === 1 ? "" : "s"}) is deleted from this browser and the app restarts with its built-in sample data. Export a copy first if you want to keep it.
-              This can&apos;t be undone.
+              {tHC("s4")}{keys} item{keys === 1 ? "" : "s"}{tHC("s3")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Keep my data</AlertDialogCancel>
+            <AlertDialogCancel>{tHC("s2")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => {
@@ -174,7 +175,7 @@ export function DataPanel({
                 setMsg({ tone: "ok", text: "Data reset. The preview reloaded." });
               }}
             >
-              Reset data
+              {tHC("s1")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

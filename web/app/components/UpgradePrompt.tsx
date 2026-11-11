@@ -97,6 +97,7 @@ export default function UpgradePrompt(props: UpgradePromptProps) {
 }
 
 function UpgradePromptDialog({ open, onClose, reason }: UpgradePromptProps) {
+  const tHC = useTranslations("hcComponentsUpgradePrompt");
   const t = useTranslations("upgradePrompt");
   const { currency, detected, choices, choose, annualAvailable } = useCurrency();
   const [mounted, setMounted] = useState(false);
@@ -252,7 +253,7 @@ function UpgradePromptDialog({ open, onClose, reason }: UpgradePromptProps) {
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-foreground">{error.title}</p>
               <p className="mt-0.5 break-words text-sm text-muted-foreground">{error.detail}</p>
-              {error.retryable && <p className="mt-1 text-xs text-muted-foreground">Pick a plan below to try again.</p>}
+              {error.retryable && <p className="mt-1 text-xs text-muted-foreground">{tHC("s1")}</p>}
             </div>
           </div>
         )}

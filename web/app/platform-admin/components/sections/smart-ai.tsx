@@ -12,6 +12,7 @@ import { Label } from "../ui/label";
 import { Alert, AlertDescription } from "../ui/alert";
 import { SectionCard, SwitchToggle } from "./common";
 import { useSectionData } from "./observability";
+import { useTranslations } from "../../../lib/i18n";
 
 // Smart AI governance (PlatformFeatureBudgetService + PlatformController's
 // /api/platform/smart-ai surface) - the platform's own AI-native niceties
@@ -37,6 +38,7 @@ const SMART_AI_FEATURES = [
 ];
 
 export function SmartAiSection({ pollMs, delay }: { pollMs?: number; delay?: number }) {
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsSmartai");
   const { data: config, error, loading, refresh } = useSectionData<any>(() => api.getSmartAiConfig(), null, pollMs);
   const [draft, setDraft] = useState<any>({});
   const [saving, setSaving] = useState(false);
@@ -153,7 +155,7 @@ export function SmartAiSection({ pollMs, delay }: { pollMs?: number; delay?: num
 
   return (
     <SectionCard
-      title="Smart AI features"
+      title={tHC("s11")}
       subtitle="The platform's own AI-native niceties - one master switch + a combined daily USD ceiling, with a per-feature override below"
       icon={Sparkles}
       delay={delay}
@@ -178,9 +180,9 @@ export function SmartAiSection({ pollMs, delay }: { pollMs?: number; delay?: num
         </Alert>
       )}
       {loading ? (
-        <p className="py-1 text-sm text-muted-foreground">Loading…</p>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("s10")}</p>
       ) : !config ? (
-        <p className="py-1 text-sm text-muted-foreground">Smart AI config unavailable.</p>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("s9")}</p>
       ) : (
         <>
           <div className="flex flex-wrap items-end gap-4 rounded-lg border border-border p-4">
@@ -190,19 +192,19 @@ export function SmartAiSection({ pollMs, delay }: { pollMs?: number; delay?: num
                 className="flex items-center gap-2 text-xs font-medium leading-none text-muted-foreground select-none"
                 aria-hidden="true"
               >
-                Master switch
+                {tHC("s8")}
               </span>
               <div className="flex h-9 items-center">
                 <SwitchToggle
                   on={!!draft.enabled}
                   onClick={() => setDraft((p: any) => ({ ...p, enabled: !p.enabled }))}
-                  label="Smart AI master switch"
+                  label={tHC("s7")}
                 />
               </div>
             </div>
             <div className="w-40 space-y-1.5">
               <Label htmlFor="smartai-master" className="text-xs text-muted-foreground">
-                Combined daily cap (USD)
+                {tHC("s6")}
               </Label>
               <Input
                 id="smartai-master"
@@ -219,7 +221,7 @@ export function SmartAiSection({ pollMs, delay }: { pollMs?: number; delay?: num
             </div>
             <div className="w-40 space-y-1.5">
               <Label htmlFor="smartai-window" className="text-xs text-muted-foreground">
-                Window (seconds)
+                {tHC("s5")}
               </Label>
               <Input
                 id="smartai-window"
@@ -236,7 +238,7 @@ export function SmartAiSection({ pollMs, delay }: { pollMs?: number; delay?: num
             </div>
             <div className="w-44 space-y-1.5">
               <Label htmlFor="smartai-default" className="text-xs text-muted-foreground">
-                Default per-feature cap (USD)
+                {tHC("s4")}
               </Label>
               <Input
                 id="smartai-default"
@@ -256,16 +258,14 @@ export function SmartAiSection({ pollMs, delay }: { pollMs?: number; delay?: num
             </Button>
           </div>
 
-          <div className="pt-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Per-feature overrides
-          </div>
+          <div className="pt-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">{tHC("s3")}</div>
           <AnimatePresence initial={false}>
             {SMART_AI_FEATURES.map((f) => {
               const d = featureDrafts[f.key];
               if (!d) {
                 return (
                   <div key={f.key} className="rounded-lg border border-border px-4 py-3 text-sm text-muted-foreground">
-                    {f.label} - config unavailable
+                    {f.label} {tHC("s2")}
                   </div>
                 );
               }
@@ -292,7 +292,7 @@ export function SmartAiSection({ pollMs, delay }: { pollMs?: number; delay?: num
                   />
                   <div className="w-36 space-y-1">
                     <Label htmlFor={`smartai-daily-${f.key}`} className="text-xs text-muted-foreground">
-                      Daily cap (USD, blank = default)
+                      {tHC("s1")}
                     </Label>
                     <Input
                       id={`smartai-daily-${f.key}`}

@@ -43,7 +43,7 @@ export default function FilesAlerts(p: FilesAlertsProps) {
           <AlertTitle>{t("collectionsPartialTitle")}</AlertTitle>
           <AlertDescription>
             {t("collectionsPartialBody", { count: p.partialFailureCount })}{" "}
-            <Button variant="outline" size="sm" className="ml-1" onClick={p.onRetryDocs}>
+            <Button variant="outline" size="sm" className="ms-1" onClick={p.onRetryDocs}>
               {t("retry")}
             </Button>
           </AlertDescription>
@@ -69,7 +69,7 @@ export default function FilesAlerts(p: FilesAlertsProps) {
           <AlertTitle>{t("artifactsPartialTitle")}</AlertTitle>
           <AlertDescription>
             {t("artifactsPartialBody", { count: p.artifactPartialFailureCount })}{" "}
-            <Button variant="outline" size="sm" className="ml-1" onClick={p.onRetryArtifacts}>
+            <Button variant="outline" size="sm" className="ms-1" onClick={p.onRetryArtifacts}>
               {t("retry")}
             </Button>
           </AlertDescription>
@@ -79,7 +79,9 @@ export default function FilesAlerts(p: FilesAlertsProps) {
       {p.docsCapped && (
         <Alert className="mb-6">
           <AlertTriangle aria-hidden="true" />
-          <AlertDescription>{tf("documentsCapped", { shown: p.docsCapped.shown, total: p.docsCapped.total })}</AlertDescription>
+          <AlertDescription>
+            {tf("documentsCapped", { shown: p.docsCapped.shown, total: p.docsCapped.total })}
+          </AlertDescription>
         </Alert>
       )}
 

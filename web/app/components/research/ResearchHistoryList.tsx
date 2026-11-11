@@ -19,7 +19,6 @@ import { filterHistory, loadPins, savePins, togglePin, type HistoryFilter } from
 import { nextPollDelay } from "./pollSchedule";
 import { RS } from "./researchStrings";
 
-
 const FILTERS: ReadonlyArray<{ value: HistoryFilter; label: string }> = [
   { value: "all", label: RS.historyFilterAll },
   { value: "running", label: RS.historyFilterRunning },
@@ -127,7 +126,7 @@ export default function ResearchHistoryList({ refreshKey = 0 }: { refreshKey?: n
     <section className="space-y-3" data-testid="research-history">
       <div className="flex items-center gap-2">
         <h2 className="text-base font-semibold text-foreground">{t("historyHeading")}</h2>
-        <Button size="sm" variant="ghost" className="ml-auto" onClick={() => load()} aria-label={t("historyRefresh")}>
+        <Button size="sm" variant="ghost" className="ms-auto" onClick={() => load()} aria-label={t("historyRefresh")}>
           <RefreshCw
             className={loading ? "size-4 animate-spin motion-reduce:animate-none" : "size-4"}
             aria-hidden="true"
@@ -234,7 +233,7 @@ export default function ResearchHistoryList({ refreshKey = 0 }: { refreshKey?: n
                       type="button"
                       size="sm"
                       variant="ghost"
-                      className="mr-2 shrink-0"
+                      className="me-2 shrink-0"
                       aria-pressed={isPinned}
                       aria-label={isPinned ? RS.historyUnpin : RS.historyPin}
                       onClick={() => pin(run.id)}

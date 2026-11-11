@@ -268,8 +268,8 @@ func TestChooseSelectionPrecedence(t *testing.T) {
 	c := mustCatalog(t)
 	ids := func(s Selection) string { return strings.Join(s.IDs(c), ",") }
 	fresh, installed := Current{Sel: Selection{}}, Current{Installed: true, Sel: selectionOf("search")}
-	if got := ids(ChooseSelection(c, fresh, nil, false)); got != "workspace,search,tools" {
-		t.Errorf("fresh default = %q (workspace, plus the web search and tools runner the launcher turns on for a fresh install)", got)
+	if got := ids(ChooseSelection(c, fresh, nil, false)); got != "" {
+		t.Errorf("fresh default = %q (lean: nothing preselected)", got)
 	}
 	if got := ids(ChooseSelection(c, installed, nil, false)); got != "search" {
 		t.Errorf("re-run keeps what is installed (and does not re-add defaults) = %q", got)
@@ -280,7 +280,7 @@ func TestChooseSelectionPrecedence(t *testing.T) {
 	if got := ids(ChooseSelection(c, installed, Selection{}, true)); got != "" {
 		t.Errorf("explicit none = %q", got)
 	}
-	if got := ids(ChooseSelection(c, fresh, nil, false, "documents", "browser", "nope")); got != "workspace,search,documents,browser,tools" {
+	if got := ids(ChooseSelection(c, fresh, nil, false, "documents", "browser", "nope")); got != "documents,browser" {
 		t.Errorf("legacy flags add = %q", got)
 	}
 	if got := ids(ChooseSelection(c, fresh, selectionOf("search"), true, "documents")); got != "search" {
@@ -316,9 +316,9 @@ func TestPrepareExtrasEndToEnd(t *testing.T) {
 	c := config{tier: "personal"}
 	noop := func(Event) {}
 
-	// Fresh install, defaults: the build terminal, and the web search the launcher turns on for a fresh install.
+	// Fresh install, defaults: lean, nothing ticked, so the launcher is told to leave every add-on off.
 	x := prepareExtras(root, c, "linux", noop)
-	if got := strings.Join(x.args("personal"), " "); got != "personal --profile workspace --profile tools --search --no-browser" {
+	if got := strings.Join(x.args("personal"), " "); got != "personal --no-search --no-browser --no-tools" {
 		t.Fatalf("fresh args = %q", got)
 	}
 	if err := x.beforeUp(root, noop); err != nil {
@@ -406,7 +406,7 @@ func TestListExtrasPrintsEverything(t *testing.T) {
 	var b strings.Builder
 	printExtras(&b)
 	out := b.String()
-	for _, want := range []string{"workspace", "search", "documents", "browser", "model-qwen35-4b", "planned", "on by default", "are kept"} {
+	for _, want := range []string{"workspace", "search", "documents", "browser", "model-qwen35-4b", "planned", "are kept"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("--list-extras misses %q:\n%s", want, out)
 		}

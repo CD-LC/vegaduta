@@ -34,7 +34,8 @@ export default function NavRow({
   return (
     <Link
       key={item.href}
-      href={item.href} prefetch={false}
+      href={item.href}
+      prefetch={false}
       aria-current={active ? "page" : undefined}
       data-tour={NAV_TOUR_TARGETS[item.href]}
       onClick={onNavigate}
@@ -58,7 +59,7 @@ export default function NavRow({
       {active && (
         <motion.span
           layoutId="ax-rail-accent"
-          className="absolute left-0 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r-full"
+          className="absolute start-0 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-e-full"
           style={{
             backgroundColor: "var(--cat)",
             boxShadow: "0 0 10px 1px color-mix(in srgb, var(--cat) 45%, transparent)",
@@ -81,7 +82,7 @@ export default function NavRow({
       </span>
       {item.badge && (
         <span
-          className={`ml-auto rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums ${railLabelCls} ${
+          className={`ms-auto rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums ${railLabelCls} ${
             item.badgeVariant === "attention"
               ? "bg-destructive text-destructive-foreground"
               : "bg-[var(--surface-border)] text-[var(--text-secondary)]"

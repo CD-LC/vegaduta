@@ -206,8 +206,11 @@ describe("edge/tier1 tool-call protocol (triggered tags + both envelope shapes)"
       respondInOrder(fakeEngine, [reply, "2 + 2 is 4."]);
       const seen: string[] = [];
       const toolEvents: Array<{ name: string; phase: string }> = [];
-      const out = await s.prompt("what is 2+2", (d: string) => seen.push(d), undefined, (e: any) =>
-        toolEvents.push({ name: e.name, phase: e.phase })
+      const out = await s.prompt(
+        "what is 2+2",
+        (d: string) => seen.push(d),
+        undefined,
+        (e: any) => toolEvents.push({ name: e.name, phase: e.phase })
       );
 
       expect(out).toBe("2 + 2 is 4.");
@@ -233,6 +236,45 @@ describe("edge/tier1 tool-call protocol (triggered tags + both envelope shapes)"
     const out = await s.prompt("give me a person as JSON");
     expect(out).toBe('{"name": "Ada", "role": "engineer"}');
     expect(fakeEngine.__calls).toHaveLength(1); // no tool round was entered
+  });
+
+  it("names budget-trimmed tools in the prompt so the model does not reach for a wrong substitute", async () => {
+    // MODEL_A's manifest has no contextWindowSize → 4096 → 3,200-char budget.
+    // buildCaps() has WebGPU but no shader-f16: local_generate_audio passes
+    // its capability gate and lands in `omitted`; local_generate_image is
+    // capability-gated and must NOT be named (the device can't run it at all).
+    const s = await session();
+    respondInOrder(fakeEngine, ["ok"]);
+    await s.prompt("hello");
+
+    const calls = fakeEngine.__calls as Array<{ messages?: Array<{ role: string; content: string }> }>;
+    const system = calls[0]?.messages?.find((m) => m.role === "system")?.content || "";
+    expect(system).toContain("Not offered this turn");
+    expect(system).toContain("local_generate_audio");
+    expect(system).not.toContain("local_generate_image");
+  });
+
+  it("rejects a call to a budget-trimmed tool with the honest reason, not 'device cannot run'", async () => {
+    const s = await session();
+    respondInOrder(fakeEngine, [
+      `<tool_call>{"name": "local_generate_audio", "arguments": {"prompt": "rain"}}</tool_call>`,
+      "I can't generate audio on this setup.",
+    ]);
+    const toolEvents: Array<{ name: string; phase: string }> = [];
+    await s.prompt(
+      "make a rain sound",
+      () => {},
+      undefined,
+      (e: any) => toolEvents.push({ name: e.name, phase: e.phase })
+    );
+
+    const calls = fakeEngine.__calls as Array<{ messages?: Array<{ role: string; content: string }> }>;
+    // Round 2's messages carry the tool failure back to the model.
+    const failure = calls[1]?.messages?.map((m) => m.content).join("\n") || "";
+    expect(failure).toContain("local_generate_audio");
+    expect(failure).toContain("prompt budget");
+    expect(failure).not.toContain("cannot run");
+    expect(toolEvents.some((e) => e.name === "local_generate_audio" && e.phase === "error")).toBe(true);
   });
 
   // ---- disableTools (agentkit contract, 2026-09-19) ------------------------
@@ -271,16 +313,16 @@ describe("edge/tier1 tool-call protocol (triggered tags + both envelope shapes)"
       expect(system).not.toContain("local_calculate");
     });
 
-    it("never calls listLocalTools, fetchEdgeTools or fetchEdgeMemory (and does without the flag)", async () => {
+    it("never calls describeToolBudget, fetchEdgeTools or fetchEdgeMemory (and does without the flag)", async () => {
       // Spies on the three lookups themselves, with the server surface made
       // reachable — asserting on fetch URLs alone would pass vacuously here,
       // because a signed-out harness never reaches the network for them anyway.
-      const listLocalTools = vi.fn(() => []);
+      const describeToolBudget = vi.fn(() => ({ advertised: [], omitted: [], chars: 0 }));
       const fetchEdgeTools = vi.fn(async () => null);
       const fetchEdgeMemory = vi.fn(async () => null);
       vi.doMock("./localTools", async () => ({
         ...(await vi.importActual<typeof import("./localTools")>("./localTools")),
-        listLocalTools,
+        describeToolBudget,
       }));
       vi.doMock("./toolBridge", async () => ({
         ...(await vi.importActual<typeof import("./toolBridge")>("./toolBridge")),
@@ -300,13 +342,13 @@ describe("edge/tier1 tool-call protocol (triggered tags + both envelope shapes)"
 
         const plain = await createTier1Session(buildCaps(), { disableTools: true, sessionKey: "agent-1" });
         await plain.prompt("hello");
-        expect(listLocalTools).not.toHaveBeenCalled();
+        expect(describeToolBudget).not.toHaveBeenCalled();
         expect(fetchEdgeTools).not.toHaveBeenCalled();
         expect(fetchEdgeMemory).not.toHaveBeenCalled();
 
         const normal = await createTier1Session(buildCaps(), { sessionKey: "agent-1" });
         await normal.prompt("hello");
-        expect(listLocalTools).toHaveBeenCalled();
+        expect(describeToolBudget).toHaveBeenCalled();
         expect(fetchEdgeTools).toHaveBeenCalled();
         expect(fetchEdgeMemory).toHaveBeenCalled();
       } finally {
@@ -322,8 +364,11 @@ describe("edge/tier1 tool-call protocol (triggered tags + both envelope shapes)"
       respondInOrder(fakeEngine, [envelope, "should never be asked for"]);
       const seen: string[] = [];
       const toolEvents: unknown[] = [];
-      const out = await s.prompt("what is 2+2", (d: string) => seen.push(d), undefined, (e: unknown) =>
-        toolEvents.push(e)
+      const out = await s.prompt(
+        "what is 2+2",
+        (d: string) => seen.push(d),
+        undefined,
+        (e: unknown) => toolEvents.push(e)
       );
 
       expect(out).toBe(envelope);

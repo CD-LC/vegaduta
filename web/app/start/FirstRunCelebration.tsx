@@ -67,7 +67,12 @@ export default function FirstRunCelebration({
         <ul className="mt-2 grid list-none grid-cols-[repeat(auto-fit,minmax(min(100%,13rem),1fr))] gap-2 p-0">
           {next.map((item) => (
             <li key={item.href} className="min-w-0">
-              <Button asChild variant="outline" size="sm" className="h-auto w-full justify-start whitespace-normal py-2 text-left">
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="h-auto w-full justify-start whitespace-normal py-2 text-start"
+              >
                 <Link href={item.href}>
                   <item.icon aria-hidden="true" />
                   {item.label}

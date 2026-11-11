@@ -30,6 +30,7 @@ import QuickTaskResultCard from "./quickTask/QuickTaskResultCard";
 // quickTask/model.ts.
 
 export default function SimpleTaskRunner() {
+  const tHC = useTranslations("hcComponentsSimpleTaskRunner");
   const t = useTranslations("simpleTaskRunner");
   const [phoneNumber, setPhoneNumber] = useState(null); // null = not loaded yet
   const [phoneDraft, setPhoneDraft] = useState("");
@@ -395,7 +396,7 @@ export default function SimpleTaskRunner() {
             disabled={busy}
           />
           <p id="qt-task-help" className="text-xs text-muted-foreground">
-            Say what you want done and for whom. Include any names, numbers or dates the agent will need.
+            {tHC("s1")}
           </p>
           <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
             <input

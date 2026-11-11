@@ -1,7 +1,13 @@
 "use client";
 
 import { useId } from "react";
-import type { EffectiveSetting, SettingCatalogEntry, SettingRole, SettingScope, SettingsFieldError } from "../../lib/api/settings";
+import type {
+  EffectiveSetting,
+  SettingCatalogEntry,
+  SettingRole,
+  SettingScope,
+  SettingsFieldError,
+} from "../../lib/api/settings";
 import { Button } from "../ui/button";
 import SettingField from "./SettingField";
 import { editability, isDirty, parseDraft, type Draft } from "./settingsModel";
@@ -51,7 +57,9 @@ export default function SettingsGroup({
 }: SettingsGroupProps) {
   const { ui, groupLabel } = useSettingsText();
   const headingId = useId();
-  const dirtyEntries = entries.filter((e) => isDirty(e, drafts[e.key], values[e.key] ? values[e.key].value : e.default));
+  const dirtyEntries = entries.filter((e) =>
+    isDirty(e, drafts[e.key], values[e.key] ? values[e.key].value : e.default)
+  );
   const dirtyKeys = dirtyEntries.map((e) => e.key);
   const invalidKeys = dirtyEntries.filter((e) => !parseDraft(e, drafts[e.key]).ok).map((e) => e.key);
   const saving = dirtyKeys.some((k) => pending.has(k));
@@ -82,10 +90,14 @@ export default function SettingsGroup({
 
       {/* Always mounted so the count is announced when it changes; the buttons only exist while there is work. */}
       <div
-        className={dirtyKeys.length ? "sticky bottom-2 z-10 flex flex-wrap items-center gap-2 rounded-lg border border-primary/40 bg-card p-3 shadow-md" : "sr-only"}
+        className={
+          dirtyKeys.length
+            ? "sticky bottom-2 z-10 flex flex-wrap items-center gap-2 rounded-lg border border-primary/40 bg-card p-3 shadow-md"
+            : "sr-only"
+        }
         data-testid={`settings-savebar-${group}`}
       >
-        <p role="status" aria-live="polite" className="mr-auto text-sm">
+        <p role="status" aria-live="polite" className="me-auto text-sm">
           {dirtyKeys.length
             ? `${ui("savebar.count", { count: dirtyKeys.length })}${invalidKeys.length ? ` ${ui("savebar.invalid", { count: invalidKeys.length })}` : ""}`
             : ""}
@@ -103,7 +115,9 @@ export default function SettingsGroup({
               onClick={() => {
                 if (invalidKeys.length) {
                   // aria-disabled (not disabled) so keyboard users can still land here and be taken to the problem.
-                  const first = document.querySelector<HTMLElement>(`[data-testid="setting-${invalidKeys[0]}"] [aria-invalid="true"]`);
+                  const first = document.querySelector<HTMLElement>(
+                    `[data-testid="setting-${invalidKeys[0]}"] [aria-invalid="true"]`
+                  );
                   first?.focus();
                   return;
                 }

@@ -311,7 +311,7 @@ export default function WorkflowRunDetailPage() {
                 <Badge variant={statusVariant(run.status)} className="px-3 py-1 text-sm">
                   <span
                     className={cn(
-                      "mr-1.5 inline-block size-1.5 rounded-full bg-current",
+                      "me-1.5 inline-block size-1.5 rounded-full bg-current",
                       isLiveStatus(run.status) && "animate-pulse"
                     )}
                   />
@@ -389,7 +389,7 @@ export default function WorkflowRunDetailPage() {
                           disabled={!hasLogLines}
                           aria-expanded={hasLogLines ? !collapsed : undefined}
                           className={cn(
-                            "flex w-full items-start gap-3 px-4 py-3.5 text-left disabled:cursor-default",
+                            "flex w-full items-start gap-3 px-4 py-3.5 text-start disabled:cursor-default",
                             hasLogLines && "cursor-pointer transition-colors hover:bg-accent/50"
                           )}
                           onClick={() => hasLogLines && setCollapsedRows((prev) => ({ ...prev, [i]: !prev[i] }))}
@@ -419,7 +419,7 @@ export default function WorkflowRunDetailPage() {
                               const level = classifyLogLine(line);
                               return (
                                 <div key={j} className="flex gap-3 py-0.5 leading-relaxed">
-                                  <span className="w-6 shrink-0 select-none text-right text-muted-foreground tabular-nums">
+                                  <span className="w-6 shrink-0 select-none text-end text-muted-foreground tabular-nums">
                                     {j + 1}
                                   </span>
                                   <span className={cn("w-12 shrink-0 font-semibold uppercase", LOG_LEVEL_CLASS[level])}>

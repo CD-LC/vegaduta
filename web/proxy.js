@@ -97,6 +97,21 @@ function hostnameOf(url) {
   }
 }
 
+// The scheme to use for redirects to (and cookies set on) this deployment's
+// public hosts. X-Forwarded-Proto is honoured - a TLS-terminating edge is the
+// supported shape - but when the deployment's canonical URLs are https the
+// answer can never downgrade: a caller reaching the origin directly sets its
+// own X-Forwarded-Proto, so the header alone must not strip TLS (or a Secure
+// flag) off an https deployment.
+function publicScheme(request) {
+  const canonical = (nodeProcess.env.NEXT_PUBLIC_APP_URL || nodeProcess.env.NEXT_PUBLIC_SITE_URL || "").toLowerCase();
+  if (canonical.startsWith("https:")) return "https";
+  const forwarded = (request.headers.get("x-forwarded-proto") || "").split(",")[0].trim();
+  if (forwarded === "https" || forwarded === "http") return forwarded;
+  // No edge header: the request's own scheme is the deployment's scheme.
+  return (request.nextUrl?.protocol || "http:").replace(/:$/, "");
+}
+
 // Hosts this deployment is known to be served on: the hosted apex/app pairs,
 // the platform-admin host and the origins the operator configured. Read from
 // node:process so the live container env is seen (see the adminHost note in
@@ -185,6 +200,15 @@ export function isPlatformAdminPrivilegedApiPath(pathname) {
 // NEXT_PUBLIC_DEPLOY_ENV=lite|full names a shared tier; only when the runtime env says nothing at all
 // does it fall back to declaredEdition() (the build-time baked values). Everything non-personal
 // returns false here, so the 404 block in route() never runs for lite, full or an undeclared install.
+// CSP_REPORT_ONLY=true is an operator debugging hatch: the whole page CSP
+// goes non-enforcing while it is set. Warn once per process so a forgotten
+// debug flag is visible instead of silently downgrading every response.
+if ((nodeProcess.env.CSP_REPORT_ONLY || "").trim() === "true") {
+  console.warn(
+    "[proxy] CSP_REPORT_ONLY=true - the page Content-Security-Policy is NOT being enforced. Unset it when done debugging."
+  );
+}
+
 export function isPersonalEditionAtRuntime() {
   const env = nodeProcess.env;
   if ((env.NEXT_PUBLIC_AUTH_MODE || "").trim().toLowerCase() === "local") return true;
@@ -339,7 +363,7 @@ function route(request, csp) {
   ) {
     // Build the target from the request's Host header - nextUrl's origin is
     // the standalone bind address, which would leak into the Location.
-    const scheme = (request.headers.get("x-forwarded-proto") || "http").split(",")[0].trim() || "http";
+    const scheme = publicScheme(request);
     const targetPath = `/platform-admin${request.nextUrl.pathname === "/" ? "" : request.nextUrl.pathname}`;
     return NextResponse.redirect(`${scheme}://${requestHost}${targetPath}${request.nextUrl.search}`, 307);
   }
@@ -360,9 +384,9 @@ function route(request, csp) {
       target.hostname = appHost;
       target.port = "";
       target.pathname = barePathname;
-      // nextUrl's scheme is the bind address's (http); use the scheme the edge forwarded.
-      const forwardedProto = (request.headers.get("x-forwarded-proto") || "").split(",")[0].trim();
-      if (forwardedProto === "http" || forwardedProto === "https") target.protocol = `${forwardedProto}:`;
+      // nextUrl's scheme is the bind address's (http); use the scheme the edge forwarded,
+      // never downgraded below the deployment's canonical scheme (see publicScheme).
+      target.protocol = `${publicScheme(request)}:`;
       return NextResponse.redirect(target, 308);
     }
   }
@@ -492,7 +516,7 @@ function setLocaleCookie(response, request, locale) {
     sameSite: "lax",
     // Not unconditional: `next dev` and the e2e stack serve plain http, where
     // a Secure cookie is silently dropped and the locale would never stick.
-    secure: request.nextUrl.protocol === "https:" || request.headers.get("x-forwarded-proto") === "https",
+    secure: request.nextUrl.protocol === "https:" || publicScheme(request) === "https",
   });
 }
 

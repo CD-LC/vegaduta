@@ -53,11 +53,7 @@ type Load =
   | { kind: "error"; message: string }
   | { kind: "ready"; versions: WorkflowVersionRow[] };
 
-type Confirm =
-  | { kind: "restore"; n: number }
-  | { kind: "promote"; n: number }
-  | { kind: "rollback" }
-  | null;
+type Confirm = { kind: "restore"; n: number } | { kind: "promote"; n: number } | { kind: "rollback" } | null;
 
 export type WorkflowVersionsDrawerProps = {
   workflowId: string;
@@ -159,7 +155,9 @@ export default function WorkflowVersionsDrawer({
     } else if (c.kind === "promote") {
       void run(async () => {
         await promoteWorkflowVersion(workflowId, c.n, label);
-        toast.success(t("promoteDone", { n: c.n, label: label === "PRODUCTION" ? t("labelProduction") : t("labelStaging") }));
+        toast.success(
+          t("promoteDone", { n: c.n, label: label === "PRODUCTION" ? t("labelProduction") : t("labelStaging") })
+        );
       });
     } else {
       void run(async () => {
@@ -173,7 +171,7 @@ export default function WorkflowVersionsDrawer({
     <aside
       role="dialog"
       aria-label={t("versionsTitle")}
-      className="fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-border bg-card shadow-xl sm:max-w-md"
+      className="fixed inset-y-0 end-0 z-50 flex w-full flex-col border-s border-border bg-card shadow-xl sm:max-w-md"
     >
       <div className="flex items-start justify-between gap-3 border-b border-border px-4 py-3">
         <div className="min-w-0">
@@ -183,7 +181,14 @@ export default function WorkflowVersionsDrawer({
           </h2>
           <p className="mt-1 text-xs text-muted-foreground">{t("versionsIntro")}</p>
         </div>
-        <Button type="button" variant="ghost" size="icon" className="size-8 shrink-0" onClick={onClose} aria-label={t("versionsClose")}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="size-8 shrink-0"
+          onClick={onClose}
+          aria-label={t("versionsClose")}
+        >
           <X className="size-4" aria-hidden="true" />
         </Button>
       </div>
@@ -208,7 +213,13 @@ export default function WorkflowVersionsDrawer({
               </Button>
             </div>
             {canvasDirty && <p className="text-xs text-amber-600 dark:text-amber-400">{t("saveVersionDirty")}</p>}
-            <Button type="button" variant="outline" size="sm" onClick={() => setConfirm({ kind: "rollback" })} disabled={busy || versions.length < 2}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setConfirm({ kind: "rollback" })}
+              disabled={busy || versions.length < 2}
+            >
               <Undo2 className="size-3.5" aria-hidden="true" />
               {t("rollbackProduction")}
             </Button>
@@ -238,7 +249,10 @@ export default function WorkflowVersionsDrawer({
         {load.kind === "unavailable" && <p className="text-sm text-muted-foreground">{t("versionsUnavailable")}</p>}
 
         {load.kind === "error" && (
-          <div role="alert" className="flex items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <div
+            role="alert"
+            className="flex items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+          >
             <span className="min-w-0">{load.message}</span>
             <Button type="button" variant="outline" size="sm" onClick={() => setReloadKey((k) => k + 1)}>
               {t("retry")}
@@ -262,13 +276,17 @@ export default function WorkflowVersionsDrawer({
               />
             )}
             {filtered.length === 0 ? (
-              <p role="status" className="py-4 text-center text-sm text-muted-foreground">{t("noMatches")}</p>
+              <p role="status" className="py-4 text-center text-sm text-muted-foreground">
+                {t("noMatches")}
+              </p>
             ) : (
               <ul className="space-y-2">
                 {pg.pageItems.map((v) => (
                   <li key={v.id} className="rounded-lg border border-border bg-background p-3">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-semibold text-foreground">{t("versionNumber", { n: v.versionNumber })}</span>
+                      <span className="text-sm font-semibold text-foreground">
+                        {t("versionNumber", { n: v.versionNumber })}
+                      </span>
                       {v.versionNumber === latest && <Badge variant="accent">{t("latest")}</Badge>}
                       <Badge variant="secondary">{prettyStatus(v.status)}</Badge>
                       {v.label && (
@@ -276,21 +294,41 @@ export default function WorkflowVersionsDrawer({
                           {v.label === "PRODUCTION" ? t("labelProduction") : t("labelStaging")}
                         </Badge>
                       )}
-                      <span className="ml-auto text-xs text-muted-foreground">{formatWhen(v.createdAt)}</span>
+                      <span className="ms-auto text-xs text-muted-foreground">{formatWhen(v.createdAt)}</span>
                     </div>
-                    {v.changeSummary && <p className="mt-1 break-words text-sm text-muted-foreground">{v.changeSummary}</p>}
+                    {v.changeSummary && (
+                      <p className="mt-1 break-words text-sm text-muted-foreground">{v.changeSummary}</p>
+                    )}
                     <div className="mt-2 flex flex-wrap gap-1.5">
-                      <Button type="button" variant="outline" size="sm" onClick={() => setCompareFor(v.versionNumber)} disabled={versions.length < 2}>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCompareFor(v.versionNumber)}
+                        disabled={versions.length < 2}
+                      >
                         <GitCompare className="size-3.5" aria-hidden="true" />
                         {t("compare")}
                       </Button>
                       {canWrite && (
                         <>
-                          <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => setConfirm({ kind: "restore", n: v.versionNumber })}>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={busy}
+                            onClick={() => setConfirm({ kind: "restore", n: v.versionNumber })}
+                          >
                             <RotateCcw className="size-3.5" aria-hidden="true" />
                             {t("restore")}
                           </Button>
-                          <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => setConfirm({ kind: "promote", n: v.versionNumber })}>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={busy}
+                            onClick={() => setConfirm({ kind: "promote", n: v.versionNumber })}
+                          >
                             <Rocket className="size-3.5" aria-hidden="true" />
                             {t("promote")}
                           </Button>
@@ -323,7 +361,8 @@ export default function WorkflowVersionsDrawer({
               {confirm?.kind === "rollback" && t("rollbackTitle")}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {confirm?.kind === "restore" && `${t("restoreBody", { n: confirm.n })}${canvasDirty ? ` ${t("restoreDirty")}` : ""}`}
+              {confirm?.kind === "restore" &&
+                `${t("restoreBody", { n: confirm.n })}${canvasDirty ? ` ${t("restoreDirty")}` : ""}`}
               {confirm?.kind === "promote" && t("promoteBody")}
               {confirm?.kind === "rollback" && t("rollbackBody")}
             </AlertDialogDescription>

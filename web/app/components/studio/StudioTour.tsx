@@ -36,6 +36,7 @@ import {
   AlertDialogTitle,
 } from "../ui/alert-dialog";
 import type { DesignerTab } from "./AgentDesigner";
+import { useTranslations } from "../../lib/i18n";
 
 // The tour: every feature the studio has, how to control it, and where to go to
 // try it. "Take me there" closes the tour and lands on the exact stage or tab.
@@ -197,6 +198,7 @@ type Props = {
 };
 
 export default function StudioTour({ open, onClose, onGo, signupHref }: Props) {
+  const tHC = useTranslations("hcComponentsStudioStudioTour");
   const [i, setI] = useState(0);
   const total = STEPS.length + 1; // + the workspace stop
   const onWorkspace = i === STEPS.length;
@@ -207,7 +209,7 @@ export default function StudioTour({ open, onClose, onGo, signupHref }: Props) {
     <AlertDialog open={open} onOpenChange={(o) => !o && onClose()}>
       <AlertDialogContent className="max-w-3xl gap-0 p-0">
         <div className="grid min-h-[420px] md:grid-cols-[210px_minmax(0,1fr)]">
-          <nav aria-label="Tour steps" className="hidden border-r border-border/60 bg-muted/30 p-3 md:block">
+          <nav aria-label={tHC("s7")} className="hidden border-e border-border/60 bg-muted/30 p-3 md:block">
             <ol className="space-y-0.5">
               {[
                 ...STEPS.map((s) => ({ id: s.id, icon: s.icon, title: s.title.replace(/^\d+ - /, "") })),
@@ -220,7 +222,7 @@ export default function StudioTour({ open, onClose, onGo, signupHref }: Props) {
                       type="button"
                       onClick={() => setI(idx)}
                       aria-current={idx === i ? "step" : undefined}
-                      className={`flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs transition-colors ${idx === i ? "bg-background font-medium shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                      className={`flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-start text-xs transition-colors ${idx === i ? "bg-background font-medium shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
                     >
                       <SIcon className="h-3.5 w-3.5 shrink-0" /> <span className="truncate">{s.title}</span>
                     </button>
@@ -231,15 +233,15 @@ export default function StudioTour({ open, onClose, onGo, signupHref }: Props) {
           </nav>
 
           <div className="flex flex-col p-5">
-            <AlertDialogHeader className="text-left">
+            <AlertDialogHeader className="text-start">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-primary">
-                  <Icon className="h-4 w-4" /> Guided tour · {i + 1} of {total}
+                  <Icon className="h-4 w-4" /> {tHC("s6")} {i + 1} of {total}
                 </div>
                 <button
                   type="button"
                   onClick={onClose}
-                  aria-label="Close the tour"
+                  aria-label={tHC("s5")}
                   className="text-muted-foreground hover:text-foreground"
                 >
                   <X aria-hidden="true" className="h-4 w-4 shrink-0" />
@@ -252,11 +254,7 @@ export default function StudioTour({ open, onClose, onGo, signupHref }: Props) {
                 <div className="space-y-3 text-sm">
                   {onWorkspace ? (
                     <>
-                      <p>
-                        This studio is the workshop; the workspace is the building. Its left-hand navigation looks like
-                        this, and each part picks up where a studio feature leaves off. Agents you build here follow you
-                        in when you sign up; documents and connectors you re-add in Knowledge and Tools.
-                      </p>
+                      <p>{tHC("s4")}</p>
                       <ul className="grid gap-1.5 sm:grid-cols-2">
                         {WORKSPACE.map((w) => {
                           const WIcon = w.icon;
@@ -277,7 +275,7 @@ export default function StudioTour({ open, onClose, onGo, signupHref }: Props) {
                       <p className="text-foreground">{step.lead}</p>
                       <div>
                         <div className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          How you control it
+                          {tHC("s3")}
                         </div>
                         <ul className="space-y-1.5">
                           {step.controls.map((c) => (
@@ -295,14 +293,14 @@ export default function StudioTour({ open, onClose, onGo, signupHref }: Props) {
 
             <div className="mt-auto flex flex-wrap items-center gap-2 pt-5">
               <Button variant="ghost" size="sm" disabled={i === 0} onClick={() => setI(i - 1)}>
-                <ArrowLeft aria-hidden="true" className="mr-1 h-3.5 w-3.5 shrink-0" /> Back
+                <ArrowLeft aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" /> Back
               </Button>
               {!onWorkspace && (
                 <Button variant="outline" size="sm" onClick={() => setI(i + 1)}>
-                  Next <ArrowRight aria-hidden="true" className="ml-1 h-3.5 w-3.5 shrink-0" />
+                  Next <ArrowRight aria-hidden="true" className="ms-1 h-3.5 w-3.5 shrink-0" />
                 </Button>
               )}
-              <div className="ml-auto flex gap-2">
+              <div className="ms-auto flex gap-2">
                 {!onWorkspace && step.target && (
                   <Button
                     size="sm"
@@ -311,17 +309,17 @@ export default function StudioTour({ open, onClose, onGo, signupHref }: Props) {
                       onClose();
                     }}
                   >
-                    {step.cta} <ArrowRight aria-hidden="true" className="ml-1 h-3.5 w-3.5 shrink-0" />
+                    {step.cta} <ArrowRight aria-hidden="true" className="ms-1 h-3.5 w-3.5 shrink-0" />
                   </Button>
                 )}
                 {onWorkspace && (
                   <>
                     <Button variant="outline" size="sm" onClick={onClose}>
-                      Back to the studio
+                      {tHC("s2")}
                     </Button>
                     <Button size="sm" asChild>
                       <Link href={signupHref}>
-                        Create my workspace <ArrowRight aria-hidden="true" className="ml-1 h-3.5 w-3.5 shrink-0" />
+                        {tHC("s1")} <ArrowRight aria-hidden="true" className="ms-1 h-3.5 w-3.5 shrink-0" />
                       </Link>
                     </Button>
                   </>

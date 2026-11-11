@@ -83,7 +83,7 @@ export default function KnowledgeDocumentsTable({
               <TableCell className="hidden whitespace-nowrap text-xs text-muted-foreground sm:table-cell">
                 {ext.replace(".", "").toUpperCase()}
               </TableCell>
-              <TableCell className="whitespace-nowrap text-right text-sm text-muted-foreground tabular-nums">
+              <TableCell className="whitespace-nowrap text-end text-sm text-muted-foreground tabular-nums">
                 {doc.chunkCount ?? "—"}
               </TableCell>
               <TableCell className="whitespace-nowrap">
@@ -91,7 +91,7 @@ export default function KnowledgeDocumentsTable({
                   {statusText}
                 </Badge>
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell className="text-end">
                 <KnowledgeDocumentActions doc={doc} onError={onError} onDeleted={onDeleted} />
               </TableCell>
             </TableRow>

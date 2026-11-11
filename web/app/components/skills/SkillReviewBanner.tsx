@@ -58,7 +58,7 @@ export default function SkillReviewBanner({
           {changed && report.changes.length > 0 && (
             <div>
               <p className="font-medium">{t("reviewChangesHeading")}</p>
-              <ul className="list-disc pl-5">
+              <ul className="list-disc ps-5">
                 {report.changes.map((c, i) => (
                   <li key={`${i}:${c}`}>{c}</li>
                 ))}
@@ -83,7 +83,11 @@ export default function SkillReviewBanner({
                 </label>
               )}
               <div className="flex flex-wrap gap-2">
-                <Button size="sm" disabled={busy || (high && !acknowledged)} onClick={() => onApprove(high && acknowledged)}>
+                <Button
+                  size="sm"
+                  disabled={busy || (high && !acknowledged)}
+                  onClick={() => onApprove(high && acknowledged)}
+                >
                   {t("reviewApprove")}
                 </Button>
                 <Button size="sm" variant="outline" disabled={busy} onClick={onReject}>

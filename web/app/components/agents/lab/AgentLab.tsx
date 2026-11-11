@@ -37,7 +37,16 @@ export default function AgentLab(props: AgentLabProps) {
 
 const subscribeNever = () => () => {};
 
-function AgentLabDialog({ onClose, agent, sessionId, turns, busy, onForkRerun, onCancelTurn, initialTab }: AgentLabProps) {
+function AgentLabDialog({
+  onClose,
+  agent,
+  sessionId,
+  turns,
+  busy,
+  onForkRerun,
+  onCancelTurn,
+  initialTab,
+}: AgentLabProps) {
   const t = useTranslations("agentLab");
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement | null>(null);
@@ -47,7 +56,11 @@ function AgentLabDialog({ onClose, agent, sessionId, turns, busy, onForkRerun, o
   // the hydration pass (the console-preview page renders the lab open from
   // its very first render), true for every ordinary client render - so an
   // overlay opened by a click portals immediately, with no extra pass.
-  const canPortal = useSyncExternalStore(subscribeNever, () => true, () => false);
+  const canPortal = useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false
+  );
 
   // What this workspace may run (plan gate + server caps). Keyed by agent id
   // so "still loading" and "loaded, and the answer is null" (a core without
@@ -66,7 +79,7 @@ function AgentLabDialog({ onClose, agent, sessionId, turns, busy, onForkRerun, o
     };
   }, [agentId]);
   const capabilitiesLoading = agentId != null && loaded?.agentId !== agentId;
-  const capabilities = capabilitiesLoading ? null : loaded?.capabilities ?? null;
+  const capabilities = capabilitiesLoading ? null : (loaded?.capabilities ?? null);
 
   // Hand focus back to whatever opened the lab (the launcher button) when it
   // closes. Declared before the focus-on-open effect so it still sees the
@@ -149,7 +162,11 @@ function AgentLabDialog({ onClose, agent, sessionId, turns, busy, onForkRerun, o
             <h2 id={titleId} className="text-sm font-semibold tracking-tight text-foreground">
               <BrandText text={t("title")} />
             </h2>
-            {agent && <span className="truncate text-xs text-muted-foreground"><BrandText text={t("subtitle", { name: agent.name })} /></span>}
+            {agent && (
+              <span className="truncate text-xs text-muted-foreground">
+                <BrandText text={t("subtitle", { name: agent.name })} />
+              </span>
+            )}
           </div>
           <Tabs
             value={tab}
@@ -164,7 +181,7 @@ function AgentLabDialog({ onClose, agent, sessionId, turns, busy, onForkRerun, o
               <TabsTrigger value="consistency">{t("tabConsistency")}</TabsTrigger>
             </TabsList>
           </Tabs>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ms-auto flex items-center gap-2">
             {/* l22-4 teaches all three instruments (run graph, knockout,
                 consistency) — one link for the lab itself; the knockout
                 panel's dataset empty state links l16-3 separately. */}

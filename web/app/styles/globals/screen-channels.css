@@ -16,7 +16,7 @@
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--ax-border2);
   border-radius: 13px;
-  text-align: left;
+  text-align: start;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -314,7 +314,7 @@
    * line and would otherwise force the row wider than the viewport. */
   .ax-ch-inbound-reassign {
     flex-wrap: wrap;
-    padding-left: 20px;
+    padding-inline-start: 20px;
   }
 
   /* Approve/Reject/Reassign - already comfortably-sized text, but the
@@ -451,7 +451,7 @@
 
 .ax-ch-steps {
   margin: 0;
-  padding-left: 18px;
+  padding-inline-start: 18px;
   display: flex;
   flex-direction: column;
   gap: 6px;

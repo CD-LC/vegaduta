@@ -24,7 +24,9 @@ export default function SolutionsTab() {
   const { status, envoys, selectedId, select, detail } = useEnvoyFor(true, null);
   const { ledger, error, loading, reload } = useBriefLedger(detail ? selectedId : null);
   const agent = detail ? primaryAgent(detail) : null;
-  const experimentHref = agent?.entityId ? deepLink(`/agents?agentId=${encodeURIComponent(agent.entityId)}`, "workbench-versions") : null;
+  const experimentHref = agent?.entityId
+    ? deepLink(`/agents?agentId=${encodeURIComponent(agent.entityId)}`, "workbench-versions")
+    : null;
 
   if (status === "loading" || status === "idle") {
     return (
@@ -70,7 +72,7 @@ export default function SolutionsTab() {
           />
         </label>
         {detail && <RungBadge rung={detail.rung} />}
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ms-auto flex items-center gap-2">
           {/* l16-9 teaches the brief/trust-ladder machinery this ledger shows. */}
           {selectedId && (
             <Button asChild variant="outline" size="sm">

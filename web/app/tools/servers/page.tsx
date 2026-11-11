@@ -175,6 +175,7 @@ function ServerRow({
   toggleBusy: boolean;
   fixBusy: boolean;
 }) {
+  const tHC = useTranslations("hcToolsServersPage");
   const [result, setResult] = useState<any>(null);
 
   async function runTest() {
@@ -239,12 +240,8 @@ function ServerRow({
                 {testBusy ? "Testing…" : "Test"}
               </Button>
             ) : (
-              <Badge
-                variant="secondary"
-                className="h-8 gap-1 px-2.5"
-                title="Built-in tool wired at deployment time and shared platform-wide - there's no per-workspace connection to test."
-              >
-                Built-in — always on
+              <Badge variant="secondary" className="h-8 gap-1 px-2.5" title={tHC("s16")}>
+                {tHC("s15")}
               </Badge>
             )}
             {/* Trusting a server that's blocked on unreadable credentials or
@@ -284,7 +281,7 @@ function ServerRow({
         {result && (
           <Alert variant={result.unsupported ? "default" : result.ok ? "success" : "destructive"}>
             {result.unsupported ? (
-              <AlertDescription>Connection testing isn&rsquo;t available on this deployment yet.</AlertDescription>
+              <AlertDescription>{tHC("s14")}</AlertDescription>
             ) : (
               <>
                 {result.ok ? <CheckCircle2 aria-hidden="true" /> : <AlertTriangle aria-hidden="true" />}
@@ -308,8 +305,11 @@ function ServerRow({
         {server.credentialsCorrupted && (
           <Alert variant="warning">
             <KeyRound aria-hidden="true" />
-            <AlertTitle>{server.name}: stored credentials could not be read</AlertTitle>
-            <AlertDescription>Please re-enter them from the Tools page.</AlertDescription>
+            <AlertTitle>
+              {server.name}
+              {tHC("s13")}
+            </AlertTitle>
+            <AlertDescription>{tHC("s12")}</AlertDescription>
           </Alert>
         )}
 
@@ -319,17 +319,20 @@ function ServerRow({
         {server.reviewStatus === "PENDING" && (
           <Alert variant="info">
             <Clock aria-hidden="true" />
-            <AlertTitle>{server.name}: awaiting platform review</AlertTitle>
-            <AlertDescription>
-              Custom, self-service STDIO servers need a one-time platform safety review before they can connect - this
-              is expected for a server you just added, not an error.
-            </AlertDescription>
+            <AlertTitle>
+              {server.name}
+              {tHC("s11")}
+            </AlertTitle>
+            <AlertDescription>{tHC("s10")}</AlertDescription>
           </Alert>
         )}
         {server.reviewStatus === "REJECTED" && (
           <Alert variant="destructive">
             <AlertTriangle aria-hidden="true" />
-            <AlertTitle>{server.name}: platform review rejected this registration</AlertTitle>
+            <AlertTitle>
+              {server.name}
+              {tHC("s9")}
+            </AlertTitle>
             <AlertDescription>
               {server.reviewRejectionReason ||
                 "No reason was given. Edit the server's command/args and re-register to request another review."}
@@ -345,7 +348,10 @@ function ServerRow({
         {persistedError && (
           <Alert variant="destructive">
             <AlertTriangle aria-hidden="true" />
-            <AlertTitle>{server.name}: connection issue</AlertTitle>
+            <AlertTitle>
+              {server.name}
+              {tHC("s8")}
+            </AlertTitle>
             <AlertDescription>
               {server.connectionHint && <p className="font-medium">{server.connectionHint}</p>}
               {server.connectionError && <p>{server.connectionError}</p>}
@@ -362,7 +368,9 @@ function ServerRow({
         {activeFix?.command && (
           <Alert variant="warning">
             <Wrench aria-hidden="true" />
-            <AlertTitle>Suggested fix for {server.name}</AlertTitle>
+            <AlertTitle>
+              {tHC("s7")} {server.name}
+            </AlertTitle>
             <AlertDescription>
               {activeFix.reason && <p>{activeFix.reason}</p>}
               <code className="block w-full break-words rounded bg-black/5 px-2 py-1 font-mono text-xs dark:bg-white/10">
@@ -372,10 +380,7 @@ function ServerRow({
               <Button size="sm" className="mt-1 w-fit" disabled={fixBusy} onClick={() => onApplyFix(server, activeFix)}>
                 {fixBusy ? "Applying fix…" : "Apply suggested fix"}
               </Button>
-              <p className="text-xs text-muted-foreground">
-                This re-registers the server with the corrected command. Any credentials it needs may have to be
-                re-entered afterward via the Tools page.
-              </p>
+              <p className="text-xs text-muted-foreground">{tHC("s6")}</p>
             </AlertDescription>
           </Alert>
         )}
@@ -385,6 +390,7 @@ function ServerRow({
 }
 
 export default function McpServersPage() {
+  const tHC = useTranslations("hcToolsServersPage");
   const [servers, setServers] = useState<any[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [loadFailed, setLoadFailed] = useState(false);
@@ -416,7 +422,7 @@ export default function McpServersPage() {
 
   const needle = filter.trim().toLowerCase();
   const enabledServers = servers.filter(
-    (s) => s.enabled && (!needle || `${s.name} ${s.description ?? ""} ${s.type ?? ""}`.toLowerCase().includes(needle)),
+    (s) => s.enabled && (!needle || `${s.name} ${s.description ?? ""} ${s.type ?? ""}`.toLowerCase().includes(needle))
   );
   const attentionServers = enabledServers.filter(needsAttention);
   const serversPagination = usePagination(enabledServers);
@@ -535,23 +541,23 @@ export default function McpServersPage() {
   return (
     <AppShell eyebrow="Tools & MCP">
       <PageHeader
-        title="Enabled MCP servers"
+        title={tHC("s5")}
         subtitle="Every MCP server enabled for this workspace in one place — test a connection, trust a server's actions, or disable it, without opening the full catalog."
         actions={
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" asChild>
               <Link href="/help/docs#tools" target="_blank" rel="noopener noreferrer">
-                <HelpCircle size={13} aria-hidden="true" /> How MCP servers work
+                <HelpCircle size={13} aria-hidden="true" /> {tHC("s4")}
               </Link>
             </Button>
             <Button variant="outline" size="sm" asChild>
               <Link href="/tools/credentials">
-                <Lock size={13} aria-hidden="true" /> Manage credentials
+                <Lock size={13} aria-hidden="true" /> {tHC("s3")}
               </Link>
             </Button>
             <Button variant="outline" size="sm" asChild>
               <Link href="/tools">
-                <ArrowLeft size={13} aria-hidden="true" /> Back to Tools
+                <ArrowLeft size={13} aria-hidden="true" /> {tHC("s2")}
               </Link>
             </Button>
             <Button size="sm" disabled={bulkBusy || attentionServers.length === 0} onClick={handleTrustAll}>
@@ -570,7 +576,7 @@ export default function McpServersPage() {
       {error && (
         <Alert variant="destructive" className="mb-4">
           <AlertTriangle aria-hidden="true" />
-          <AlertTitle>Something went wrong</AlertTitle>
+          <AlertTitle>{tHC("s1")}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}

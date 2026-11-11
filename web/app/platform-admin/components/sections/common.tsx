@@ -5,6 +5,7 @@ import { Info, Construction } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Alert, AlertDescription } from "../ui/alert";
+import { useTranslations } from "../../../lib/i18n";
 
 // Shared primitives for the Governance & Operations Console sections
 // (PLATFORM-ADMIN-GOVERNANCE-AND-CONTROLS.md §3). Rebuilt on the same shadcn
@@ -113,6 +114,7 @@ export function ComingSoon({
   endpoints?: string[];
   roadmap?: any;
 }) {
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsCommon");
   return (
     <div className="flex items-start gap-3 rounded-lg border border-border bg-secondary/30 p-4">
       <Construction size={18} className="mt-0.5 shrink-0 text-[var(--warning)]" />
@@ -120,14 +122,14 @@ export function ComingSoon({
         <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-foreground">
           {title}
           <Badge variant="secondary" className="text-2xs uppercase tracking-wide">
-            Coming soon
+            {tHC("s2")}
           </Badge>
         </div>
         <p className="text-xs text-muted-foreground">{description}</p>
         {roadmap && <p className="text-xs text-muted-foreground/80">{roadmap}</p>}
         {endpoints && endpoints.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 pt-0.5">
-            <span className="text-[11px] text-muted-foreground">Will call:</span>
+            <span className="text-[11px] text-muted-foreground">{tHC("s1")}</span>
             {endpoints.map((ep) => (
               <code
                 key={ep}

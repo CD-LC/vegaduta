@@ -8,6 +8,7 @@
 // an anonymous caller, and replay never fetches a model).
 
 import { Play, Square } from "lucide-react";
+import { useTranslations } from "../../lib/i18n";
 
 interface ShareCallLogProps {
   callLog: { role: "user" | "agent"; text: string }[];
@@ -28,6 +29,7 @@ export default function ShareCallLog({
   onReplay,
   onStopReplay,
 }: ShareCallLogProps) {
+  const tHC = useTranslations("hcAgentShareIdShareCallLog");
   if (callLog.length === 0 && !stageText && !transcript && !reply) return null;
   return (
     <div className="max-h-64 space-y-1 overflow-y-auto rounded-lg bg-secondary/30 px-3 py-2 text-xs">
@@ -54,7 +56,12 @@ export default function ShareCallLog({
           )}
         </div>
       ))}
-      {transcript && <p className="text-muted-foreground">You said: &quot;{transcript}&quot;</p>}
+      {transcript && (
+        <p className="text-muted-foreground">
+          {tHC("s1")}
+          {transcript}&quot;
+        </p>
+      )}
       {reply && <p className="text-foreground">{reply}</p>}
     </div>
   );

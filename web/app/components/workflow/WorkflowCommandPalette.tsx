@@ -10,6 +10,7 @@ import type { WorkflowNodeDef } from "./nodeDefs";
 import { useNodeDefTranslations } from "./useNodeDefTranslations";
 import { useDialogFocus } from "../../lib/hooks/useDialogFocus";
 import "./workflow-chrome.css";
+import { useTranslations } from "../../lib/i18n";
 
 const RECENTS_KEY = "wf-cmd-recents";
 const MAX_RECENTS = 5;
@@ -64,6 +65,7 @@ export default function WorkflowCommandPalette({
   onClose: () => void;
   onPick: (type: string) => void;
 }) {
+  const tHC = useTranslations("hcComponentsWorkflowWorkflowCommandPalette");
   const t = useNodeDefTranslations();
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
@@ -170,7 +172,7 @@ export default function WorkflowCommandPalette({
             ref={dialogRef}
             role="dialog"
             aria-modal="true"
-            aria-label="Add a node"
+            aria-label={tHC("s5")}
             className="w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-popover shadow-2xl"
             initial={{ opacity: 0, scale: 0.97, y: -8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -186,12 +188,12 @@ export default function WorkflowCommandPalette({
                 aria-expanded="true"
                 aria-controls="wf-cmd-list"
                 aria-autocomplete="list"
-                aria-label="Search nodes to add"
+                aria-label={tHC("s4")}
                 aria-activedescendant={items[active] ? `wf-cmd-opt-${items[active].type}` : undefined}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={onKeyDown}
-                placeholder="Search nodes to add…"
+                placeholder={tHC("s3")}
                 className="h-12 w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
               />
               <kbd className="hidden rounded border border-border px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground sm:inline">
@@ -201,7 +203,8 @@ export default function WorkflowCommandPalette({
             <div id="wf-cmd-list" role="listbox" aria-label="Nodes" className="max-h-[52vh] overflow-y-auto p-1.5">
               {items.length === 0 && (
                 <div role="status" className="px-3 py-8 text-center text-sm text-muted-foreground">
-                  No nodes match &ldquo;{query}&rdquo;.
+                  {tHC("s2")}
+                  {query}&rdquo;.
                 </div>
               )}
               {items.map((def, idx) => {
@@ -209,8 +212,16 @@ export default function WorkflowCommandPalette({
                 const isActive = idx === active;
                 return (
                   <div key={def.type} role="presentation">
-                    {showGroups && idx === 0 && <div className="wf-cmd-group" aria-hidden="true">Recent</div>}
-                    {showGroups && idx === recentCount && <div className="wf-cmd-group" aria-hidden="true">All nodes</div>}
+                    {showGroups && idx === 0 && (
+                      <div className="wf-cmd-group" aria-hidden="true">
+                        Recent
+                      </div>
+                    )}
+                    {showGroups && idx === recentCount && (
+                      <div className="wf-cmd-group" aria-hidden="true">
+                        {tHC("s1")}
+                      </div>
+                    )}
                     <button
                       id={`wf-cmd-opt-${def.type}`}
                       role="option"
@@ -220,7 +231,7 @@ export default function WorkflowCommandPalette({
                       type="button"
                       onMouseEnter={() => setActive(idx)}
                       onClick={() => commit(def)}
-                      className={`flex w-full items-center gap-3 rounded-lg border-0 p-0 px-2.5 py-2 text-left shadow-none transition-colors ${
+                      className={`flex w-full items-center gap-3 rounded-lg border-0 p-0 px-2.5 py-2 text-start shadow-none transition-colors ${
                         isActive ? "bg-accent" : "bg-transparent hover:bg-accent/60"
                       }`}
                     >
@@ -231,13 +242,19 @@ export default function WorkflowCommandPalette({
                         <Icon size={15} className="text-white" strokeWidth={2.2} aria-hidden="true" />
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-medium text-foreground">{t(nodeLabelKey(def.type))}</span>
-                        <span className="block truncate text-xs text-muted-foreground">{t(nodeDescriptionKey(def.type))}</span>
+                        <span className="block truncate text-sm font-medium text-foreground">
+                          {t(nodeLabelKey(def.type))}
+                        </span>
+                        <span className="block truncate text-xs text-muted-foreground">
+                          {t(nodeDescriptionKey(def.type))}
+                        </span>
                       </span>
                       <span className="shrink-0 rounded border border-border px-2 py-0.5 font-mono text-[9px] uppercase tracking-wide text-muted-foreground">
                         {t(categoryLabelKey(def.category))}
                       </span>
-                      {isActive && <CornerDownLeft size={13} className="shrink-0 text-muted-foreground" aria-hidden="true" />}
+                      {isActive && (
+                        <CornerDownLeft size={13} className="shrink-0 text-muted-foreground" aria-hidden="true" />
+                      )}
                     </button>
                   </div>
                 );

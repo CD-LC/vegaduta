@@ -48,9 +48,9 @@
   gap: 5px;
   padding: 11px 14px;
   border-bottom: 1px solid var(--ax-border);
-  border-left: 2px solid transparent;
+  border-inline-start: 2px solid transparent;
   background: none;
-  text-align: left;
+  text-align: start;
   cursor: pointer;
   color: var(--ax-text);
 }
@@ -60,7 +60,7 @@
 }
 
 .ax-mnt-appr-card-active {
-  border-left-color: var(--ax-amber);
+  border-inline-start-color: var(--ax-amber);
   background: rgba(245, 181, 68, 0.06);
 }
 
@@ -88,7 +88,7 @@
 }
 
 .ax-mnt-appr-card-time {
-  margin-left: auto;
+  margin-inline-start: auto;
   flex-shrink: 0;
   font-size: var(--fs-label);
   font-weight: 400;

@@ -130,7 +130,7 @@
   gap: 0.7rem;
   max-height: 320px;
   overflow-y: auto;
-  padding-right: 0.25rem;
+  padding-inline-end: 0.25rem;
 }
 
 .ax-tool-selector-group {

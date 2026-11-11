@@ -336,7 +336,7 @@ export default function DashboardHome() {
                   </div>
                   <div className="mt-1 text-xs text-muted-foreground">{t("cognitionCoreSub")}</div>
                 </div>
-                <div className="text-right">
+                <div className="text-end">
                   <div className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-foreground">
                     {t("agentsThinking", { count: agents.length })}
                   </div>

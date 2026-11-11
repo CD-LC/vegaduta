@@ -63,9 +63,7 @@ export default function SkillLibraryPanel({ agents }: { agents: AgentOption[] })
 
   const rows = useMemo(
     () =>
-      TAB_STATUSES[tab]
-        .flatMap((s) => buckets[s])
-        .sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || "")),
+      TAB_STATUSES[tab].flatMap((s) => buckets[s]).sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || "")),
     [buckets, tab]
   );
   const pg = usePagination(rows, 10);
@@ -149,7 +147,7 @@ export default function SkillLibraryPanel({ agents }: { agents: AgentOption[] })
                       aria-pressed={openId === s.id}
                       onClick={() => setOpenId(openId === s.id ? null : s.id)}
                       className={cn(
-                        "w-full rounded-lg border border-border bg-card p-3 text-left outline-none transition-colors",
+                        "w-full rounded-lg border border-border bg-card p-3 text-start outline-none transition-colors",
                         "hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring",
                         openId === s.id && "border-primary"
                       )}
@@ -160,7 +158,9 @@ export default function SkillLibraryPanel({ agents }: { agents: AgentOption[] })
                         <SkillSelfCheckBadge check={s.selfCheck} />
                         {tab === "archived" && <Badge variant="outline">{t(`status_${s.status}`)}</Badge>}
                       </span>
-                      {s.description && <span className="mt-1 line-clamp-2 block text-xs text-muted-foreground">{s.description}</span>}
+                      {s.description && (
+                        <span className="mt-1 line-clamp-2 block text-xs text-muted-foreground">{s.description}</span>
+                      )}
                       <span className="mt-1 block text-xs text-muted-foreground">
                         {t("rowMeta", { version: s.version, uses: s.uses, agents: s.agentIds.length })}
                         {s.agentIds.length > 0 && s.agentIds.length <= 3

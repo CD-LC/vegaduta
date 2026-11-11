@@ -96,6 +96,7 @@ const NAV_LINK_CLS = "whitespace-nowrap rounded-md px-1.5 py-2 transition-colors
 // Sticky landing nav: inline link row (only when measured to fit), hamburger
 // sheet, condense-on-scroll sentinel. Extracted verbatim from DemoLanding.
 export default function LandingNav({ journey, tried }: { journey: ReturnType<typeof useJourney>; tried: boolean }) {
+  const tHC = useTranslations("hcComponentsDemolandingLandingNav");
   const t = useTranslations("landing");
   // Separate namespace: "languageSwitcher.label" is the one already-translated
   // "Language" string present in all 30 locale files, so the sheet's heading
@@ -228,7 +229,7 @@ export default function LandingNav({ journey, tried }: { journey: ReturnType<typ
               width so that measurement stays correct regardless of which
               locale is active, without ever showing overflowing content. */}
           {showInlineLinks && (
-            <div className="ml-2 flex items-center gap-0.5 whitespace-nowrap text-xs text-muted-foreground">
+            <div className="ms-2 flex items-center gap-0.5 whitespace-nowrap text-xs text-muted-foreground">
               {NAV_LINK_ITEMS.map((item) => {
                 const cls = item.iconOnly ? `${NAV_LINK_CLS} inline-flex items-center justify-center` : NAV_LINK_CLS;
                 const content = item.iconOnly ? (
@@ -280,7 +281,7 @@ export default function LandingNav({ journey, tried }: { journey: ReturnType<typ
               </span>
             ))}
           </div>
-          <div ref={navActionsRef} className="ml-auto flex min-w-0 shrink-0 items-center gap-1.5 sm:gap-3">
+          <div ref={navActionsRef} className="ms-auto flex min-w-0 shrink-0 items-center gap-1.5 sm:gap-3">
             {/* Academy pill — always visible (incl. mobile). Was "Academy ·
                 learn free" spelled out at >=640px (verbose enough to be
                 part of the 217px nav-links overflow at 1280px, measured
@@ -388,7 +389,7 @@ export default function LandingNav({ journey, tried }: { journey: ReturnType<typ
               {/* How it works section */}
               <div>
                 <h3 className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground/70">
-                  How it works
+                  {tHC("s1")}
                 </h3>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
                   {MENU_ANCHOR_ITEMS.map((l) => {

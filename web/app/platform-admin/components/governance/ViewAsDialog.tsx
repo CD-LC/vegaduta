@@ -12,6 +12,7 @@ import { useDialogFocus } from "../../lib/useDialogFocus";
 import { toast } from "../../lib/toastBus";
 import { governanceApi } from "../../lib/adminApi/governance";
 import { IMPERSONATION_REASON_MIN, isSafeViewUrl, reasonProblem } from "../../lib/governanceFormat";
+import { useTranslations } from "../../../lib/i18n";
 
 // Read-only "view as" start dialog (POST /api/platform/impersonation). Needs a
 // written reason (>= 10 chars, recorded and shown to the tenant admin in their
@@ -28,6 +29,7 @@ export type ViewAsTarget = {
 };
 
 export default function ViewAsDialog({ target, onClose }: { target: ViewAsTarget | null; onClose: () => void }) {
+  const tHC = useTranslations("hcPlatformadminComponentsGovernanceViewAsDialog");
   const open = target != null;
   const [reason, setReason] = useState("");
   const [masterKey, setMasterKey] = useState("");
@@ -125,7 +127,7 @@ export default function ViewAsDialog({ target, onClose }: { target: ViewAsTarget
               <div className="flex items-center gap-2">
                 <Eye size={16} className="text-primary" />
                 <h2 id="view-as-title" className="text-sm font-semibold text-foreground">
-                  View as (read-only)
+                  {tHC("s10")}
                 </h2>
               </div>
               <button
@@ -149,22 +151,19 @@ export default function ViewAsDialog({ target, onClose }: { target: ViewAsTarget
               role="note"
             >
               <ShieldAlert size={14} className="mt-0.5 shrink-0 text-[var(--warning-text)]" />
-              <span>
-                Opens the tenant app as this user for 30 minutes, read-only: every change is refused. The session, your
-                reason and every request are audited and visible to the tenant&apos;s admins in their audit log.
-              </span>
+              <span>{tHC("s9")}</span>
             </div>
 
             <div className="mt-3 space-y-1.5">
               <Label htmlFor="view-as-reason" className="text-xs text-muted-foreground">
-                Reason (at least {IMPERSONATION_REASON_MIN} characters)
+                {tHC("s8")} {IMPERSONATION_REASON_MIN} characters)
               </Label>
               <Textarea
                 id="view-as-reason"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 onBlur={() => setTouched(true)}
-                placeholder="e.g. Support ticket #4821: agent replies look truncated"
+                placeholder={tHC("s7")}
                 disabled={submitting}
                 maxLength={500}
                 aria-invalid={touched && !!problem}
@@ -180,7 +179,7 @@ export default function ViewAsDialog({ target, onClose }: { target: ViewAsTarget
 
             <div className="mt-3 space-y-1.5">
               <Label htmlFor="view-as-master-key" className="text-xs text-muted-foreground">
-                Master key
+                {tHC("s6")}
               </Label>
               <Input
                 id="view-as-master-key"
@@ -191,14 +190,13 @@ export default function ViewAsDialog({ target, onClose }: { target: ViewAsTarget
                 autoComplete="off"
                 disabled={submitting}
               />
-              <p className="text-[11px] text-muted-foreground">Sent once with this request; never stored.</p>
+              <p className="text-[11px] text-muted-foreground">{tHC("s5")}</p>
             </div>
 
             {started && (
               <div className="mt-3 space-y-2 rounded-lg border border-border p-3 text-xs" role="status">
                 <p>
-                  Session started for <span className="font-medium">{started.who}</span> and opened in a new tab. If
-                  nothing opened, your browser blocked the pop-up:
+                  {tHC("s4")} <span className="font-medium">{started.who}</span> {tHC("s3")}
                 </p>
                 <a
                   href={started.viewUrl}
@@ -206,9 +204,9 @@ export default function ViewAsDialog({ target, onClose }: { target: ViewAsTarget
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 font-medium text-primary underline underline-offset-2"
                 >
-                  <Eye size={12} /> Open the read-only view
+                  <Eye size={12} /> {tHC("s2")}
                 </a>
-                <p className="text-muted-foreground">End it early from Operations, Impersonation.</p>
+                <p className="text-muted-foreground">{tHC("s1")}</p>
               </div>
             )}
 

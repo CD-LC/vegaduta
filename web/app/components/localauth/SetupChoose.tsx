@@ -95,7 +95,9 @@ export default function SetupChoose({ token, methods, passkey, onComplete }: Pro
             <OptionButton
               icon={<Fingerprint className="size-5" aria-hidden="true" />}
               title={t("local.setup.passkeyTitle")}
-              description={passkey.supported ? t("local.setup.passkeyDesc") : t(`local.passkey.unavailable.${passkey.reason}`)}
+              description={
+                passkey.supported ? t("local.setup.passkeyDesc") : t(`local.passkey.unavailable.${passkey.reason}`)
+              }
               badge={passkey.supported ? t("local.setup.recommended") : undefined}
               disabled={busy || !passkey.supported}
               onClick={() => void run(() => setupWithPasskey(token, guessDeviceLabel(t("local.device.defaultLabel"))))}
@@ -122,7 +124,11 @@ export default function SetupChoose({ token, methods, passkey, onComplete }: Pro
           />
         </div>
         <div aria-live="polite">{errorLine}</div>
-        {busy && <p role="status" className="text-sm text-muted-foreground">{t("local.setup.working")}</p>}
+        {busy && (
+          <p role="status" className="text-sm text-muted-foreground">
+            {t("local.setup.working")}
+          </p>
+        )}
       </div>
     );
   }
@@ -131,8 +137,23 @@ export default function SetupChoose({ token, methods, passkey, onComplete }: Pro
     return (
       <form onSubmit={onPin} className="vd-auth__form" data-testid="local-setup-pin-form">
         <p className="text-sm text-muted-foreground">{t("local.setup.pinNote")}</p>
-        <PinField id="local-pin-new" label={t("local.pin.newLabel", { min: PIN_MIN, max: PIN_MAX })} value={pin} onChange={setPin} disabled={busy} testId="local-pin-new" focusOnMount />
-        <PinField id="local-pin-confirm" label={t("local.pin.confirmLabel")} value={pinConfirm} onChange={setPinConfirm} disabled={busy} testId="local-pin-confirm" />
+        <PinField
+          id="local-pin-new"
+          label={t("local.pin.newLabel", { min: PIN_MIN, max: PIN_MAX })}
+          value={pin}
+          onChange={setPin}
+          disabled={busy}
+          testId="local-pin-new"
+          focusOnMount
+        />
+        <PinField
+          id="local-pin-confirm"
+          label={t("local.pin.confirmLabel")}
+          value={pinConfirm}
+          onChange={setPinConfirm}
+          disabled={busy}
+          testId="local-pin-confirm"
+        />
         <div aria-live="polite">{errorLine}</div>
         <Button type="submit" size="lg" className="w-full" disabled={busy} data-testid="local-pin-submit">
           {busy ? t("local.signingIn") : t("local.setup.pinButton")}
@@ -213,7 +234,7 @@ function OptionButton({
       onClick={onClick}
       disabled={disabled}
       data-testid={testId}
-      className="flex w-full items-start gap-3 rounded-lg border border-border bg-transparent p-3 text-left outline-none transition-colors hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
+      className="flex w-full items-start gap-3 rounded-lg border border-border bg-transparent p-3 text-start outline-none transition-colors hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
     >
       <span className="mt-0.5 text-muted-foreground">{icon}</span>
       <span className="flex min-w-0 flex-col gap-0.5">

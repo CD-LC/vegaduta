@@ -147,7 +147,10 @@ function SignalInspector({ ctx }: { ctx: ChannelCtx }) {
         />
       </SimpleConnectPanel>
       {active && (
-        <form className="w-full space-y-3 rounded-xl border border-border bg-muted/40 p-4 text-left" onSubmit={savePolicy}>
+        <form
+          className="w-full space-y-3 rounded-xl border border-border bg-muted/40 p-4 text-start"
+          onSubmit={savePolicy}
+        >
           <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             {t("signalPolicyTitle")}
           </div>

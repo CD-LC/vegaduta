@@ -17,6 +17,7 @@ import { Label } from "../components/ui/label";
 import { Badge } from "../components/ui/badge";
 import { appBuilder, type AppBuilderDataConfig, type AppBuilderDataTable, type DataOp } from "./lib";
 import { DATA_OPS, fetchSnippet, isDirty, maskKey, parseOrigins, policiesPayload, riskNotes } from "./dataApi";
+import { useTranslations } from "../lib/i18n";
 
 interface Props {
   project: { project_id: string };
@@ -55,6 +56,7 @@ function Copyable({
 }
 
 export default function DataApiPanel({ project, onError, refreshToken }: Props) {
+    const tHC = useTranslations("hcBuildDataApiPanel");
   const id = project.project_id;
   const [cfg, setCfg] = useState<AppBuilderDataConfig | null>(null);
   const [loading, setLoading] = useState(true);
@@ -136,7 +138,7 @@ export default function DataApiPanel({ project, onError, refreshToken }: Props) 
   if (loading && !cfg) {
     return (
       <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-        <Loader2 aria-hidden="true" size={13} className="animate-spin" /> Loading Data API…
+        <Loader2 aria-hidden="true" size={13} className="animate-spin" /> {tHC("s30")}
       </div>
     );
   }
@@ -145,23 +147,21 @@ export default function DataApiPanel({ project, onError, refreshToken }: Props) 
     <div className="mt-5 space-y-3 border-t border-border pt-4" data-testid="data-api-panel">
       <div className="flex items-center gap-2">
         <Globe aria-hidden="true" size={15} className="text-primary" />
-        <h3 className="text-sm font-medium text-foreground">Data API</h3>
+        <h3 className="text-sm font-medium text-foreground">{tHC("s29")}</h3>
         {cfg?.enabled && <Badge variant="secondary">on</Badge>}
       </div>
 
       {cfg?.available === false && (
-        <p className="text-xs text-muted-foreground">The Data API is switched off on this deployment.</p>
+        <p className="text-xs text-muted-foreground">{tHC("s28")}</p>
       )}
 
       {cfg && !cfg.enabled && cfg.available !== false && (
         <>
           <p className="text-xs leading-relaxed text-muted-foreground">
-            The database URL above only works inside Azure, so an app you deploy (GitHub Pages, a phone, Vercel) can&apos;t use it.
-            The Data API gives your app a safe HTTPS door to <em>this project&apos;s tables only</em>: you choose which tables the
-            public key may read or write, and nothing is exposed until you do.
+            {tHC("s27")} <em>{tHC("s26")}</em>{tHC("s25")}
           </p>
           <Button size="sm" disabled={busy} onClick={() => run(() => appBuilder.dataEnable(id))}>
-            {busy ? <Loader2 aria-hidden="true" size={14} className="animate-spin" /> : <ShieldCheck aria-hidden="true" size={14} />} Enable Data API
+            {busy ? <Loader2 aria-hidden="true" size={14} className="animate-spin" /> : <ShieldCheck aria-hidden="true" size={14} />} {tHC("s24")}
           </Button>
         </>
       )}
@@ -169,33 +169,33 @@ export default function DataApiPanel({ project, onError, refreshToken }: Props) 
       {cfg?.enabled && (
         <>
           <div className="space-y-1.5">
-            <Copyable label="Base URL" value={cfg.base_url ?? ""} copied={copied} onCopy={copy} />
-            <Copyable label="Public key" value={cfg.anon_key ?? ""} shown={maskKey(cfg.anon_key ?? "")} copied={copied} onCopy={copy} />
+            <Copyable label={tHC("s23")} value={cfg.base_url ?? ""} copied={copied} onCopy={copy} />
+            <Copyable label={tHC("s22")} value={cfg.anon_key ?? ""} shown={maskKey(cfg.anon_key ?? "")} copied={copied} onCopy={copy} />
           </div>
           <p className="text-[11px] text-muted-foreground">
-            The public key is safe in your app&apos;s code: it can only do what the table switches below allow.
+            {tHC("s21")}
           </p>
 
           {serviceKey && (
             <div role="alert" className="rounded-lg border border-amber-500/50 bg-amber-500/10 p-3">
               <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-foreground">
-                <KeyRound aria-hidden="true" size={13} /> Service key - copy it now, it won&apos;t be shown again
+                <KeyRound aria-hidden="true" size={13} /> {tHC("s20")}
               </div>
-              <Copyable label="Service key" value={serviceKey} shown={maskKey(serviceKey)} copied={copied} onCopy={copy} />
+              <Copyable label={tHC("s19")} value={serviceKey} shown={maskKey(serviceKey)} copied={copied} onCopy={copy} />
               <p className="mt-1 text-[11px] text-muted-foreground">
-                Full access to every table. For servers only - never put it in your app; the API refuses it from a browser.
+                {tHC("s18")}
               </p>
               <Button variant="ghost" size="sm" className="mt-1" onClick={() => setServiceKey(null)}>
-                I&apos;ve saved it
+                {tHC("s17")}
               </Button>
             </div>
           )}
 
           <div className="space-y-1.5">
-            <Label className="text-xs">Which tables can your app use?</Label>
-            {cfg.tables_error && <p className="text-xs text-destructive">Couldn&apos;t read the tables: {cfg.tables_error}</p>}
+            <Label className="text-xs">{tHC("s16")}</Label>
+            {cfg.tables_error && <p className="text-xs text-destructive">{tHC("s15")} {cfg.tables_error}</p>}
             {tables.length === 0 && !cfg.tables_error && (
-              <p className="text-xs text-muted-foreground">No tables yet - apply a schema above, then they appear here.</p>
+              <p className="text-xs text-muted-foreground">{tHC("s14")}</p>
             )}
             {tables.map((t) => {
               const notes = riskNotes(t);
@@ -228,7 +228,7 @@ export default function DataApiPanel({ project, onError, refreshToken }: Props) 
 
           <div className="space-y-1">
             <Label htmlFor="data-origins" className="text-xs">
-              Only allow these websites (optional)
+              {tHC("s13")}
             </Label>
             <Input
               id="data-origins"
@@ -238,20 +238,20 @@ export default function DataApiPanel({ project, onError, refreshToken }: Props) 
               onChange={(e) => setOriginsRaw(e.target.value)}
             />
             <p className="text-[11px] text-muted-foreground">
-              Blank allows any website. This stops other sites using your key from a browser; it can&apos;t stop a server.
-              {parsed.invalid.length > 0 && <span className="text-destructive"> Not an origin: {parsed.invalid[0]}</span>}
+              {tHC("s12")}
+              {parsed.invalid.length > 0 && <span className="text-destructive"> {tHC("s11")} {parsed.invalid[0]}</span>}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
             <Button size="sm" disabled={busy || !dirty} onClick={save}>
-              {busy ? <Loader2 aria-hidden="true" size={14} className="animate-spin" /> : <Check aria-hidden="true" size={14} />} Save access
+              {busy ? <Loader2 aria-hidden="true" size={14} className="animate-spin" /> : <Check aria-hidden="true" size={14} />} {tHC("s10")}
             </Button>
-            {dirty && <span className="text-[11px] text-muted-foreground">Unsaved changes</span>}
+            {dirty && <span className="text-[11px] text-muted-foreground">{tHC("s9")}</span>}
           </div>
 
           <details className="rounded-md border border-border p-2">
-            <summary className="cursor-pointer text-xs font-medium text-foreground">Use it in your app</summary>
+            <summary className="cursor-pointer text-xs font-medium text-foreground">{tHC("s8")}</summary>
             <pre className="mt-2 max-h-56 overflow-auto rounded bg-muted/50 p-2 font-mono text-[11px] leading-snug">
               {fetchSnippet(cfg.base_url ?? "", cfg.anon_key ?? "", tables)}
             </pre>
@@ -260,16 +260,16 @@ export default function DataApiPanel({ project, onError, refreshToken }: Props) 
               size="sm"
               onClick={() => copy("snippet", fetchSnippet(cfg.base_url ?? "", cfg.anon_key ?? "", tables))}
             >
-              {copied === "snippet" ? <Check aria-hidden="true" size={13} /> : <Copy aria-hidden="true" size={13} />} Copy code
+              {copied === "snippet" ? <Check aria-hidden="true" size={13} /> : <Copy aria-hidden="true" size={13} />} {tHC("s7")}
             </Button>
           </details>
 
           <div className="flex flex-wrap items-center gap-2 border-t border-border pt-2">
             {confirm === "rotate" ? (
               <>
-                <span className="text-[11px] text-muted-foreground">Anything using the old service key stops working.</span>
+                <span className="text-[11px] text-muted-foreground">{tHC("s6")}</span>
                 <Button size="sm" variant="outline" disabled={busy} onClick={() => run(() => appBuilder.dataRotateKey(id, "service"))}>
-                  Rotate it
+                  {tHC("s5")}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => setConfirm(null)}>
                   Cancel
@@ -277,7 +277,7 @@ export default function DataApiPanel({ project, onError, refreshToken }: Props) 
               </>
             ) : confirm === "disable" ? (
               <>
-                <span className="text-[11px] text-muted-foreground">Both keys stop working immediately.</span>
+                <span className="text-[11px] text-muted-foreground">{tHC("s4")}</span>
                 <Button
                   size="sm"
                   variant="outline"
@@ -285,7 +285,7 @@ export default function DataApiPanel({ project, onError, refreshToken }: Props) 
                   disabled={busy}
                   onClick={() => run(() => appBuilder.dataDisable(id))}
                 >
-                  Turn off Data API
+                  {tHC("s3")}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => setConfirm(null)}>
                   Cancel
@@ -294,10 +294,10 @@ export default function DataApiPanel({ project, onError, refreshToken }: Props) 
             ) : (
               <>
                 <Button size="sm" variant="ghost" onClick={() => setConfirm("rotate")}>
-                  <KeyRound aria-hidden="true" size={13} /> Rotate service key
+                  <KeyRound aria-hidden="true" size={13} /> {tHC("s2")}
                 </Button>
                 <Button size="sm" variant="ghost" className="text-destructive" onClick={() => setConfirm("disable")}>
-                  Turn off
+                  {tHC("s1")}
                 </Button>
               </>
             )}

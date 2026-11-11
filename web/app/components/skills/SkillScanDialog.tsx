@@ -46,7 +46,7 @@ export default function SkillScanDialog({
                 {prompt.preview.replacesExisting ? ` ${t("scanDialogReplaces")}` : ""}
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <div className="max-h-[50vh] overflow-y-auto pr-1">
+            <div className="max-h-[50vh] overflow-y-auto pe-1">
               <SkillScanFindings report={prompt.preview.scan} />
             </div>
             <AlertDialogFooter>

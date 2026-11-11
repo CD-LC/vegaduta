@@ -53,7 +53,7 @@ export default function FilesTable({
           <TableHead>{t("colName")}</TableHead>
           <TableHead>{t("colDetails")}</TableHead>
           <TableHead>{t("colDate")}</TableHead>
-          <TableHead className="text-right">{t("colActions")}</TableHead>
+          <TableHead className="text-end">{t("colActions")}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -84,16 +84,18 @@ export default function FilesTable({
                 <div className="truncate text-sm font-medium text-foreground" title={row.name}>
                   {row.name}
                 </div>
-                {row.collectionName && <div className="truncate text-xs text-muted-foreground">{row.collectionName}</div>}
+                {row.collectionName && (
+                  <div className="truncate text-xs text-muted-foreground">{row.collectionName}</div>
+                )}
               </TableCell>
               <TableCell className="whitespace-nowrap text-xs text-muted-foreground">{row.detail || "—"}</TableCell>
               <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
                 {row.createdAt ? new Date(row.createdAt).toLocaleDateString() : "—"}
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell className="text-end">
                 {/* Clip Studio entry point: images can be animated into a short clip. */}
                 {row.kind === "image" && (
-                  <Button variant="ghost" size="sm" className="mr-1 gap-1" asChild>
+                  <Button variant="ghost" size="sm" className="me-1 gap-1" asChild>
                     <a href={`/clips?imageId=${encodeURIComponent(row.id)}`}>
                       <Clapperboard size={12} aria-hidden="true" />
                       {t("makeClip")}
@@ -104,7 +106,7 @@ export default function FilesTable({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="mr-1 gap-1"
+                    className="me-1 gap-1"
                     disabled={previewBusyKey === key}
                     onClick={() => onPreview(row)}
                   >

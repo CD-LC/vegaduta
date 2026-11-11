@@ -60,7 +60,7 @@ export default function ActivityRunsRow({
                       style={{ background: i % 2 === 0 ? "var(--ax-cyan)" : "var(--ax-violet)" }}
                     />
                     <span className="truncate text-sm font-medium text-foreground">{agent.name}</span>
-                    <span className="ml-auto truncate text-xs text-muted-foreground">{modelInfo || "—"}</span>
+                    <span className="ms-auto truncate text-xs text-muted-foreground">{modelInfo || "—"}</span>
                   </li>
                 );
               })}
@@ -98,7 +98,7 @@ export default function ActivityRunsRow({
                     <span className="truncate text-sm font-medium text-foreground">
                       {wf.name || t("untitledWorkflow")}
                     </span>
-                    <Badge variant="outline" className="ml-auto tabular-nums" style={{ color: runColor(status) }}>
+                    <Badge variant="outline" className="ms-auto tabular-nums" style={{ color: runColor(status) }}>
                       {runLabel(status, t)}
                     </Badge>
                   </li>

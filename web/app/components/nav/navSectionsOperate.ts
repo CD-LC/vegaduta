@@ -32,6 +32,7 @@ import {
   Fingerprint,
   Wallet,
   Signpost,
+  Waypoints,
 } from "lucide-react";
 
 import type { NavSection } from "./navTypes";
@@ -480,6 +481,23 @@ export const OPERATE_NAV_SECTIONS: NavSection[] = [
         href: "/admin/agent-trust",
         labelKey: "railAgentTrust",
         icon: Fingerprint,
+        exact: false,
+        badge: null,
+        badgeVariant: null,
+        adminHidden: false,
+        adminOnly: false,
+        perm: "MANAGE_AGENTS",
+      },
+      // A2A interoperability console (/admin/a2a, core/agents-interop
+      // a2a/A2aConsoleController) - inbound endpoints, the outbound
+      // remote-agent allow-list (read-only) and the cross-subject task
+      // console the protocol bindings deliberately do not serve. Same
+      // MANAGE_AGENTS scope as agent-trust: seeing every subject's A2A
+      // traffic IS managing the agent surface.
+      {
+        href: "/admin/a2a",
+        labelKey: "railA2a",
+        icon: Waypoints,
         exact: false,
         badge: null,
         badgeVariant: null,

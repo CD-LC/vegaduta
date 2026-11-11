@@ -110,6 +110,7 @@ function LangEditor({
 }
 
 export default function ConsentPolicyTab() {
+  const tHC = useTranslations("hcAdminDataprivacyConsentPolicyTab");
   const t = useTranslations("privacySso");
   const [agents, setAgents] = useState<AgentOption[] | null>(null);
   const [agentsError, setAgentsError] = useState<string | null>(null);
@@ -170,7 +171,7 @@ export default function ConsentPolicyTab() {
         .catch((e: unknown) => setPolicyError(errText(e)))
         .finally(() => setLoadingPolicy(false));
     },
-    [apply],
+    [apply]
   );
 
   const onSave = async () => {
@@ -184,7 +185,11 @@ export default function ConsentPolicyTab() {
     setSaving(true);
     try {
       const keywords: Record<string, string[]> = {};
-      for (const [k, v] of [["accept", accept], ["decline", decline], ["withdraw", withdraw]] as const) {
+      for (const [k, v] of [
+        ["accept", accept],
+        ["decline", decline],
+        ["withdraw", withdraw],
+      ] as const) {
         const list = fromCsv(v);
         if (list.length) keywords[k] = list;
       }
@@ -224,10 +229,7 @@ export default function ConsentPolicyTab() {
               setAgentId(v);
               loadPolicy(v);
             }}
-            options={[
-              { value: "", label: t("chooseAgent") },
-              ...agents.map((a) => ({ value: a.id, label: a.name })),
-            ]}
+            options={[{ value: "", label: t("chooseAgent") }, ...agents.map((a) => ({ value: a.id, label: a.name }))]}
           />
         </div>
       )}
@@ -245,12 +247,21 @@ export default function ConsentPolicyTab() {
         >
           <p className="text-sm text-muted-foreground">
             {policy
-              ? t("policyMeta", { version: policy.noticeVersion, by: policy.updatedBy ?? "-", at: fmtTime(policy.updatedAt) })
+              ? t("policyMeta", {
+                  version: policy.noticeVersion,
+                  by: policy.updatedBy ?? "-",
+                  at: fmtTime(policy.updatedAt),
+                })
               : t("policyNone")}
           </p>
 
           <div className="flex items-center gap-3">
-            <Switch id="consent-enabled" checked={enabled} onCheckedChange={setEnabled} aria-label={t("consentEnabled")} />
+            <Switch
+              id="consent-enabled"
+              checked={enabled}
+              onCheckedChange={setEnabled}
+              aria-label={t("consentEnabled")}
+            />
             <Label htmlFor="consent-enabled">{t("consentEnabled")}</Label>
           </div>
 
@@ -298,7 +309,12 @@ export default function ConsentPolicyTab() {
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="grid gap-1.5">
               <Label htmlFor="kw-accept">{t("kwAccept")}</Label>
-              <Input id="kw-accept" value={accept} onChange={(e) => setAccept(e.target.value)} placeholder="yes, agree" />
+              <Input
+                id="kw-accept"
+                value={accept}
+                onChange={(e) => setAccept(e.target.value)}
+                placeholder={tHC("s2")}
+              />
             </div>
             <div className="grid gap-1.5">
               <Label htmlFor="kw-decline">{t("kwDecline")}</Label>
@@ -306,7 +322,12 @@ export default function ConsentPolicyTab() {
             </div>
             <div className="grid gap-1.5">
               <Label htmlFor="kw-withdraw">{t("kwWithdraw")}</Label>
-              <Input id="kw-withdraw" value={withdraw} onChange={(e) => setWithdraw(e.target.value)} placeholder="stop, withdraw" />
+              <Input
+                id="kw-withdraw"
+                value={withdraw}
+                onChange={(e) => setWithdraw(e.target.value)}
+                placeholder={tHC("s1")}
+              />
             </div>
           </div>
           <p className="text-xs text-muted-foreground">{t("keywordsHint")}</p>

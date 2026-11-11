@@ -23,10 +23,10 @@ import { SITE_URL, buildAlternates, getSeoRequestContext, localizedSeoText, ogLo
 // exporting BOTH `metadata` and `generateMetadata`; viewport is its own
 // export either way.
 // Site-mode switch (lib/siteMode.ts): in "oss" mode the tab title, snippet and
-// link unfurl describe the open-source project, not the hosted product.
-export const OSS_TITLE = "VegaDūta — Open-source platform for AI agents";
+// link unfurl describe the source-available project, not the hosted product.
+export const OSS_TITLE = "VegaDūta — Source-available platform for AI agents";
 export const OSS_DESCRIPTION =
-  "VegaDūta is an open-source, self-hostable platform for AI agents: MCP, A2A and AG-UI, workflows with human approval, retrieval over your own data. Apache-2.0.";
+  "VegaDūta is a source-available, self-hostable platform for AI agents: MCP, A2A and AG-UI, workflows with human approval, retrieval over your own data. Business Source License 1.1 (free to self-host in production).";
 export async function buildMetadata() {
   const headerStore = await headers();
   // Multilingual SEO (2026-09-19). On a locale-prefixed URL ("/hi") the

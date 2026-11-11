@@ -20,8 +20,10 @@ import {
   withCurrentValue,
 } from "./constants";
 import type { HostedPool } from "./useHostedPool";
+import { useTranslations } from "../../lib/i18n";
 
 export function HostedProviderForm({ pool }: { pool: HostedPool }) {
+  const tHC = useTranslations("hcPlatformadminLlmprovidersHostedProviderForm");
   const {
     hostedProviderDraft,
     setHostedProviderDraft,
@@ -40,14 +42,14 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
       <div className="mb-3 text-sm font-semibold text-foreground">
         {editingHostedProviderId === null ? (
           <span className="inline-flex items-center gap-1.5">
-            <Plus size={13} /> Add a hosted provider
+            <Plus size={13} /> {tHC("s36")}
           </span>
         ) : (
           `Editing "${hostedProviderDraft.label}"`
         )}
       </div>
       <div className="mb-3 flex flex-wrap items-center gap-2">
-        <span className="text-xs text-muted-foreground">Credential type:</span>
+        <span className="text-xs text-muted-foreground">{tHC("s35")}</span>
         {CREDENTIAL_TYPE_OPTIONS.map((opt) => (
           <Button
             key={opt.value}
@@ -80,7 +82,7 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
             aria-pressed={hostedProviderDraft.mode === "custom"}
             onClick={() => setHostedProviderDraft((d) => ({ ...d, mode: "custom" }))}
           >
-            Custom base URL
+            {tHC("s17")}
           </Button>
           <Button
             type="button"
@@ -97,7 +99,7 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
               }))
             }
           >
-            Provider + key (auto)
+            {tHC("s19")}
           </Button>
           <span className="text-xs text-muted-foreground">
             {hostedProviderDraft.mode === "provider"
@@ -115,25 +117,25 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
             id="hosted-label"
             value={hostedProviderDraft.label}
             onChange={(e) => setHostedProviderDraft((d) => ({ ...d, label: e.target.value }))}
-            placeholder="e.g. Groq - Llama 3.3 70B"
+            placeholder={tHC("s34")}
           />
         </div>
         {hostedProviderDraft.authType !== "API_KEY" ? (
           <>
             <div className="w-56 space-y-1.5">
               <Label htmlFor="hosted-vertex-project" className="text-xs text-muted-foreground">
-                Vertex AI project ID
+                {tHC("s33")}
               </Label>
               <Input
                 id="hosted-vertex-project"
                 value={hostedProviderDraft.vertexProjectId}
                 onChange={(e) => setHostedProviderDraft((d) => ({ ...d, vertexProjectId: e.target.value }))}
-                placeholder="e.g. my-gcp-project"
+                placeholder={tHC("s32")}
               />
             </div>
             <div className="w-48 space-y-1.5">
               <Label htmlFor="hosted-vertex-location" className="text-xs text-muted-foreground">
-                Vertex AI location
+                {tHC("s31")}
               </Label>
               <Input
                 id="hosted-vertex-location"
@@ -151,18 +153,16 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
             <Select
               id="hosted-provider"
               value={hostedProviderDraft.providerName}
-              onChange={(e) =>
-                setHostedProviderDraft((d) => ({ ...d, providerName: e.target.value, model: "" }))
-              }
+              onChange={(e) => setHostedProviderDraft((d) => ({ ...d, providerName: e.target.value, model: "" }))}
               options={HOSTED_POOL_GENERIC_PROVIDERS}
-              placeholder="Choose a provider…"
+              placeholder={tHC("s30")}
             />
           </div>
         ) : (
           <>
             <div className="w-64 max-w-full space-y-1.5">
               <Label htmlFor="hosted-base-url" className="text-xs text-muted-foreground">
-                Base URL
+                {tHC("s29")}
               </Label>
               <Select
                 id="hosted-base-url"
@@ -183,14 +183,14 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
                   HOSTED_PROVIDER_PRESETS.map((p) => ({ value: p.value, label: `${p.label} — ${p.value}` })),
                   hostedProviderDraft.baseUrl
                 )}
-                placeholder="Choose a hosted provider…"
+                placeholder={tHC("s28")}
                 allowCustom
                 searchable
               />
             </div>
             <div className="w-64 max-w-full space-y-1.5">
               <Label htmlFor="hosted-completions-path" className="text-xs text-muted-foreground">
-                Completions path (optional)
+                {tHC("s27")}
               </Label>
               <Input
                 id="hosted-completions-path"
@@ -212,7 +212,7 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
             <Input
               value={hostedProviderDraft.model}
               onChange={(e) => setHostedProviderDraft((d) => ({ ...d, model: e.target.value }))}
-              placeholder="e.g. gemini-2.5-flash"
+              placeholder={tHC("s26")}
             />
           ) : hostedProviderDraft.mode === "provider" ? (
             <Select
@@ -233,14 +233,14 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
                 onChange={(e) => setHostedProviderDraft((d) => ({ ...d, model: e.target.value }))}
                 options={withCurrentValue(
                   [
-                    ...(HOSTED_PROVIDER_PRESETS.find(
-                      (p) => p.value === hostedProviderDraft.baseUrl
-                    )?.models.map((m) => ({ value: m, label: m })) || []),
+                    ...(HOSTED_PROVIDER_PRESETS.find((p) => p.value === hostedProviderDraft.baseUrl)?.models.map(
+                      (m) => ({ value: m, label: m })
+                    ) || []),
                     ...discoveredHostedModels.map((m) => ({ value: m, label: m })),
                   ],
                   hostedProviderDraft.model
                 )}
-                placeholder="Choose a model…"
+                placeholder={tHC("s25")}
                 allowCustom
                 searchable
               />
@@ -250,7 +250,7 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
                 size="sm"
                 onClick={handleDiscoverHostedModels}
                 disabled={discoveringHostedModels}
-                title="Live-probe this base URL/key's real GET /v1/models endpoint"
+                title={tHC("s24")}
               >
                 {discoveringHostedModels ? "…" : "Discover"}
               </Button>
@@ -260,7 +260,7 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
         {hostedProviderDraft.authType === "VERTEX_SERVICE_ACCOUNT" && (
           <div className="w-full space-y-1.5 sm:w-80">
             <Label htmlFor="hosted-sa-json" className="text-xs text-muted-foreground">
-              Service account JSON key
+              {tHC("s23")}
             </Label>
             <Textarea
               id="hosted-sa-json"
@@ -286,9 +286,7 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
               type="password"
               value={hostedProviderDraft.apiKey}
               onChange={(e) => setHostedProviderDraft((d) => ({ ...d, apiKey: e.target.value }))}
-              placeholder={
-                editingHostedProviderId === null ? "Required" : "Leave blank to keep the current key"
-              }
+              placeholder={editingHostedProviderId === null ? "Required" : "Leave blank to keep the current key"}
               autoComplete="new-password"
             />
           </div>
@@ -302,20 +300,20 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
             value={String(hostedProviderDraft.priority)}
             onChange={(e) => setHostedProviderDraft((d) => ({ ...d, priority: e.target.value }))}
             options={withCurrentValue(HOSTED_PROVIDER_PRIORITY_OPTIONS, hostedProviderDraft.priority)}
-            placeholder="Choose a priority…"
+            placeholder={tHC("s22")}
             allowCustom
           />
         </div>
         <div className="w-40 space-y-1.5">
           <Label htmlFor="hosted-region" className="text-xs text-muted-foreground">
-            Region (optional)
+            {tHC("s21")}
           </Label>
           <Select
             id="hosted-region"
             value={hostedProviderDraft.region}
             onChange={(e) => setHostedProviderDraft((d) => ({ ...d, region: e.target.value }))}
             options={withCurrentValue(HOSTED_PROVIDER_REGION_OPTIONS, hostedProviderDraft.region)}
-            placeholder="No region label"
+            placeholder={tHC("s20")}
             allowCustom
           />
         </div>
@@ -331,11 +329,7 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
       </div>
       <div className="mt-3 flex items-center gap-2">
         <Button type="submit" size="sm" disabled={savingHostedProvider}>
-          {savingHostedProvider
-            ? "Saving…"
-            : editingHostedProviderId === null
-              ? "Add provider"
-              : "Save changes"}
+          {savingHostedProvider ? "Saving…" : editingHostedProviderId === null ? "Add provider" : "Save changes"}
         </Button>
         {editingHostedProviderId !== null && (
           <Button type="button" variant="outline" size="sm" onClick={cancelHostedProviderEdit}>
@@ -344,29 +338,12 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
         )}
       </div>
       <p className="mt-2 text-xs text-muted-foreground">
-        <strong>Provider + key (auto)</strong> mode is the generic flow, mirroring tenant BYOK: pick
-        OpenAI/Grok/OpenRouter/Gemini/Meta (Muse Spark), paste a key, and leave Model blank to auto-select the
-        best currently-available model from that provider&apos;s catalog - the fix for a hand-typed model id
-        (e.g. a retired Gemini model) breaking every FREE-tier chat call with no warning.{" "}
-        <strong>Custom base URL</strong> mode is unchanged from before: any OpenAI-compatible host (Groq,
-        Together AI, ...) as a dropdown (search or pick &quot;Use...&quot; to type a different one), with a{" "}
-        <strong>Discover</strong> button to live-probe that host/key&apos;s real model list instead of typing
-        blind. Base URL must NOT include a trailing <code>/v1</code> - by default{" "}
-        <code>/v1/chat/completions</code> is appended automatically (same composition Spring AI&apos;s OpenAiApi
-        builder does for every OpenAI-compatible provider). Leave <strong>Completions path</strong> blank for
-        the conventional providers; set it only when a provider&apos;s OpenAI-compatible endpoint lives
-        elsewhere - e.g. <strong>Google Gemini</strong>, base URL{" "}
-        <code>https://generativelanguage.googleapis.com</code> + completions path{" "}
-        <code>/v1beta/openai/chat/completions</code> (auto-filled in either mode). Region is an optional label
-        for your own organization (e.g. which datacenter/geo a provider serves) - selection among enabled rows
-        is still purely priority-order, not routed by region or by tenant location. Label stays free text -
-        it&apos;s your own name for this row, not a value to pick from a list. The{" "}
-        <strong>Credential type</strong> selector above is a separate axis from Custom/Provider mode: switching
-        it to <strong>Vertex AI — Application Default Credentials</strong> authenticates via this
-        platform&apos;s own GCP service identity (no key to paste - just a project ID and location), while{" "}
-        <strong>Vertex AI — Service Account JSON</strong> uses a pasted service-account key (the same API-key
-        field, just a multi-line JSON paste instead of a short string) - both replace the Base URL/Provider/API
-        key fields with a project ID + location, and neither is echoed back once saved.
+        <strong>{tHC("s19")}</strong> {tHC("s18")} <strong>{tHC("s17")}</strong> {tHC("s16")} <strong>Discover</strong>{" "}
+        {tHC("s15")} <code>/v1</code> {tHC("s14")} <code>/v1/chat/completions</code> {tHC("s13")}{" "}
+        <strong>{tHC("s12")}</strong> {tHC("s11")} <strong>{tHC("s10")}</strong>
+        {tHC("s9")} <code>https://generativelanguage.googleapis.com</code> {tHC("s8")}{" "}
+        <code>/v1beta/openai/chat/completions</code> {tHC("s7")} <strong>{tHC("s6")}</strong> {tHC("s5")}{" "}
+        <strong>{tHC("s4")}</strong> {tHC("s3")} <strong>{tHC("s2")}</strong> {tHC("s1")}
       </p>
     </form>
   );

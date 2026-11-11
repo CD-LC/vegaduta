@@ -105,7 +105,7 @@ export default function CredentialHelp({ title, steps, href, hrefLabel, pricingH
   }, [open]);
 
   return (
-    <span className="relative ml-1.5 inline-block" ref={ref}>
+    <span className="relative ms-1.5 inline-block" ref={ref}>
       <Button
         type="button"
         variant="link"
@@ -129,12 +129,12 @@ export default function CredentialHelp({ title, steps, href, hrefLabel, pricingH
           // enough to fit it. alignRight (measured on open) swaps the
           // anchor edge so a trigger near the right edge doesn't get its
           // popover clipped off-screen.
-          className={`absolute top-full z-50 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground shadow-lg ${alignRight ? "right-0" : "left-0"}`}
+          className={`absolute top-full z-50 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-popover p-4 text-sm text-muted-foreground shadow-lg ${alignRight ? "right-0" : "left-0"}`}
           ref={panelRef}
           tabIndex={-1}
         >
           <strong className="mb-1.5 block font-semibold text-foreground">{title}</strong>
-          <ol className="m-0 flex list-decimal flex-col gap-1.5 pl-4">
+          <ol className="m-0 flex list-decimal flex-col gap-1.5 ps-4">
             {steps?.map((step: string, i: number) => (
               <li key={i}>{step}</li>
             ))}

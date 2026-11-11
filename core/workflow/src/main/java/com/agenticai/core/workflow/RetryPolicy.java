@@ -58,6 +58,10 @@ public final class RetryPolicy {
      * true} on the node opts back in, the same escape hatch the error strategy exposes.
      */
     public static boolean isRetryableNode(WorkflowNodeDto node) {
+        // A duplicated output is the visible half of a duplicated send: it never opts back in.
+        if (node.type() != null && "output".equalsIgnoreCase(node.type())) {
+            return false;
+        }
         Object unsafe = node.config().get("retryUnsafe");
         if (unsafe instanceof Boolean b
                 ? b
@@ -73,7 +77,8 @@ public final class RetryPolicy {
         return isRetryableNode(node)
                 && attempt < maxAttempts
                 && !(failure instanceof TenantLimitExceededException)
-                // A timed-out attempt's worker may still be running; a retry would run the node twice.
+                // A timed-out attempt's worker may still be running (an LLM or HTTP call can ignore
+                // the interrupt); a second copy would run the node's side effects twice.
                 && !(failure instanceof NodeAttemptExecutor.NodeStepTimeoutException);
     }
 }

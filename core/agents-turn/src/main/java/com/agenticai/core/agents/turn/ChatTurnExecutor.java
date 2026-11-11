@@ -652,17 +652,9 @@ final class ChatTurnExecutor {
 
     /**
      * The FAST stream's idle timeout: model silence only, a running tool suspends it (see {@link
-     * StreamIdleWatch}). Every idle timer of a turn's passes goes through here so none of them
-     * times a tool.
+     * StreamIdleWatch}). Applied by {@link FastStreamTurn#idleTimeout}, which passes the serving
+     * row's own override (V674) or the platform {@link #streamIdleTimeout} through the same call.
      */
-    Flux<String> idleTimeout(Flux<String> stream, TurnToolActivity activity) {
-        return StreamIdleWatch.apply(
-                stream,
-                streamIdleTimeout,
-                resilience.getToolIdleCeiling(),
-                activity,
-                com.agenticai.core.security.concurrent.TenantAwareSchedulers.parallel());
-    }
 
     /**
      * Retries {@code first} when it fails before a token under {@code app.llm.retry.*} (429, 5xx, a

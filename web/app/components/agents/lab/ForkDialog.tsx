@@ -262,7 +262,7 @@ export default function ForkDialog({
           {t("graphForkTitle")}
         </h3>
         <p className="m-0 text-sm leading-relaxed text-muted-foreground">{t("graphForkBody")}</p>
-        <ul className="m-0 list-disc space-y-1 pl-5 text-xs leading-relaxed text-muted-foreground">
+        <ul className="m-0 list-disc space-y-1 ps-5 text-xs leading-relaxed text-muted-foreground">
           <li>{t("graphForkSideEffects")}</li>
           {hadAttachment && <li>{t("graphForkAttachmentNote")}</li>}
         </ul>

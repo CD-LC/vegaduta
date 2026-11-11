@@ -32,6 +32,7 @@ export default function SemanticSearchPanel({
   processingAvailable: boolean;
   onError: (message: string | null) => void;
 }) {
+  const tHC = useTranslations("hcComponentsKnowledgeSemanticSearchPanel");
   const t = useTranslations("knowledgePanel");
   const sidecarDown = !processingAvailable;
   const [query, setQuery] = useState("");
@@ -141,7 +142,7 @@ export default function SemanticSearchPanel({
             <Search
               aria-hidden="true"
               size={14}
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
             />
             <Input
               type="text"
@@ -149,24 +150,22 @@ export default function SemanticSearchPanel({
               aria-label={t("searchPlaceholder")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="pl-9 pr-14"
+              className="ps-9 pe-14"
               disabled={sidecarDown}
             />
             <Button
               type="submit"
               size="sm"
-              className="absolute right-1.5 top-1/2 h-7 -translate-y-1/2 px-2.5"
+              className="absolute end-1.5 top-1/2 h-7 -translate-y-1/2 px-2.5"
               disabled={searching || sidecarDown || !query.trim()}
             >
               {searching ? <Loader2 aria-hidden="true" size={12} className="animate-spin" /> : t("goButton")}
             </Button>
           </div>
         </form>
-        {sidecarDown && (
-          <p className="text-xs text-[var(--ax-amber)]">Search is paused while the indexing service reconnects.</p>
-        )}
+        {sidecarDown && <p className="text-xs text-[var(--ax-amber)]">{tHC("s3")}</p>}
         {recentSearches.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5" aria-label="Recent searches" role="group">
+          <div className="flex flex-wrap items-center gap-1.5" aria-label={tHC("s2")} role="group">
             <History size={12} className="text-muted-foreground" aria-hidden="true" />
             {recentSearches.map((q) => (
               <button
@@ -268,8 +267,8 @@ export default function SemanticSearchPanel({
                     <button
                       type="button"
                       className="flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-secondary hover:text-foreground"
-                      aria-label="Copy this passage"
-                      title="Copy this passage"
+                      aria-label={tHC("s1")}
+                      title={tHC("s1")}
                       onClick={() => copyText(r.id, r.content)}
                     >
                       {copiedKey === r.id ? (

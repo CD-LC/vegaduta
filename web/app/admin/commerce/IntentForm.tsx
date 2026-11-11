@@ -16,6 +16,7 @@ import { csvList } from "./commerceFormat";
 // ---- Intent mandate form ------------------------------------------------------
 
 export function IntentForm({ agentId, onCreated }: { agentId: string; onCreated: () => void }) {
+  const tHC = useTranslations("hcAdminCommerceIntentForm");
   const t = useTranslations("adminCommercePage");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
@@ -96,7 +97,7 @@ export function IntentForm({ agentId, onCreated }: { agentId: string; onCreated:
           <Label htmlFor="intent-cats">{t("fieldCategories")}</Label>
           <Input
             id="intent-cats"
-            placeholder="books, travel"
+            placeholder={tHC("s1")}
             value={form.categories}
             onChange={(e) => setForm((f) => ({ ...f, categories: e.target.value }))}
           />

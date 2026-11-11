@@ -58,7 +58,7 @@ export function ChannelGrid({
                 data-tour={`channel-${key}`}
                 aria-pressed={isSel}
                 className={cn(
-                  "group flex flex-col gap-3 rounded-xl border bg-card p-4 text-left transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md",
+                  "group flex flex-col gap-3 rounded-xl border bg-card p-4 text-start transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md",
                   isSel ? "border-primary ring-2 ring-primary/40" : "border-border hover:border-primary/40",
                   state === "NOT_CONNECTED" && !isSel && "border-dashed"
                 )}

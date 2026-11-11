@@ -68,7 +68,7 @@ export default function ReferralCard({
           {referral.code}
         </code>
         <Button type="button" variant="outline" size="sm" className="mb-0" onClick={copyCode}>
-          <ClipboardDocumentIcon width={13} height={13} className="mr-1" aria-hidden="true" />
+          <ClipboardDocumentIcon width={13} height={13} className="me-1" aria-hidden="true" />
           {t("referralCopyButton")}
         </Button>
         <span className="font-mono text-xs text-muted-foreground">

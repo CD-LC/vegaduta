@@ -52,7 +52,8 @@ export function normalizeJobCounts(raw: unknown): GlanceJobCounts | null {
   if (!isFiniteNumber(r.succeededInWindow) || !isFiniteNumber(r.failedInWindow)) return null;
   const start = typeof r.windowStart === "string" ? Date.parse(r.windowStart) : NaN;
   const end = typeof r.asOf === "string" ? Date.parse(r.asOf) : NaN;
-  const hours = Number.isFinite(start) && Number.isFinite(end) && end > start ? Math.round((end - start) / 3_600_000) : null;
+  const hours =
+    Number.isFinite(start) && Number.isFinite(end) && end > start ? Math.round((end - start) / 3_600_000) : null;
   return {
     queued: count(r.queued),
     running: count(r.running),
@@ -142,7 +143,12 @@ export default function AgentGlanceCard({ agentId, reliability }: { agentId: str
 
   const firstDay = formatDay(data?.firstCallAt);
   const lastDay = formatDay(data?.lastCallAt);
-  const range = firstDay && lastDay ? (firstDay === lastDay ? t("rangeOneDay", { day: firstDay }) : t("range", { from: firstDay, to: lastDay })) : t("rangeUnknown");
+  const range =
+    firstDay && lastDay
+      ? firstDay === lastDay
+        ? t("rangeOneDay", { day: firstDay })
+        : t("range", { from: firstDay, to: lastDay })
+      : t("rangeUnknown");
 
   const percent = formatPercent(callRate) ?? "-";
   const toolPercent = formatPercent(toolRate) ?? "-";
@@ -159,7 +165,10 @@ export default function AgentGlanceCard({ agentId, reliability }: { agentId: str
         })
       : t("jobsNone", { window: windowText })
     : "";
-  const reasons = (data?.recentFailures ?? []).map(failureReason).filter((x): x is string => !!x).slice(0, MAX_FAILURES);
+  const reasons = (data?.recentFailures ?? [])
+    .map(failureReason)
+    .filter((x): x is string => !!x)
+    .slice(0, MAX_FAILURES);
 
   const table: ChartTableData = {
     columns: [
@@ -167,17 +176,29 @@ export default function AgentGlanceCard({ agentId, reliability }: { agentId: str
       { key: "value", header: t("tableValue"), align: "right" },
     ],
     rows: [
-      { id: "calls", metric: t("rowCalls"), value: totalCalls > 0 ? t("okOfTotal", { ok: okCalls, total: totalCalls }) : "-" },
+      {
+        id: "calls",
+        metric: t("rowCalls"),
+        value: totalCalls > 0 ? t("okOfTotal", { ok: okCalls, total: totalCalls }) : "-",
+      },
       { id: "rate", metric: t("rowCallRate"), value: percent },
       { id: "latency", metric: t("rowLatency"), value: formatDuration(data?.avgResponseTimeMs, t) },
-      { id: "tools", metric: t("rowTools"), value: toolCalls > 0 ? t("okOfTotal", { ok: toolOk, total: toolCalls }) : "-" },
+      {
+        id: "tools",
+        metric: t("rowTools"),
+        value: toolCalls > 0 ? t("okOfTotal", { ok: toolOk, total: toolCalls }) : "-",
+      },
       { id: "toolRate", metric: t("rowToolRate"), value: toolPercent },
       { id: "fallbacks", metric: t("rowFallbacks"), value: fallbacks },
       ...(jobs
         ? [
             { id: "jobsOk", metric: t("rowJobsSucceeded", { window: windowText }), value: jobs.succeededInWindow },
             { id: "jobsFailed", metric: t("rowJobsFailed", { window: windowText }), value: jobs.failedInWindow },
-            { id: "jobsCancelled", metric: t("rowJobsCancelled", { window: windowText }), value: jobs.cancelledInWindow },
+            {
+              id: "jobsCancelled",
+              metric: t("rowJobsCancelled", { window: windowText }),
+              value: jobs.cancelledInWindow,
+            },
             { id: "jobsQueued", metric: t("rowJobsQueued"), value: jobs.queued },
             { id: "jobsRunning", metric: t("rowJobsRunning"), value: jobs.running },
             { id: "jobsAwaiting", metric: t("rowJobsAwaiting"), value: jobs.awaitingApproval },
@@ -212,7 +233,9 @@ export default function AgentGlanceCard({ agentId, reliability }: { agentId: str
           <dl className="m-0 grid min-w-0 grid-cols-2 gap-3">
             <div className="min-w-0" data-testid="agent-glance-latency">
               <dt className="text-xs text-muted-foreground">{t("latencyLabel")}</dt>
-              <dd className="m-0 text-base font-semibold tabular-nums text-foreground">{formatDuration(data?.avgResponseTimeMs, t)}</dd>
+              <dd className="m-0 text-base font-semibold tabular-nums text-foreground">
+                {formatDuration(data?.avgResponseTimeMs, t)}
+              </dd>
             </div>
             <div className="min-w-0" data-testid="agent-glance-fallbacks">
               <dt className="text-xs text-muted-foreground">{t("fallbackLabel")}</dt>
@@ -225,7 +248,9 @@ export default function AgentGlanceCard({ agentId, reliability }: { agentId: str
           <p className="m-0 mb-1.5 text-xs font-medium text-foreground">{t("toolsTitle")}</p>
           {toolCalls > 0 ? (
             <>
-              <p className="m-0 mb-1.5 text-xs text-muted-foreground">{t("toolsSummary", { ok: toolOk, total: toolCalls, percent: toolPercent })}</p>
+              <p className="m-0 mb-1.5 text-xs text-muted-foreground">
+                {t("toolsSummary", { ok: toolOk, total: toolCalls, percent: toolPercent })}
+              </p>
               <StackedStatusBar
                 ariaLabel={t("toolsSummary", { ok: toolOk, total: toolCalls, percent: toolPercent })}
                 segments={[
@@ -264,7 +289,7 @@ export default function AgentGlanceCard({ agentId, reliability }: { agentId: str
         {reasons.length > 0 && (
           <div className="mt-4 min-w-0" data-testid="agent-glance-failures">
             <p className="m-0 mb-1 text-xs font-medium text-foreground">{t("failuresTitle")}</p>
-            <ul className="m-0 list-disc space-y-1 pl-4">
+            <ul className="m-0 list-disc space-y-1 ps-4">
               {reasons.map((reason, index) => (
                 <li key={index} className="break-words text-xs text-muted-foreground [overflow-wrap:anywhere]">
                   {reason}

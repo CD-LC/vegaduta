@@ -1,31 +1,14 @@
 // @ts-nocheck
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import {
-  Boxes,
-  RefreshCw,
-  Plus,
-  Trash2,
-  Loader2,
-  Clock,
-} from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Boxes, RefreshCw, Plus, Trash2, Loader2, Clock } from "lucide-react";
 
 import Select from "../components/Select";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 
 import {
   AlertDialog,
@@ -98,6 +81,7 @@ function tricklePct(elapsedMs, phase) {
 }
 
 export default function ReposTab({ repos, repoId, setRepoId, refresh, onError }) {
+  const tHC = useTranslations("hcCodeintelReposTab");
   const t = useTranslations("codeIntel");
   const [form, setForm] = useState({
     repo_id: "",
@@ -178,7 +162,10 @@ export default function ReposTab({ repos, repoId, setRepoId, refresh, onError })
           }
           await sleep(INDEX_POLL_MS);
         }
-        if (!indexResult) throw new Error("Indexing is taking unusually long — check that the code-intel service is running, then try again.");
+        if (!indexResult)
+          throw new Error(
+            "Indexing is taking unusually long — check that the code-intel service is running, then try again."
+          );
         if (indexResult.status === "error") throw new Error(indexResult.error || "Indexing failed.");
         // Rebuild the graph only if it's older than the index we just finished.
         patchMarker(id, { phase: "graph" });
@@ -211,7 +198,11 @@ export default function ReposTab({ repos, repoId, setRepoId, refresh, onError })
     async (id) => {
       if (markers[id]) return;
       const repo = repos.find((r) => r.repo_id === id);
-      const marker = { startedAt: Date.now(), prevIndexFinishedAt: repo?.last_index?.finished_at ?? null, phase: "indexing" };
+      const marker = {
+        startedAt: Date.now(),
+        prevIndexFinishedAt: repo?.last_index?.finished_at ?? null,
+        phase: "indexing",
+      };
       putMarker(id, marker);
       try {
         await codeIntel.indexRepo(id, false, true); // background → returns immediately
@@ -319,7 +310,7 @@ export default function ReposTab({ repos, repoId, setRepoId, refresh, onError })
                   onChange={(e) => setForm({ ...form, git_url: e.target.value })}
                 />
               </Field>
-              <Field label="Auth env var (optional)">
+              <Field label={tHC("s5")}>
                 <Input
                   value={form.auth_env}
                   placeholder="GITHUB_TOKEN_ACME"
@@ -346,7 +337,7 @@ export default function ReposTab({ repos, repoId, setRepoId, refresh, onError })
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sm">
             <Boxes size={16} className="text-primary" /> {t("registeredHeading", { count: repos.length })}
-            <Button variant="ghost" size="sm" className="ml-auto" onClick={refresh}>
+            <Button variant="ghost" size="sm" className="ms-auto" onClick={refresh}>
               <RefreshCw size={13} /> {t("refreshButton")}
             </Button>
           </CardTitle>
@@ -368,15 +359,13 @@ export default function ReposTab({ repos, repoId, setRepoId, refresh, onError })
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    className="min-w-0 flex-1 text-left"
-                    onClick={() => setRepoId(r.repo_id)}
-                  >
+                  <button type="button" className="min-w-0 flex-1 text-start" onClick={() => setRepoId(r.repo_id)}>
                     <div className="truncate text-sm font-semibold text-foreground">{r.repo_id}</div>
                     <div className="mt-0.5 text-xs text-muted-foreground">
                       {r.source_type}
-                      {r.last_index?.stats ? ` · indexed: ${r.last_index.stats.files_changed ?? 0} changed` : " · not indexed"}
+                      {r.last_index?.stats
+                        ? ` · indexed: ${r.last_index.stats.files_changed ?? 0} changed`
+                        : " · not indexed"}
                       {r.last_graph?.stats ? ` · graph: ${r.last_graph.stats.symbols ?? 0} symbols` : ""}
                     </div>
                   </button>
@@ -390,7 +379,7 @@ export default function ReposTab({ repos, repoId, setRepoId, refresh, onError })
                     className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                     disabled={indexing}
                     onClick={() => setPendingDeleteRepo(r)}
-                    aria-label="Delete repository"
+                    aria-label={tHC("s4")}
                   >
                     <Trash2 size={13} />
                   </Button>
@@ -419,10 +408,7 @@ export default function ReposTab({ repos, repoId, setRepoId, refresh, onError })
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <p className="text-[11px] leading-relaxed text-muted-foreground">
-                      Safe to leave this page — indexing continues on the server and this progress will still be here
-                      when you return. No need to click again.
-                    </p>
+                    <p className="text-[11px] leading-relaxed text-muted-foreground">{tHC("s3")}</p>
                   </div>
                 )}
               </div>
@@ -443,11 +429,11 @@ export default function ReposTab({ repos, repoId, setRepoId, refresh, onError })
       <AlertDialog open={!!pendingDeleteRepo} onOpenChange={(open) => !open && setPendingDeleteRepo(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete repository &quot;{pendingDeleteRepo?.repo_id}&quot;?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This removes the repository and its index from code-intel. Search, graph queries and autonomous-resolve
-              will no longer find anything in it.
-            </AlertDialogDescription>
+            <AlertDialogTitle>
+              {tHC("s2")}
+              {pendingDeleteRepo?.repo_id}&quot;?
+            </AlertDialogTitle>
+            <AlertDialogDescription>{tHC("s1")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deletingRepo}>Cancel</AlertDialogCancel>

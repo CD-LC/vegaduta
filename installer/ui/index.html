@@ -274,7 +274,7 @@ function renderExtras() {
     (selN ? ' (' + selN + ' extra' + (selN === 1 ? '' : 's') + ')' : ' (no extras)');
   $('extrasIntro').textContent = ex.installed
     ? 'Setup found an existing install. These are the extras it has now. Tick or untick to add or remove, then press the button to apply.'
-    : 'Optional. Each one adds a download and uses memory, so the recommended set is ticked. You can add or remove any of them later by running Setup again.';
+    : 'Lean install (nothing ticked): about 3 GB on disk, just Postgres, core and the console; add a cloud model key after sign-up. Full: about 8 GB (a local model, web search, connector tools and the build terminal). Each one below adds a download and uses memory; tick only what you want. You can add or remove any of them later from the console\'s Add-ons page or by running Setup again.';
   const needed = {};
   for (const it of ex.items) if (ex.selected.includes(it.id)) for (const r of it.requires) (needed[r] = needed[r] || []).push(it.name);
   const list = $('extrasList');

@@ -457,6 +457,7 @@ export default function EdgeConsole() {
             detail={EDGE_BRANDING.imageGenDownloadDetails}
             caps={caps}
             reasoningModelReady={reasoningModelReady}
+            requiresFp16
             asset={assetById.get(IMAGE_GEN_ASSET_ID) || null}
             installed={imageGenInstalled}
             busy={!!busyIds[IMAGE_GEN_ASSET_ID]}

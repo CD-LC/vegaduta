@@ -236,7 +236,7 @@ export default function RequestInspector({
           intended shapes. Copy/Download keep the chrome: they ARE buttons. */}
       <button
         type="button"
-        className="flex w-full min-w-0 items-center gap-2 rounded-none border-0 bg-transparent px-2.5 py-2 text-left text-xs font-normal text-muted-foreground shadow-none hover:bg-transparent hover:text-foreground"
+        className="flex w-full min-w-0 items-center gap-2 rounded-none border-0 bg-transparent px-2.5 py-2 text-start text-xs font-normal text-muted-foreground shadow-none hover:bg-transparent hover:text-foreground"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
       >
@@ -297,7 +297,7 @@ export default function RequestInspector({
                   type="button"
                   title={`${p.title} · ~${fmt.format(est(p.chars))} ${t("tokensApprox")}`}
                   style={{ width: `${Math.max(1.5, (p.chars / total) * 100)}%`, background: ROLE_COLOR[p.role] }}
-                  className="h-full min-h-0! rounded-none border-y-0 border-l-0 border-r border-background/60 p-0 shadow-none last:border-r-0 active:scale-100"
+                  className="h-full min-h-0! rounded-none border-y-0 border-s-0 border-e border-background/60 p-0 shadow-none last:border-e-0 active:scale-100"
                   onClick={() => {
                     if (p.i >= 0) {
                       setTab("messages");
@@ -376,7 +376,7 @@ export default function RequestInspector({
                       <div className="flex items-center gap-1.5 px-2 py-1.5">
                         <button
                           type="button"
-                          className="flex min-h-0! flex-1 items-center gap-1.5 rounded-none border-0 bg-transparent p-0 text-left text-xs font-normal shadow-none hover:bg-transparent"
+                          className="flex min-h-0! flex-1 items-center gap-1.5 rounded-none border-0 bg-transparent p-0 text-start text-xs font-normal shadow-none hover:bg-transparent"
                           onClick={() => toggleMsg(p.i)}
                           aria-expanded={isOpen}
                         >
@@ -395,7 +395,9 @@ export default function RequestInspector({
                             </span>
                           )}
                           {(m.blocks ?? []).length > 0 && (
-                            <span className="text-muted-foreground">· {t("blocksCount", { n: m.blocks?.length ?? 0 })}</span>
+                            <span className="text-muted-foreground">
+                              · {t("blocksCount", { n: m.blocks?.length ?? 0 })}
+                            </span>
                           )}
                         </button>
                         <button

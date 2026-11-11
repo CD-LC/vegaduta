@@ -6,12 +6,7 @@ import { Button } from "../ui/button";
 import { useDialogFocus } from "../../lib/hooks/useDialogFocus";
 import { useTranslations } from "../../lib/i18n";
 
-export default function WorkflowAiPendingDialog({
-  aiPendingGraph,
-  applyAiGraph,
-  setAiPendingGraph,
-  t,
-}: any) {
+export default function WorkflowAiPendingDialog({ aiPendingGraph, applyAiGraph, setAiPendingGraph, t }: any) {
   // Focus in on open, Tab trap, Escape closes, focus back to the opener on close (FE-041).
   const dialogRef = useRef<HTMLDivElement>(null);
   useDialogFocus(dialogRef, null, () => setAiPendingGraph(null), { enabled: !!aiPendingGraph });
@@ -31,7 +26,9 @@ export default function WorkflowAiPendingDialog({
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
           role="presentation"
-          onClick={(e) => { if (e.target === e.currentTarget) setAiPendingGraph(null); }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setAiPendingGraph(null);
+          }}
         >
           <div
             className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-border bg-card p-6 shadow-xl"
@@ -46,7 +43,7 @@ export default function WorkflowAiPendingDialog({
               </h2>
               <button
                 type="button"
-                className="-mr-1 -mt-1 flex size-8 items-center justify-center rounded-md border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-accent hover:text-foreground"
+                className="-me-1 -mt-1 flex size-8 items-center justify-center rounded-md border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-accent hover:text-foreground"
                 onClick={() => setAiPendingGraph(null)}
                 aria-label={t("close")}
               >
@@ -56,7 +53,10 @@ export default function WorkflowAiPendingDialog({
             <p className="mt-1.5 text-sm text-muted-foreground">
               {isEdit
                 ? tDescribe("pendingEditBody", { count: aiPendingGraph.nodes.length })
-                : t("replaceGraphBody", { count: aiPendingGraph.nodes.length, plural: aiPendingGraph.nodes.length === 1 ? "" : "s" })}
+                : t("replaceGraphBody", {
+                    count: aiPendingGraph.nodes.length,
+                    plural: aiPendingGraph.nodes.length === 1 ? "" : "s",
+                  })}
             </p>
             {steps.length > 0 && (
               <div className="mt-4" data-testid="ai-pending-explanation">

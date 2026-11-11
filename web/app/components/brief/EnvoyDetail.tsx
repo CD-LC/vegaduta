@@ -108,7 +108,7 @@ export default function EnvoyDetail({ id }: { id: string }) {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <Button asChild variant="ghost" size="sm" className="-ml-2">
+        <Button asChild variant="ghost" size="sm" className="-ms-2">
           <Link href="/build">
             <ArrowLeft className="size-4" aria-hidden="true" />
             {t("workspace.back")}
@@ -117,7 +117,7 @@ export default function EnvoyDetail({ id }: { id: string }) {
         <div className="flex flex-wrap items-center gap-3">
           <h2 className="text-xl font-semibold tracking-tight text-foreground">{brief.title}</h2>
           <RungBadge rung={rung} />
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ms-auto flex items-center gap-2">
             {/* l16-9 teaches the brief an envoy is applied from — the trust
                 ladder and proof ledger below are that lesson's machinery. */}
             <CoachButton entityId={agent?.entityId} onChanged={changed} />
@@ -130,7 +130,7 @@ export default function EnvoyDetail({ id }: { id: string }) {
         className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-4"
         aria-label={t("detail.tryTitle")}
       >
-        <h3 className="mr-2 text-sm font-semibold text-foreground">{t("detail.tryTitle")}</h3>
+        <h3 className="me-2 text-sm font-semibold text-foreground">{t("detail.tryTitle")}</h3>
         {agent?.entityId && applied ? (
           <Button asChild size="sm" variant="outline">
             <Link href={`/agents?agentId=${encodeURIComponent(agent.entityId)}`}>

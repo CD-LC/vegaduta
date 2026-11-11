@@ -16,6 +16,7 @@ if (typeof window !== "undefined") installMockApi();
 
 import type { Context, ReactNode } from "react";
 import { AuthContext } from "../../components/AuthProvider";
+import { useTranslations } from "../../lib/i18n";
 
 const PreviewAuthContext = AuthContext as unknown as Context<Record<string, unknown> | null>;
 
@@ -40,6 +41,7 @@ export function buildPreviewAuth(admin: boolean) {
 }
 
 function PreviewPill({ label }: { label: string }) {
+  const tHC = useTranslations("hcUikitConsolepreviewPreviewharness");
   return (
     <div
       role="status"
@@ -62,7 +64,7 @@ function PreviewPill({ label }: { label: string }) {
         fontFamily: "ui-sans-serif, system-ui, sans-serif",
       }}
     >
-      Preview · {label} — sample data, no backend
+      {tHC("s2")} {label} {tHC("s1")}
     </div>
   );
 }

@@ -89,7 +89,7 @@ export function RunSettingsDrawer({
       aria-modal="false"
       aria-labelledby={titleId}
       data-testid="run-settings-drawer"
-      className="absolute inset-y-0 right-0 z-20 flex w-full max-w-md flex-col border-l border-border bg-card text-card-foreground shadow-xl"
+      className="absolute inset-y-0 end-0 z-20 flex w-full max-w-md flex-col border-s border-border bg-card text-card-foreground shadow-xl"
     >
       <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
         <div className="flex min-w-0 items-center gap-1.5">
@@ -114,7 +114,14 @@ export function RunSettingsDrawer({
             {view === "prompt" ? t("rsPreviewTitle") : t("rsTitle")}
           </h2>
         </div>
-        <Button type="button" variant="ghost" size="sm" onClick={onClose} aria-label={t("rsClose")} data-testid="rs-close">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={onClose}
+          aria-label={t("rsClose")}
+          data-testid="rs-close"
+        >
           <X size={14} aria-hidden="true" />
         </Button>
       </div>

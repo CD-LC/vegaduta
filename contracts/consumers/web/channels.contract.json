@@ -401,6 +401,17 @@
       }
     },
     {
+      "id": "get-api-channels-imessage-credential-webhook-token",
+      "method": "GET",
+      "path": "/api/channels/imessage/credential/webhook-token",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.webhookToken"
+        ]
+      }
+    },
+    {
       "id": "put-api-channels-imessage-default-agent",
       "method": "PUT",
       "path": "/api/channels/imessage/default-agent",

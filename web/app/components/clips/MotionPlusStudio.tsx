@@ -31,6 +31,7 @@ import {
 } from "../../lib/edge/video/rife";
 import { encodeFrameSequence } from "../../lib/edge/video/encode";
 import { type ClipRecordingSupport, detectClipRecordingSupport } from "../../lib/edge/video/assemble";
+import { useTranslations } from "../../lib/i18n";
 
 /**
  * Clip Studio "Motion+" mode (tier V1 — keyframes + on-device
@@ -72,6 +73,7 @@ interface MotionPlusStudioProps {
 }
 
 export default function MotionPlusStudio({ onBackToStill }: MotionPlusStudioProps = {}) {
+  const tHC = useTranslations("hcComponentsClipsMotionPlusStudio");
   // --- Environment / availability ----------------------------------------
   const [engines, setEngines] = useState<MotionEngineOption[]>([]);
   const [enginesLoaded, setEnginesLoaded] = useState(false);
@@ -326,11 +328,11 @@ export default function MotionPlusStudio({ onBackToStill }: MotionPlusStudioProp
     return (
       <div className="space-y-3">
         <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground">
-          <Loader2 size={14} className="animate-spin" aria-hidden="true" /> Checking Motion+ availability…
+          <Loader2 size={14} className="animate-spin" aria-hidden="true" /> {tHC("s24")}
         </div>
         {onBackToStill && (
           <Button variant="outline" size="sm" onClick={onBackToStill} className="gap-1.5">
-            <ArrowLeft size={13} aria-hidden="true" /> Back to Still clip
+            <ArrowLeft size={13} aria-hidden="true" /> {tHC("s21")}
           </Button>
         )}
       </div>
@@ -342,15 +344,12 @@ export default function MotionPlusStudio({ onBackToStill }: MotionPlusStudioProp
         <CardContent className="flex flex-col items-center gap-2 py-10 text-center">
           <Film size={22} className="text-muted-foreground" aria-hidden="true" />
           <p className="text-sm font-medium text-foreground">
-            {availability?.displayName || "Motion+ interpolation model"} isn&apos;t published yet
+            {availability?.displayName || "Motion+ interpolation model"} {tHC("s23")}
           </p>
-          <p className="max-w-md text-sm text-muted-foreground">
-            The small on-device motion model that powers Motion+ hasn&apos;t been released to this environment.
-            Still-image clips keep working in the Still clip tab.
-          </p>
+          <p className="max-w-md text-sm text-muted-foreground">{tHC("s22")}</p>
           {onBackToStill && (
             <Button variant="outline" size="sm" onClick={onBackToStill} className="mt-2 gap-1.5">
-              <ArrowLeft size={13} aria-hidden="true" /> Back to Still clip
+              <ArrowLeft size={13} aria-hidden="true" /> {tHC("s21")}
             </Button>
           )}
         </CardContent>
@@ -365,11 +364,10 @@ export default function MotionPlusStudio({ onBackToStill }: MotionPlusStudioProp
         <Card>
           <CardHeader>
             <CardTitle>
-              <h2 style={{ font: "inherit", letterSpacing: "inherit", margin: 0 }}>1 · Describe the scene</h2>
+              <h2 style={{ font: "inherit", letterSpacing: "inherit", margin: 0 }}>{tHC("s20")}</h2>
             </CardTitle>
             <CardDescription>
-              An agent generates {frameCount} chained keyframes of one scene, then your device fills in the motion
-              between them.
+              {tHC("s19")} {frameCount} {tHC("s18")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -384,7 +382,7 @@ export default function MotionPlusStudio({ onBackToStill }: MotionPlusStudioProp
                 onChange={(e) => setAgentId(e.target.value)}
                 className="h-8 w-full rounded-md border border-input bg-transparent px-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {!agentId && <option value="">Select an agent…</option>}
+                {!agentId && <option value="">{tHC("s17")}</option>}
                 {agents.map((agent: any) => (
                   <option key={agent.id} value={String(agent.id)}>
                     {agent.name || `Agent ${agent.id}`}
@@ -394,17 +392,15 @@ export default function MotionPlusStudio({ onBackToStill }: MotionPlusStudioProp
               </select>
               {agentsLoaded && agents.length === 0 && (
                 <p className="mt-1 text-xs text-muted-foreground">
-                  No agents yet — create one on the{" "}
+                  {tHC("s16")}{" "}
                   <Link href="/agents" className="font-medium text-primary underline underline-offset-2">
                     Agents
                   </Link>{" "}
-                  page first.
+                  {tHC("s15")}
                 </p>
               )}
               {agentsLoaded && agents.length > 0 && capableAgents.length === 0 && (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  None of your agents has the generate_image tool enabled — keyframes need it.
-                </p>
+                <p className="mt-1 text-xs text-muted-foreground">{tHC("s14")}</p>
               )}
             </div>
 
@@ -418,7 +414,7 @@ export default function MotionPlusStudio({ onBackToStill }: MotionPlusStudioProp
                 disabled={busy}
                 onChange={(e) => setPrompt(e.target.value)}
                 rows={3}
-                placeholder="A lighthouse on a cliff at dusk, waves rolling in below"
+                placeholder={tHC("s13")}
                 className="w-full rounded-md border border-input bg-transparent px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
@@ -494,7 +490,7 @@ export default function MotionPlusStudio({ onBackToStill }: MotionPlusStudioProp
 
             <div className="min-w-48">
               <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="motionplus-output">
-                Output size
+                {tHC("s12")}
               </label>
               <select
                 id="motionplus-output"
@@ -514,14 +510,17 @@ export default function MotionPlusStudio({ onBackToStill }: MotionPlusStudioProp
             {/* Honest cost + ceiling, stated BEFORE anything is generated. */}
             <div className="rounded-md border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
               <p>
-                Uses <span className="font-medium text-foreground">{frameCount} image generations</span> from your image
-                quota. The motion itself is made on your device at no server cost — a one-time small motion-engine
-                download happens on first use.
+                Uses{" "}
+                <span className="font-medium text-foreground">
+                  {frameCount} {tHC("s11")}
+                </span>{" "}
+                {tHC("s10")}
               </p>
               <p className="mt-1">
-                Result: a ~{durationSec.toFixed(1)}s clip at {MOTION_FPS} fps. Motion is filled in between keyframes by{" "}
-                {availability?.detailName || "a small open frame-interpolation model"} — WebGPU when your device
-                supports it, a slower fallback otherwise.
+                {tHC("s9")}
+                {durationSec.toFixed(1)}
+                {tHC("s8")} {MOTION_FPS} {tHC("s7")}{" "}
+                {availability?.detailName || "a small open frame-interpolation model"} {tHC("s6")}
               </p>
             </div>
           </CardContent>
@@ -533,15 +532,15 @@ export default function MotionPlusStudio({ onBackToStill }: MotionPlusStudioProp
         <Card>
           <CardHeader>
             <CardTitle>
-              <h2 style={{ font: "inherit", letterSpacing: "inherit", margin: 0 }}>2 · Generate &amp; preview</h2>
+              <h2 style={{ font: "inherit", letterSpacing: "inherit", margin: 0 }}>{tHC("s5")}</h2>
             </CardTitle>
-            <CardDescription>Keyframes → interpolation → encode. The page stays usable throughout.</CardDescription>
+            <CardDescription>{tHC("s4")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {unsupported && (
               <Alert variant="destructive">
                 <AlertTriangle aria-hidden="true" />
-                <AlertTitle>This browser can&apos;t record clips</AlertTitle>
+                <AlertTitle>{tHC("s3")}</AlertTitle>
                 <AlertDescription>{support?.reason}</AlertDescription>
               </Alert>
             )}
@@ -598,15 +597,13 @@ export default function MotionPlusStudio({ onBackToStill }: MotionPlusStudioProp
               <div className="space-y-2">
                 <video controls src={result.url} className="h-auto w-full rounded-md border border-border bg-black" />
                 <Button variant="outline" size="sm" onClick={handleDownload} className="gap-1.5">
-                  <Download size={13} aria-hidden="true" /> Download .{result.extension}
+                  <Download size={13} aria-hidden="true" /> {tHC("s2")}
+                  {result.extension}
                 </Button>
               </div>
             )}
 
-            <p className="text-xs text-muted-foreground">
-              Motion+ clips are stylised keyframe-driven motion made on your device — free beyond the image quota above,
-              and private. Cinematic AI video generation is a separate paid feature.
-            </p>
+            <p className="text-xs text-muted-foreground">{tHC("s1")}</p>
           </CardContent>
         </Card>
       </div>

@@ -18,7 +18,10 @@ import { Textarea } from "../../components/ui/textarea";
 const NUMBER = new Intl.NumberFormat();
 
 /** Where a block's wording came from, as one short badge label. */
-export function blockOrigin(b: Pick<PromptPreviewBlock, "key" | "source" | "scope" | "version">, t: (k: string, v?: Record<string, string | number>) => string): string {
+export function blockOrigin(
+  b: Pick<PromptPreviewBlock, "key" | "source" | "scope" | "version">,
+  t: (k: string, v?: Record<string, string | number>) => string
+): string {
   if (!b.key) return b.source === "agent_config" ? t("regOriginAgentConfig") : t("regOriginCode");
   if (b.version === null || b.version === undefined || b.version <= 0) return t("regOriginDefault");
   return t("regOriginOverride", { scope: b.scope ?? b.source, version: b.version });
@@ -108,7 +111,12 @@ export default function PromptPreviewPanel({ initialAgentId = null }: { initialA
             />
           </div>
           <div className="flex items-center gap-2">
-            <Switch id="prev-small" checked={smallModel} onCheckedChange={setSmallModel} aria-label={t("regPreviewSmallModel")} />
+            <Switch
+              id="prev-small"
+              checked={smallModel}
+              onCheckedChange={setSmallModel}
+              aria-label={t("regPreviewSmallModel")}
+            />
             <Label htmlFor="prev-small" className="text-xs">
               {t("regPreviewSmallModel")}
             </Label>
@@ -140,7 +148,9 @@ export default function PromptPreviewPanel({ initialAgentId = null }: { initialA
             <Alert variant="warning">
               <TriangleAlert aria-hidden="true" />
               <AlertTitle>{t("regPreviewOverBudgetTitle")}</AlertTitle>
-              <AlertDescription>{t("regPreviewOverBudget", { budget: NUMBER.format(preview.tokenBudget) })}</AlertDescription>
+              <AlertDescription>
+                {t("regPreviewOverBudget", { budget: NUMBER.format(preview.tokenBudget) })}
+              </AlertDescription>
             </Alert>
           )}
           {preview.tokenEstimateNote && <p className="text-xs text-muted-foreground">{preview.tokenEstimateNote}</p>}
@@ -162,12 +172,16 @@ export default function PromptPreviewPanel({ initialAgentId = null }: { initialA
                       >
                         <div className="flex flex-wrap items-center gap-2">
                           <code className="font-mono font-medium text-foreground">{b.key ?? b.id}</code>
-                          <Badge variant={b.version && b.version > 0 ? "accent" : "secondary"}>{blockOrigin(b, t)}</Badge>
+                          <Badge variant={b.version && b.version > 0 ? "accent" : "secondary"}>
+                            {blockOrigin(b, t)}
+                          </Badge>
                           <span className="text-muted-foreground">
                             {t("regPreviewTokens", { tokens: NUMBER.format(b.estimatedTokens) })}
                           </span>
                         </div>
-                        <pre className="mt-1.5 max-h-48 overflow-auto whitespace-pre-wrap break-words font-sans">{b.text}</pre>
+                        <pre className="mt-1.5 max-h-48 overflow-auto whitespace-pre-wrap break-words font-sans">
+                          {b.text}
+                        </pre>
                       </li>
                     ))}
                 </ol>
@@ -202,7 +216,7 @@ export default function PromptPreviewPanel({ initialAgentId = null }: { initialA
             <Alert>
               <AlertTitle>{t("regPreviewNotes")}</AlertTitle>
               <AlertDescription>
-                <ul className="list-disc pl-4">
+                <ul className="list-disc ps-4">
                   {preview.notes.map((n) => (
                     <li key={n}>{n}</li>
                   ))}

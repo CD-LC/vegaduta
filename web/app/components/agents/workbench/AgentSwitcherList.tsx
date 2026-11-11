@@ -73,7 +73,7 @@ export default function AgentSwitcherList({
               role="option"
               aria-selected={a.id === selectedAgentId}
               className={cn(
-                "card-interactive flex w-full items-center gap-2.5 rounded-lg border px-2.5 py-2 text-left disabled:cursor-not-allowed disabled:opacity-50",
+                "card-interactive flex w-full items-center gap-2.5 rounded-lg border px-2.5 py-2 text-start disabled:cursor-not-allowed disabled:opacity-50",
                 // elev-raised carries its own border colour, so the
                 // transparent border is only for the unselected rows
                 // (keeps every row the same height either way).
@@ -98,7 +98,7 @@ export default function AgentSwitcherList({
                   {a.model ? ` · ${a.model}` : ""}
                 </span>
               </span>
-              <AgentStateDot state={rowState} className="mr-0.5" />
+              <AgentStateDot state={rowState} className="me-0.5" />
             </button>
           </li>
         );

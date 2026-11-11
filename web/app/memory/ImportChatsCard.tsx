@@ -378,16 +378,16 @@ export default function ImportChatsCard({
                       )}
                     >
                       <span className="font-medium">{c.title}</span>
-                      <Badge variant="outline" className="ml-2">
+                      <Badge variant="outline" className="ms-2">
                         {t(sourceLabelKey(c.source))}
                       </Badge>
                       {c.alreadyImported && (
-                        <Badge variant="secondary" className="ml-2">
+                        <Badge variant="secondary" className="ms-2">
                           {t("alreadyImported")}
                         </Badge>
                       )}
                       {c.truncated && (
-                        <Badge variant="outline" className="ml-2">
+                        <Badge variant="outline" className="ms-2">
                           {t("shortened")}
                         </Badge>
                       )}
@@ -429,7 +429,7 @@ export default function ImportChatsCard({
               </AlertDescription>
             </Alert>
             {skippedGroups.length > 0 && (
-              <ul className="list-disc space-y-0.5 pl-5 text-xs text-muted-foreground">
+              <ul className="list-disc space-y-0.5 ps-5 text-xs text-muted-foreground">
                 {skippedGroups.map((g) => (
                   <li key={g.reason}>{t("skippedGroup", { count: g.count, reason: t(skipReasonKey(g.reason)) })}</li>
                 ))}
@@ -479,12 +479,12 @@ export default function ImportChatsCard({
                             >
                               {f.text}
                               {f.duplicateOf && (
-                                <Badge variant="secondary" className="ml-2">
+                                <Badge variant="secondary" className="ms-2">
                                   {t("memDuplicate")}
                                 </Badge>
                               )}
                               {f.rejectedReason && (
-                                <Badge variant="outline" className="ml-2">
+                                <Badge variant="outline" className="ms-2">
                                   {t("memRejected")}
                                 </Badge>
                               )}

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { auth } from "../../lib/auth";
 import { Button } from "../../components/ui/button";
 import Logo from "./Logo";
+import { useTranslations } from "../../lib/i18n";
 
 // Rendered by the ROOT AuthProvider (web/app/components/AuthProvider.tsx)
 // when an unauthenticated visitor hits a /platform-admin/* route. The tenant
@@ -22,6 +23,7 @@ import Logo from "./Logo";
 export const REDIRECT_TIMEOUT_MS = 15_000;
 
 export default function SignInRedirect() {
+  const tHC = useTranslations("hcPlatformadminComponentsSignInRedirect");
   const [failure, setFailure] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
 
@@ -46,10 +48,12 @@ export default function SignInRedirect() {
       <main className="auth-shell">
         <div className="auth-card" style={{ textAlign: "center" }}>
           <Logo size={48} />
-          <p style={{ marginTop: "1rem", fontWeight: 600 }}>Sign-in could not start</p>
-          <p className="muted" style={{ marginTop: "0.5rem" }}>{failure}</p>
+          <p style={{ marginTop: "1rem", fontWeight: 600 }}>{tHC("s4")}</p>
+          <p className="muted" style={{ marginTop: "0.5rem" }}>
+            {failure}
+          </p>
           <p className="muted" style={{ marginTop: "0.5rem", fontSize: "0.8rem", wordBreak: "break-all" }}>
-            Sign-in service: <code data-testid="signin-endpoint">{auth.signInEndpoint()}</code>
+            {tHC("s3")} <code data-testid="signin-endpoint">{auth.signInEndpoint()}</code>
           </p>
           <Button
             style={{ marginTop: "1.25rem" }}
@@ -58,7 +62,7 @@ export default function SignInRedirect() {
               setAttempt((n) => n + 1);
             }}
           >
-            Try again
+            {tHC("s2")}
           </Button>
         </div>
       </main>
@@ -70,7 +74,7 @@ export default function SignInRedirect() {
       <div className="auth-card" style={{ textAlign: "center" }}>
         <Logo size={48} />
         <p className="muted" style={{ marginTop: "1rem" }}>
-          Signing you in…
+          {tHC("s1")}
         </p>
       </div>
     </main>

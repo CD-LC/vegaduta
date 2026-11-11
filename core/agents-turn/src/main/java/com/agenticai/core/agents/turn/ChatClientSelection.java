@@ -113,6 +113,17 @@ final class ChatClientSelection {
                 && continuation.getHeuristicProviders().contains(agent.getProviderName());
     }
 
+    /**
+     * Whether the model this turn starts on forces on-demand tool loading (see {@link
+     * TurnModelTraits#toolDeferral}): the first hosted-chain link's own row setting (V674). A BYOK
+     * provider has no pool row, so the global {@code app.tools.search.enabled} decides.
+     */
+    boolean toolDeferral(Agent agent, List<HostedChainLink> hostedChain) {
+        return hostedChain != null
+                && !hostedChain.isEmpty()
+                && Boolean.TRUE.equals(hostedChain.get(0).toolDeferral());
+    }
+
     Outcome select(
             TurnContext context,
             ChatTurnPreflight.Turn turn,
@@ -217,6 +228,7 @@ final class ChatClientSelection {
         }
         context.modelTraits().weakToolCaller(weakToolCaller(agent, hostedChain));
         context.modelTraits().stableToolSet(stableToolSet(agent, hostedChain));
+        context.modelTraits().toolDeferral(toolDeferral(agent, hostedChain));
         // A short follow-up ("yes", "continue") carries no words to select tools or a model by: it
         // keeps
         // the tools the conversation already used and stays on the model that started the task. The

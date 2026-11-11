@@ -11,7 +11,7 @@
 # Dockerfile.dockerignore (next to this file) allow-lists that context so the
 # rest of the repository is never sent to the builder.
 
-FROM node:26.11.1-trixie-slim@sha256:193fe51b64e77981119c98c2002c9e32a70e2f006fb4d25068ce0558998917f0
+FROM node:26.13.0-trixie-slim@sha256:e4db4c914bf8ad241bd24804fc25d272d89bad97e68cdc8a1414862790a02c39
 
 # No npm install anywhere in this image - the gateway and every connector it
 # serves are zero-dependency by house rule, so there is no lockfile to honour

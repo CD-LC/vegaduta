@@ -24,6 +24,11 @@ export interface EdgeCapabilities {
      * minMaxBufferSize requirement is compared against. */
     maxBufferSize: number | null;
     maxStorageBufferBindingSize: number | null;
+    /** adapter.features.has("shader-f16") — fp16 kernels (SD-Turbo's weights
+     * are fp16-only; MusicGen falls back to fp32) only run where this is true.
+     * absent when unprobed (a caps payload written before the field existed) —
+     * treated as no. */
+    shaderF16?: boolean | null;
   };
   promptApi: {
     /** "languageModel" = current Chrome global; "windowAi" = the older
@@ -62,7 +67,7 @@ function emptyCapabilities(): EdgeCapabilities {
   return {
     version: 1,
     detectedAt: 0,
-    webgpu: { available: false, maxBufferSize: null, maxStorageBufferBindingSize: null },
+    webgpu: { available: false, maxBufferSize: null, maxStorageBufferBindingSize: null, shaderF16: null },
     promptApi: { shape: "none", availability: "unavailable" },
     deviceMemoryGB: null,
     hardwareConcurrency: null,
@@ -128,6 +133,7 @@ async function runDetection(): Promise<EdgeCapabilities> {
           available: true,
           maxBufferSize: Number(limits.maxBufferSize) || null,
           maxStorageBufferBindingSize: Number(limits.maxStorageBufferBindingSize) || null,
+          shaderF16: adapter.features?.has?.("shader-f16") === true ? true : false,
         };
       }
     }

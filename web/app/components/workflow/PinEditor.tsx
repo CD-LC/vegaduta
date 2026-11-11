@@ -131,7 +131,7 @@ export default function PinEditor({
           </h2>
           <button
             type="button"
-            className="-mr-1 -mt-1 flex size-8 items-center justify-center rounded-md border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-accent hover:text-foreground"
+            className="-me-1 -mt-1 flex size-8 items-center justify-center rounded-md border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-accent hover:text-foreground"
             onClick={onClose}
             aria-label={t("close")}
           >
@@ -220,4 +220,3 @@ export default function PinEditor({
     </div>
   );
 }
-

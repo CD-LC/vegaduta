@@ -5,7 +5,6 @@ import { Coins } from "lucide-react";
 import { api } from "../../lib/api";
 import type { RunCostStep, RunCostSummary } from "../../lib/api";
 import { useTranslations } from "../../lib/i18n";
-import { isBillingEnabled } from "../../lib/billing-flag";
 import { cn } from "../../lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import BrandText from "../BrandText";
@@ -130,10 +129,10 @@ export default function RunCostCard({
   }
 
   const { summary } = current;
-  // Self-hosted/personal installs have no price table that means anything
-  // (billing off => NEXT_PUBLIC_BILLING_ENABLED unset): the card stays, but
-  // every $ figure becomes the token count it was computed from.
-  const billing = isBillingEnabled();
+  // No $ display anywhere: per-turn cost reads as metered-billing noise on
+  // hosted plans and means nothing on self-hosted/local installs. The card
+  // stays, every figure is the token count it was computed from.
+  const billing = false;
   const steps = recentSteps(summary.steps, MAX_STEPS_SHOWN);
   const hiddenSteps = (Array.isArray(summary.steps) ? summary.steps.length : 0) - steps.length;
   const unpriced = toNumber(summary.unpricedCalls) ?? 0;
@@ -160,7 +159,9 @@ export default function RunCostCard({
       </PopoverTrigger>
       <PopoverContent className="p-3 text-sm" data-testid="run-cost-panel">
         <div className="flex items-baseline justify-between gap-2">
-          <span className="font-medium text-foreground"><BrandText text={billing ? t("title") : t("titleUsage")} /></span>
+          <span className="font-medium text-foreground">
+            <BrandText text={billing ? t("title") : t("titleUsage")} />
+          </span>
           <span className="font-mono text-foreground" data-testid="run-cost-total">
             {billing ? total : `${totalTokens} tok`}
           </span>
@@ -169,11 +170,11 @@ export default function RunCostCard({
 
         <dl className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-0.5 text-xs">
           <dt className="text-muted-foreground">{t("calls")}</dt>
-          <dd className="text-right font-mono text-foreground" data-testid="run-cost-calls">
+          <dd className="text-end font-mono text-foreground" data-testid="run-cost-calls">
             {(toNumber(summary.callCount) ?? 0).toLocaleString()}
           </dd>
           <dt className="text-muted-foreground">{t("tokens")}</dt>
-          <dd className="text-right font-mono text-foreground" data-testid="run-cost-tokens">
+          <dd className="text-end font-mono text-foreground" data-testid="run-cost-tokens">
             {(toNumber(summary.totalTokens) ?? 0).toLocaleString()}
           </dd>
           {(toNumber(summary.reasoningTokens) ?? 0) > 0 && (
@@ -181,7 +182,7 @@ export default function RunCostCard({
               <dt className="text-muted-foreground" title={t("reasoningTokensHint")}>
                 {t("reasoningTokens")}
               </dt>
-              <dd className="text-right font-mono text-foreground" data-testid="run-cost-reasoning">
+              <dd className="text-end font-mono text-foreground" data-testid="run-cost-reasoning">
                 {(toNumber(summary.reasoningTokens) ?? 0).toLocaleString()}
               </dd>
             </>
@@ -189,12 +190,12 @@ export default function RunCostCard({
           {failed > 0 && (
             <>
               <dt className="text-muted-foreground">{t("failedCalls")}</dt>
-              <dd className="text-right font-mono text-foreground">{failed.toLocaleString()}</dd>
+              <dd className="text-end font-mono text-foreground">{failed.toLocaleString()}</dd>
             </>
           )}
         </dl>
 
-        {billing && unpriced > 0 && (
+        {unpriced > 0 && (
           <p className="mt-2 text-xs text-muted-foreground" data-testid="run-cost-unpriced">
             {unpriced === 1 ? t("unpricedOne") : t("unpricedMany", { count: unpriced })}
           </p>

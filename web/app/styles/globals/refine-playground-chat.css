@@ -229,7 +229,7 @@
   padding: 8px 12px;
   margin-bottom: 8px;
   border: 1px solid var(--surface-border);
-  border-left: 2px solid var(--accent-400);
+  border-inline-start: 2px solid var(--accent-400);
   border-radius: var(--radius-lg);
   background: var(--surface-card-alt);
   font-size: var(--fs-caption);

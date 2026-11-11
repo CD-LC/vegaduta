@@ -19,6 +19,7 @@ import type { ChannelAdapter, ChannelCtx } from "./types";
 // default-closed: any sender goes through admin pairing, and the bot joins a room on invite only when
 // "join on invite" is on AND the inviter is on the allow-list. End-to-end encrypted rooms are not supported.
 export function MatrixInspector({ ctx }: { ctx: ChannelCtx }) {
+  const tHC = useTranslations("hcComponentsChannelsAdaptersMatrix");
   const { t, busy, agents, cardsByKey, statusLoaded, setError, setSuccess, setBusy, refreshStatus } = ctx;
   const tm = useTranslations("channelsMatrix");
   const matrix = useSimpleChannel({
@@ -117,7 +118,7 @@ export function MatrixInspector({ ctx }: { ctx: ChannelCtx }) {
         <Textarea
           id="matrix-allowed-senders"
           rows={3}
-          placeholder="@alice:example.org&#10;@*:example.org"
+          placeholder={tHC("s1")}
           value={allowedSenders}
           onChange={(e) => setAllowedSenders(e.target.value)}
         />

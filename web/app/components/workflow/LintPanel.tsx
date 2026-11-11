@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboa
 import { AlertTriangle, CheckCircle2, Crosshair, Info, Loader2, X, XCircle } from "lucide-react";
 import type { LintFix, LintFixKind, LintSeverity, UnifiedLintIssue } from "./lintMerge";
 import "./lint-panel.css";
+import { useTranslations } from "../../lib/i18n";
 
 const FIX_LABEL: Record<LintFixKind, string> = {
   "delete-edge": "Remove edge",
@@ -51,7 +52,16 @@ export type LintPanelProps = {
 
 // Side panel opened from the lint chip: grouped by severity, one-click fixes,
 // arrow-key navigation between issues. Severity is always icon + word.
-export default function LintPanel({ issues, nodeLabel, onFocusNode, onApplyFix, loading, serverAvailable, onClose }: LintPanelProps) {
+export default function LintPanel({
+  issues,
+  nodeLabel,
+  onFocusNode,
+  onApplyFix,
+  loading,
+  serverAvailable,
+  onClose,
+}: LintPanelProps) {
+  const tHC = useTranslations("hcComponentsWorkflowLintPanel");
   const rootRef = useRef<HTMLDivElement | null>(null);
   const rowRefs = useRef<(HTMLLIElement | null)[]>([]);
   const [active, setActive] = useState(0);
@@ -60,8 +70,11 @@ export default function LintPanel({ issues, nodeLabel, onFocusNode, onApplyFix, 
   const [draftError, setDraftError] = useState<string | null>(null);
 
   const grouped = useMemo(
-    () => GROUPS.map((g) => ({ ...g, items: issues.filter((i) => i.severity === g.severity) })).filter((g) => g.items.length > 0),
-    [issues],
+    () =>
+      GROUPS.map((g) => ({ ...g, items: issues.filter((i) => i.severity === g.severity) })).filter(
+        (g) => g.items.length > 0
+      ),
+    [issues]
   );
   // Flat order used for arrow-key navigation (matches visual order).
   const flat = useMemo(() => grouped.flatMap((g) => g.items), [grouped]);
@@ -174,13 +187,13 @@ export default function LintPanel({ issues, nodeLabel, onFocusNode, onApplyFix, 
   let flatIdx = -1;
 
   return (
-    <div className="wf-lintp" role="dialog" aria-label="Workflow checks" ref={rootRef} tabIndex={-1}>
+    <div className="wf-lintp" role="dialog" aria-label={tHC("s5")} ref={rootRef} tabIndex={-1}>
       <div className="wf-lintp-head">
         <div className="wf-lintp-title">
-          <strong>Workflow checks</strong>
+          <strong>{tHC("s5")}</strong>
           <span className="wf-lintp-sum">{summary || "No issues"}</span>
         </div>
-        <button type="button" className="wf-lintp-icon" aria-label="Close workflow checks" onClick={onClose}>
+        <button type="button" className="wf-lintp-icon" aria-label={tHC("s4")} onClick={onClose}>
           <X size={14} aria-hidden="true" />
         </button>
       </div>
@@ -189,13 +202,13 @@ export default function LintPanel({ issues, nodeLabel, onFocusNode, onApplyFix, 
         {loading && (
           <span className="wf-lintp-note">
             <Loader2 size={12} className="wf-lintp-spin" aria-hidden="true" />
-            Running server checks…
+            {tHC("s3")}
           </span>
         )}
         {!loading && !serverAvailable && (
           <span className="wf-lintp-note">
             <Info size={12} aria-hidden="true" />
-            Server checks unavailable. Showing canvas checks only.
+            {tHC("s2")}
           </span>
         )}
       </div>
@@ -208,7 +221,12 @@ export default function LintPanel({ issues, nodeLabel, onFocusNode, onApplyFix, 
       ) : (
         <div className="wf-lintp-body">
           {grouped.map((g) => (
-            <section key={g.severity} className="wf-lintp-group" data-severity={g.severity} aria-label={`${g.title}: ${g.items.length}`}>
+            <section
+              key={g.severity}
+              className="wf-lintp-group"
+              data-severity={g.severity}
+              aria-label={`${g.title}: ${g.items.length}`}
+            >
               <h3 className="wf-lintp-gh">
                 <g.Icon size={12} aria-hidden="true" />
                 {g.title}
@@ -313,7 +331,7 @@ export default function LintPanel({ issues, nodeLabel, onFocusNode, onApplyFix, 
                                 onClick={() => onFocusNode(issue.nodeId as string)}
                               >
                                 <Crosshair size={12} aria-hidden="true" />
-                                Show on canvas
+                                {tHC("s1")}
                               </button>
                             )}
                           </div>

@@ -1,26 +1,13 @@
 // @ts-nocheck
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
-import {
-  RefreshCw,
-  ShieldCheck,
-  AlertTriangle,
-} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { RefreshCw, ShieldCheck, AlertTriangle } from "lucide-react";
 
 import Select from "../components/Select";
 import { Button } from "../components/ui/button";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 
 import { useTranslations } from "../lib/i18n";
 import PaginationControls from "../components/PaginationControls";
@@ -31,6 +18,7 @@ import { Toggle, Field } from "./shared";
 const AUDIT_LIMIT = 60;
 
 export default function GovernanceTab({ onError }) {
+  const tHC = useTranslations("hcCodeintelGovernanceTab");
   const t = useTranslations("codeIntel");
   const tg = useTranslations("codeIntelGov");
   const [policy, setPolicy] = useState(null);
@@ -135,17 +123,16 @@ export default function GovernanceTab({ onError }) {
           <CardContent>
             {policyError ? (
               <div className="text-sm text-muted-foreground">
-                <p className="mb-2 text-destructive">Couldn&apos;t load policy: {policyError}</p>
-                <p>
-                  If Search works but this doesn&apos;t, the running service is an older build — restart code-intel so
-                  the guardrails endpoints load.
+                <p className="mb-2 text-destructive">
+                  {tHC("s6")} {policyError}
                 </p>
+                <p>{tHC("s5")}</p>
                 <Button variant="secondary" size="sm" className="mt-2" onClick={refresh}>
                   <RefreshCw size={13} /> {t("retryButton")}
                 </Button>
               </div>
             ) : !policy ? (
-              <p className="text-sm text-muted-foreground">Loading…</p>
+              <p className="text-sm text-muted-foreground">{tHC("s4")}</p>
             ) : (
               <>
                 <Field label={t("autonomyModeLabel")}>
@@ -176,8 +163,9 @@ export default function GovernanceTab({ onError }) {
                   />
                 </div>
                 <div className="mt-3 text-xs leading-relaxed text-muted-foreground">
-                  caps: {policy.max_files_per_apply} files / apply ·{" "}
-                  {Math.round(policy.max_bytes_per_file / 1024)} KB / file · {policy.max_command_timeout}s / command
+                  caps: {policy.max_files_per_apply} {tHC("s3")} {Math.round(policy.max_bytes_per_file / 1024)}{" "}
+                  {tHC("s2")} {policy.max_command_timeout}
+                  {tHC("s1")}
                   <br />
                   protected: {(policy.protected_path_globs || []).join(", ")}
                 </div>
@@ -190,14 +178,18 @@ export default function GovernanceTab({ onError }) {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
               {t("pendingApprovalsHeading", { count: approvals.length })}
-              <Button variant="ghost" size="sm" className="ml-auto" onClick={refresh}>
+              <Button variant="ghost" size="sm" className="ms-auto" onClick={refresh}>
                 <RefreshCw size={13} /> {t("refreshButton")}
               </Button>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {approvalsError && (
-              <LoadError message={tg("approvalsLoadFailed", { error: approvalsError })} retryLabel={t("retryButton")} onRetry={refresh} />
+              <LoadError
+                message={tg("approvalsLoadFailed", { error: approvalsError })}
+                retryLabel={t("retryButton")}
+                onRetry={refresh}
+              />
             )}
             {!approvalsError && approvals.length === 0 && (
               <p className="text-sm text-muted-foreground">{t("nothingAwaitingApproval")}</p>
@@ -242,14 +234,18 @@ export default function GovernanceTab({ onError }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sm">
             {t("auditTrailHeading")}
-            <Button variant="ghost" size="sm" className="ml-auto" onClick={refresh}>
+            <Button variant="ghost" size="sm" className="ms-auto" onClick={refresh}>
               <RefreshCw size={13} /> {t("refreshButton")}
             </Button>
           </CardTitle>
         </CardHeader>
         <CardContent>
           {trailError && (
-            <LoadError message={tg("auditLoadFailed", { error: trailError })} retryLabel={t("retryButton")} onRetry={refresh} />
+            <LoadError
+              message={tg("auditLoadFailed", { error: trailError })}
+              retryLabel={t("retryButton")}
+              onRetry={refresh}
+            />
           )}
           {!trailError && trail.length === 0 && <p className="text-sm text-muted-foreground">{t("noActivityYet")}</p>}
           {trail.length >= AUDIT_LIMIT && (
@@ -262,7 +258,7 @@ export default function GovernanceTab({ onError }) {
                 <span className="flex-1 text-xs text-foreground">
                   {e.command || (e.written && `wrote ${e.written.join(", ")}`) || e.decision || e.reason || ""}
                   {e.canary && e.canary.length > 0 && (
-                    <span className="ml-1 inline-flex items-center gap-1 text-destructive">
+                    <span className="ms-1 inline-flex items-center gap-1 text-destructive">
                       <AlertTriangle size={12} aria-hidden="true" /> canary
                     </span>
                   )}

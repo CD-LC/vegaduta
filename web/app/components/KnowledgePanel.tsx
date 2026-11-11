@@ -65,6 +65,7 @@ const KnowledgePanel = forwardRef(function KnowledgePanel(
   { collections, selectedId, onDocumentsChanged, onRequestCreateCollection, processingAvailable = true }: any,
   ref
 ) {
+  const tHC = useTranslations("hcComponentsKnowledgePanel");
   // When the Python sidecar (embeddings/extraction) is down, upload and
   // semantic search both hard-depend on it, so the page gates them off via
   // this prop. Optional + defaults true so the healthy case (and any caller
@@ -420,10 +421,14 @@ const KnowledgePanel = forwardRef(function KnowledgePanel(
       />
       <ConfirmDialog
         open={forgetTarget !== null}
-        onOpenChange={(o) => { if (!o) setForgetTarget(null); }}
+        onOpenChange={(o) => {
+          if (!o) setForgetTarget(null);
+        }}
         title={forgetTarget ? tFace("forgetPersonConfirm", { name: forgetTarget.personName }) : ""}
         destructive
-        onConfirm={async () => { if (forgetTarget) await handleDeleteFaceEnrollment(forgetTarget); }}
+        onConfirm={async () => {
+          if (forgetTarget) await handleDeleteFaceEnrollment(forgetTarget);
+        }}
       />
       <div className="space-y-5">
         <input
@@ -474,7 +479,7 @@ const KnowledgePanel = forwardRef(function KnowledgePanel(
                     href="/help#knowledge"
                     className="text-sm font-medium text-primary underline-offset-4 hover:underline"
                   >
-                    Learn how knowledge works
+                    {tHC("s2")}
                   </Link>
                 </div>
               }
@@ -554,7 +559,7 @@ const KnowledgePanel = forwardRef(function KnowledgePanel(
                   />
                   {visibleDocuments.length === 0 && (
                     <div className="rounded-lg border border-dashed border-border bg-card/40 px-4 py-6 text-center text-sm text-muted-foreground">
-                      No files match this filter.
+                      {tHC("s1")}
                     </div>
                   )}
                   <KnowledgeDocumentsTable
