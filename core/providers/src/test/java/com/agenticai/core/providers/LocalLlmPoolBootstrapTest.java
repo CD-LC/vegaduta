@@ -252,6 +252,31 @@ class LocalLlmPoolBootstrapTest {
     }
 
     @Test
+    void existingRowOnADifferentModelIsKeptButWarnedAbout() {
+        server.expect(ExpectedCount.manyTimes(), requestTo(BASE + "/api/tags"))
+                .andRespond(
+                        withSuccess(
+                                "{\"models\":[{\"name\":\"llama3.2:latest\"},{\"name\":\"mistral:latest\"}]}",
+                                MediaType.APPLICATION_JSON));
+        PlatformHostedLlmProvider stale = row(6, "Local model (Ollama)", BASE, 1);
+        when(stale.getModel()).thenReturn("mistral");
+        when(repository.findAllByOrderByPriorityAsc()).thenReturn(List.of(stale));
+        usable(stale);
+
+        assertEquals(
+                Outcome.ALREADY_PRESENT,
+                bootstrap("ollama", guard(Set.of("ollama:11434"))).bootstrapOnce());
+
+        verify(service, never()).update(any(), any());
+        assertTrue(
+                logs.list.stream()
+                        .anyMatch(
+                                e ->
+                                        e.getLevel() == Level.WARN
+                                                && e.getFormattedMessage().contains("mistral")));
+    }
+
+    @Test
     void rowWhoseKeyNoLongerDecryptsIsRewrittenAndEnabled() {
         // An older database kept under a new .env: APP_ENCRYPTION_KEY changed, the chat path
         // excludes the row, every chat says "No platform LLM is configured" while the console
