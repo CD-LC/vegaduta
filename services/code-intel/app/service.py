@@ -16,6 +16,7 @@ from dataclasses import dataclass
 
 from codebase_rag import analysis as cr_analysis
 from codebase_rag import graph as cr_graph
+from codebase_rag import security as cr_security
 from codebase_rag.config import Config
 from codebase_rag.embedders import make_embedder
 from codebase_rag.pipeline import sync
@@ -500,3 +501,23 @@ class CodeIntelService(GovernedExecutionMixin):
     def hotspots(self, ctx: TenantContext, repo_id: str, days: int = 90, limit: int = 30) -> dict:
         h = self._handles(ctx, repo_id, refresh_checkout=False)
         return cr_analysis.hotspots(h.cfg, days=days, limit=limit)
+
+    def security_scan(
+        self,
+        ctx: TenantContext,
+        repo_id: str,
+        categories: list[str] | None = None,
+        include_tests: bool = False,
+        min_severity: str = "low",
+        limit: int = 500,
+    ) -> dict:
+        """Offline heuristic secrets / dangerous-sink / dependency-inventory
+        scan over this tenant's checkout (codebase_rag/security.py)."""
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        return cr_security.scan(
+            h.cfg,
+            categories=categories or cr_security.CATEGORIES,
+            include_tests=include_tests,
+            min_severity=min_severity,
+            limit=limit,
+        )
