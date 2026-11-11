@@ -58,6 +58,7 @@ merge, tag, release or deploy, and add a line to the log at the bottom when you 
 | Database docs agent (Claude Code) | local session, branch `docs/database-schema` (worktree `/private/tmp/vd-dbdocs`) | `docs/architecture/database.md` and `docs/architecture/database-reference.md` (new), and one nav entry pair in `mkdocs.yml` under Architecture. Docs only: no code, no migrations. Overlaps the OSS-integrations agent only if it also edits `mkdocs.yml` (the nav lines are adjacent to its docs entries) |
 | License-information audit agent (Claude Code) | local worktree `vegaduta-license-audit-wt`, branch `docs/license-info-audit` | wording only, no change of license: statements about the project license in `web/app/help/docs-content.tsx`, `web/app/compare/compare-data.ts`, `web/app/components/enterprise-landing/EnterpriseFaq.tsx`, `web/app/platform/platform-data-operate.ts`, `docs/platform-documentation/development/{git-workflow,repository-map}.html`, the `licenses` / `artifacthub.io/license` annotations in `deploy/helm/charts/*/Chart.yaml`, and the `license` field of the private `package.json` files under `services/` and `tests/e2e`. Overlaps the release-readiness lead's `web/app/**` and `docs/` claims (the PR says so in its title and waits for their review) |
 | Personal e2e coverage agent (Claude Code) | local worktree `vegaduta-personal-e2e-wt`, branch `test/personal-e2e-coverage` | the signed-in personal-edition Playwright suite: `tests/e2e/playwright.personal.config.ts`, `tests/e2e/tests/personal-{agent,smoke,a2a-channels,mcp-tools,turns-workflows}.spec.ts`, `tests/e2e/fixtures/`. Overlaps the release-readiness lead's `tests/e2e/tests/**` claim (the PR says so in its title and waits for their review). Test code only; no product code, migrations or configuration |
+| PR-triage agent (Devin) | cloud session, pushes through the maintainer's Mac | getting the open PRs green without changing behaviour: formatting/lint/DCO/lock fixes on their own branches, `.github/workflows/dependabot-autofix.yml` (opener check), `scripts/ci/check-browser-runner-version.sh` self-test. Merges nothing |
 
 
 ## What production must run
@@ -790,6 +791,8 @@ broken links. Worktree: /private/tmp/vd-dbdocs.
 ### License-information audit (Claude Code, 2026-11-01)
 
 Audited every place that states the project license against `LICENSE` (BUSL-1.1; `sdk/` is Apache-2.0; each version converts to Apache-2.0 four years after release). The license itself is unchanged. Corrected statements that called the platform Apache-2.0, said the public repository was not published yet, and the Helm and private-package metadata that declared Apache-2.0. Verified: `make gates`, `make helm-lint`, and the web tests for the touched pages.
+
+- 2026-11-02, test-coverage agent: added JUnit tests under `core/agents-studio/src/test` only (Magic Studio planner and controller, sandbox music controller, app-builder controllers and service auth, Redis coding task store, platform query rewriter, face enrollment, demo agent seeder). No production code changed. Worktree: `vegaduta-coverage-wt`.
 
 ### Personal e2e coverage (Claude Code, 2026-11-01)
 
