@@ -474,7 +474,7 @@ public class SecurityConfig {
                                                 csp ->
                                                         csp.policyDirectives(
                                                                 "default-src 'none';"
-                                                                    + " frame-ancestors 'none'"))
+                                                                        + " frame-ancestors 'none'"))
                                         .referrerPolicy(
                                                 referrer ->
                                                         referrer.policy(

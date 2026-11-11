@@ -141,7 +141,7 @@ class A2aTwoHopTest {
         b.security.getServer().setRequireSignedMessages(true);
         String body =
                 "{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"SendMessage\",\"params\":{\"message\":"
-                    + "{\"messageId\":\"m\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"hi\"}]}}}";
+                        + "{\"messageId\":\"m\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"hi\"}]}}}";
 
         HttpResponse<String> response =
                 HttpClient.newHttpClient()

@@ -387,8 +387,8 @@ public class KnowledgeIngestionService {
             } catch (DataAccessException e) {
                 log.warn(
                         "Could not set per-collection content_tsv (schema likely pending migration"
-                            + " V154; keyword search falls back to the legacy generated column):"
-                            + " {}",
+                                + " V154; keyword search falls back to the legacy generated column):"
+                                + " {}",
                         e.getMessage());
             }
         }

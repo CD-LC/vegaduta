@@ -65,9 +65,9 @@ public class A2aAgentCardService {
         return card(
                 PLATFORM_NAME,
                 "VegaDuta agentic AI platform. Authenticate with a bearer token, then send messages"
-                    + " to a specific agent by setting metadata.agentId - or discover one agent's"
-                    + " own card at /api/agents/{agentId}/a2a/agent-card.json and use its"
-                    + " agent-scoped endpoint.",
+                        + " to a specific agent by setting metadata.agentId - or discover one agent's"
+                        + " own card at /api/agents/{agentId}/a2a/agent-card.json and use its"
+                        + " agent-scoped endpoint.",
                 endpoint,
                 List.of());
     }

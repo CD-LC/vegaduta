@@ -77,11 +77,11 @@ public class McpSearchKnowledgeToolCallback implements ToolCallback {
                 .name("search_knowledge")
                 .description(
                         "Runs a read-only hybrid (semantic + keyword) search over the Knowledge"
-                            + " Collections your tenant admin has shared with this API key, and"
-                            + " returns the most relevant chunks. If no collections have been"
-                            + " shared with this key, this tool returns an explanatory error"
-                            + " instead of results - ask your tenant admin to update this grant's"
-                            + " exposed knowledge collections.")
+                                + " Collections your tenant admin has shared with this API key, and"
+                                + " returns the most relevant chunks. If no collections have been"
+                                + " shared with this key, this tool returns an explanatory error"
+                                + " instead of results - ask your tenant admin to update this grant's"
+                                + " exposed knowledge collections.")
                 .inputSchema(
                         """
 {

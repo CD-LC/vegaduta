@@ -33,4 +33,3 @@ public record A2aCallContext(int hop, String traceId, boolean signed) {
         return new A2aCallContext(0, traceId, false);
     }
 }
-

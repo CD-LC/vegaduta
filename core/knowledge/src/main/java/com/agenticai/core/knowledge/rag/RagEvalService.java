@@ -466,22 +466,22 @@ public class RagEvalService {
         if (usesParents && parents == 0) {
             notes.add(
                     "This collection has no parent-child documents, so the parent-child configs"
-                        + " return the same chunks as their non-parent counterparts. Parent-child"
-                        + " applies to documents ingested after the collection opted in.");
+                            + " return the same chunks as their non-parent counterparts. Parent-child"
+                            + " applies to documents ingested after the collection opted in.");
         }
         if (usesParents && parents > 0) {
             notes.add(
                     "Parent-child configs return larger passages: compare avgReturnedChars, and"
-                        + " prefer expectedDocumentIds over expectedSubstrings, because a larger"
-                        + " passage can contain an expected substring without ranking the right"
-                        + " document higher.");
+                            + " prefer expectedDocumentIds over expectedSubstrings, because a larger"
+                            + " passage can contain an expected substring without ranking the right"
+                            + " document higher.");
         }
         if (configs.stream().anyMatch(c -> presetOf(c).startsWith("rewrite"))) {
             notes.add(
                     "Rewrite configs fall back to the original query when no cheap model is"
-                        + " available, the call fails, or your workspace uses its own provider key"
-                        + " (queries are not sent to the platform model), so they may equal the"
-                        + " baseline.");
+                            + " available, the call fails, or your workspace uses its own provider key"
+                            + " (queries are not sent to the platform model), so they may equal the"
+                            + " baseline.");
         }
         if (truncated) {
             notes.add(

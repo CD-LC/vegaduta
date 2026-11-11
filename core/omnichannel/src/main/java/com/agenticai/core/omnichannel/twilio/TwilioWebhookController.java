@@ -184,11 +184,11 @@ public class TwilioWebhookController {
                                 () -> {
                                     log.warn(
                                             "No tenant link found for Twilio AccountSid ***{} -"
-                                                + " falling back to the {} schema. This is expected"
-                                                + " for a single-tenant setup where the credential"
-                                                + " was activated before this link existed;"
-                                                + " otherwise, this AccountSid was never activated"
-                                                + " via POST /api/channels/twilio/credential.",
+                                                    + " falling back to the {} schema. This is expected"
+                                                    + " for a single-tenant setup where the credential"
+                                                    + " was activated before this link existed;"
+                                                    + " otherwise, this AccountSid was never activated"
+                                                    + " via POST /api/channels/twilio/credential.",
                                             lastFour(accountSid),
                                             TenantSchemaResolver.DEFAULT_SCHEMA);
                                     return TenantSchemaResolver.DEFAULT_SCHEMA;

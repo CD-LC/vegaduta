@@ -57,7 +57,7 @@ final class OpenAiCompatAuth {
                 response.getWriter()
                         .write(
                                 "{\"error\":{\"message\":\"Incorrect API key provided.\","
-                                    + "\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_api_key\"}}");
+                                        + "\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_api_key\"}}");
                 return;
             }
             delegate.commence(request, response, ex);
@@ -89,7 +89,7 @@ final class OpenAiCompatAuth {
                 // backslashes stripped.
                 .write(
                         "{\"type\":\"urn:vegaduta:problem:unauthorized\",\"title\":\"Unauthorized\",\"status\":401,\"detail\":\"Authentication"
-                            + " is required to access this resource.\",\"instance\":\""
+                                + " is required to access this resource.\",\"instance\":\""
                                 + path
                                 + "\",\"timestamp\":\""
                                 + java.time.Instant.now()

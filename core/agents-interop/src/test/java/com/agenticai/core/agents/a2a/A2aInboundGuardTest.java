@@ -30,7 +30,7 @@ class A2aInboundGuardTest {
     private static final String PATH = "/api/agents/a1/a2a";
     private static final String BODY =
             "{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"SendMessage\",\"params\":{\"message\":"
-                + "{\"messageId\":\"m\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"hi\"}]}}}";
+                    + "{\"messageId\":\"m\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"hi\"}]}}}";
 
     private MutableClock clock;
     private A2aCardSigningService signing;

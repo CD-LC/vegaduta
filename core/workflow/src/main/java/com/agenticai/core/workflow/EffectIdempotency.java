@@ -40,4 +40,3 @@ public final class EffectIdempotency {
         return part == null ? "" : part.replaceAll("[^A-Za-z0-9._:-]", "_");
     }
 }
-

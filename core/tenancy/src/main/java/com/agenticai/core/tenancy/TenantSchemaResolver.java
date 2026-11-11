@@ -254,8 +254,8 @@ public class TenantSchemaResolver
         if (!configured) {
             log.warn(
                     "app.tenancy.fail-on-missing-context=false - context-less threads fall back to"
-                        + " the public schema (pre-SEC-017 behaviour). This is an escape hatch, not"
-                        + " a supported production setting.");
+                            + " the public schema (pre-SEC-017 behaviour). This is an escape hatch, not"
+                            + " a supported production setting.");
         }
         return configured;
     }
@@ -413,8 +413,8 @@ public class TenantSchemaResolver
         Counter.builder(FALLBACK_METRIC)
                 .description(
                         "Tenant-schema resolutions that fell back to the public schema, by"
-                            + " resolution path (kind) and nearest non-infrastructure caller. See"
-                            + " TenantSchemaResolver's javadoc for which kinds are legitimate.")
+                                + " resolution path (kind) and nearest non-infrastructure caller. See"
+                                + " TenantSchemaResolver's javadoc for which kinds are legitimate.")
                 .tag("kind", kind.tag)
                 .tag("caller", caller)
                 .register(registry)
@@ -437,11 +437,11 @@ public class TenantSchemaResolver
                 && lastSuspiciousWarnAtMillis.compareAndSet(last, now)) {
             log.warn(
                     "Tenant-schema resolution fell back to the public schema on a thread that still"
-                        + " carries an authenticated JWT with a tenant_id claim (nearest caller:"
-                        + " {}). This is the TenantContext-propagation bug signature - see"
-                        + " TenantSchemaResolver's F-14 javadoc. Rate-limited to one warning per"
-                        + " minute; the {} counter (kind=authenticated_no_context) has the true"
-                        + " rate.",
+                            + " carries an authenticated JWT with a tenant_id claim (nearest caller:"
+                            + " {}). This is the TenantContext-propagation bug signature - see"
+                            + " TenantSchemaResolver's F-14 javadoc. Rate-limited to one warning per"
+                            + " minute; the {} counter (kind=authenticated_no_context) has the true"
+                            + " rate.",
                     caller,
                     FALLBACK_METRIC);
         }

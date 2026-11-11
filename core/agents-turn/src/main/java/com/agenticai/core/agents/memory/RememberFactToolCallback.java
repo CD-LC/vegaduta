@@ -73,12 +73,12 @@ public class RememberFactToolCallback implements ToolCallback {
                 .name("remember_fact")
                 .description(
                         "Saves a fact, preference, or correction about the current user so you'll"
-                            + " still know it in future conversations, not just this one. Use this"
-                            + " when the user states a durable preference (\"I prefer email over"
-                            + " WhatsApp\"), a fact about themselves or their business (\"my shop"
-                            + " is only open on weekends\"), or corrects something you got wrong."
-                            + " Do not use this for one-off details that only matter to the current"
-                            + " message.")
+                                + " still know it in future conversations, not just this one. Use this"
+                                + " when the user states a durable preference (\"I prefer email over"
+                                + " WhatsApp\"), a fact about themselves or their business (\"my shop"
+                                + " is only open on weekends\"), or corrects something you got wrong."
+                                + " Do not use this for one-off details that only matter to the current"
+                                + " message.")
                 .inputSchema(
                         """
 {

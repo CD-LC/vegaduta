@@ -297,8 +297,8 @@ final class KnowledgeChunkScanner {
                 collectionIds.stream().map(id -> "?").collect(Collectors.joining(","));
         String sql =
                 "SELECT c.id, c.source, c.chunk_index, c.content, c.collection_id, c.document_id,"
-                    + " ts_rank_cd(c.content_tsv, plainto_tsquery(COALESCE(kc.text_search_config,"
-                    + " 'simple')::regconfig, ?)) AS rank FROM "
+                        + " ts_rank_cd(c.content_tsv, plainto_tsquery(COALESCE(kc.text_search_config,"
+                        + " 'simple')::regconfig, ?)) AS rank FROM "
                         + table
                         + " c JOIN "
                         + collectionTable

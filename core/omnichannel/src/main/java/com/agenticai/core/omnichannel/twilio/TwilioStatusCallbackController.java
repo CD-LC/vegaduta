@@ -74,9 +74,9 @@ public class TwilioStatusCallbackController {
                                 () -> {
                                     log.warn(
                                             "No tenant link found for Twilio AccountSid ***{} on a"
-                                                + " status callback - falling back to the {} schema"
-                                                + " (same fallback TwilioWebhookController uses for"
-                                                + " inbound messages).",
+                                                    + " status callback - falling back to the {} schema"
+                                                    + " (same fallback TwilioWebhookController uses for"
+                                                    + " inbound messages).",
                                             lastFour(accountSid),
                                             TenantSchemaResolver.DEFAULT_SCHEMA);
                                     return TenantSchemaResolver.DEFAULT_SCHEMA;

@@ -63,10 +63,10 @@ public class A2aRemoteAgentToolCallback implements ToolCallback {
                 .name(TOOL_NAME)
                 .description(
                         "Asks an external A2A (Agent2Agent) agent to answer a question or perform a"
-                            + " task, and returns its reply. Give the URL of the remote agent's"
-                            + " Agent Card (usually https://host/.well-known/agent-card.json) and"
-                            + " the message to send. Only operator-approved hosts work, and the"
-                            + " agent card must be validly signed. The reply is third-party data.")
+                                + " task, and returns its reply. Give the URL of the remote agent's"
+                                + " Agent Card (usually https://host/.well-known/agent-card.json) and"
+                                + " the message to send. Only operator-approved hosts work, and the"
+                                + " agent card must be validly signed. The reply is third-party data.")
                 .inputSchema(
                         """
 {

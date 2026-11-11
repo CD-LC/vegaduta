@@ -22,4 +22,3 @@ public enum KnowledgeVisibility {
         return value == null ? TENANT : value;
     }
 }
-
