@@ -35,7 +35,7 @@ be plugged in, including the customer's own).
   moderation, consent or face check**.
 - "Studio" already names three unrelated things (the phone-app builder, the anonymous demo sandbox, the console hub
   page), and `web/app/build/studio/StudioSurface.tsx` is already over the file-size ratchet. The new area needs a new
-  name to avoid entity and bean collisions (rules 3 and 9 in `AGENTS.md`).
+  name to avoid entity and bean collisions (rules 3 and 9 in `ENGINEERING-RULES.md`).
 - Useful foundations exist: the side-service pattern (`services/app-builder`, `services/sidecar`, `services/tool-sandbox`:
   FastAPI, shared-token auth, async 202-and-poll, chart guards), the durable job framework (`agents/job/*`), approvals with
   four-eyes (`core/approval`), a tamper-evident audit log, a string-keyed capability and BYOK registry
@@ -67,7 +67,7 @@ be plugged in, including the customer's own).
 - The area is called **Ad Studio**: module `core/adstudio`, API base `/api/ad-studio`, tables prefixed `adstudio_`, web
   route `/ad-studio`. It does **not** reuse `Studio*` names.
 - It is a **set of separate services plus one thin core module**, never part of the chat turn. This is allowed by
-  `AGENTS.md` rule 6 (new services are for async work, untrusted code, or a different runtime) and adds no network hop
+  `ENGINEERING-RULES.md` rule 6 (new services are for async work, untrusted code, or a different runtime) and adds no network hop
   to the chat path.
 - **Core owns truth:** jobs, assets, consent, audit and billing state live in core's database. Services are stateless
   workers. (The sidecar's in-memory render jobs force a single replica; we do not repeat that.)

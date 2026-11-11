@@ -27,7 +27,7 @@ The tenant Flyway history in the snapshot reaches version 674, which matches the
 
 Two consequences:
 
-- **PgBouncer must run in session pooling mode.** Transaction pooling lets a connection keep one tenant's `search_path` while the next transaction belongs to another tenant. See `AGENTS.md` rule 8.
+- **PgBouncer must run in session pooling mode.** Transaction pooling lets a connection keep one tenant's `search_path` while the next transaction belongs to another tenant. See `ENGINEERING-RULES.md` rule 8.
 - **Code that bypasses the JPA connection must name the schema.** The pgvector table `knowledge_chunks` is written with raw JDBC, so it uses `KnowledgeSchemaSupport.qualifiedTableName()`, which spells out the schema.
 
 ## Migrations

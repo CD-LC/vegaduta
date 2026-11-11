@@ -9,28 +9,24 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 /**
- * One row of {@code control_plane.plan_limits} (migration
- * {@code V101__plan_limits.sql}) - the data-driven replacement for the
- * hardcoded FREE_MAX_* / PREMIUM_MAX_* constants that used to live directly
- * in {@link TenantLimitsServiceImpl}. Exactly one row per {@link
- * TenantPlan} value, never per-tenant - see {@link PlanLimitsService},
- * which reads (and Redis-caches) these rows.
+ * One row of {@code control_plane.plan_limits} (migration {@code V101__plan_limits.sql}) - the
+ * data-driven replacement for the hardcoded FREE_MAX_* / PREMIUM_MAX_* constants that used to live
+ * directly in {@link TenantLimitsServiceImpl}. Exactly one row per {@link TenantPlan} value, never
+ * per-tenant - see {@link PlanLimitsService}, which reads (and Redis-caches) these rows.
  *
  * <p>{@code -1} in any {@code max*} column means "no cap" - see {@link
- * PlanLimitsService.ResolvedPlanLimits} for where that sentinel is
- * translated into the {@code Integer.MAX_VALUE}/{@code Optional.empty()}
- * shape {@code com.agenticai.core.security.TenantLimits} actually exposes.
+ * PlanLimitsService.ResolvedPlanLimits} for where that sentinel is translated into the {@code
+ * Integer.MAX_VALUE}/{@code Optional.empty()} shape {@code
+ * com.agenticai.core.security.TenantLimits} actually exposes.
  *
- * <p>Read-only from the application's own runtime path in this PR (A2-PR1
- * tasks 1-3, 5); the platform-admin CRUD editor over this table
- * (A2-PR1 task 4) is {@code web-admin}-scoped and out of {@code
- * core-business}'s own scope per this repo's {@code CLAUDE.md} - flagged
- * in {@code AGENT-COORDINATION-2026-07-18.md} for whoever picks up {@code
- * web-admin} next, not built here. The package-private all-args
- * constructor below exists for that future editor's create/update path
- * (mirrors {@code PlatformHostedLlmProviderService#create}'s
- * {@code new PlatformHostedLlmProvider(...)} convention) and for this
- * class's own unit tests to build rows without a Hibernate session.
+ * <p>Read-only from the application's own runtime path in this PR (A2-PR1 tasks 1-3, 5); the
+ * platform-admin CRUD editor over this table (A2-PR1 task 4) is {@code web-admin}-scoped and out of
+ * {@code core-business}'s own scope per this repo's {@code ENGINEERING-RULES.md} - flagged in
+ * {@code the internal change log} for whoever picks up {@code web-admin} next, not built here. The
+ * package-private all-args constructor below exists for that future editor's create/update path
+ * (mirrors {@code PlatformHostedLlmProviderService#create}'s {@code new
+ * PlatformHostedLlmProvider(...)} convention) and for this class's own unit tests to build rows
+ * without a Hibernate session.
  */
 @Entity
 @Table(name = "plan_limits", schema = "control_plane")
@@ -99,22 +95,21 @@ public class PlanLimits {
     }
 
     PlanLimits(
-        TenantPlan plan,
-        int maxUsers,
-        int maxAgents,
-        int maxWorkflows,
-        int maxKbCollections,
-        boolean byokAllowed,
-        boolean whatsappAllowed,
-        boolean whiteLabel,
-        boolean liveVisionAllowed,
-        boolean externalChannelsAllowed,
-        boolean developerApiAllowed,
-        boolean ssoAllowed,
-        boolean scimAllowed,
-        boolean workflowExportAllowed,
-        boolean automationAllowed
-    ) {
+            TenantPlan plan,
+            int maxUsers,
+            int maxAgents,
+            int maxWorkflows,
+            int maxKbCollections,
+            boolean byokAllowed,
+            boolean whatsappAllowed,
+            boolean whiteLabel,
+            boolean liveVisionAllowed,
+            boolean externalChannelsAllowed,
+            boolean developerApiAllowed,
+            boolean ssoAllowed,
+            boolean scimAllowed,
+            boolean workflowExportAllowed,
+            boolean automationAllowed) {
         this.plan = plan;
         this.maxUsers = maxUsers;
         this.maxAgents = maxAgents;

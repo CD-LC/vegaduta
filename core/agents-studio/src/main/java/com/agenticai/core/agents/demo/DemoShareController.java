@@ -8,6 +8,7 @@ import com.agenticai.core.guardrails.moderation.ModerationContext;
 import com.agenticai.core.guardrails.moderation.ModerationOutcome;
 import com.agenticai.core.guardrails.moderation.ModerationService;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.tenancy.demo.DemoPersona;
 import com.agenticai.core.tenancy.demo.DemoSession;
 import com.agenticai.core.tenancy.demo.DemoSessionRateLimiter;
@@ -137,7 +138,7 @@ public class DemoShareController {
         try {
             demoShareService.recordView(session);
         } catch (RuntimeException e) {
-            log.warn("Could not record a share view for share {}", shareId, e);
+            log.warn("Could not record a share view for share {}", LogSafe.clean(shareId), e);
         }
         return ResponseEntity.ok(
                 new ShareMetaResponse(
@@ -283,7 +284,7 @@ public class DemoShareController {
         try {
             demoShareService.report(found.get(), reason);
         } catch (RuntimeException e) {
-            log.warn("Could not record a report for share {}", shareId, e);
+            log.warn("Could not record a report for share {}", LogSafe.clean(shareId), e);
         }
         return ResponseEntity.noContent().build();
     }

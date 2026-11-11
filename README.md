@@ -1,6 +1,6 @@
 # VegaDūta
 
-**An open-source, multi-tenant platform for building AI agents, wiring them into workflows with human approval, grounding them in your own data, and reaching them over the channels your users already use.**
+**A source-available (BSL-1.1), multi-tenant platform for building AI agents, wiring them into workflows with human approval, grounding them in your own data, and reaching them over the channels your users already use.**
 
 [![CI](https://github.com/CD-LC/vegaduta/actions/workflows/ci.yml/badge.svg)](https://github.com/CD-LC/vegaduta/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/CD-LC/vegaduta/actions/workflows/codeql.yml/badge.svg)](https://github.com/CD-LC/vegaduta/actions/workflows/codeql.yml)
@@ -231,7 +231,7 @@ One packaging per target, an open protocol at every boundary, no cloud SDK in th
 
 ## Contributing
 
-Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup, the checks every change must pass (`make gates`), and the DCO sign-off. Coding agents: see [AGENTS.md](AGENTS.md). Plans are in [ROADMAP.md](ROADMAP.md); how decisions are made is in [GOVERNANCE.md](GOVERNANCE.md). Questions go to GitHub Discussions; see [SUPPORT.md](SUPPORT.md).
+Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup, the checks every change must pass (`make gates`), and the DCO sign-off. Engineering rules: see [ENGINEERING-RULES.md](ENGINEERING-RULES.md). Plans are in [ROADMAP.md](ROADMAP.md); how decisions are made is in [GOVERNANCE.md](GOVERNANCE.md). Questions go to GitHub Discussions; see [SUPPORT.md](SUPPORT.md).
 
 ## Security
 

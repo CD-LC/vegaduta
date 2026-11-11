@@ -486,7 +486,7 @@ Streaming terminal signals go through `StreamFinalizer`, which calls the same ob
 The contract is in `LlmCallObserver`: an exception while building the observation or inside any sink is logged
 and swallowed, so observability can never fail (or mis-classify as failed) the call it observes; sinks run on
 whichever thread delivered the terminal signal, inside the call's captured tenant scope (so
-`TenantContext.current()` is the originating call's tenant, rule 12 in AGENTS.md). Derive nothing from raw
+`TenantContext.current()` is the originating call's tenant, rule 12 in ENGINEERING-RULES.md). Derive nothing from raw
 request objects in a sink; read the observation, which is the single place cost and token maths happen.
 
 To add one: write a class implementing `LlmCallSink` in package `com.agenticai.core.chat`, then add it to the
@@ -522,7 +522,7 @@ are `intake`, `guard`, `modelCall`, `toolCall`, `approval`, `verify`, `commit` a
   yet), call it from that code via the recorder of the turn in flight.
 - **To add an event type:** add a value to `TurnEventType`, a method on `TurnRecorder`, and a **new tenant Flyway
   migration** that widens the `turn_journal_event_type_chk` check constraint (V498 restricts `event_type` to the
-  seven current names and a released migration is never edited; see rule 3 in AGENTS.md). The hash includes the
+  seven current names and a released migration is never edited; see rule 3 in ENGINEERING-RULES.md). The hash includes the
   type, so existing chains stay valid.
 - **To read or replay:** `GET /api/agents/{agentId}/turns/{turnId}/journal` (needs `PERM_VIEW_AUDIT_LOG` and agent
   VIEWER; works whether or not writing is on), `TurnHashChain.verify` for integrity, `TurnReplay` for replaying a
