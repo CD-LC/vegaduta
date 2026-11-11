@@ -1,6 +1,7 @@
 package com.agenticai.core.security;
 
 import com.agenticai.core.security.apikey.ApiKeyAuthenticationToken;
+import com.agenticai.core.security.logging.LogSafe;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -142,10 +143,10 @@ public class TenantContextFilter extends OncePerRequestFilter {
                                     + " that attribute and the caller needs to log out and back in for"
                                     + " a fresh one. Returning 403 instead of letting every"
                                     + " tenant-scoped controller fail with a raw 500.",
-                            request.getMethod(),
+                            LogSafe.clean(request.getMethod()),
                             LogMasking.path(request.getRequestURI()),
-                            jwt.getSubject(),
-                            tenantClaim);
+                            LogSafe.clean(jwt.getSubject()),
+                            LogSafe.clean(tenantClaim));
                     reject(response, MISSING_TENANT_CLAIM_BODY, request);
                     return;
                 }
@@ -164,10 +165,10 @@ public class TenantContextFilter extends OncePerRequestFilter {
                     log.debug(
                             "Rejected {} {} - platform admin '{}' has no '{}' claim and this"
                                     + " route is tenant-scoped; returning 403.",
-                            request.getMethod(),
+                            LogSafe.clean(request.getMethod()),
                             LogMasking.path(request.getRequestURI()),
-                            jwt.getSubject(),
-                            tenantClaim);
+                            LogSafe.clean(jwt.getSubject()),
+                            LogSafe.clean(tenantClaim));
                     reject(response, PLATFORM_ADMIN_NO_TENANT_BODY, request);
                     return;
                 }
@@ -220,9 +221,9 @@ public class TenantContextFilter extends OncePerRequestFilter {
                                     + " (provisioning never completed, or was rolled back). Returning"
                                     + " 403 instead of letting every downstream schema-scoped query"
                                     + " fail with 'relation does not exist'.",
-                            request.getMethod(),
+                            LogSafe.clean(request.getMethod()),
                             LogMasking.path(request.getRequestURI()),
-                            tenantId);
+                            LogSafe.clean(tenantId));
                     reject(response, TENANT_UNUSABLE_BODY, request);
                     return;
                 }
@@ -264,10 +265,10 @@ public class TenantContextFilter extends OncePerRequestFilter {
                 if (tenantStatusGuard.isPresent() && !tenantStatusGuard.get().isUsable(tenantId)) {
                     log.warn(
                             "Rejected {} {} - API key '{}' resolved tenant '{}' which is not usable.",
-                            request.getMethod(),
+                            LogSafe.clean(request.getMethod()),
                             LogMasking.path(request.getRequestURI()),
-                            subject,
-                            tenantId);
+                            LogSafe.clean(subject),
+                            LogSafe.clean(tenantId));
                     reject(response, TENANT_UNUSABLE_BODY, request);
                     return;
                 }
@@ -339,10 +340,10 @@ public class TenantContextFilter extends OncePerRequestFilter {
                                 + " TenantContext will be empty for this request, and any tenant-scoped"
                                 + " code downstream (UserAdminController, Hibernate's schema resolver,"
                                 + " etc.) will fail. Authorities: {}",
-                        authentication.getClass().getName(),
-                        request.getMethod(),
+                        LogSafe.clean(authentication.getClass().getName()),
+                        LogSafe.clean(request.getMethod()),
                         LogMasking.path(request.getRequestURI()),
-                        authentication.getAuthorities());
+                        LogSafe.clean(authentication.getAuthorities()));
             }
             filterChain.doFilter(request, response);
         } finally {

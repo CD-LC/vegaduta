@@ -97,6 +97,12 @@ updates:
       semver-major-days: 14
     open-pull-requests-limit: 10
     labels: [dependencies, area/web]
+    ignore:
+      # 8.72.1 runs `next lint`'s type-aware pass out of heap (exit 134) at 4 GiB; retry on the next release.
+      - dependency-name: typescript-eslint
+        versions: ["8.72.1"]
+      - dependency-name: "@typescript-eslint/*"
+        versions: ["8.72.1"]
     commit-message:
       prefix: "build(deps)"
     groups:

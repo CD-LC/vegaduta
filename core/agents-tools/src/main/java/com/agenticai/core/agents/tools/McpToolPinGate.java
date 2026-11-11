@@ -6,6 +6,7 @@ import com.agenticai.core.mcp.McpToolPin;
 import com.agenticai.core.mcp.McpToolPinApprovalListener;
 import com.agenticai.core.mcp.McpToolPinService;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,9 +24,9 @@ import org.springframework.stereotype.Component;
  * from what agents may call until an administrator approves the new list.
  *
  * <p>What is pinned is what the model sees - the wrapped, namespaced callbacks' name, description
- * and input schema - so a change hidden past the description cap, which never reaches the model,
- * is correctly not a change. MCP annotations are not part of the pin (the Spring AI tool
- * definition does not carry them); see docs/architecture/mcp-spec-alignment.md.
+ * and input schema - so a change hidden past the description cap, which never reaches the model, is
+ * correctly not a change. MCP annotations are not part of the pin (the Spring AI tool definition
+ * does not carry them); see docs/architecture/mcp-spec-alignment.md.
  *
  * <p>Never throws into the connection path: an observation failure is logged and the connection
  * proceeds, because pinning must not turn a database hiccup into an MCP outage. The read side
@@ -68,12 +69,29 @@ public class McpToolPinGate implements McpToolPinApprovalListener {
                 var o = observation.get();
                 log.warn(
                         "MCP server '{}' ({}) changed its tool definitions for tenant '{}': {} (mode={})",
-                        o.serverName(), registrationId, tenant, o.diff().summary(), pins.mode());
-                record(ACTION_CHANGED, registrationId, o.serverName(), ACTOR, AuditOutcome.PENDING_APPROVAL,
-                        "observedHash=" + o.hash() + " " + o.diff().summary() + " mode=" + pins.mode());
+                        LogSafe.clean(o.serverName()),
+                        LogSafe.clean(registrationId),
+                        LogSafe.clean(tenant),
+                        LogSafe.clean(o.diff().summary()),
+                        LogSafe.clean(pins.mode()));
+                record(
+                        ACTION_CHANGED,
+                        registrationId,
+                        o.serverName(),
+                        ACTOR,
+                        AuditOutcome.PENDING_APPROVAL,
+                        "observedHash="
+                                + o.hash()
+                                + " "
+                                + o.diff().summary()
+                                + " mode="
+                                + pins.mode());
             }
         } catch (RuntimeException e) {
-            log.warn("Tool pin observation failed for MCP registration {} - continuing without it", registrationId, e);
+            log.warn(
+                    "Tool pin observation failed for MCP registration {} - continuing without it",
+                    registrationId,
+                    e);
         } finally {
             if (previous == null) {
                 TenantContext.clear();
@@ -83,7 +101,9 @@ public class McpToolPinGate implements McpToolPinApprovalListener {
         }
     }
 
-    /** {@code usable} minus registrations whose changed tool list awaits approval (enforce mode). */
+    /**
+     * {@code usable} minus registrations whose changed tool list awaits approval (enforce mode).
+     */
     Set<UUID> allowed(Set<UUID> usable) {
         if (pins.mode() != McpToolPinService.Mode.ENFORCE) {
             return usable;
@@ -93,14 +113,26 @@ public class McpToolPinGate implements McpToolPinApprovalListener {
             result.removeAll(pins.blockedRegistrationIds());
             return result;
         } catch (RuntimeException e) {
-            log.warn("Could not read MCP tool-pin state - offering NO dynamic MCP tools this turn (fail-closed)", e);
+            log.warn(
+                    "Could not read MCP tool-pin state - offering NO dynamic MCP tools this turn (fail-closed)",
+                    e);
             return Set.of();
         }
     }
 
     @Override
-    public void onApproved(UUID registrationId, String serverName, String actor, String newHash, McpToolPin.Diff approvedDiff) {
-        record(ACTION_APPROVED, registrationId, serverName, actor, AuditOutcome.APPROVED,
+    public void onApproved(
+            UUID registrationId,
+            String serverName,
+            String actor,
+            String newHash,
+            McpToolPin.Diff approvedDiff) {
+        record(
+                ACTION_APPROVED,
+                registrationId,
+                serverName,
+                actor,
+                AuditOutcome.APPROVED,
                 "pinnedHash=" + newHash + " " + approvedDiff.summary());
         DynamicMcpConnectionManager m = manager.getIfAvailable();
         if (m != null) {
@@ -111,17 +143,32 @@ public class McpToolPinGate implements McpToolPinApprovalListener {
     static List<McpToolPin.ToolDescriptor> descriptors(List<ToolCallback> wrapped) {
         return wrapped.stream()
                 .map(ToolCallback::getToolDefinition)
-                .map(d -> new McpToolPin.ToolDescriptor(d.name(), d.description(), d.inputSchema(), null))
+                .map(
+                        d ->
+                                new McpToolPin.ToolDescriptor(
+                                        d.name(), d.description(), d.inputSchema(), null))
                 .toList();
     }
 
-    private void record(String action, UUID id, String serverName, String actor, AuditOutcome outcome, String detail) {
+    private void record(
+            String action,
+            UUID id,
+            String serverName,
+            String actor,
+            AuditOutcome outcome,
+            String detail) {
         AuditLogService svc = audit.getIfAvailable();
         if (svc == null) {
             return;
         }
         try {
-            svc.record(actor, action, TARGET, id.toString(), outcome, "server=" + serverName + " " + detail);
+            svc.record(
+                    actor,
+                    action,
+                    TARGET,
+                    id.toString(),
+                    outcome,
+                    "server=" + serverName + " " + detail);
         } catch (RuntimeException e) {
             log.warn("Could not write {} audit event for MCP registration {}", action, id, e);
         }

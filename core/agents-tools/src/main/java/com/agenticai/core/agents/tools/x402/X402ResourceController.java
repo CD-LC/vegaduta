@@ -1,6 +1,7 @@
 package com.agenticai.core.agents.tools.x402;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.logging.LogSafe;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
@@ -129,7 +130,10 @@ public class X402ResourceController {
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(body);
         } catch (RuntimeException e) {
-            log.error("x402 settlement blew up on offer {}: {}", slug, e.toString());
+            log.error(
+                    "x402 settlement blew up on offer {}: {}",
+                    LogSafe.clean(slug),
+                    LogSafe.clean(e.toString()));
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(
                             Map.of(

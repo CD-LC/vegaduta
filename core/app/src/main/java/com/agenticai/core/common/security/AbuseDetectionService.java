@@ -1,16 +1,7 @@
 package com.agenticai.core.common.security;
 
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.tenancy.AllowUnlockedSchedule;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -21,6 +12,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Core fraud detection service: analyzes requests for suspicious patterns and issues fraud
@@ -107,8 +105,8 @@ public class AbuseDetectionService {
                 if (vpnScore.score >= vpnScoreThreshold) {
                     log.warn(
                             "VPN/Datacenter IP detected for high-risk endpoint: {} (score: {})",
-                            clientCtx.ip,
-                            vpnScore.score);
+                            LogSafe.clean(clientCtx.ip),
+                            LogSafe.clean(vpnScore.score));
                     decision = FraudDecision.CHALLENGE;
                 }
             }
@@ -396,10 +394,10 @@ public class AbuseDetectionService {
         userBlacklistRepo.save(blacklist);
         log.warn(
                 "User blacklisted: {} for reason: {} ({}min, by admin: {})",
-                userId,
-                reason,
-                durationMinutes,
-                adminId);
+                LogSafe.clean(userId),
+                LogSafe.clean(reason),
+                LogSafe.clean(durationMinutes),
+                LogSafe.clean(adminId));
     }
 
     /** Get or create a rate limit bucket. */

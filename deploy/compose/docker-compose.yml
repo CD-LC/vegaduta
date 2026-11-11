@@ -394,7 +394,7 @@ services:
   valkey:
     # Valkey (BSD-3) — drop-in Redis-protocol replacement. The password is
     # templated into a config file at start so it never sits in argv.
-    image: valkey/valkey:9.1.2-alpine
+    image: valkey/valkey:9.1.3-alpine
     <<: [*restart, *logging, *nnp]
     command:
       - sh
@@ -422,7 +422,7 @@ services:
     # S3 identity is generated from STORAGE_ACCESS_KEY/SECRET at start; core
     # creates STORAGE_BUCKET itself on boot. To use external S3 instead, set
     # STORAGE_ENDPOINT and stop this service (`docker compose stop seaweedfs`).
-    image: chrislusf/seaweedfs:4.50
+    image: chrislusf/seaweedfs:4.51
     <<: [*restart, *logging, *nnp]
     entrypoint: ["/bin/sh", "-c"]
     command:
@@ -483,7 +483,7 @@ services:
 
   keycloak:
     # Same Keycloak release as deploy/helm/charts/keycloak (one version line).
-    image: quay.io/keycloak/keycloak:26.8.1
+    image: quay.io/keycloak/keycloak:26.8.2
     <<: [*restart, *logging, *nnp]
     # Production mode (`start`) against keycloak-db, HTTP only inside the
     # compose network / on the loopback port; TLS is terminated by Caddy in
@@ -550,7 +550,7 @@ services:
   # Idempotent; shares keycloak's network namespace so the script's
   # localhost:8080 is this realm's Keycloak.
   keycloak-reconcile:
-    image: quay.io/keycloak/keycloak:26.8.1
+    image: quay.io/keycloak/keycloak:26.8.2
     <<: [*logging, *nnp]
     restart: "no"
     network_mode: "service:keycloak"
@@ -1023,7 +1023,7 @@ services:
     # The mounted config has no env interpolation; the webhook secret (and the
     # optional SMTP block, activated only when ALERT_EMAIL_TO+ALERT_SMTP_HOST
     # are set) are templated into /tmp at start.
-    image: prom/alertmanager:v0.34.1
+    image: prom/alertmanager:v0.34.2
     profiles: ["observability"]
     <<: [*restart, *logging, *nnp]
     entrypoint: ["/bin/sh", "-c"]
@@ -1070,7 +1070,7 @@ services:
     networks: [observability]
 
   grafana:
-    image: grafana/grafana:13.2.4
+    image: grafana/grafana:13.3.0
     profiles: ["observability"]
     <<: [*restart, *logging, *nnp]
     depends_on:
@@ -1154,7 +1154,7 @@ services:
     networks: [observability]
 
   langfuse-valkey:
-    image: valkey/valkey:9.1.2-alpine
+    image: valkey/valkey:9.1.3-alpine
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     command:
@@ -1177,7 +1177,7 @@ services:
     networks: [observability]
 
   langfuse-s3:
-    image: chrislusf/seaweedfs:4.50
+    image: chrislusf/seaweedfs:4.51
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     entrypoint: ["/bin/sh", "-c"]
@@ -1212,7 +1212,7 @@ services:
     networks: [observability]
 
   langfuse-worker:
-    image: langfuse/langfuse-worker:4.70.0
+    image: langfuse/langfuse-worker:4.72.0
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     depends_on: &langfuse-depends-on
@@ -1268,7 +1268,7 @@ services:
     networks: [observability]
 
   langfuse-web:
-    image: langfuse/langfuse:4.70.0
+    image: langfuse/langfuse:4.72.0
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     depends_on: *langfuse-depends-on
