@@ -3038,7 +3038,13 @@
     "auditTrailLabel": "தணிக்கைத் தடம்",
     "retriedLabel": "{count} முறை மீண்டும் முயற்சிக்கப்பட்டது{plural}",
     "nextAttemptSuffix": ", அடுத்த முயற்சி {time}",
-    "executionResultLabel": "செயல்படுத்தல் முடிவு"
+    "executionResultLabel": "செயல்படுத்தல் முடிவு",
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown."
   },
   "auditLogPanel": {
     "title": "தணிக்கைப் பதிவேடு",

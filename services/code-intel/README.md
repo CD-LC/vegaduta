@@ -121,6 +121,77 @@ the "read" tools need to answer architecture-level questions deterministically:
 All of it is deterministic — an answer exists only if the parsers produced
 it — and all of it is read-only: no approval, no `ALLOW_EXEC`, no heavy gate.
 
+## Security scan (offline heuristic)
+
+`GET /repos/{repo_id}/security-scan` and the read-only MCP tool `security_scan`
+run a deterministic, offline scan (no network, no LLM) over the tenant's own
+checkout, in `codebase_rag/security.py` (+ `security_rules.py`,
+`security_deps.py`). It reads files straight from disk, so it works without an
+index and, like every other analysis, only ever sees the calling tenant's
+checkout (reads go through the symlink-refusing, root-confined `safe_path`).
+
+**This is a heuristic triage aid, not a security product.** It is line-oriented
+regex matching with placeholder and entropy guards, with no data-flow or taint
+analysis, so it has both false positives and false negatives. It does not
+replace CodeQL/Semgrep (code), gitleaks/trufflehog (secrets, including git
+history, which this never reads) or Trivy/OSV/Dependabot (vulnerabilities).
+
+Parameters: `categories` (`secrets,sinks,dependencies`, default all),
+`include_tests` (default `false`), `min_severity` (`info|low|medium|high|critical`,
+default `low`), `limit` (default 500, max 5000). The response is
+`{summary, findings, dependencies, advisories, advisory_matching, disclaimer}`;
+`summary` counts are before the `limit` cap and `truncated` says whether it bit.
+
+**Secrets.** High-signal patterns: AWS access key ids and secret-key
+assignments, GitHub, Google, Slack, Stripe-live, Anthropic and OpenAI keys,
+PEM private keys (only when key material follows the header), passwords in
+connection URLs, a generic `password|secret|api_key|token = "literal"`
+assignment (entropy-gated) and a low-severity high-entropy string rule.
+Values are never returned: snippets are redacted (`AKIA[REDACTED:20]`, at most a
+4-character prefix, nothing at all for short values), and the same redaction is
+applied to snippets of sink findings. Placeholders (`example`, `changeme`,
+`<...>`, `${...}`, `xxxx`, repeated characters), env lookups, hashes/integrity
+strings and URLs are skipped.
+
+**Dangerous sinks** (Python, JS/TS, Java; one rule per line, comments skipped).
+Each finding has `rule_id`, `severity`, `category`, `file`, `line`, `snippet`,
+`title`, `cwe`, `confidence` and `remediation`:
+
+| Category | Rule ids |
+|---|---|
+| command exec | `py-os-system`, `py-subprocess-shell`, `js-child-process-exec`, `java-runtime-exec` |
+| code exec | `py-eval-exec`, `js-eval` |
+| unsafe deserialization | `py-unsafe-deserialization`, `py-yaml-unsafe-load`, `js-unsafe-deserialization`, `java-unsafe-deserialization` |
+| SQL string building | `py-sql-concat`, `js-sql-concat`, `java-sql-concat` (also needs a SQL keyword on the line) |
+| weak crypto | `py-weak-hash`, `py-weak-cipher`, `js-weak-crypto`, `java-weak-crypto` |
+| TLS verification off | `py-tls-verify-disabled`, `js-tls-verify-disabled`, `java-tls-verify-disabled` |
+
+A sink match means "review this", not "this is exploitable": there is no taint
+tracking, so `os.system("ls")` with a constant is reported like one with user
+input, and multi-line calls are missed. `confidence` is `low` for the noisiest
+rules.
+
+**Dependency inventory.** `requirements*.txt`, `package.json`,
+`package-lock.json` (v1-v3), `pom.xml` (properties resolved,
+`dependencyManagement` and DTD-bearing files skipped) and `go.mod` are
+normalized to `{ecosystem, name, version, spec, scope, direct, file, line,
+purl}` (`pypi|npm|maven|golang`; `version` is empty when only a range is
+declared). Yarn/pnpm lockfiles, Gradle, Poetry and `Pipfile` are not parsed.
+**No vulnerability lookup is performed**: matching needs an advisory feed and
+this service is offline by design. Feed `dependencies` (purl + version) to
+OSV/Trivy, or inject a callable via `security.scan(..., advisory_provider=fn)`
+(`fn(dependencies) -> list[advisory dict]`); it is deliberately not exposed over
+HTTP, and `advisory_matching.performed` is `false` unless one is supplied.
+
+**Scope and suppression.** Test and fixture paths (`tests/`, `__tests__/`,
+`*_test.*`, `*.spec.*`, `fixtures/`, `testdata/`, `mocks/`) are skipped unless
+`include_tests=true`; vendored/build directories, minified files, files over
+1 MB and lines over 2000 characters are always skipped. Suppress a finding with
+an inline `vegaduta:ignore` (optionally `vegaduta:ignore[rule-id,...]`),
+`nosec`, `pragma: allowlist secret` or `gitleaks:allow` comment, or with a
+`.vegaduta-security-ignore` file at the repo root (one `glob` or
+`rule-id:glob` per line, `#` for comments).
+
 ## Code execution with automatic rework
 
 The industry pattern for agentic code fixes (SWE-agent / Reflexion) is a
@@ -235,8 +306,8 @@ env:
 It exposes `search_code`, `code_callers`, `code_callees`, `code_impact`,
 `code_map`, `find_symbols`, `symbol_detail`, `code_outline`,
 `code_references`, `code_implementations`, `code_path`, `dead_code`,
-`code_tests`, `api_surface`, `code_hotspots`, `import_cycles` (the full
-read-only suite) plus `create_workspace`, `apply_files`, `run_code`,
+`code_tests`, `api_surface`, `code_hotspots`, `import_cycles`,
+`security_scan` (the full read-only suite) plus `create_workspace`, `apply_files`, `run_code`,
 `workspace_diff`. The agent sees the rework loop spelled out in the tool
 descriptions and drives it itself — no orchestration code in core.
 (`CODE_INTEL_DIRECT=1` makes the bridge call the service in-process, used
@@ -245,7 +316,7 @@ by the tests.)
 **Read-only by default over the registry path.** When registered in the
 platform's MCP registry (the HTTP backend, reachable by arbitrary agents),
 the bridge exposes **only** the read tools (`search_code`, `code_callers`,
-`code_callees`, `code_impact` and the twelve analysis tools) unless
+`code_callees`, `code_impact` and the thirteen analysis tools) unless
 `CODE_INTEL_MCP_READONLY=false`. This is deliberate and load-bearing: the
 bridge reaches the service over the *same* shared `X-Internal-Token` core
 uses, and the service now treats any internal-token caller as

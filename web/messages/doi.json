@@ -3947,7 +3947,13 @@
     "emptyTitle": "समीक्षा लेई किश नइँ",
     "policyOverrideButton": "नीति ओवरराइड",
     "workflowNeedsLabel": "इस वर्कफ़्लो गी तुंदे थमां इंदी लोड़ ऐ",
-    "workflowNeedsHint": "मंजूरी देने पर तुंदे जवाब अग्ले कदम गी भेजे जांघने।"
+    "workflowNeedsHint": "मंजूरी देने पर तुंदे जवाब अग्ले कदम गी भेजे जांघने।",
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown."
   },
   "auditLogPanel": {
     "title": "ऑडिट लॉग",

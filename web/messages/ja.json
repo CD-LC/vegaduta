@@ -2940,7 +2940,13 @@
     "auditTrailLabel": "監査証跡",
     "retriedLabel": "{count}回再試行済み",
     "nextAttemptSuffix": "、次回試行: {time}",
-    "executionResultLabel": "実行結果"
+    "executionResultLabel": "実行結果",
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown."
   },
   "auditLogPanel": {
     "title": "監査ログ",

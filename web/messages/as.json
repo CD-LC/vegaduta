@@ -3947,7 +3947,13 @@
     "emptyTitle": "পুনৰীক্ষণ কৰিবলৈ একো নাই",
     "policyOverrideButton": "নীতি অগ্ৰাহ্য কৰক",
     "workflowNeedsLabel": "এই ৱৰ্কফ্ল’টোক আপোনাৰ পৰা নিম্নলিখিতখিনিৰ প্ৰয়োজন",
-    "workflowNeedsHint": "আপুনি অনুমোদন জনালে আপোনাৰ উত্তৰসমূহ পৰৱৰ্তী পদক্ষেপলৈ প্ৰেৰণ কৰা হ'ব।"
+    "workflowNeedsHint": "আপুনি অনুমোদন জনালে আপোনাৰ উত্তৰসমূহ পৰৱৰ্তী পদক্ষেপলৈ প্ৰেৰণ কৰা হ'ব।",
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown."
   },
   "auditLogPanel": {
     "title": "অডিট লগ",

@@ -3947,7 +3947,13 @@
     "proposalGoalLabel": "O QUE O SENTINELA QUER EXECUTAR",
     "statusFilterLabel": "Filtrar por status",
     "workflowNeedsHint": "Suas respostas são passadas para a próxima etapa quando você aprova.",
-    "workflowNeedsLabel": "Este fluxo de trabalho precisa do seguinte de você"
+    "workflowNeedsLabel": "Este fluxo de trabalho precisa do seguinte de você",
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown."
   },
   "auditLogPanel": {
     "title": "Registro de auditoria",
