@@ -104,6 +104,8 @@ class SettingsCatalogContractTest {
                 new com.agenticai.core.agents.tools.scratchpad.ScratchpadSettings(
                         new com.agenticai.core.agents.tools.scratchpad.ScratchpadProperties()),
                 new SkillPromptSettings(),
+                new com.agenticai.core.agents.memory.HistoryWindowCatalog(),
+                new com.agenticai.core.agents.context.ContextCompactionSettings(new MockEnvironment()),
                 new ProductControlsCatalog(
                         new SemanticCacheProperties(), new ChatLimitsProperties(), new FollowUpProperties(),
                         new MemoryLimitsProperties(), new ToolLedgerProperties())));
@@ -138,6 +140,7 @@ class SettingsCatalogContractTest {
     @Test
     void theOwnerVisibleProductControlsAreInTheCatalogWithTheScopesTheirUseSitesHonour() {
         List<String> workspaceOnly = List.of(
+                "chat.history.maxTurns", "chat.history.maxChars", "chat.history.maxTokens",
                 "chat.toolLedger.enabled", "chat.toolLedger.replayEnabled", "chat.toolLedger.replayTurns",
                 "chat.toolLedger.maxEntriesPerTurn", "chat.toolLedger.maxReplayCharsPerTurn", "memory.tenant.maxMemories",
                 "skills.prompt.maxSkills", "skills.prompt.maxBlockChars");
@@ -146,7 +149,8 @@ class SettingsCatalogContractTest {
                 "agent.steps.autonomousMultiplier", "chat.semanticCache.similarityThreshold", "chat.semanticCache.ttl",
                 "chat.semanticCache.maxEntriesPerAgent", "chat.followUp.maxStickyTools", "chat.followUp.keepPrimaryModel",
                 "chat.attachments.maxImageMb", "chat.attachments.maxAudioMb", "chat.attachments.maxVideoMb",
-                "chat.attachments.maxDocumentMb", "memory.edge.maxFacts");
+                "chat.attachments.maxDocumentMb", "memory.edge.maxFacts",
+                "chat.compaction.clearAt", "chat.compaction.compactAt", "chat.compaction.keepRecentToolResults");
         for (String key : workspaceOnly) {
             assertThat(registry.require(key).scopes()).as(key).containsExactly(SettingScope.TENANT);
         }

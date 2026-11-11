@@ -92,6 +92,17 @@ public class ChatContextCompaction {
         this.tuning = tuning == null ? ContextCompactionProperties.shipped() : tuning;
     }
 
+    private volatile com.agenticai.core.settings.SettingsResolver settings;
+
+    /**
+     * The settings catalog, so a workspace's or an agent's {@code chat.compaction.*} decide when its prompts are
+     * compacted. Absent (hand-built instances): the {@code app.context.compaction.*} values.
+     */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setSettings(com.agenticai.core.settings.SettingsResolver settings) {
+        this.settings = settings;
+    }
+
     public ChatContextCompaction(
             ObjectProvider<LlmCompactionSummarizer> summarizer,
             ObjectProvider<ProviderModelCatalogService> catalog,
@@ -205,12 +216,17 @@ public class ChatContextCompaction {
                                         t ->
                                                 RestoreToolResultToolCallback.NAME.equals(
                                                         t.getToolDefinition().name()));
+        ContextCompactionSettings.Thresholds at =
+                ContextCompactionSettings.thresholds(
+                        settings,
+                        agentId,
+                        new ContextCompactionSettings.Thresholds(clearAt, compactAt, keepRecentToolResults));
         Params params =
                 new Params(
                         window,
-                        clearAt,
-                        compactAt,
-                        keepRecentToolResults,
+                        at.clearAt(),
+                        at.compactAt(),
+                        at.keepRecentToolResults(),
                         keepRecentMessages,
                         summaryMaxTokens,
                         restoreOffered,

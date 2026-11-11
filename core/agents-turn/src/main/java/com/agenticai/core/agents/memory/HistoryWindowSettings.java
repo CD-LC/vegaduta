@@ -1,7 +1,11 @@
 package com.agenticai.core.agents.memory;
 
+import com.agenticai.core.settings.SettingContext;
+import com.agenticai.core.settings.SettingsResolver;
 import com.agenticai.core.tenancy.PlatformSettingsService;
 import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The admin-tunable replay-window knobs of {@link SessionMemoryService} (platform_setting-backed),
@@ -16,6 +20,14 @@ import java.util.concurrent.atomic.AtomicReference;
  * SessionMemoryService#estimateTokens}).
  */
 final class HistoryWindowSettings {
+
+    private static final Logger log = LoggerFactory.getLogger(HistoryWindowSettings.class);
+
+    /** Settings-catalog keys: a workspace's own replay window (tenant scope; the history has no agent). */
+    static final String MAX_TURNS = "chat.history.maxTurns";
+
+    static final String MAX_CHARS = "chat.history.maxChars";
+    static final String MAX_TOKENS = "chat.history.maxTokens";
 
     /**
      * The three window knobs, snapshotted together so one turn never mixes a fresh cap with a stale
@@ -79,5 +91,40 @@ final class HistoryWindowSettings {
                                         defaultMaxTokens)));
         cached.set(new CachedHistoryConfig(fresh, now));
         return fresh;
+    }
+
+    private volatile SettingsResolver catalog;
+
+    /** Sets the settings catalog and returns it; absent (hand-built instances) every workspace gets the platform window. */
+    SettingsResolver catalog(SettingsResolver catalog) {
+        this.catalog = catalog;
+        return catalog;
+    }
+
+    /**
+     * The window of the calling thread's workspace: the platform window ({@link #current()}) with the
+     * workspace's {@code chat.history.*} settings applied. With no catalog, no tenant on the thread or a
+     * failing read it is the platform window, so a settings outage never blanks or widens a prompt. The
+     * same floors as {@link #current()} apply (at least one turn, never a negative budget).
+     */
+    HistoryConfig effective() {
+        HistoryConfig platform = current();
+        SettingsResolver resolver = catalog;
+        if (resolver == null) {
+            return platform;
+        }
+        try {
+            SettingContext ctx = SettingContext.tenant();
+            int turns = Math.max(1, resolver.getInt(MAX_TURNS, ctx));
+            int chars = Math.max(0, resolver.getInt(MAX_CHARS, ctx));
+            int tokens = Math.max(0, resolver.getInt(MAX_TOKENS, ctx));
+            if (turns == platform.maxTurns() && chars == platform.maxChars() && tokens == platform.maxTokens()) {
+                return platform;
+            }
+            return new HistoryConfig(turns, chars, tokens);
+        } catch (RuntimeException e) {
+            log.warn("Could not read the chat.history.* settings; using the platform window: {}", e.toString());
+            return platform;
+        }
     }
 }

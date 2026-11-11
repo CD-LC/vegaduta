@@ -8,6 +8,12 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Added
+- Settings catalog: a workspace can set its own conversation replay window (`chat.history.maxTurns`, `chat.history.maxChars`, `chat.history.maxTokens`; before, only a platform admin could), and a workspace or an agent can set when a long prompt is compacted (`chat.compaction.clearAt`, `chat.compaction.compactAt`, `chat.compaction.keepRecentToolResults`). Labels for the new settings are English in every locale for now.
+
+### Changed
+- The cumulative prompt-token cap of one reply's tool loop (`app.chat.tools.max-prompt-tokens-per-turn`, setting `chat.toolLoop.maxPromptTokensPerTurn`) now defaults to 1,000,000 (200,000 in the `personal` profile) instead of uncapped. A reply that passes it is told to stop calling tools and answer with what it has. Set `APP_CHAT_TOOLS_MAX_PROMPT_TOKENS_PER_TURN=0`, or the setting to 0, to remove the cap.
+
 ## [0.1.14] - 2026-10-30
 
 ### Changed

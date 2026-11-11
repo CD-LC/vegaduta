@@ -255,7 +255,7 @@ public class SessionMemoryService {
      * The admin-tunable replay window (turn, char and token caps); see {@link
      * HistoryWindowSettings}.
      */
-    private final HistoryWindowSettings windowSettings;
+    final HistoryWindowSettings windowSettings;
 
     public SessionMemoryService(
             StringRedisTemplate redisTemplate,
@@ -318,7 +318,7 @@ public class SessionMemoryService {
      */
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     public void setLedgerSettings(com.agenticai.core.settings.SettingsResolver resolver) {
-        this.ledgerSettings = resolver;
+        this.ledgerSettings = windowSettings.catalog(resolver); // also carries the workspace's chat.history.* window
     }
 
     /** The ledger limits of the calling thread's tenant. */
@@ -375,7 +375,7 @@ public class SessionMemoryService {
      * <p>Full-transcript consumers must use {@link #getFullHistory} instead.
      */
     public List<ChatTurn> getHistory(String sessionId) {
-        HistoryWindowSettings.HistoryConfig config = windowSettings.current();
+        HistoryWindowSettings.HistoryConfig config = windowSettings.effective();
         // Fetch only the newest maxTurns elements from Redis (negative range
         // indexes count from the tail) - no point deserializing entries the
         // window could never include.
