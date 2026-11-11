@@ -47,17 +47,19 @@ export default function AdminInboxPage() {
   if (!allowed) return null;
 
   return (
-    <AppShell eyebrow="Conversations">
-      <PageHeader
-        title="Inbox"
-        subtitle={
-          <span className="tabular-nums">
-            <strong className="font-semibold text-foreground">{waiting ?? "—"}</strong> {tHC("s1")}{" "}
-            <span className="text-muted-foreground">/</span> {held ?? "—"} human-held
-          </span>
-        }
-      />
-      <InboxPanel onCountsChange={onCountsChange} />
+    <AppShell eyebrow="Conversations" fillViewport quietStatus>
+      <div className="flex min-h-0 flex-1 flex-col gap-3 px-4 py-4 sm:px-6 lg:px-8">
+        <PageHeader
+          title="Inbox"
+          subtitle={
+            <span className="tabular-nums">
+              <strong className="font-semibold text-foreground">{waiting ?? "—"}</strong> {tHC("s1")}{" "}
+              <span className="text-muted-foreground">/</span> {held ?? "—"} human-held
+            </span>
+          }
+        />
+        <InboxPanel onCountsChange={onCountsChange} />
+      </div>
     </AppShell>
   );
 }

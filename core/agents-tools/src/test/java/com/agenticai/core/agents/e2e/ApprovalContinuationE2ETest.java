@@ -21,8 +21,8 @@ import org.junit.jupiter.api.Test;
  * ({@link ApprovalTurnHarness}); only the LLM is scripted.
  *
  * <p>The client sends NOTHING after the decision: the server starts the continuation turn itself
- * ({@code ApprovalContinuationLauncher}) and the tests wait for it the way the web does, by
- * reading the stored conversation ({@link ApprovalTurnHarness#awaitContinuation}).
+ * ({@code ApprovalContinuationLauncher}) and the tests wait for it the way the web does, by reading
+ * the stored conversation ({@link ApprovalTurnHarness#awaitContinuation}).
  *
  * <p>The scripted model is a policy, not a fixed script: it answers from what it was SHOWN. Shown
  * the approved tool's output it finishes the task; shown nothing it can only do what a model with
@@ -192,10 +192,9 @@ class ApprovalContinuationE2ETest {
                                                         t.startsWith(
                                                                         ApprovalTurnHarness
                                                                                 .CONTINUATION_MARKER)
-                                                                && t.contains(GOAL)
-                                                                && t.contains(CONFIRMATION)),
-                                "(c) the continuation message itself restates the original goal and carries the full"
-                                        + " result; the model's user messages were: "
+                                                                && t.contains(GOAL)),
+                                "(c) the continuation message restates the original goal (the result travels as the"
+                                        + " native tool result, see (b)); the model's user messages were: "
                                         + nextRequest.userTexts()),
                 () ->
                         assertTrue(
@@ -239,7 +238,8 @@ class ApprovalContinuationE2ETest {
                         .responder(
                                 request ->
                                         request.mentions(tail)
-                                                ? ScriptedLlm.text("Done, the receipt ends in " + tail)
+                                                ? ScriptedLlm.text(
+                                                        "Done, the receipt ends in " + tail)
                                                 : request.hasToolResult()
                                                         ? ScriptedLlm.text("Waiting for approval.")
                                                         : ScriptedLlm.callTool(
@@ -254,7 +254,10 @@ class ApprovalContinuationE2ETest {
         String reply = harness.awaitContinuation();
 
         assertAll(
-                () -> assertTrue(reply.contains(tail), "the model never saw the end of the result: " + reply),
+                () ->
+                        assertTrue(
+                                reply.contains(tail),
+                                "the model never saw the end of the result: " + reply),
                 () ->
                         assertTrue(
                                 harness.llm().requests().get(before).mentions(tail),
@@ -331,7 +334,10 @@ class ApprovalContinuationE2ETest {
                 ApprovalRequestAlreadyDecidedException.class,
                 () ->
                         h.approvalService()
-                                .reject(parked.getId(), ApprovalTurnHarness.APPROVER, "changed my mind"));
+                                .reject(
+                                        parked.getId(),
+                                        ApprovalTurnHarness.APPROVER,
+                                        "changed my mind"));
         Thread.sleep(400);
 
         assertAll(
@@ -381,7 +387,9 @@ class ApprovalContinuationE2ETest {
                                     }
                                     return lookups < 1
                                             ? ScriptedLlm.callTool(
-                                                    "l" + request.number(), "lookup_rate", "{\"to\":\"usd\"}")
+                                                    "l" + request.number(),
+                                                    "lookup_rate",
+                                                    "{\"to\":\"usd\"}")
                                             : ScriptedLlm.callTool(
                                                     "s" + request.number(),
                                                     TOOL,
@@ -419,13 +427,22 @@ class ApprovalContinuationE2ETest {
         String goal =
                 "Send invoice INV-7731 to billing@acme.test, then archive the invoice record and tell me the"
                         + " confirmation number.";
-        RecordingTool archive = plainTool("archive_invoice", "Archives an invoice record.", "archived INV-7731");
+        RecordingTool archive =
+                plainTool("archive_invoice", "Archives an invoice record.", "archived INV-7731");
         sendInvoice = plainTool(TOOL, "Sends an invoice by email.", TOOL_OUTPUT);
         harness =
                 ApprovalTurnHarness.builder()
                         .tool(sendInvoice)
-                        .tool(plainTool("weather_forecast", "Gets a weather forecast for a city.", "sunny"))
-                        .tool(plainTool("translate_text", "Translates text between languages.", "hola"))
+                        .tool(
+                                plainTool(
+                                        "weather_forecast",
+                                        "Gets a weather forecast for a city.",
+                                        "sunny"))
+                        .tool(
+                                plainTool(
+                                        "translate_text",
+                                        "Translates text between languages.",
+                                        "hola"))
                         .tool(plainTool("create_meeting", "Creates a calendar meeting.", "booked"))
                         .tool(plainTool("resize_image", "Resizes an image file.", "resized"))
                         .tool(archive)
@@ -437,16 +454,22 @@ class ApprovalContinuationE2ETest {
                                         return request.hasToolResult()
                                                 ? ScriptedLlm.text("Waiting for your approval.")
                                                 : ScriptedLlm.callTool(
-                                                        "s" + request.number(), TOOL, "{\"to\":\"billing@acme.test\"}");
+                                                        "s" + request.number(),
+                                                        TOOL,
+                                                        "{\"to\":\"billing@acme.test\"}");
                                     }
                                     boolean archived =
-                                            request.toolResults().stream().anyMatch(r -> r.contains("archived INV-7731"));
+                                            request.toolResults().stream()
+                                                    .anyMatch(r -> r.contains("archived INV-7731"));
                                     if (archived) {
-                                        return ScriptedLlm.text(FINAL_ANSWER + " The record is archived.");
+                                        return ScriptedLlm.text(
+                                                FINAL_ANSWER + " The record is archived.");
                                     }
                                     return request.offeredTools().contains("archive_invoice")
-                                            ? ScriptedLlm.callTool("a" + request.number(), "archive_invoice", "{}")
-                                            : ScriptedLlm.text("I cannot archive the record: that tool is not available.");
+                                            ? ScriptedLlm.callTool(
+                                                    "a" + request.number(), "archive_invoice", "{}")
+                                            : ScriptedLlm.text(
+                                                    "I cannot archive the record: that tool is not available.");
                                 })
                         .build();
         harness.chat(goal);
@@ -456,10 +479,16 @@ class ApprovalContinuationE2ETest {
 
         List<String> selectedFor = harness.toolSelectionMessages();
         assertAll(
-                () -> assertEquals(1, archive.executions(), "the next step's tool was used: " + reply),
+                () ->
+                        assertEquals(
+                                1, archive.executions(), "the next step's tool was used: " + reply),
                 () -> assertTrue(reply.contains("archived"), reply),
                 () -> assertEquals(1, sendInvoice.executions()),
-                () -> assertEquals(2, selectedFor.size(), "one tool resolution per turn: " + selectedFor),
+                () ->
+                        assertEquals(
+                                2,
+                                selectedFor.size(),
+                                "one tool resolution per turn: " + selectedFor),
                 () ->
                         assertEquals(
                                 goal,
@@ -474,13 +503,25 @@ class ApprovalContinuationE2ETest {
      */
     @Test
     void aToolTheConversationAlreadyUsedStaysOfferedWhateverTheGoalMatches() {
-        RecordingTool lookup = plainTool("lookup_customer", "Finds a customer account by name.", "customer-record ACME");
+        RecordingTool lookup =
+                plainTool(
+                        "lookup_customer",
+                        "Finds a customer account by name.",
+                        "customer-record ACME");
         sendInvoice = plainTool(TOOL, "Sends an invoice by email.", TOOL_OUTPUT);
         harness =
                 ApprovalTurnHarness.builder()
                         .tool(sendInvoice)
-                        .tool(plainTool("weather_forecast", "Gets a weather forecast for a city.", "sunny"))
-                        .tool(plainTool("translate_text", "Translates text between languages.", "hola"))
+                        .tool(
+                                plainTool(
+                                        "weather_forecast",
+                                        "Gets a weather forecast for a city.",
+                                        "sunny"))
+                        .tool(
+                                plainTool(
+                                        "translate_text",
+                                        "Translates text between languages.",
+                                        "hola"))
                         .tool(plainTool("create_meeting", "Creates a calendar meeting.", "booked"))
                         .tool(plainTool("resize_image", "Resizes an image file.", "resized"))
                         .tool(lookup)
@@ -490,23 +531,35 @@ class ApprovalContinuationE2ETest {
                                     List<String> users = request.userTexts();
                                     String last = users.get(users.size() - 1);
                                     boolean customerSeen =
-                                            request.toolResults().stream().anyMatch(r -> r.contains("customer-record"));
+                                            request.toolResults().stream()
+                                                    .anyMatch(r -> r.contains("customer-record"));
                                     if (last.startsWith(ApprovalTurnHarness.CONTINUATION_MARKER)) {
                                         if (customerSeen) {
-                                            return ScriptedLlm.text("Verified the customer; " + FINAL_ANSWER);
+                                            return ScriptedLlm.text(
+                                                    "Verified the customer; " + FINAL_ANSWER);
                                         }
                                         return request.offeredTools().contains("lookup_customer")
-                                                ? ScriptedLlm.callTool("v" + request.number(), "lookup_customer", "{\"to\":\"acme\"}")
-                                                : ScriptedLlm.text("I cannot verify the customer: no lookup tool.");
+                                                ? ScriptedLlm.callTool(
+                                                        "v" + request.number(),
+                                                        "lookup_customer",
+                                                        "{\"to\":\"acme\"}")
+                                                : ScriptedLlm.text(
+                                                        "I cannot verify the customer: no lookup tool.");
                                     }
                                     if (last.startsWith("Look up")) {
                                         return request.hasToolResult()
                                                 ? ScriptedLlm.text("Found the ACME account.")
-                                                : ScriptedLlm.callTool("l" + request.number(), "lookup_customer", "{\"to\":\"acme\"}");
+                                                : ScriptedLlm.callTool(
+                                                        "l" + request.number(),
+                                                        "lookup_customer",
+                                                        "{\"to\":\"acme\"}");
                                     }
                                     return request.hasToolResult()
                                             ? ScriptedLlm.text("Waiting for your approval.")
-                                            : ScriptedLlm.callTool("s" + request.number(), TOOL, "{\"to\":\"billing@acme.test\"}");
+                                            : ScriptedLlm.callTool(
+                                                    "s" + request.number(),
+                                                    TOOL,
+                                                    "{\"to\":\"billing@acme.test\"}");
                                 })
                         .build();
         harness.chat("Look up the account for ACME");
@@ -520,7 +573,11 @@ class ApprovalContinuationE2ETest {
 
         assertAll(
                 () -> assertTrue(reply.startsWith("Verified the customer"), reply),
-                () -> assertEquals(2, lookup.executions(), "once earlier in the conversation, once in the continuation"));
+                () ->
+                        assertEquals(
+                                2,
+                                lookup.executions(),
+                                "once earlier in the conversation, once in the continuation"));
     }
 
     /**
@@ -563,7 +620,9 @@ class ApprovalContinuationE2ETest {
                 .filter(
                         t ->
                                 t.content() != null
-                                        && t.content().startsWith(ApprovalTurnHarness.CONTINUATION_MARKER))
+                                        && t.content()
+                                                .startsWith(
+                                                        ApprovalTurnHarness.CONTINUATION_MARKER))
                 .count();
     }
 

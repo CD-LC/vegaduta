@@ -88,4 +88,15 @@ public final class TurnModelTraits {
     public void streamIdleTimeout(java.time.Duration timeout) {
         this.streamIdleTimeout = timeout;
     }
+
+    /** The agent's prompt profile for this turn; {@link PromptProfile#FULL} until set. */
+    private volatile PromptProfile promptProfile = PromptProfile.FULL;
+
+    public PromptProfile promptProfile() {
+        return promptProfile;
+    }
+
+    public void promptProfile(PromptProfile profile) {
+        this.promptProfile = profile == null ? PromptProfile.FULL : profile;
+    }
 }

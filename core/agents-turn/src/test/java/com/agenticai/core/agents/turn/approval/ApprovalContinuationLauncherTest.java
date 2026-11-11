@@ -1,6 +1,5 @@
 package com.agenticai.core.agents.turn.approval;
 
-import com.agenticai.core.agents.turn.ApprovalContinuationProperties;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -15,6 +14,7 @@ import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.ApprovalContinuation;
 import com.agenticai.core.agents.turn.ApprovalContinuation.Outcome;
+import com.agenticai.core.agents.turn.ApprovalContinuationProperties;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.approval.ApprovalRequest;
@@ -40,7 +40,8 @@ class ApprovalContinuationLauncherTest {
     private final ApprovalContinuationFactory factory = mock(ApprovalContinuationFactory.class);
     private final ApprovalContinuationProperties properties = new ApprovalContinuationProperties();
     private final Set<String> claimed = new HashSet<>();
-    private final ApprovalRequest request = new ApprovalRequest("mcp_tool.send_invoice", "s", "{}", "r");
+    private final ApprovalRequest request =
+            new ApprovalRequest("mcp_tool.send_invoice", "s", "{}", "r");
     private ApprovalContinuationLauncher launcher;
 
     @AfterEach
@@ -55,7 +56,8 @@ class ApprovalContinuationLauncherTest {
         when(redis.opsForValue()).thenReturn(ops);
         when(ops.setIfAbsent(anyString(), anyString(), any(Duration.class)))
                 .thenAnswer(inv -> claimed.add(inv.getArgument(0)));
-        when(redis.delete(anyString())).thenAnswer(inv -> claimed.remove(inv.<String>getArgument(0)));
+        when(redis.delete(anyString()))
+                .thenAnswer(inv -> claimed.remove(inv.<String>getArgument(0)));
         ObjectProvider<StringRedisTemplate> provider = mock(ObjectProvider.class);
         when(provider.getIfAvailable()).thenReturn(redis);
         launcher =
@@ -90,7 +92,8 @@ class ApprovalContinuationLauncherTest {
 
     private void built(ApprovalContinuation c) {
         when(factory.build(any(), any(), any())).thenReturn(Optional.of(c));
-        when(chat.chat(any(TurnContext.class), any(ChatTurnRequest.class))).thenReturn(Flux.just("done"));
+        when(chat.chat(any(TurnContext.class), any(ChatTurnRequest.class)))
+                .thenReturn(Flux.just("done"));
     }
 
     @Test
@@ -114,14 +117,31 @@ class ApprovalContinuationLauncherTest {
         assertThat(turn.getValue().agentId()).isEqualTo(c.requestedAgentId());
         assertThat(turn.getValue().sessionId()).isEqualTo("sess-1");
         assertThat(turn.getValue().subjectKey()).isEqualTo("user-1");
-        assertThat(turn.getValue().continuation()).isSameAs(c);
-        assertThat(ApprovalContinuation.isContinuationMessage(turn.getValue().userMessage())).isTrue();
-        assertThat(turn.getValue().userMessage()).contains("Send the invoice.").contains("sent");
+        // The replayed copy (output cut at max-result-chars): equal to the decision for a short
+        // output.
+        assertThat(turn.getValue().continuation())
+                .usingRecursiveComparison()
+                .comparingOnlyFields(
+                        "requestId",
+                        "outcome",
+                        "toolName",
+                        "argumentsJson",
+                        "result",
+                        "goal",
+                        "sessionId")
+                .isEqualTo(c);
+        assertThat(ApprovalContinuation.isContinuationMessage(turn.getValue().userMessage()))
+                .isTrue();
+        // The native shape (the default): the result travels as the replayed tool result, the
+        // message names the goal.
+        assertThat(ApprovalContinuationPrompt.isNativeShape(turn.getValue().userMessage()))
+                .isTrue();
+        assertThat(turn.getValue().userMessage()).contains("Send the invoice.");
         // As the person who asked, with no roles - never as the approver.
         assertThat(context.getValue().tenantId()).isEqualTo(TENANT);
         assertThat(context.getValue().subject()).isEqualTo("user-1");
         assertThat(context.getValue().tenantContext().orElseThrow().getRoles()).isEmpty();
-        assertThat(context.getValue().continuation()).isSameAs(c);
+        assertThat(context.getValue().continuation()).isSameAs(turn.getValue().continuation());
         // The approving thread keeps its own context.
         assertThat(TenantContext.current().orElseThrow().getSubject()).isEqualTo("admin-1");
     }
@@ -135,7 +155,8 @@ class ApprovalContinuationLauncherTest {
         assertThat(launcher.afterDecision(request, Outcome.COMPLETED, "sent")).isFalse();
         assertThat(launcher.afterDecision(request, Outcome.COMPLETED, "sent")).isFalse();
 
-        verify(chat, timeout(5000).times(1)).chat(any(TurnContext.class), any(ChatTurnRequest.class));
+        verify(chat, timeout(5000).times(1))
+                .chat(any(TurnContext.class), any(ChatTurnRequest.class));
     }
 
     @Test
@@ -181,14 +202,16 @@ class ApprovalContinuationLauncherTest {
     @Test
     void aTurnThatFailsOnTheWorkerNeverThrowsIntoTheApprovingThread() {
         built(continuation("sess-1", TENANT));
-        when(chat.chat(any(TurnContext.class), any(ChatTurnRequest.class))).thenThrow(new IllegalStateException("boom"));
+        when(chat.chat(any(TurnContext.class), any(ChatTurnRequest.class)))
+                .thenThrow(new IllegalStateException("boom"));
         ApprovalContinuationLauncher launcher = launcher();
 
         // The failure surfaces on the worker (the Flux is deferred), not on the approving thread.
         boolean started = launcher.afterDecision(request, Outcome.COMPLETED, "sent");
 
         assertThat(started).isTrue();
-        verify(chat, timeout(5000).times(1)).chat(any(TurnContext.class), any(ChatTurnRequest.class));
+        verify(chat, timeout(5000).times(1))
+                .chat(any(TurnContext.class), any(ChatTurnRequest.class));
     }
 
     @Test
