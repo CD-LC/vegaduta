@@ -200,6 +200,12 @@ final class ProviderModelSeedCatalog {
             new SeedModel("deepseek-r1:8b", "DeepSeek R1 8B", 131_072, false, false, false),
             new SeedModel("deepseek-r1:14b", "DeepSeek R1 14B", 131_072, false, false, false),
             new SeedModel("llama3.2:3b", "Llama 3.2 3B", 131_072, false, false, false),
+            // Meta's open-weight lines beyond Llama 3.x (Nov 2026): Muse Glimmer
+            // (Apache-2.0, Aug 2026) and Llama 4 Scout, both text + image input.
+            new SeedModel("llama3.1:8b", "Llama 3.1 8B", 131_072, false, false, false),
+            new SeedModel("llama3.3:70b", "Llama 3.3 70B", 131_072, false, false, false),
+            new SeedModel("llama4:16x17b", "Llama 4 Scout", 131_072, true, false, false),
+            new SeedModel("muse-glimmer:30b", "Muse Glimmer 30B", 131_072, true, false, false),
             new SeedModel("mistral:7b", "Mistral 7B", 32_000, false, false, false)
         )),
         // The -latest aliases are Mistral's own moving pointers and stay; the
@@ -227,6 +233,11 @@ final class ProviderModelSeedCatalog {
         Map.entry(ProviderName.GROQ, List.of(
             new SeedModel("llama-3.3-70b-versatile", "Llama 3.3 70B Versatile (Groq)", 128_000, false, false, false),
             new SeedModel("llama-3.1-8b-instant", "Llama 3.1 8B Instant (Groq)", 128_000, false, false, false),
+            // Muse Spark Open (Meta's 816B open-weight model, Oct 2026) is a Groq
+            // preview model on enterprise pricing: listed so it can be chosen, and
+            // its id holds none of the hosted pool's auto-pick keywords, so
+            // auto-selection stays on llama-3.1-8b-instant.
+            new SeedModel("meta-models/muse-spark-open", "Muse Spark Open (Groq, preview)", 131_072, false, false, false),
             new SeedModel("openai/gpt-oss-20b", "GPT-OSS 20B (Groq)", 128_000, false, false, false),
             new SeedModel("openai/gpt-oss-120b", "GPT-OSS 120B (Groq)", 128_000, false, false, false)
         )),

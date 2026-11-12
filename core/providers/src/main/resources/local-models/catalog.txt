@@ -28,8 +28,14 @@ qwen3:8b|Qwen|5|12|structured|reliable tool use for its size; thinking on by def
 qwen3:14b|Qwen|9|16|structured|stronger reasoning than 8b; 16 GB GPU or 24 GB Apple Silicon|15|40|11|Apache-2.0|yes|analysis and multi-step tasks
 granite4.2:3b|Granite|2|8|structured|IBM, Apache-2.0; compact, trained for tool use and RAG|3|128|3|Apache-2.0|yes|retrieval over your documents on a small machine
 hermes3:8b|Hermes|5|12|unverified|Nous Research, tuned for function calling; run `models pull hermes3:8b` to measure it on your machine|8|128|7|Llama 3.1 community|no|function calling and structured JSON output
+llama3.2:1b|Llama|1.3|6|chat only|Meta's smallest; listed as chat only like llama3.2:3b (not measured separately)|1.2|128|2|Llama 3.2 community|no|quick replies and summaries on a very small machine
 llama3.2:3b|Llama|2|8|chat only|narrates tool runs instead of calling them; chat and summaries only|3|128|3|Llama 3.2 community|no|plain chat and summaries
 llama3.1:8b|Llama|5|12|structured|Meta's general-purpose model; calls tools natively|8|128|7|Llama 3.1 community|no|general chat and simple tool use
+llama3.2-vision:11b|Llama|7.8|16|chat only|Meta's image-reading model; Ollama reports no tool support for it|11|128|12|Llama 3.2 community|no|describing and reading images
+llama3.3:70b|Llama|43|64|unverified|70B dense; 48 GB GPU or 64 GB Apple Silicon; run `models pull llama3.3:70b` to grade it|70|128|48|Llama 3.3 community|no|a strong multilingual assistant on a workstation
+llama4:16x17b|Llama|67|96|unverified|Llama 4 Scout: 109B mixture-of-experts, 17B active; image input; 80 GB+ VRAM or 96 GB+ unified memory|109|10000|80|Llama 4 community|no|very long documents and images on a workstation
+llama4:128x17b|Llama|245|288|unverified|Llama 4 Maverick: 400B mixture-of-experts, 17B active; servers only, 256 GB+ of GPU or unified memory|400|1000|256|Llama 4 community|no|the largest Llama; multi-GPU servers
+muse-glimmer:30b|Muse|18|32|unverified|Meta, Apache-2.0; 30B built for always-on local agents, image input; 24 GB GPU or 32 GB Apple Silicon; run `models pull muse-glimmer:30b` to grade it|30|128|24|Apache-2.0|yes|local agents with tools and images on one GPU
 phi4-mini|Phi|2.5|8|structured|Microsoft, MIT; strong for its size at maths and following instructions|3.8|128|4|MIT|no|maths and instructions on a small machine
 phi4:14b|Phi|9|16|unverified|Microsoft, MIT; strong reasoning, short context window|14|16|11|MIT|no|reasoning and maths without tools
 ministral-3:8b|Mistral|5|12|unverified|Mistral's small dense model with native function calling; run `models pull ministral-3:8b` to grade it|8|256|7|Apache-2.0|no|multilingual chat and function calling
