@@ -11,9 +11,9 @@ import org.springframework.stereotype.Component;
  * /api/agents/{agentId}/chat/sessions/{sessionId}/taint}) is the whole truth for every reader.
  *
  * <p>The conversation id is the SEC-004 scoped session id, which already folds in the tenant, so
- * the tenant id is not part of the key. Follows the marker's own switches and failure behaviour:
- * with {@code app.agents.taint.session-persistence=false}, or Redis unreachable, a conversation
- * reads as not tainted.
+ * the tenant id is not part of the key. With {@code app.agents.taint.session-persistence=false} a
+ * conversation reads as not tainted. A marker that cannot be read is NOT reported as clean: the
+ * read throws, and both readers then treat the conversation as tainted (fail closed).
  */
 @Component
 class SessionBackedConversationTaintStore implements ConversationTaintStore {
@@ -26,7 +26,7 @@ class SessionBackedConversationTaintStore implements ConversationTaintStore {
 
     @Override
     public boolean isTainted(String tenantId, String conversationId) {
-        return sessions.load(conversationId).isPresent();
+        return sessions.hasMarkerStrict(conversationId);
     }
 
     /**

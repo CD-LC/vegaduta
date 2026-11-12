@@ -5,9 +5,12 @@ package com.agenticai.core.guardrails.taint;
  * stays in the conversation history, so a later turn of the same conversation still has it in the
  * model's context even though that turn's own {@link TurnTaint} starts clean.
  *
- * <p>The flag only ever grows: there is deliberately no clear operation. A conversation is
- * identified by tenant plus the caller-scoped conversation id; the same id under another tenant is
- * a different conversation.
+ * <p>Nothing in the turn pipeline clears the flag: it only grows as turns run. The one way back is
+ * the audited, human decision behind {@code DELETE
+ * /api/agents/{agentId}/chat/sessions/{sessionId}/taint}, which removes the session marker this
+ * store reads. A conversation is identified by tenant plus the caller-scoped conversation id; the
+ * same id under another tenant is a different conversation. An implementation that cannot read the
+ * flag throws rather than answer "clean".
  */
 public interface ConversationTaintStore {
 

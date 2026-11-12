@@ -82,6 +82,19 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
     private final A2aMessageSigner signer;
     private final A2aMessageSecurityProperties security;
     private final A2aHopRegistry hopRegistry;
+
+    /**
+     * Shared-secret peers and replay settings of the {@code X-A2A-*} layer; defaults sign nothing.
+     */
+    private volatile A2aReplayProtectionProperties replay = new A2aReplayProtectionProperties();
+
+    @Autowired(required = false)
+    void setReplayProtection(A2aReplayProtectionProperties replay) {
+        if (replay != null) {
+            this.replay = replay;
+        }
+    }
+
     private final A2aBoundedHttp bounded;
 
     @Autowired
@@ -416,6 +429,7 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
                             security.getClient().isSignRequests())
                     .forEach(request::header);
         }
+        A2aReplayHeaders.add(request, target, body, outbound.hop(), replay);
         String responseBody = execute(request.build());
         JsonNode response;
         try {

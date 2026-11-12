@@ -32,6 +32,20 @@ public class A2aError extends RuntimeException {
     public static final int HOP_LIMIT_EXCEEDED = -32013;
     public static final int MESSAGE_EXPIRED = -32014;
 
+    /**
+     * Replay-protection block (-32090..-32095) of the optional {@code X-A2A-*} header layer (see
+     * {@link A2aMessageSecurityFilter}): shared-secret HMAC, timestamp window and single-use nonce
+     * for peers that have no signed Agent Card. These only appear when a peer sent the headers or
+     * the operator required them.
+     */
+    public static final int REPLAY_DETECTED = -32090;
+
+    public static final int TIMESTAMP_OUT_OF_WINDOW = -32091;
+    public static final int REPLAY_HOP_LIMIT_EXCEEDED = -32092;
+    public static final int REPLAY_HEADERS_REQUIRED = -32093;
+    public static final int SIGNATURE_INVALID = -32094;
+    public static final int REPLAY_CAPACITY = -32095;
+
     private final int code;
     private final Object data;
 
