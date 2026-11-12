@@ -612,6 +612,11 @@ effective defaults are the ones in this table and now in the yml. Seeding keys a
 | `APP_A2A_SERVER_TRUSTED_CARD_HOSTS` (`app.a2a.server.trusted-card-hosts`) | empty | optional allow-list (`host` or `*.suffix`) of hosts whose Agent Card may be fetched to find a caller's signing key; empty = any host the SSRF guard allows, for an authenticated caller | |
 | `APP_A2A_SERVER_KEY_CACHE_TTL` (`app.a2a.server.key-cache-ttl`) | `10m` | how long a caller's resolved signing key is cached (failures: 1 minute) | |
 | `APP_A2A_CLIENT_SIGN_REQUESTS` (`app.a2a.client.sign-requests`) | `true` | sign outbound A2A requests and send hop/trace, only to a peer whose card advertises the message-integrity extension; signing needs `APP_A2A_PUBLIC_BASE_URL` | |
+| `APP_A2A_REQUIRE_REPLAY_PROTECTION` (`app.a2a.require-replay-protection`) | `false` | require the shared-secret `X-A2A-*` headers (timestamp, nonce, hop) on inbound requests; `false` because third-party peers send none. Set `true` once every peer is a VegaDuta instance | |
+| `APP_A2A_REPLAY_WINDOW` (`app.a2a.replay-window`) | `300s` | clock-skew window and nonce TTL for the shared-secret scheme (`-32091` outside) | |
+| `APP_A2A_NONCE_CACHE_MAX_PER_TENANT` (`app.a2a.nonce-cache-max-per-tenant`) | `10000` | shared-secret nonce cache size per tenant (in-memory mode; Redis when `APP_A2A_TASK_STORE=redis`) | |
+| `APP_A2A_SIGNING_SECRET` / `APP_A2A_REQUIRE_SIGNATURE` (`app.a2a.signing-secret` / `app.a2a.require-signature`) | blank / `false` | shared HMAC-SHA256 secret for inbound `X-A2A-Signature` verification (`-32094` when wrong); `require-signature=true` refuses unsigned requests with `-32093` | |
+| `app.a2a.signed-peers[n].host` / `.secret` | none | peers that receive `X-A2A-Signature` on outbound calls, alongside the card-key signature when the peer advertises it. The two schemes are independent: card-key is resolved from the peer's Agent Card, shared-secret is configured per host | |
 | `TOOL_AUTO_SELECTION_ENABLED` | `true` | automatic tool selection per turn | |
 | `APP_VISION_ENABLED` | `true` | image inputs in chat | |
 | `AGENT_JOB_TRIGGERS_ENABLED` | `true` | scheduled agent jobs | |
