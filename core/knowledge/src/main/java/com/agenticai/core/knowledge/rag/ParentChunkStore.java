@@ -41,7 +41,7 @@ public class ParentChunkStore {
 
     /**
      * Persists parents for one ingestion. {@code documentId} may be null (raw text ingest). The
-     * parents take the trust of the children written with them ({@code provenance}, V680): a parent
+     * parents take the trust of the children written with them ({@code provenance}, V711): a parent
      * holds the children's text, so a QUARANTINED document's parents are QUARANTINED too and never
      * handed to the model.
      */
@@ -79,7 +79,7 @@ public class ParentChunkStore {
     /**
      * For each given chunk id that is a child of a stored parent, its {@link
      * ParentExpander.ParentLink}. Chunks without a parent (flat chunks) are simply absent from the
-     * map, and so are chunks whose parent is QUARANTINED (V680): the child is returned alone rather
+     * map, and so are chunks whose parent is QUARANTINED (V711): the child is returned alone rather
      * than expanded with text a person has not approved.
      */
     public Map<UUID, ParentExpander.ParentLink> linksFor(Collection<UUID> chunkIds) {

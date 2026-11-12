@@ -161,4 +161,37 @@ class WorkflowHttpNodeSecretInjectionTest {
         assertThat(sentBodies).containsExactly("{{b}}");
         assertThat(sentBodies.get(0)).doesNotContain(SECRET);
     }
+
+    @Test
+    void journaledPostCarriesTheStableIdempotencyKeyHeader() {
+        EffectIdempotency.bind("run-1:n1:3");
+        try {
+            run("x", "{}");
+        } finally {
+            EffectIdempotency.clear();
+        }
+        assertThat(sentHeaders.get(0)).containsEntry("Idempotency-Key", "run-1:n1:3");
+    }
+
+    @Test
+    void anAuthorSetIdempotencyKeyWinsAndNoJournalMeansNoHeader() {
+        run("x", "{}");
+        assertThat(sentHeaders.get(0)).doesNotContainKey("Idempotency-Key");
+
+        EffectIdempotency.bind("run-1:n1:-");
+        try {
+            Map<String, Object> config = new LinkedHashMap<>();
+            config.put("method", "POST");
+            config.put("url", "https://93.184.216.34/hook");
+            config.put("headers", List.of(Map.of("name", "idempotency-key", "value", "mine")));
+            WorkflowNodeDto node =
+                    new WorkflowNodeDto(
+                            "n1", "http", Map.of(), Map.of("config", config, "label", "HTTP"));
+            handler.executeHttpNode(node, "{}");
+        } finally {
+            EffectIdempotency.clear();
+        }
+        assertThat(sentHeaders.get(1)).containsEntry("idempotency-key", "mine");
+        assertThat(sentHeaders.get(1)).doesNotContainKey("Idempotency-Key");
+    }
 }

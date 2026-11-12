@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
  * an agent-long-term note.
  *
  * <p><b>Whose notes.</b> A session-pad note belongs to the session (whose id is already derived per
- * caller). An agent-pad note belongs to the caller's {@code subjectKey} (V680): the model's read,
+ * caller). An agent-pad note belongs to the caller's {@code subjectKey} (V711): the model's read,
  * list, write and delete only reach the caller's own agent-pad notes, the cap and eviction are per
  * caller, and a turn with no identified caller cannot use the agent pad at all. Rows that predate
  * the column have no owner; they are never returned to the model (operators still see them).

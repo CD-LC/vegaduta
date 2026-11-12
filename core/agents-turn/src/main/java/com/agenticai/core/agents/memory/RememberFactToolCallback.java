@@ -6,6 +6,7 @@ import com.agenticai.core.graphmemory.GraphTriple;
 import com.agenticai.core.graphmemory.MemoryWriteArbitrationService;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.knowledge.MemoryWriteScreen;
+import com.agenticai.core.screen.ContentWriteScreen;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
@@ -140,11 +141,13 @@ public class RememberFactToolCallback implements ToolCallback {
         return ToolDefinition.builder()
                 .name("remember_fact")
                 .description(
-                        "Saves a fact, preference, or correction about the current user so you'll still know it in "
-                                + "future conversations, not just this one. Use this when the user states a durable "
-                                + "preference (\"I prefer email over WhatsApp\"), a fact about themselves or their business "
-                                + "(\"my shop is only open on weekends\"), or corrects something you got wrong. Do not use "
-                                + "this for one-off details that only matter to the current message.")
+                        "Saves a fact, preference, or correction about the current user so you'll"
+                                + " still know it in future conversations, not just this one. Use this"
+                                + " when the user states a durable preference (\"I prefer email over"
+                                + " WhatsApp\"), a fact about themselves or their business (\"my shop"
+                                + " is only open on weekends\"), or corrects something you got wrong."
+                                + " Do not use this for one-off details that only matter to the current"
+                                + " message.")
                 .inputSchema(
                         memoryService != null && memoryService.supersessionEnabled()
                                 ? SCHEMA_WITH_REPLACES
@@ -166,9 +169,13 @@ public class RememberFactToolCallback implements ToolCallback {
             if (factValue == null || factValue.toString().isBlank()) {
                 return "{\"error\": \"fact is required\"}";
             }
-            Optional<String> refusal = MemoryWriteScreen.refusal(factValue.toString());
+            // Stored-injection / credential tripwire (ASI06, LLM04, LLM02): a remembered fact is
+            // recalled into later turns, so a directive or a key written here outlives this turn.
+            Optional<String> refusal =
+                    ContentWriteScreen.refusal(factValue.toString())
+                            .or(() -> MemoryWriteScreen.refusal(factValue.toString()));
             if (refusal.isPresent()) {
-                log.warn("remember_fact refused by the memory write screen (agent {})", agentId);
+                log.warn("remember_fact refused for agent {}: write screen tripped", agentId);
                 return errorJson(refusal.get());
             }
             MemoryProvenance provenance = MemoryWriteGate.classify(turnTaint);
@@ -237,7 +244,8 @@ public class RememberFactToolCallback implements ToolCallback {
             }
         } catch (Exception e) {
             log.warn(
-                    "Graph memory enrichment failed for remember_fact - vector memory is unaffected",
+                    "Graph memory enrichment failed for remember_fact - vector memory is"
+                            + " unaffected",
                     e);
         }
     }

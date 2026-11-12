@@ -10114,6 +10114,25 @@ class SessionConfigApi:
         return self._http.request("GET", "/api/session/config")
 
 
+class SessionTaintApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def status(self, agent_id: str, session_id: str, *, subject: Optional[str] = None) -> Dict[str, Any]:
+        """Status.
+
+        GET /api/agents/{agentId}/chat/sessions/{sessionId}/taint
+        """
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/chat/sessions/{quote_path(session_id)}/taint", query={"subject": subject})
+
+    def clear(self, agent_id: str, session_id: str, *, subject: Optional[str] = None) -> Dict[str, Any]:
+        """Clear.
+
+        DELETE /api/agents/{agentId}/chat/sessions/{sessionId}/taint
+        """
+        return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/chat/sessions/{quote_path(session_id)}/taint", query={"subject": subject})
+
+
 class SettingsApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
@@ -10173,12 +10192,33 @@ class ShareApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(self, resource_kind: str, resource_id: str) -> List[m.ShareController_GrantResponse]:
+    def list_2(self, resource_kind: str, resource_id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.ShareController_GrantResponse]:
+        """List.
+
+        GET /api/knowledge/{resourceKind}/{resourceId}/grants
+        """
+        return self._http.request("GET", f"/api/knowledge/{quote_path(resource_kind)}/{quote_path(resource_id)}/grants", query={"limit": limit, "offset": offset})
+
+    def grant_2(self, resource_kind: str, resource_id: str, body: m.ShareController_GrantRequest, *, idempotency_key: Optional[str] = None) -> m.ShareController_GrantResponse:
+        """Grant.
+
+        POST /api/knowledge/{resourceKind}/{resourceId}/grants
+        """
+        return self._http.request("POST", f"/api/knowledge/{quote_path(resource_kind)}/{quote_path(resource_id)}/grants", headers={"Idempotency-Key": idempotency_key}, body=body)
+
+    def revoke_2(self, resource_kind: str, resource_id: str, grant_id: str) -> None:
+        """Revoke.
+
+        DELETE /api/knowledge/{resourceKind}/{resourceId}/grants/{grantId}
+        """
+        return self._http.request("DELETE", f"/api/knowledge/{quote_path(resource_kind)}/{quote_path(resource_id)}/grants/{quote_path(grant_id)}", response="void")
+
+    def list(self, resource_kind: str, resource_id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.ShareController_GrantResponse]:
         """List.
 
         GET /api/{resourceKind}/{resourceId}/grants
         """
-        return self._http.request("GET", f"/api/{quote_path(resource_kind)}/{quote_path(resource_id)}/grants")
+        return self._http.request("GET", f"/api/{quote_path(resource_kind)}/{quote_path(resource_id)}/grants", query={"limit": limit, "offset": offset})
 
     def grant(self, resource_kind: str, resource_id: str, body: m.ShareController_GrantRequest, *, idempotency_key: Optional[str] = None) -> m.ShareController_GrantResponse:
         """Grant.
@@ -13860,6 +13900,7 @@ class VegadutaClient:
         self.scim_provisioning = ScimProvisioningApi(self.http)
         self.secret_vault = SecretVaultApi(self.http)
         self.session_config = SessionConfigApi(self.http)
+        self.session_taint = SessionTaintApi(self.http)
         self.settings = SettingsApi(self.http)
         self.share = ShareApi(self.http)
         self.shared_with_me = SharedWithMeApi(self.http)

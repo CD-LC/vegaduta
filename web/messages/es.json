@@ -2278,7 +2278,7 @@
     "adminOnlyEnforcedHint": "Aplicado por el servidor, no solo en esta pantalla. Cualquier otro que intente aprobar o rechazar esta solicitud (incluso vía la API) será rechazado.",
     "requireApprovalLabel": "Requerir aprobación humana antes de que este nodo se ejecute",
     "deleteNode": "Eliminar nodo",
-    "triggerRequiredHint": "Cada flujo de trabajo necesita exactamente un nodo de Disparador.",
+    "triggerRequiredHint": "Cada flujo de trabajo necesita al menos un nodo de Disparador.",
     "toolNodeAgentLabel": "Agente (cuyo acceso a herramientas reutiliza esta llamada)",
     "toolLabel": "Herramienta",
     "loadingToolsPlaceholder": "Cargando herramientas disponibles…",

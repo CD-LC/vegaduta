@@ -456,6 +456,9 @@ final class ChatPromptAssembler {
         // itself is not spotlight-wrapped: the tool path wraps output only in ENFORCE, and the
         // standing memory block is already labelled - the enforceable control is the same in both
         // paths, the approval gate on sinks.
+        // Conversation-level taint: replay what earlier turns of this session recorded onto this
+        // turn's taint, and persist whatever this turn adds (app.agents.taint.session-persistence).
+        memoryRecall.seedSessionTaint(context.taint(), memorySessionId);
         if (recalled != null && recalled.hasRecalledFacts()) {
             context.taint().mark("recall_related_facts");
         }
@@ -612,7 +615,8 @@ final class ChatPromptAssembler {
             return future.get(remainingMillis, TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
             log.warn(
-                    "Pre-turn read '{}' exceeded {}ms - continuing without it so the model call starts",
+                    "Pre-turn read '{}' exceeded {}ms - continuing without it so the model call"
+                            + " starts",
                     what,
                     svc.turns.preTurnMaxWait.toMillis());
             future.cancel(true);

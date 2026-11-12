@@ -19,7 +19,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 
 /**
- * G7 (V680): a parent chunk carries the trust of the children written with it, the parent read path
+ * G7 (V711): a parent chunk carries the trust of the children written with it, the parent read path
  * only returns TRUSTED parents, and quarantine approve/reject keep the parents in step with their
  * children.
  */

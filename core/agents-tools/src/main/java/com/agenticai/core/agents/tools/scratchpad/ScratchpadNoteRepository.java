@@ -72,7 +72,7 @@ public interface ScratchpadNoteRepository extends JpaRepository<ScratchpadNote, 
     /**
      * What the model may see for one caller: the session's notes (those owned by the caller or by
      * nobody, since the session id is already per caller) and the caller's own agent-pad notes.
-     * Notes with a null owner on the agent pad (pre-V680) are never returned here.
+     * Notes with a null owner on the agent pad (pre-V711) are never returned here.
      */
     @Query(
             "select n from ScratchpadNote n where n.agentId = :agentId"

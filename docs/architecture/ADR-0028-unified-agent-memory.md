@@ -136,7 +136,7 @@ the invariants):
 ### 5. Schema and Flyway plan
 
 Tenant schema only (nothing in `controlplane/`). Raw JDBC tables, no Hibernate mapping, as `agent_memory` (V18).
-V678 and V680 are taken (`tenant/V678__scratchpad_and_data_table_row_trust.sql` and the V680 scratchpad/parent-chunk trust
+V678 and V711 are taken (`tenant/V678__scratchpad_and_data_table_row_trust.sql` and the V711 scratchpad/parent-chunk trust
 migration) and V679 is reserved by another work stream; this plan **claims V681
 and V682** (the next free tenant versions) and must re-check `bash scripts/ci/flyway-lint.sh` and `docs/maintainers/agent-coordination.md` at
 implementation time. New files only; V18, V44, V77, V676, V677 are not touched.

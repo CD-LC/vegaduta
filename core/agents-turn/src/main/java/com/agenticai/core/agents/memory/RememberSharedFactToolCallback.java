@@ -5,6 +5,7 @@ import com.agenticai.core.graphmemory.GraphMemoryService;
 import com.agenticai.core.graphmemory.GraphTriple;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.knowledge.MemoryWriteScreen;
+import com.agenticai.core.screen.ContentWriteScreen;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
@@ -90,24 +91,25 @@ public class RememberSharedFactToolCallback implements ToolCallback {
         return ToolDefinition.builder()
                 .name("remember_shared_fact")
                 .description(
-                        "Saves a fact, preference, or correction about the current user so EVERY agent on this team can "
-                                + "recall it, not just you - use this for facts genuinely useful across agents (e.g. \"this "
-                                + "customer's account is on the Enterprise plan\", \"prefers to be called by their first "
-                                + "name\"). For something only relevant to your own conversations with this user, use "
-                                + "remember_fact instead.")
+                        "Saves a fact, preference, or correction about the current user so EVERY"
+                                + " agent on this team can recall it, not just you - use this for facts"
+                                + " genuinely useful across agents (e.g. \"this customer's account is"
+                                + " on the Enterprise plan\", \"prefers to be called by their first"
+                                + " name\"). For something only relevant to your own conversations with"
+                                + " this user, use remember_fact instead.")
                 .inputSchema(
                         """
-                {
-                    "type": "object",
-                    "properties": {
-                        "fact": {
-                            "type": "string",
-                            "description": "The fact to remember, written as a short, self-contained statement (e.g. \\"On the Enterprise plan since March\\")"
-                        }
-                    },
-                    "required": ["fact"]
-                }
-                """)
+{
+    "type": "object",
+    "properties": {
+        "fact": {
+            "type": "string",
+            "description": "The fact to remember, written as a short, self-contained statement (e.g. \\"On the Enterprise plan since March\\")"
+        }
+    },
+    "required": ["fact"]
+}
+""")
                 .build();
     }
 
@@ -125,11 +127,13 @@ public class RememberSharedFactToolCallback implements ToolCallback {
             if (factValue == null || factValue.toString().isBlank()) {
                 return "{\"error\": \"fact is required\"}";
             }
-            Optional<String> refusal = MemoryWriteScreen.refusal(factValue.toString());
+            // Shared tier: recalled by EVERY agent of the tenant, so the same write screen applies.
+            Optional<String> refusal =
+                    ContentWriteScreen.refusal(factValue.toString())
+                            .or(() -> MemoryWriteScreen.refusal(factValue.toString()));
             if (refusal.isPresent()) {
                 log.warn(
-                        "remember_shared_fact refused by the memory write screen (agent {})",
-                        agentId);
+                        "remember_shared_fact refused for agent {}: write screen tripped", agentId);
                 return errorJson(refusal.get());
             }
             MemoryProvenance provenance = MemoryWriteGate.classify(turnTaint);
@@ -175,7 +179,8 @@ public class RememberSharedFactToolCallback implements ToolCallback {
             graphMemoryService.rememberShared(subjectKey, triples);
         } catch (Exception e) {
             log.warn(
-                    "Shared graph memory enrichment failed for remember_shared_fact - vector memory is unaffected",
+                    "Shared graph memory enrichment failed for remember_shared_fact - vector memory"
+                            + " is unaffected",
                     e);
         }
     }

@@ -10943,7 +10943,7 @@
     "toolNodeAgentLabel": "Agent (whose tool access this call reuses)",
     "topKLabel": "Top K results",
     "triggerChannelLabel": "Trigger channel",
-    "triggerRequiredHint": "Every workflow needs exactly one Trigger node.",
+    "triggerRequiredHint": "Every workflow needs at least one Trigger node.",
     "voiceMenuAddBranch": "Add option",
     "voiceMenuBranchDigitPlaceholder": "Digit",
     "voiceMenuBranchLabelPlaceholder": "Port name (e.g. sales)",

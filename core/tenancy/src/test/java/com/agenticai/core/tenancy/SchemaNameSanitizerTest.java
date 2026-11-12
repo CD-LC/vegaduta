@@ -8,29 +8,24 @@ import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@link SchemaNameSanitizer} is the one shared place every raw tenant
- * identifier (a JWT {@code tenant_id} claim on the hot request path, or a
- * signup form's org name at provisioning time) passes through on its way to
- * becoming a literal Postgres schema name / {@code SET search_path} value -
- * see its own javadoc. Its correctness is a direct tenant-isolation
- * guarantee: any raw string this method fails to neutralize is a potential
- * SQL-injection or schema-collision vector, or (see {@link
- * TenantSchemaResolver#currentSchemaName()}) a straight path to querying
- * the wrong tenant's data. This class had zero test coverage before this
- * suite despite being exactly the kind of pure, dependency-free logic that
- * is cheapest to test and most dangerous to get wrong.
+ * {@link SchemaNameSanitizer} is the one shared place every raw tenant identifier (a JWT {@code
+ * tenant_id} claim on the hot request path, or a signup form's org name at provisioning time)
+ * passes through on its way to becoming a literal Postgres schema name / {@code SET search_path}
+ * value - see its own javadoc. Its correctness is a direct tenant-isolation guarantee: any raw
+ * string this method fails to neutralize is a potential SQL-injection or schema-collision vector,
+ * or (see {@link TenantSchemaResolver#currentSchemaName()}) a straight path to querying the wrong
+ * tenant's data. This class had zero test coverage before this suite despite being exactly the kind
+ * of pure, dependency-free logic that is cheapest to test and most dangerous to get wrong.
  */
 class SchemaNameSanitizerTest {
 
     /**
-     * A valid unquoted Postgres identifier per this class's own contract:
-     * only lowercase letters, digits, and underscores, and never starting
-     * with a digit (underscore-led is fine - see {@code
-     * inputThatSanitizesToAllInvalidCharsIsKeptAsIs} below). Used for
-     * inputs whose exact transliteration is tedious/error-prone to
-     * hand-verify character-by-character - asserting the safety invariant
-     * the method exists to guarantee is both more robust and more honest
-     * about what actually matters than a brittle hardcoded literal.
+     * A valid unquoted Postgres identifier per this class's own contract: only lowercase letters,
+     * digits, and underscores, and never starting with a digit (underscore-led is fine - see {@code
+     * inputThatSanitizesToAllInvalidCharsIsKeptAsIs} below). Used for inputs whose exact
+     * transliteration is tedious/error-prone to hand-verify character-by-character - asserting the
+     * safety invariant the method exists to guarantee is both more robust and more honest about
+     * what actually matters than a brittle hardcoded literal.
      */
     private static final Pattern SAFE_IDENTIFIER = Pattern.compile("^[a-z_][a-z0-9_]*$");
 
@@ -160,5 +155,18 @@ class SchemaNameSanitizerTest {
         // property is what makes it safe for TenantProvisioningService to
         // re-derive a schema name from a stored value without drift.
         assertEquals(valid, SchemaNameSanitizer.sanitize(SchemaNameSanitizer.sanitize(valid)));
+    }
+
+    @Test
+    void sanitiserIsLossyWhichIsWhyCallersMustRequireTheCanonicalForm() {
+        // Different raw claims, one schema: exactly the collision a caller must not accept.
+        String canonical = "acme_co";
+        for (String raw : new String[] {"Acme-Co", "ACME_CO", "acme.co", "acme co", "Acme_Co"}) {
+            assertEquals(canonical, SchemaNameSanitizer.sanitize(raw), raw);
+            assertFalse(raw.equals(SchemaNameSanitizer.sanitize(raw)), raw);
+        }
+        // Only the canonical spelling round-trips, so "claim equals its own sanitised form" admits
+        // exactly one spelling per schema.
+        assertEquals(canonical, SchemaNameSanitizer.sanitize(canonical));
     }
 }

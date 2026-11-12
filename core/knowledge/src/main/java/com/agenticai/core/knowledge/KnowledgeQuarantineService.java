@@ -67,7 +67,7 @@ public class KnowledgeQuarantineService {
 
     /**
      * Makes one quarantined chunk retrievable. False when it does not exist or is already trusted.
-     * Its parent passage (V680) is released with it only once no sibling is still held, because the
+     * Its parent passage (V711) is released with it only once no sibling is still held, because the
      * parent carries the siblings' text too.
      */
     @Transactional
@@ -179,7 +179,7 @@ public class KnowledgeQuarantineService {
      * Brings the QUARANTINED parents of just-reviewed chunks in line with their children (G7): a
      * parent with a chunk still held stays held; one whose remaining children are all approved
      * becomes TRUSTED; one with no child left (all rejected) is deleted. Fails open on a schema
-     * that has not applied V680: nothing to settle.
+     * that has not applied V711: nothing to settle.
      */
     private void settleParents(Affected affected) {
         if (affected.collectionId() == null || affected.parentIds().isEmpty()) {
@@ -218,7 +218,7 @@ public class KnowledgeQuarantineService {
                     affected.collectionId(),
                     ids);
         } catch (DataAccessException e) {
-            // pre-V680 schema: no parent trust to settle
+            // pre-V711 schema: no parent trust to settle
         }
     }
 

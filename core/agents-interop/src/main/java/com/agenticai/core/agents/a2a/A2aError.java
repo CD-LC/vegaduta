@@ -24,18 +24,13 @@ public class A2aError extends RuntimeException {
     public static final int CONTENT_TYPE_NOT_SUPPORTED = -32005;
     public static final int VERSION_NOT_SUPPORTED = -32009;
 
-    /**
-     * Platform extension block (-32090..-32095) for message-level protection (OWASP ASI07). The A2A
-     * spec only reserves -32001..-32009; these sit well clear of it and only appear when a peer
-     * opted in by sending the {@code X-A2A-*} headers (or the operator required them).
-     */
-    public static final int REPLAY_DETECTED = -32090;
-
-    public static final int TIMESTAMP_OUT_OF_WINDOW = -32091;
-    public static final int HOP_LIMIT_EXCEEDED = -32092;
-    public static final int REPLAY_HEADERS_REQUIRED = -32093;
-    public static final int SIGNATURE_INVALID = -32094;
-    public static final int REPLAY_CAPACITY = -32095;
+    // VegaDuta message-security codes (see A2aInboundGuard). The A2A spec leaves -32010 and below
+    // free for implementations; the REST binding maps them in A2aRestController.mapping.
+    public static final int MESSAGE_SIGNATURE_INVALID = -32010;
+    public static final int MESSAGE_SIGNATURE_REQUIRED = -32011;
+    public static final int MESSAGE_REPLAYED = -32012;
+    public static final int HOP_LIMIT_EXCEEDED = -32013;
+    public static final int MESSAGE_EXPIRED = -32014;
 
     private final int code;
     private final Object data;
@@ -118,5 +113,37 @@ public class A2aError extends RuntimeException {
                 VERSION_NOT_SUPPORTED,
                 "Version not supported: " + requested,
                 java.util.Map.of("supported", java.util.List.of("0.3", "1.0")));
+    }
+
+    public static A2aError messageSignatureInvalid(String detail) {
+        return new A2aError(MESSAGE_SIGNATURE_INVALID, "Message signature invalid: " + detail);
+    }
+
+    public static A2aError messageSignatureRequired() {
+        return new A2aError(
+                MESSAGE_SIGNATURE_REQUIRED,
+                "Message signature required: this server only accepts signed A2A requests");
+    }
+
+    public static A2aError messageReplayed() {
+        return new A2aError(MESSAGE_REPLAYED, "Message replayed: this nonce was already used");
+    }
+
+    public static A2aError replayCacheFull() {
+        return new A2aError(MESSAGE_REPLAYED, "Replay cache full: retry shortly");
+    }
+
+    public static A2aError messageExpired(long skewSeconds) {
+        return new A2aError(
+                MESSAGE_EXPIRED,
+                "Message timestamp outside the accepted window",
+                java.util.Map.of("skewSeconds", skewSeconds));
+    }
+
+    public static A2aError hopLimitExceeded(int hop, int max) {
+        return new A2aError(
+                HOP_LIMIT_EXCEEDED,
+                "Hop limit exceeded: hop " + hop + " is above the maximum of " + max,
+                java.util.Map.of("hop", hop, "maxHops", max));
     }
 }

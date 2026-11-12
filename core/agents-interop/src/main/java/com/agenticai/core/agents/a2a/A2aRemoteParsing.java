@@ -3,12 +3,10 @@ package com.agenticai.core.agents.a2a;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Locale;
 
-/**
- * Pure helpers that read the JSON-RPC result of an outbound A2A call for {@link A2aClientService}.
- */
-final class A2aResultParsing {
+/** Reads a remote agent's replies in either A2A dialect, for {@link A2aClientService}. */
+final class A2aRemoteParsing {
 
-    private A2aResultParsing() {}
+    private A2aRemoteParsing() {}
 
     /**
      * 1.0 wraps in {@code {"task"|"message": ...}}; 0.3 sends the object bare. Tolerates either
@@ -73,12 +71,5 @@ final class A2aResultParsing {
             }
         }
         return text.toString();
-    }
-
-    static String trim(String text, int max) {
-        if (text == null) {
-            return "";
-        }
-        return text.length() <= max ? text : text.substring(0, max) + "... [truncated]";
     }
 }

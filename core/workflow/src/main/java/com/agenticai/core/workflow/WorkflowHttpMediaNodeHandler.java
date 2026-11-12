@@ -114,6 +114,15 @@ class WorkflowHttpMediaNodeHandler {
                 new java.util.LinkedHashMap<>(pairsConfig(node.config().get("headers")));
         Map<String, String> query =
                 new java.util.LinkedHashMap<>(pairsConfig(node.config().get("query")));
+        // Effect journal: a non-idempotent verb gets the stable runId:nodeId:iteration key so a
+        // replayed request is recognised by APIs that honour Idempotency-Key. An author-set header
+        // always wins; no journal bound (disabled / not journaled) = nothing added.
+        String idempotencyKey = EffectIdempotency.current();
+        if (idempotencyKey != null
+                && ("POST".equals(method) || "PUT".equals(method) || "PATCH".equals(method))
+                && headers.keySet().stream().noneMatch("Idempotency-Key"::equalsIgnoreCase)) {
+            headers.put("Idempotency-Key", idempotencyKey);
+        }
         String bodyType =
                 stringConfig(node, "bodyType", "none").strip().toLowerCase(java.util.Locale.ROOT);
         String body = "none".equals(bodyType) ? null : stringConfig(node, "body", "");
@@ -309,8 +318,8 @@ class WorkflowHttpMediaNodeHandler {
                     if (jobId == null) {
                         return NodeExecutionResult.skipped(
                                 input,
-                                "No jobId configured on this Media node and none found in its input "
-                                        + "(expected a job_id or jobId field).");
+                                "No jobId configured on this Media node and none found in its input"
+                                        + " (expected a job_id or jobId field).");
                     }
                     SidecarRenderJobResponse job = client.renderStatus(jobId);
                     logLines.add(

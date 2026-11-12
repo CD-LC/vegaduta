@@ -104,7 +104,8 @@ public class RagEvalService {
             @Value("${app.knowledge.rag-eval.max-questions:200}") int maxQuestions,
             @Value("${app.knowledge.rag-eval.free-max-questions:25}") int freeMaxQuestions,
             // 80s: the Cloudflare edge answers 524 at about 100s, so a synchronous run must stop
-            // well before that
+            // well
+            // before that
             // (a question already in flight can still finish after the deadline).
             @Value("${app.knowledge.rag-eval.max-seconds:80}") int maxSeconds) {
         this.searchService = searchService;
@@ -118,12 +119,24 @@ public class RagEvalService {
         this.maxMillis = Math.max(1, maxSeconds) * 1000L;
     }
 
+    /**
+     * Per-collection access control (V710); setter-injected so the constructor is unchanged. Null =
+     * not enforced (tests).
+     */
+    private com.agenticai.core.knowledge.KnowledgeAccessService access;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void setAccess(com.agenticai.core.knowledge.KnowledgeAccessService access) {
+        this.access = access;
+    }
+
     public RagEvalResponse run(UUID collectionId, RagEvalRequest request) {
         String tenantId = TenantContext.current().map(TenantContext::getTenantId).orElse(null);
         if (tenantId != null && !runningTenants.add(tenantId)) {
             throw new ResponseStatusException(
                     HttpStatus.TOO_MANY_REQUESTS,
-                    "A retrieval eval is already running for your workspace - wait for it to finish.");
+                    "A retrieval eval is already running for your workspace - wait for it to"
+                            + " finish.");
         }
         try {
             return runEval(collectionId, request);
@@ -139,6 +152,9 @@ public class RagEvalService {
         int cap = gate.questionCap();
         if (collectionRepository.findById(collectionId).isEmpty()) {
             throw new KnowledgeCollectionNotFoundException(collectionId);
+        }
+        if (access != null) {
+            access.requireRead(collectionId);
         }
         if (request == null || request.questions() == null || request.questions().isEmpty()) {
             throw new IllegalArgumentException("questions must contain at least one question");
@@ -169,7 +185,8 @@ public class RagEvalService {
                 throw new IllegalArgumentException(
                         "question "
                                 + (i + 1)
-                                + " needs expectedDocumentIds or expectedSubstrings - without a target there is nothing to measure");
+                                + " needs expectedDocumentIds or expectedSubstrings - without a"
+                                + " target there is nothing to measure");
             }
             validateTargets(q, i + 1);
         }
@@ -189,10 +206,12 @@ public class RagEvalService {
             }
             if (gate.free() && presetOf(c).startsWith("rewrite")) {
                 // Rewrite presets spend the platform-wide rag-query-rewrite budget on every
-                // question; a FREE
+                // question; a
+                // FREE
                 // tenant must not be able to exhaust it for everyone.
                 throw new TenantLimitExceededException(
-                        "Query-rewrite comparisons call a hosted model and are a Premium feature - upgrade your plan to run them.");
+                        "Query-rewrite comparisons call a hosted model and are a Premium feature -"
+                                + " upgrade your plan to run them.");
             }
         }
         List<RetrievalOptions> options = new ArrayList<>(configs.size());
@@ -302,7 +321,8 @@ public class RagEvalService {
         if (plan == TenantPlan.FREE) {
             if (!freePlanEnabled) {
                 throw new TenantLimitExceededException(
-                        "Retrieval quality evals are a Premium feature - upgrade your plan to run them.");
+                        "Retrieval quality evals are a Premium feature - upgrade your plan to run"
+                                + " them.");
             }
             return new PlanGate(freeMaxQuestions, true);
         }
@@ -380,7 +400,8 @@ public class RagEvalService {
             case "parent-child" -> {
                 if (overrides) {
                     throw new IllegalArgumentException(
-                            "the parent-child preset takes no fusion overrides - use fusion+parent-child");
+                            "the parent-child preset takes no fusion overrides - use"
+                                    + " fusion+parent-child");
                 }
                 wantsFusion = false;
                 parents = true;
@@ -410,7 +431,8 @@ public class RagEvalService {
                     throw new IllegalArgumentException(
                             "Unknown preset \""
                                     + preset
-                                    + "\" - use baseline, fusion, parent-child, fusion+parent-child, rewrite-multi or rewrite-hyde");
+                                    + "\" - use baseline, fusion, parent-child,"
+                                    + " fusion+parent-child, rewrite-multi or rewrite-hyde");
         }
         return new RetrievalOptions(
                 wantsFusion,
@@ -438,21 +460,28 @@ public class RagEvalService {
             int total) {
         List<String> notes = new ArrayList<>();
         notes.add(
-                "Results describe this dataset on this collection only; they are not a benchmark and small datasets give wide intervals.");
+                "Results describe this dataset on this collection only; they are not a benchmark"
+                        + " and small datasets give wide intervals.");
         boolean usesParents = configs.stream().anyMatch(c -> presetOf(c).contains("parent-child"));
         if (usesParents && parents == 0) {
             notes.add(
-                    "This collection has no parent-child documents, so the parent-child configs return the same chunks as their non-parent counterparts. "
-                            + "Parent-child applies to documents ingested after the collection opted in.");
+                    "This collection has no parent-child documents, so the parent-child configs"
+                            + " return the same chunks as their non-parent counterparts. Parent-child"
+                            + " applies to documents ingested after the collection opted in.");
         }
         if (usesParents && parents > 0) {
             notes.add(
-                    "Parent-child configs return larger passages: compare avgReturnedChars, and prefer expectedDocumentIds over expectedSubstrings, "
-                            + "because a larger passage can contain an expected substring without ranking the right document higher.");
+                    "Parent-child configs return larger passages: compare avgReturnedChars, and"
+                            + " prefer expectedDocumentIds over expectedSubstrings, because a larger"
+                            + " passage can contain an expected substring without ranking the right"
+                            + " document higher.");
         }
         if (configs.stream().anyMatch(c -> presetOf(c).startsWith("rewrite"))) {
             notes.add(
-                    "Rewrite configs fall back to the original query when no cheap model is available, the call fails, or your workspace uses its own provider key (queries are not sent to the platform model), so they may equal the baseline.");
+                    "Rewrite configs fall back to the original query when no cheap model is"
+                            + " available, the call fails, or your workspace uses its own provider key"
+                            + " (queries are not sent to the platform model), so they may equal the"
+                            + " baseline.");
         }
         if (truncated) {
             notes.add(
@@ -460,7 +489,8 @@ public class RagEvalService {
                             + evaluated
                             + " of "
                             + total
-                            + " questions because the run's time budget was reached; every config covers the same questions.");
+                            + " questions because the run's time budget was reached; every config"
+                            + " covers the same questions.");
         }
         return notes;
     }
@@ -470,10 +500,13 @@ public class RagEvalService {
         try {
             Long n =
                     jdbcTemplate.queryForObject(
-                            // codeql[java/sql-injection]
+                            // codeql[java/sql-injection] -- `table` is a schema-qualified
+                            // identifier from KnowledgeSchemaSupport.qualifiedTableName
+                            // (double-quote escaped).
                             "SELECT COUNT(*) FROM "
                                     + table
-                                    + " WHERE collection_id = ? AND metadata->>'parent_id' IS NOT NULL AND trust = 'TRUSTED'",
+                                    + " WHERE collection_id = ? AND metadata->>'parent_id' IS NOT"
+                                    + " NULL AND trust = 'TRUSTED'",
                             Long.class,
                             collectionId);
             return n == null ? 0L : n;
@@ -485,10 +518,8 @@ public class RagEvalService {
     private long countParents(UUID collectionId) {
         String table = KnowledgeSchemaSupport.qualifiedTableName("knowledge_parent_chunk");
         try {
-            // codeql[java/sql-injection]
             Long n =
                     jdbcTemplate.queryForObject(
-                            // codeql[java/sql-injection]
                             "SELECT COUNT(*) FROM " + table + " WHERE collection_id = ?",
                             Long.class,
                             collectionId);

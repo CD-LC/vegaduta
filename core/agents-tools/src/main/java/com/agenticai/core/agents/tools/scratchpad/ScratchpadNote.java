@@ -69,7 +69,7 @@ public class ScratchpadNote {
     @Column(name = "source_taint", columnDefinition = "TEXT")
     private String sourceTaint;
 
-    // Owner of an agent-pad note (V680): the caller's subject key, as agent_memory.subject_key.
+    // Owner of an agent-pad note (V711): the caller's subject key, as agent_memory.subject_key.
     // NULL on rows
     // that predate the column (author unknown: not returned to the model) and on session-pad notes
     // written
@@ -175,7 +175,7 @@ public class ScratchpadNote {
         return sessionId;
     }
 
-    /** Owner (subject key) of the note; null for rows that predate V680. */
+    /** Owner (subject key) of the note; null for rows that predate V711. */
     public String getSubjectKey() {
         return subjectKey;
     }

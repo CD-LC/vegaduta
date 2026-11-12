@@ -28,4 +28,5 @@ record ChatContextFacade(
         ObjectProvider<SandboxFileRegistry> sandboxFileRegistry,
         ObjectProvider<ModelModalitiesService> modelModalitiesService,
         ObjectProvider<ChatContextCompaction> chatContextCompaction,
-        ObjectProvider<UnifiedMemoryRecall> unifiedMemoryRecall) {}
+        ObjectProvider<UnifiedMemoryRecall> unifiedMemoryRecall,
+        ObjectProvider<com.agenticai.core.agents.memory.SessionTaintStore> sessionTaintStore) {}
