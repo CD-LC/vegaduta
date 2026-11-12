@@ -1,86 +1,111 @@
 package com.agenticai.core.agents.a2a;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
-import java.security.MessageDigest;
-import java.util.Base64;
-import java.util.HexFormat;
-import java.util.Locale;
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
+import java.time.Clock;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 /**
- * Detached HMAC-SHA256 over {@code method, path, timestamp, nonce, hop, sha256(body)}. The header
- * value is {@code v1=<base64url>}. The hop is inside the MAC so a relay cannot lower it. The path
- * is the raw request path as the receiver sees it; a proxy that rewrites paths breaks verification
- * (documented operator constraint).
+ * The outbound half of message signing: builds the headers an A2A request to a peer carries - the
+ * hop number, the trace id and, when this instance can sign, a detached JWS over (method, path,
+ * body digest, timestamp, nonce, hop, trace, origin card) made with the same Ed25519 key {@link
+ * A2aCardSigningService} signs the Agent Card with. The peer finds the matching public key through
+ * our Agent Card ({@code X-Vegaduta-A2A-Origin}) and our JWKS, exactly as it verifies the card.
+ *
+ * <p>Signing needs {@code app.a2a.public-base-url}: the signature names our card URL, and without a
+ * configured public origin there is no URL a peer could fetch it from. Without it (or with signing
+ * disabled) the request still carries hop and trace, just no signature.
  */
-final class A2aMessageSigner {
+@ConditionalOnEditionFeature(EditionFeature.A2A_DIRECTORY)
+@Component
+public class A2aMessageSigner {
 
-    static final String PREFIX = "v1=";
+    private static final Logger log = LoggerFactory.getLogger(A2aMessageSigner.class);
 
-    private A2aMessageSigner() {}
+    private final A2aCardSigningService signingService;
+    private final A2aProperties properties;
+    private final Clock clock;
 
-    static String canonical(
-            String method, String path, String timestamp, String nonce, int hop, byte[] body) {
-        return "A2A-HMAC-SHA256\n"
-                + method.toUpperCase(Locale.ROOT)
-                + "\n"
-                + path
-                + "\n"
-                + timestamp
-                + "\n"
-                + nonce
-                + "\n"
-                + hop
-                + "\n"
-                + sha256Hex(body);
+    @Autowired
+    public A2aMessageSigner(A2aCardSigningService signingService, A2aProperties properties) {
+        this(signingService, properties, Clock.systemUTC());
     }
 
-    static String sign(
-            String secret,
-            String method,
-            String path,
-            String timestamp,
-            String nonce,
-            int hop,
-            byte[] body) {
-        try {
-            Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
-            byte[] tag =
-                    mac.doFinal(
-                            canonical(method, path, timestamp, nonce, hop, body)
-                                    .getBytes(StandardCharsets.UTF_8));
-            return PREFIX + Base64.getUrlEncoder().withoutPadding().encodeToString(tag);
-        } catch (GeneralSecurityException e) {
-            throw new IllegalStateException("HmacSHA256 unavailable", e);
-        }
+    A2aMessageSigner(A2aCardSigningService signingService, A2aProperties properties, Clock clock) {
+        this.signingService = signingService;
+        this.properties = properties;
+        this.clock = clock;
     }
 
-    static boolean verify(
-            String secret,
-            String header,
-            String method,
-            String path,
-            String timestamp,
-            String nonce,
-            int hop,
-            byte[] body) {
-        if (header == null) {
-            return false;
-        }
-        String expected = sign(secret, method, path, timestamp, nonce, hop, body);
-        return MessageDigest.isEqual(
-                expected.getBytes(StandardCharsets.UTF_8),
-                header.strip().getBytes(StandardCharsets.UTF_8));
+    /** True when a request can carry a signature a peer could verify. */
+    public boolean canSign() {
+        return signingService.isEnabled() && StringUtils.hasText(originCardUrl());
     }
 
-    static String sha256Hex(byte[] body) {
-        try {
-            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(body));
-        } catch (GeneralSecurityException e) {
-            throw new IllegalStateException("SHA-256 unavailable", e);
+    /** Our platform Agent Card URL, the place a peer resolves our signing key from. */
+    String originCardUrl() {
+        String base = properties.getPublicBaseUrl();
+        if (!StringUtils.hasText(base)) {
+            return null;
         }
+        String trimmed = base.strip();
+        while (trimmed.endsWith("/")) {
+            trimmed = trimmed.substring(0, trimmed.length() - 1);
+        }
+        return trimmed + A2aMessageSecurity.WELL_KNOWN_CARD_PATH;
+    }
+
+    /**
+     * Headers for a {@code POST endpoint} carrying {@code body}.
+     *
+     * @param hop the hop number of THIS call (the caller's own hop plus one)
+     * @param traceId the originating correlation id
+     * @param sign whether to add the signature headers (false = hop and trace only)
+     */
+    public Map<String, String> headers(
+            URI endpoint, byte[] body, int hop, String traceId, boolean sign) {
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put(A2aMessageSecurity.HEADER_HOP, Integer.toString(hop));
+        headers.put(A2aMessageSecurity.HEADER_TRACE, traceId);
+        if (!sign || !canSign()) {
+            return headers;
+        }
+        long timestamp = clock.millis();
+        String nonce = UUID.randomUUID().toString();
+        String origin = originCardUrl();
+        String path = endpoint.getRawPath() == null ? "" : endpoint.getRawPath();
+        Map<String, Object> claims =
+                A2aMessageSecurity.claims(
+                        "POST", path, body, timestamp, nonce, hop, traceId, origin);
+        Map<String, Object> header = new LinkedHashMap<>();
+        header.put("typ", A2aMessageSecurity.JWS_TYPE);
+        String compact = signingService.signCompactJws(header, claims);
+        String[] parts = compact == null ? new String[0] : compact.split("\\.");
+        if (parts.length != 3) {
+            log.warn("A2A request signing failed; sending the request unsigned");
+            return headers;
+        }
+        // Detached form (RFC 7515 appendix F): the payload is rebuilt by the verifier, not sent.
+        headers.put(A2aMessageSecurity.HEADER_SIGNATURE, parts[0] + ".." + parts[2]);
+        headers.put(A2aMessageSecurity.HEADER_TIMESTAMP, Long.toString(timestamp));
+        headers.put(A2aMessageSecurity.HEADER_NONCE, nonce);
+        headers.put(A2aMessageSecurity.HEADER_KEY_ID, signingService.keyId());
+        headers.put(A2aMessageSecurity.HEADER_ORIGIN, origin);
+        return headers;
+    }
+
+    /** Convenience for callers that hold the body as text. */
+    public Map<String, String> headers(
+            URI endpoint, String body, int hop, String traceId, boolean sign) {
+        return headers(endpoint, body.getBytes(StandardCharsets.UTF_8), hop, traceId, sign);
     }
 }

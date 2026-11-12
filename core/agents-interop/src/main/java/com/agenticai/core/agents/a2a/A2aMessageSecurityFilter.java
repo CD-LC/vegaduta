@@ -199,7 +199,7 @@ public class A2aMessageSecurityFilter extends OncePerRequestFilter {
         }
         if (secretSet && signature != null) {
             byte[] body = request instanceof CachedBodyRequest c ? c.body : new byte[0];
-            if (!A2aMessageSigner.verify(
+            if (!A2aHmacSigner.verify(
                     props.getSigningSecret(),
                     signature,
                     request.getMethod(),

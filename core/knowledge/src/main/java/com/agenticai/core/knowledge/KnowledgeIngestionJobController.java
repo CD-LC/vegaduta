@@ -9,9 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Knowledge Stage F3c - status polling for async ingestion jobs (audio
- * today; Stage F3d's video ingestion will reuse this same job/polling
- * mechanism rather than adding a second one).
+ * Knowledge Stage F3c - status polling for async ingestion jobs (audio today; Stage F3d's video
+ * ingestion will reuse this same job/polling mechanism rather than adding a second one).
  */
 @RestController
 @RequestMapping("/api/knowledge/jobs")
@@ -19,13 +18,24 @@ import org.springframework.web.bind.annotation.RestController;
 public class KnowledgeIngestionJobController {
 
     private final KnowledgeIngestionJobService jobService;
+    private final KnowledgeAccessService access;
 
-    public KnowledgeIngestionJobController(KnowledgeIngestionJobService jobService) {
+    public KnowledgeIngestionJobController(
+            KnowledgeIngestionJobService jobService, KnowledgeAccessService access) {
         this.jobService = jobService;
+        this.access = access;
     }
 
+    /**
+     * A job reveals the file name and target collection, so it needs read access to that
+     * collection.
+     */
     @GetMapping("/{jobId}")
     public KnowledgeIngestionJobResponse get(@PathVariable UUID jobId) {
-        return jobService.get(jobId);
+        KnowledgeIngestionJobResponse job = jobService.get(jobId);
+        if (job.collectionId() != null) {
+            access.requireRead(job.collectionId());
+        }
+        return job;
     }
 }

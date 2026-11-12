@@ -86,12 +86,24 @@ public class A2aTaskService {
     }
 
     private final Semaphore asyncSlots;
+    private final A2aHopRegistry hops;
 
     public A2aTaskService(
             AgentChatService agentChatService,
             A2aTaskStore store,
             AuditLogService auditLogService,
             A2aProperties properties) {
+        this(agentChatService, store, auditLogService, properties, new A2aHopRegistry());
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public A2aTaskService(
+            AgentChatService agentChatService,
+            A2aTaskStore store,
+            AuditLogService auditLogService,
+            A2aProperties properties,
+            A2aHopRegistry hops) {
+        this.hops = hops;
         this.agentChatService = agentChatService;
         this.store = store;
         this.auditLogService = auditLogService;
@@ -111,6 +123,21 @@ public class A2aTaskService {
             String userMessageId,
             String userText,
             Principal principal) {
+        return create(agentId, contextId, userMessageId, userText, principal, null);
+    }
+
+    /**
+     * As {@link #create(UUID, String, String, String, Principal)}, for a request that passed the
+     * message-security checks: {@code call} (hop and trace id) travels with the task, and {@link
+     * #run} hands it to the turn's outbound A2A tool so the next call is numbered one hop higher.
+     */
+    public A2aTask create(
+            UUID agentId,
+            String contextId,
+            String userMessageId,
+            String userText,
+            Principal principal,
+            A2aCallContext call) {
         Optional<TenantContext> tenant = TenantContext.current();
         String tenantId = tenant.map(TenantContext::getTenantId).orElse(null);
         String subject =
@@ -131,6 +158,7 @@ public class A2aTaskService {
                         subject,
                         userMessageId,
                         userText);
+        task.callContext(call);
         store.put(task);
         // Redis mode: mirror the terminal snapshot (every terminal path completes this future);
         // no-op in memory mode.
@@ -165,6 +193,17 @@ public class A2aTaskService {
             return task.completion();
         }
         store.save(task);
+        A2aCallContext call = task.callContext();
+        if (call != null) {
+            // Explicit hand-off to the turn's outbound tool (see A2aHopRegistry): keyed by the chat
+            // session id, set before the tools are resolved, released when the task ends.
+            String sessionKey = task.contextId();
+            if (!hops.register(sessionKey, call)) {
+                task.abort("Too many A2A turns are in flight on this server; retry later.");
+                return task.completion();
+            }
+            task.completion().whenComplete((ignored, err) -> hops.release(sessionKey));
+        }
         // Long-term-memory subject: the caller's identity when known, else the
         // context itself (memory then behaves session-scoped only - the same
         // fallback AgentController#chat takes when no principal exists).

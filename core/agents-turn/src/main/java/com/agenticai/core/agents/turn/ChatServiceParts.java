@@ -131,6 +131,7 @@ final class ChatServiceParts {
                                             recallPlatform.getIfAvailable();
                                     return memory == null || !memory.writesSwitchedOffByPlatform();
                                 }));
+        this.memoryRecall.useSessionTaint(context.sessionTaintStore());
         this.turns =
                 new ChatTurnExecutor(
                         credentialResolver,

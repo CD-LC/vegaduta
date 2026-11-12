@@ -2,6 +2,7 @@ package com.agenticai.core.sharing;
 
 import com.agenticai.core.admin.identity.IdentityUserAdminPort;
 import com.agenticai.core.admin.keycloak.KeycloakUserRepresentation;
+import com.agenticai.core.audit.AuditPaging;
 import com.agenticai.core.security.TenantContext;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -55,7 +57,10 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Profile("security")
-@RequestMapping("/api/{resourceKind:agents|workflows}/{resourceId}/grants")
+@RequestMapping({
+    "/api/{resourceKind:agents|workflows}/{resourceId}/grants",
+    "/api/knowledge/{resourceKind:collections}/{resourceId}/grants"
+})
 public class ShareController {
 
     private final ResourceAccessService accessService;
@@ -138,14 +143,28 @@ public class ShareController {
      * caller ({@link ShareRateLimiter#assertGrantReadAllowed}).
      */
     @GetMapping
-    public List<GrantResponse> list(
-            @PathVariable String resourceKind, @PathVariable UUID resourceId) {
+    public ResponseEntity<List<GrantResponse>> list(
+            @PathVariable String resourceKind,
+            @PathVariable UUID resourceId,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
         rateLimiter.assertGrantReadAllowed();
         ResourceType type = resourceTypeOf(resourceKind);
         String createdBy = resolveCreatedBy(type, resourceId);
-        return accessService.listGrants(type, resourceId, createdBy).stream()
-                .map(g -> toResponse(g, resolveEmailBestEffort(g.getGranteeUserId())))
-                .toList();
+        List<ResourceGrant> all = accessService.listGrants(type, resourceId, createdBy);
+        // No limit/offset: the whole list, as before. Either present: a 1..500 window (default
+        // 50), so only the rows on the page cost an identity lookup for the grantee's email.
+        int from = 0;
+        int to = all.size();
+        if (limit != null || offset != null) {
+            from = (int) Math.min(AuditPaging.clampOffset(offset), all.size());
+            to = (int) Math.min((long) from + AuditPaging.clampLimit(limit, 50, 500), all.size());
+        }
+        List<GrantResponse> page =
+                all.subList(from, to).stream()
+                        .map(g -> toResponse(g, resolveEmailBestEffort(g.getGranteeUserId())))
+                        .toList();
+        return AuditPaging.respondWithTotal(page, from, all.size());
     }
 
     @DeleteMapping("/{grantId}")
@@ -168,10 +187,11 @@ public class ShareController {
         return switch (resourceKind) {
             case "agents" -> ResourceType.AGENT;
             case "workflows" -> ResourceType.WORKFLOW;
+            case "collections" -> ResourceType.KNOWLEDGE_COLLECTION;
             default ->
                     throw new IllegalStateException(
-                            "Unreachable - path pattern restricts resourceKind to"
-                                    + " agents|workflows");
+                            "Unreachable - path patterns restrict resourceKind to"
+                                    + " agents|workflows|collections");
         };
     }
 

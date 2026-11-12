@@ -2,6 +2,8 @@ package com.agenticai.core.knowledge;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -10,31 +12,26 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Knowledge Stage F1 - a named, described, optionally-nested group of
- * {@code knowledge_chunks} rows. Unlike {@code knowledge_chunks} itself
- * (raw JDBC, pgvector has no Hibernate mapping - see
- * {@code VectorSchemaInitializer}'s javadoc), this entity is plain
- * relational data with no vector column, so it's Hibernate-mapped like
- * every other tenant-scoped entity ({@code Agent}, etc.) - schema routing
- * comes for free from {@code TenantSchemaResolver}.
+ * Knowledge Stage F1 - a named, described, optionally-nested group of {@code knowledge_chunks}
+ * rows. Unlike {@code knowledge_chunks} itself (raw JDBC, pgvector has no Hibernate mapping - see
+ * {@code VectorSchemaInitializer}'s javadoc), this entity is plain relational data with no vector
+ * column, so it's Hibernate-mapped like every other tenant-scoped entity ({@code Agent}, etc.) -
+ * schema routing comes for free from {@code TenantSchemaResolver}.
  *
- * <p>{@code description} is not cosmetic - Stage F2's
- * {@code list_knowledge_collections} tool returns it verbatim so a model
- * can decide which collection is relevant to a scenario before searching.
- * Collection creation/edit UX should treat it as effectively required.
+ * <p>{@code description} is not cosmetic - Stage F2's {@code list_knowledge_collections} tool
+ * returns it verbatim so a model can decide which collection is relevant to a scenario before
+ * searching. Collection creation/edit UX should treat it as effectively required.
  *
- * <p>{@code parentCollectionId} models nesting (a collection can live under
- * another) without a full filesystem-style per-document folder tree - see
- * the Stage F Build Plan's "Decisions" section for why. Deliberately not a
- * JPA {@code @ManyToOne} self-reference - kept as a plain UUID column so
- * this entity never needs a full parent object graph loaded just to know
- * its own ancestry; callers that need the parent's name/description look
- * it up via {@link KnowledgeCollectionRepository} explicitly.
+ * <p>{@code parentCollectionId} models nesting (a collection can live under another) without a full
+ * filesystem-style per-document folder tree - see the Stage F Build Plan's "Decisions" section for
+ * why. Deliberately not a JPA {@code @ManyToOne} self-reference - kept as a plain UUID column so
+ * this entity never needs a full parent object graph loaded just to know its own ancestry; callers
+ * that need the parent's name/description look it up via {@link KnowledgeCollectionRepository}
+ * explicitly.
  *
- * <p>{@code isDefault} is true for exactly one row per tenant (seeded by
- * migration V15) - where an upload lands when no collection is specified,
- * and the one collection {@link KnowledgeCollectionService} refuses to
- * delete.
+ * <p>{@code isDefault} is true for exactly one row per tenant (seeded by migration V15) - where an
+ * upload lands when no collection is specified, and the one collection {@link
+ * KnowledgeCollectionService} refuses to delete.
  */
 @Entity
 @Table(name = "knowledge_collection")
@@ -75,7 +72,8 @@ public class KnowledgeCollection {
     private String embeddingStatus;
 
     // Migration V550 - the embedding SOURCE that produced this collection's vectors ("sidecar" or
-    // "provider:model:width", see SidecarClient#embeddingFingerprint); null = not bound yet. Written
+    // "provider:model:width", see SidecarClient#embeddingFingerprint); null = not bound yet.
+    // Written
     // only by KnowledgeEmbeddingBinding / KnowledgeReembedService's JDBC, never by JPA.
     @Column(name = "embedding_fingerprint", length = 190, insertable = false, updatable = false)
     private String embeddingFingerprint;
@@ -102,6 +100,16 @@ public class KnowledgeCollection {
     @Column(name = "text_search_config", length = 64)
     private String textSearchConfig;
 
+    // Migration V710 - the owner's subject; null = a legacy collection that predates per-collection
+    // access control (never backfilled, like agent.created_by in V151).
+    @Column(name = "created_by", length = 255, updatable = false)
+    private String createdBy;
+
+    // Migration V710 - NOT NULL DEFAULT 'TENANT', so every existing row stays tenant-visible.
+    @Enumerated(EnumType.STRING)
+    @Column(name = "visibility", nullable = false, length = 16)
+    private KnowledgeVisibility visibility = KnowledgeVisibility.TENANT;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -113,8 +121,11 @@ public class KnowledgeCollection {
     }
 
     public KnowledgeCollection(
-        String name, String description, UUID parentCollectionId, String embeddingModel, String textSearchConfig
-    ) {
+            String name,
+            String description,
+            UUID parentCollectionId,
+            String embeddingModel,
+            String textSearchConfig) {
         this.name = name;
         this.description = description;
         this.parentCollectionId = parentCollectionId;
@@ -127,6 +138,20 @@ public class KnowledgeCollection {
         this.updatedAt = now;
     }
 
+    /** Records the owner and visibility chosen at creation (V710). */
+    public KnowledgeCollection(
+            String name,
+            String description,
+            UUID parentCollectionId,
+            String embeddingModel,
+            String textSearchConfig,
+            String createdBy,
+            KnowledgeVisibility visibility) {
+        this(name, description, parentCollectionId, embeddingModel, textSearchConfig);
+        this.createdBy = createdBy;
+        this.visibility = KnowledgeVisibility.orDefault(visibility);
+    }
+
     public static final String STATUS_READY = "READY";
     public static final String STATUS_REEMBEDDING = "REEMBEDDING";
 
@@ -137,7 +162,16 @@ public class KnowledgeCollection {
         this.updatedAt = Instant.now();
     }
 
-    /** Null arguments leave the stored value unchanged; validated by the caller via {@link Chunker#resolve}. */
+    /** Owner / administrator only - enforced by {@link KnowledgeAccessService}, not here. */
+    public void changeVisibility(KnowledgeVisibility visibility) {
+        this.visibility = KnowledgeVisibility.orDefault(visibility);
+        this.updatedAt = Instant.now();
+    }
+
+    /**
+     * Null arguments leave the stored value unchanged; validated by the caller via {@link
+     * Chunker#resolve}.
+     */
     public void updateChunking(Integer chunkSize, Integer chunkOverlap) {
         if (chunkSize != null) {
             this.chunkSize = chunkSize;
@@ -181,7 +215,10 @@ public class KnowledgeCollection {
         return embeddingStatus != null ? embeddingStatus : STATUS_READY;
     }
 
-    /** The embedding source bound to this collection's vectors, or null when none has been recorded yet. */
+    /**
+     * The embedding source bound to this collection's vectors, or null when none has been recorded
+     * yet.
+     */
     public String getEmbeddingFingerprint() {
         return embeddingFingerprint;
     }
@@ -192,6 +229,16 @@ public class KnowledgeCollection {
 
     public Integer getChunkOverlap() {
         return chunkOverlap;
+    }
+
+    /** The owner's subject, or null for a legacy collection (V710 does not backfill). */
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    /** Never null: a missing value reads as {@link KnowledgeVisibility#TENANT}. */
+    public KnowledgeVisibility getVisibility() {
+        return KnowledgeVisibility.orDefault(visibility);
     }
 
     public Instant getCreatedAt() {

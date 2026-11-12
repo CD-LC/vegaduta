@@ -48,6 +48,13 @@ public class KnowledgeSearchToolCallback implements ToolCallback {
     private final double minScore;
 
     /**
+     * Set only for an unattended run (scheduled / webhook / public-link turn, no invoking user):
+     * the agent owner's subject, whose access then governs retrieval instead of the synthetic
+     * caller's. Null = retrieval is evaluated for the invoking user ({@code TenantContext}).
+     */
+    private final String ownerSubject;
+
+    /**
      * @param allowedCollectionIds empty means "no restriction, this agent may search every
      *     collection its tenant has" - same semantics as {@code
      *     Agent.allowedKnowledgeCollectionIds}.
@@ -69,10 +76,32 @@ public class KnowledgeSearchToolCallback implements ToolCallback {
             Set<UUID> allowedCollectionIds,
             int topK,
             double minScore) {
+        this(searchService, allowedCollectionIds, topK, minScore, null);
+    }
+
+    private KnowledgeSearchToolCallback(
+            KnowledgeSearchService searchService,
+            Set<UUID> allowedCollectionIds,
+            int topK,
+            double minScore,
+            String ownerSubject) {
         this.searchService = searchService;
         this.allowedCollectionIds = allowedCollectionIds;
         this.topK = topK > 0 ? topK : DEFAULT_TOP_K;
         this.minScore = minScore;
+        this.ownerSubject = ownerSubject;
+    }
+
+    /**
+     * The same tool for an UNATTENDED run: retrieval uses {@code ownerSubject}'s access (the agent
+     * owner's own collections, grants and tenant-visible collections, never an admin override)
+     * rather than the run's synthetic caller. Interactive turns must not use this; they are
+     * evaluated for the invoking user, intersected with the agent's allow-list. A blank owner
+     * leaves the default: the run's own (synthetic, so tenant-visible-only) caller.
+     */
+    public KnowledgeSearchToolCallback asOwner(String ownerSubject) {
+        return new KnowledgeSearchToolCallback(
+                searchService, allowedCollectionIds, topK, minScore, ownerSubject);
     }
 
     @Override
@@ -80,40 +109,44 @@ public class KnowledgeSearchToolCallback implements ToolCallback {
         return ToolDefinition.builder()
                 .name("search_knowledge_base")
                 .description(
-                        "Searches this agent's uploaded knowledge base for content relevant to a query and returns "
-                                + "results with citations (source document name and document id). Scope: uploaded "
-                                + "documents only (PDFs, manuals, notes the user attached) - never source code or the "
-                                + "tenant's repository (that is search_code) and never files on this machine "
-                                + "(workspace_search). Use this whenever the user's question might be answered by "
-                                + "something they've uploaded, rather than relying on general knowledge alone. If you're "
-                                + "unsure which knowledge collection is relevant, call "
-                                + "list_knowledge_collections first and pass its id as collection_id to scope the search; "
-                                + "omit collection_id to search every collection you have access to. When you answer using "
-                                + "these results, cite the source document by name so the user knows which upload the "
-                                + "answer came from - do not present retrieved content as general knowledge. If results "
-                                + "look garbled or you suspect they came from OCR'd images (misread SKUs, prices, or numbers) "
-                                + "rather than clean source text, retry with exclude_image_sourced=true.")
+                        "Searches this agent's uploaded knowledge base for content relevant to a"
+                                + " query and returns results with citations (source document name and"
+                                + " document id). Scope: uploaded documents only (PDFs, manuals, notes"
+                                + " the user attached) - never source code or the tenant's repository"
+                                + " (that is search_code) and never files on this machine"
+                                + " (workspace_search). Use this whenever the user's question might be"
+                                + " answered by something they've uploaded, rather than relying on"
+                                + " general knowledge alone. If you're unsure which knowledge"
+                                + " collection is relevant, call list_knowledge_collections first and"
+                                + " pass its id as collection_id to scope the search; omit"
+                                + " collection_id to search every collection you have access to. When"
+                                + " you answer using these results, cite the source document by name so"
+                                + " the user knows which upload the answer came from - do not present"
+                                + " retrieved content as general knowledge. If results look garbled or"
+                                + " you suspect they came from OCR'd images (misread SKUs, prices, or"
+                                + " numbers) rather than clean source text, retry with"
+                                + " exclude_image_sourced=true.")
                 .inputSchema(
                         """
-                {
-                    "type": "object",
-                    "properties": {
-                        "query": {
-                            "type": "string",
-                            "description": "What to search for in the knowledge base"
-                        },
-                        "collection_id": {
-                            "type": "string",
-                            "description": "Optional - the id of a specific knowledge collection to search (see list_knowledge_collections). Omit to search every collection you have access to."
-                        },
-                        "exclude_image_sourced": {
-                            "type": "boolean",
-                            "description": "Optional, default false. Set true to exclude chunks extracted via OCR from uploaded images, which can be noisy or garbled (misread SKUs, prices, ratings)."
-                        }
-                    },
-                    "required": ["query"]
-                }
-                """)
+{
+    "type": "object",
+    "properties": {
+        "query": {
+            "type": "string",
+            "description": "What to search for in the knowledge base"
+        },
+        "collection_id": {
+            "type": "string",
+            "description": "Optional - the id of a specific knowledge collection to search (see list_knowledge_collections). Omit to search every collection you have access to."
+        },
+        "exclude_image_sourced": {
+            "type": "boolean",
+            "description": "Optional, default false. Set true to exclude chunks extracted via OCR from uploaded images, which can be noisy or garbled (misread SKUs, prices, ratings)."
+        }
+    },
+    "required": ["query"]
+}
+""")
                 .build();
     }
 
@@ -143,7 +176,8 @@ public class KnowledgeSearchToolCallback implements ToolCallback {
                     return "{\"error\": \"collection_id is not a valid id\"}";
                 }
                 if (!allowedCollectionIds.isEmpty() && !allowedCollectionIds.contains(requested)) {
-                    return "{\"error\": \"This agent does not have access to that knowledge collection\"}";
+                    return "{\"error\": \"This agent does not have access to that knowledge"
+                            + " collection\"}";
                 }
                 scopedCollectionIds = Set.of(requested);
             }
@@ -153,8 +187,18 @@ public class KnowledgeSearchToolCallback implements ToolCallback {
                             String.valueOf(args.getOrDefault("exclude_image_sourced", false)));
 
             List<SearchResultResponse> results =
-                    searchService.search(
-                            queryValue.toString(), topK, scopedCollectionIds, excludeImageSourced);
+                    ownerSubject == null || ownerSubject.isBlank()
+                            ? searchService.search(
+                                    queryValue.toString(),
+                                    topK,
+                                    scopedCollectionIds,
+                                    excludeImageSourced)
+                            : searchService.searchAs(
+                                    queryValue.toString(),
+                                    topK,
+                                    scopedCollectionIds,
+                                    excludeImageSourced,
+                                    KnowledgeAccessService.Principal.ofOwner(ownerSubject));
             if (minScore > 0.0) {
                 results = results.stream().filter(r -> -r.distance() >= minScore).toList();
             }

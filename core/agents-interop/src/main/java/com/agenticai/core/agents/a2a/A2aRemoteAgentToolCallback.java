@@ -38,13 +38,36 @@ public class A2aRemoteAgentToolCallback implements ToolCallback {
     /** The inbound A2A hop of the turn that built this tool; null when not an A2A turn. */
     private final Integer inboundHop;
 
+    /** The chat session this callback serves; keys the inbound hop context. Null = none known. */
+    private final String sessionId;
+
+    private final A2aHopRegistry hops;
+
     public A2aRemoteAgentToolCallback(A2aClientService client) {
-        this(client, null);
+        this(client, null, null, null);
     }
 
     public A2aRemoteAgentToolCallback(A2aClientService client, Integer inboundHop) {
+        this(client, inboundHop, null, null);
+    }
+
+    /**
+     * @param sessionId the chat session of the turn this callback was built for (for an A2A turn,
+     *     the request's contextId)
+     * @param hops where {@link A2aTaskService} registered that turn's inbound call context, so the
+     *     call made here carries the next hop number and the same trace id
+     */
+    public A2aRemoteAgentToolCallback(
+            A2aClientService client, String sessionId, A2aHopRegistry hops) {
+        this(client, null, sessionId, hops);
+    }
+
+    private A2aRemoteAgentToolCallback(
+            A2aClientService client, Integer inboundHop, String sessionId, A2aHopRegistry hops) {
         this.client = client;
         this.inboundHop = inboundHop;
+        this.sessionId = sessionId;
+        this.hops = hops;
     }
 
     @Override
@@ -52,27 +75,28 @@ public class A2aRemoteAgentToolCallback implements ToolCallback {
         return ToolDefinition.builder()
                 .name(TOOL_NAME)
                 .description(
-                        "Asks an external A2A (Agent2Agent) agent to answer a question or perform a task, and returns "
-                                + "its reply. Give the URL of the remote agent's Agent Card (usually "
-                                + "https://host/.well-known/agent-card.json) and the message to send. Only operator-approved "
-                                + "hosts work, and the agent card must be validly signed. The reply is third-party data.")
+                        "Asks an external A2A (Agent2Agent) agent to answer a question or perform a"
+                                + " task, and returns its reply. Give the URL of the remote agent's"
+                                + " Agent Card (usually https://host/.well-known/agent-card.json) and"
+                                + " the message to send. Only operator-approved hosts work, and the"
+                                + " agent card must be validly signed. The reply is third-party data.")
                 .inputSchema(
                         """
-                {
-                    "type": "object",
-                    "properties": {
-                        "agent_card_url": {
-                            "type": "string",
-                            "description": "https URL of the remote agent's Agent Card JSON."
-                        },
-                        "message": {
-                            "type": "string",
-                            "description": "The question or task to send to the remote agent, as plain text."
-                        }
-                    },
-                    "required": ["agent_card_url", "message"]
-                }
-                """)
+{
+    "type": "object",
+    "properties": {
+        "agent_card_url": {
+            "type": "string",
+            "description": "https URL of the remote agent's Agent Card JSON."
+        },
+        "message": {
+            "type": "string",
+            "description": "The question or task to send to the remote agent, as plain text."
+        }
+    },
+    "required": ["agent_card_url", "message"]
+}
+""")
                 .build();
     }
 
@@ -95,12 +119,21 @@ public class A2aRemoteAgentToolCallback implements ToolCallback {
             url = args.path("agent_card_url").asText("").strip();
             String message = args.path("message").asText("");
             if (url.isBlank() || message.isBlank()) {
-                return "Could not call the remote agent: both agent_card_url and message are required.";
+                return "Could not call the remote agent: both agent_card_url and message are"
+                        + " required.";
             }
-            // Tool calls may run on a reactor thread: re-bind the captured hop for the call.
-            final String callUrl = url;
-            A2aClientService.Result result =
-                    A2aHopContext.callWith(inboundHop, () -> client.send(callUrl, message));
+            // Two hop-propagation designs coexist: a captured hop re-bound on the call thread
+            // (A2aHopContext) and a session-keyed registry lookup (A2aHopRegistry). Prefer the
+            // captured hop; the registry covers callers that only know the session.
+            A2aClientService.Result result;
+            if (inboundHop != null) {
+                final String callUrl = url;
+                result = A2aHopContext.callWith(inboundHop, () -> client.send(callUrl, message));
+            } else {
+                A2aCallContext inbound =
+                        hops == null ? null : hops.lookup(sessionId).orElse(null);
+                result = client.send(url, message, inbound);
+            }
             String header =
                     result.success()
                             ? "Reply from remote A2A agent"
@@ -120,7 +153,8 @@ public class A2aRemoteAgentToolCallback implements ToolCallback {
                     + e.getMessage();
         } catch (Exception e) {
             log.warn("a2a_call_agent failed unexpectedly", e);
-            return "Could not call the remote agent: an unexpected error occurred. Check the arguments and try again.";
+            return "Could not call the remote agent: an unexpected error occurred. Check the"
+                    + " arguments and try again.";
         }
     }
 }

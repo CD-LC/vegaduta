@@ -71,6 +71,7 @@ class AgentIntegrationToolResolverA2aGateTest {
                                 .inputSchema("{}")
                                 .build());
         when(svc.newCallAgentTool()).thenReturn(tool);
+        when(svc.newCallAgentTool(org.mockito.ArgumentMatchers.any())).thenReturn(tool);
         return svc;
     }
 

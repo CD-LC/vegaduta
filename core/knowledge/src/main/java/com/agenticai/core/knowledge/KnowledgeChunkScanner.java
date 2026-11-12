@@ -134,7 +134,8 @@ final class KnowledgeChunkScanner {
 
             float[] queryVector = sidecarClient.embedQuery(query, model);
             // Straight from float[]: the old List<Double> detour boxed ~768 values per query and
-            // per model.
+            // per
+            // model.
             String literal = KnowledgeIngestionService.toVectorLiteral(queryVector);
 
             List<Object> params = new ArrayList<>();
@@ -168,7 +169,8 @@ final class KnowledgeChunkScanner {
             // "type vector does not exist" - because pgvector's type lives
             // in public (pinned there by VectorSchemaInitializer).
             String sql =
-                    "SELECT id, source, chunk_index, content, collection_id, document_id, embedding OPERATOR(public.<=>) ?::public.vector AS distance FROM "
+                    "SELECT id, source, chunk_index, content, collection_id, document_id, embedding"
+                            + " OPERATOR(public.<=>) ?::public.vector AS distance FROM "
                             + table
                             + " WHERE embedding_model = ? AND collection_id IN ("
                             + placeholders
@@ -225,9 +227,10 @@ final class KnowledgeChunkScanner {
         } catch (HnswTuningRejectedException e) {
             if (hnswTuningSupported.compareAndSet(true, false)) {
                 log.warn(
-                        "Database rejected HNSW session settings (ef_search={}, iterative_scan={}) - vector search continues "
-                                + "untuned. Check the pgvector version (iterative_scan needs >= 0.8.0) or set "
-                                + "app.knowledge.vector-index.iterative-scan=off. Cause: {}",
+                        "Database rejected HNSW session settings (ef_search={}, iterative_scan={})"
+                                + " - vector search continues untuned. Check the pgvector version"
+                                + " (iterative_scan needs >= 0.8.0) or set"
+                                + " app.knowledge.vector-index.iterative-scan=off. Cause: {}",
                         hnswEfSearch,
                         hnswIterativeScan,
                         e.getCause() != null ? e.getCause().getMessage() : e.getMessage());
@@ -322,6 +325,9 @@ final class KnowledgeChunkScanner {
         params.add(limit);
 
         try {
+            // codeql[java/sql-injection] -- `table` is a schema-qualified identifier from
+            // KnowledgeSchemaSupport.qualifiedTableName (double-quote escaped); all values are bind
+            // params.
             return jdbcTemplate.query(
                     sql,
                     (rs, rowNum) ->
@@ -343,10 +349,52 @@ final class KnowledgeChunkScanner {
                     params.toArray());
         } catch (DataAccessException e) {
             log.warn(
-                    "Keyword search failed (falling back to vector-only results) - likely a tenant schema pending "
-                            + "migration V87's content_tsv backfill: {}",
+                    "Keyword search failed (falling back to vector-only results) - likely a tenant"
+                            + " schema pending migration V87's content_tsv backfill: {}",
                     e.getMessage());
             return List.of();
         }
+    }
+
+    /**
+     * The ingestion write-screen's {@code screen_flags} marker (see {@link
+     * KnowledgeIngestionService}) for each of {@code ids} that has one, in one query. Chunks
+     * without a marker are absent from the map. Fails open to an empty map: a lookup problem must
+     * never fail a search.
+     */
+    Map<UUID, List<String>> screenFlags(List<UUID> ids, String table) {
+        Map<UUID, List<String>> out = new java.util.HashMap<>();
+        if (ids.isEmpty()) {
+            return out;
+        }
+        String idArray =
+                ids.stream().map(UUID::toString).collect(Collectors.joining(",", "{", "}"));
+        com.fasterxml.jackson.databind.ObjectMapper mapper =
+                com.agenticai.core.json.JsonMappers.plain();
+        try {
+            jdbcTemplate.query(
+                    // codeql[java/sql-injection] -- `table` is a schema-qualified identifier from
+                    // KnowledgeSchemaSupport.qualifiedTableName (double-quote escaped); ids bind.
+                    "SELECT id, metadata->'screen_flags' AS flags FROM "
+                            + table
+                            + " WHERE id = ANY(?::uuid[]) AND metadata->'screen_flags' IS NOT NULL",
+                    rs -> {
+                        try {
+                            List<String> flags =
+                                    mapper.readValue(
+                                            rs.getString("flags"),
+                                            new com.fasterxml.jackson.core.type.TypeReference<
+                                                    List<String>>() {});
+                            out.put(UUID.fromString(rs.getString("id")), flags);
+                        } catch (Exception ignored) {
+                            // a malformed marker is skipped, never fails the search
+                        }
+                    },
+                    idArray);
+        } catch (RuntimeException e) {
+            log.debug("screen_flags lookup skipped: {}", e.getMessage());
+            out.clear();
+        }
+        return out;
     }
 }

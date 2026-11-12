@@ -768,6 +768,9 @@
       "name": "SessionConfig"
     },
     {
+      "name": "SessionTaint"
+    },
+    {
       "name": "Settings"
     },
     {
@@ -7659,6 +7662,148 @@
           },
           "422": {
             "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/agents/{agentId}/chat/sessions/{sessionId}/taint": {
+      "get": {
+        "tags": [
+          "SessionTaint"
+        ],
+        "summary": "Status",
+        "operationId": "SessionTaintController_status",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "subject",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "SessionTaint"
+        ],
+        "summary": "Clear",
+        "operationId": "SessionTaintController_clear",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "subject",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -49610,6 +49755,243 @@
         ]
       }
     },
+    "/api/knowledge/{resourceKind}/{resourceId}/grants": {
+      "get": {
+        "tags": [
+          "Share"
+        ],
+        "summary": "List",
+        "operationId": "ShareController_list_2",
+        "parameters": [
+          {
+            "name": "resourceKind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "X-Has-More": {
+                "$ref": "#/components/headers/X-Has-More"
+              },
+              "X-Total-Count": {
+                "$ref": "#/components/headers/X-Total-Count"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ShareController_GrantResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Share"
+        ],
+        "summary": "Grant",
+        "operationId": "ShareController_grant_2",
+        "parameters": [
+          {
+            "name": "resourceKind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShareController_GrantRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShareController_GrantResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/knowledge/{resourceKind}/{resourceId}/grants/{grantId}": {
+      "delete": {
+        "tags": [
+          "Share"
+        ],
+        "summary": "Revoke",
+        "operationId": "ShareController_revoke_2",
+        "parameters": [
+          {
+            "name": "resourceKind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "grantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful response."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
     "/api/leads": {
       "get": {
         "tags": [
@@ -89508,11 +89890,37 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Successful response.",
+            "headers": {
+              "X-Has-More": {
+                "$ref": "#/components/headers/X-Has-More"
+              },
+              "X-Total-Count": {
+                "$ref": "#/components/headers/X-Total-Count"
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -107464,6 +107872,9 @@
             "format": "int32",
             "minimum": 0,
             "maximum": 199
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/KnowledgeVisibility"
           }
         },
         "required": [
@@ -107525,6 +107936,12 @@
           "chunkOverlap": {
             "type": "integer",
             "format": "int32"
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/KnowledgeVisibility"
+          },
+          "createdBy": {
+            "type": "string"
           }
         },
         "required": [
@@ -107559,6 +107976,9 @@
             "format": "int32",
             "minimum": 0,
             "maximum": 199
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/KnowledgeVisibility"
           }
         },
         "required": [
@@ -107924,6 +108344,14 @@
         "required": [
           "chunkCount",
           "document"
+        ]
+      },
+      "KnowledgeVisibility": {
+        "type": "string",
+        "enum": [
+          "PRIVATE",
+          "TENANT",
+          "SHARED"
         ]
       },
       "LandingEventController_LandingEventRequest": {
@@ -120550,7 +120978,8 @@
         "type": "string",
         "enum": [
           "AGENT",
-          "WORKFLOW"
+          "WORKFLOW",
+          "KNOWLEDGE_COLLECTION"
         ]
       },
       "ResumableChatStreamService_TurnSnapshot": {
@@ -122418,6 +122847,12 @@
           },
           "quote": {
             "type": "string"
+          },
+          "screenFlags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [

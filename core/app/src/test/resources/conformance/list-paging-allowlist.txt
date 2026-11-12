@@ -86,4 +86,3 @@ GET /api/wallets
 GET /api/workflow-expression-functions
 GET /api/workflows
 GET /api/workflows/{workflowId}/runs/{runId}/llm-requests
-GET /api/{resourceKind}/{resourceId}/grants

@@ -10,16 +10,14 @@ import static com.agenticai.core.graphmemory.GraphMemoryCypher.singleEdgeFilter;
 import com.agenticai.core.settings.SettingContext;
 import com.agenticai.core.settings.SettingsResolver;
 import com.agenticai.core.tenancy.AgeSessionSupport;
+import com.agenticai.core.tenancy.MissingTenantContextException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.LongSupplier;
 import org.slf4j.Logger;
@@ -141,9 +139,11 @@ public class GraphMemoryService {
                 };
             } catch (RuntimeException e) {
                 // The settings refine the property values; a recall never fails because they cannot
-                // be read.
+                // be
+                // read.
                 log.warn(
-                        "Could not read the graph memory recall settings, using the configured limits: {}",
+                        "Could not read the graph memory recall settings, using the configured"
+                                + " limits: {}",
                         e.toString());
             }
         }
@@ -234,7 +234,8 @@ public class GraphMemoryService {
                     subjectKey);
         } catch (Exception ex) {
             log.warn(
-                    "Graph memory write failed for agent {} subject '{}' - vector memory is unaffected",
+                    "Graph memory write failed for agent {} subject '{}' - vector memory is"
+                            + " unaffected",
                     agentId,
                     subjectKey,
                     ex);
@@ -284,7 +285,8 @@ public class GraphMemoryService {
                     asOf);
         } catch (Exception ex) {
             log.warn(
-                    "Graph memory recall failed for agent {} subject '{}' entity '{}' - continuing with vector recall only",
+                    "Graph memory recall failed for agent {} subject '{}' entity '{}' - continuing"
+                            + " with vector recall only",
                     agentId,
                     subjectKey,
                     entityHint,
@@ -315,7 +317,8 @@ public class GraphMemoryService {
      * might briefly remain valid alongside it until the next successful write.
      */
     public void supersede(UUID agentId, String subjectKey, GraphTriple triple) {
-        if (triple == null) {
+        if (triple == null || triple.tripsWriteScreen()) {
+            // A screened triple must not close the fact it would have replaced either.
             return;
         }
         String graphName = GraphMemoryErasure.graphNameOrNull();
@@ -330,23 +333,28 @@ public class GraphMemoryService {
                     st -> {
                         long now = nowMillis();
                         st.execute(
+                                // codeql[java/sql-injection] -- buildSupersedeInvalidateCypher
+                                // sanitises every value it interpolates; `now` is a long.
                                 cypherCall(
                                         graphName,
                                         buildSupersedeInvalidateCypher(
                                                 agentIdStr, subjectKeyStr, triple, now),
                                         ONE_COLUMN));
-                        writeTriple(st, graphName, agentIdStr, subjectKeyStr, triple, now, null);
+                        GraphMemoryWriter.writeTriple(
+                                st, graphName, agentIdStr, subjectKeyStr, triple, now);
                         return null;
                     });
             log.debug(
-                    "Superseded stale '{}' edge(s) from '{}' with an updated fact for agent {} subject '{}'",
+                    "Superseded stale '{}' edge(s) from '{}' with an updated fact for agent {}"
+                            + " subject '{}'",
                     triple.relation(),
                     triple.subject(),
                     agentId,
                     subjectKey);
         } catch (Exception ex) {
             log.warn(
-                    "Graph memory supersede failed for agent {} subject '{}' - falling back to a plain merge so the new fact isn't lost",
+                    "Graph memory supersede failed for agent {} subject '{}' - falling back to a"
+                            + " plain merge so the new fact isn't lost",
                     agentId,
                     subjectKey,
                     ex);
@@ -383,7 +391,7 @@ public class GraphMemoryService {
             onAge(
                     st -> {
                         for (GraphTriple triple : triples) {
-                            writeTriple(
+                            GraphMemoryWriter.writeTriple(
                                     st,
                                     graphName,
                                     SHARED_AGENT_SENTINEL,
@@ -398,7 +406,8 @@ public class GraphMemoryService {
                     "Wrote {} shared graph triple(s) for subject '{}'", triples.size(), subjectKey);
         } catch (Exception ex) {
             log.warn(
-                    "Shared graph memory write failed for subject '{}' - vector memory is unaffected",
+                    "Shared graph memory write failed for subject '{}' - vector memory is"
+                            + " unaffected",
                     subjectKey,
                     ex);
         }
@@ -430,7 +439,8 @@ public class GraphMemoryService {
                     null);
         } catch (Exception ex) {
             log.warn(
-                    "Shared graph recall failed for subject '{}' entity '{}' - continuing without shared graph context",
+                    "Shared graph recall failed for subject '{}' entity '{}' - continuing without"
+                            + " shared graph context",
                     subjectKey,
                     entityHint,
                     ex);
@@ -439,23 +449,79 @@ public class GraphMemoryService {
     }
 
     // -------------------------    /** Edges read per page by {@link #forgetFactText}. */
+    /**
+     * #815 Governance follow-up (PII handling review) - GDPR Article 17 "right to erasure" for a
+     * single data subject's graph-memory facts. Closes the gap {@code
+     * ChannelSessionService#eraseDataSubject}'s own javadoc already flags in this codebase ("Does
+     * NOT touch: GraphMemoryService-extracted entities... see this method's follow-up note in
+     * AI-GOVERNANCE-ASSESSMENT.md") - see this method's own callers for how the two are wired
+     * together.
+     *
+     * <p>Scoped by {@code subject_key} ALONE, across every agent this tenant has, not just one -
+     * the same "every agent, not just the currently-bound one" reasoning {@code
+     * AgentMemoryService#forgetAllForSubject} already documents: a data subject who has talked to
+     * three different agents has three different agent-scoped memories of them, and an erasure
+     * request is about the PERSON, not about any one agent relationship.
+     *
+     * <p><b>Unlike every other method on this class, this one does NOT fail open.</b> {@link
+     * #remember}/{@link #recallRelated}/{@link #supersede} degrade gracefully because graph memory
+     * is supplementary context to a chat turn - a write or read failing there must never break the
+     * conversation. An erasure request is different: silently swallowing a failure here would mean
+     * reporting "erased" (or simply not surfacing an error) while the subject's data may still sit
+     * in the graph - exactly the failure mode {@code TenantDataErasureService#eraseCurrentTenant}
+     * already establishes the precedent against (its own {@code DROP SCHEMA} failure is rethrown,
+     * not logged-and-swallowed, for the same reason). Any failure here propagates as an unchecked
+     * exception.
+     *
+     * @return how many {@code Entity} vertices (and, via {@code DETACH DELETE}, every edge attached
+     *     to them) were removed. Zero is a legitimate outcome - this subject was never written to
+     *     the graph - not an error.
+     */
+    public int eraseSubject(String subjectKey) {
+        String graphName = GraphMemorySchemaSupport.currentGraphName();
+        String subjectKeyStr = sanitize(subjectKey);
+
+        Integer erased =
+                onAge(st -> GraphMemoryForget.eraseSubjectEdges(st, graphName, subjectKeyStr));
+
+        int erasedCount = erased == null ? 0 : erased;
+        // No subject key in the line: this is reachable by every user (self-service forget-all) and
+        // the
+        // key is an identity.
+        log.info(
+                "Erased {} graph-memory entit{} for one subject across every agent",
+                erasedCount,
+                erasedCount == 1 ? "y" : "ies");
+        return erasedCount;
+    }
+
+    /**
+     * Fail-open twin of {@link GraphMemorySchemaSupport#currentGraphName()} for the supplementary
+     * read/write paths: no tenant schema on this thread means "no graph context", logged, never a
+     * broken chat turn - and never a fallback to a shared graph. {@link #eraseSubject} deliberately
+     * does NOT use this (erasure fails closed).
+     */
+    private static String graphNameOrNull() {
+        try {
+            return GraphMemorySchemaSupport.currentGraphName();
+        } catch (MissingTenantContextException e) {
+            log.warn("Graph memory skipped - {}", e.getMessage());
+            return null;
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // User-initiated forget sync (app.graph-memory.user-forget-sync.enabled,
+    // default OFF).
+    // ------------------------------------------------------------------
+
+    /** Edges read per page by {@link #forgetFactText}. */
     static final int FORGET_SCAN_PAGE = GraphMemoryProperties.DEFAULT_FORGET_SCAN_PAGE;
 
     /**
      * Most pages one {@link #forgetFactText} call reads (so at most 10,000 currently-valid edges).
      */
     static final int FORGET_SCAN_MAX_PAGES = GraphMemoryProperties.DEFAULT_FORGET_SCAN_MAX_PAGES;
-
-    private final GraphMemoryErasure erasure = new GraphMemoryErasure(this);
-
-    /**
-     * @return how many {@code Entity} vertices (and, via {@code DETACH DELETE}, every edge attached
-     *     to them) were removed. Zero is a legitimate outcome - this subject was never written to
-     *     the graph - not an error.
-     */
-    public int eraseSubject(String subjectKey) {
-        return erasure.eraseSubject(subjectKey);
-    }
 
     /**
      * As {@link #forgetFactText(String, UUID, String, Collection)} with no other facts to protect.
@@ -465,9 +531,26 @@ public class GraphMemoryService {
     }
 
     /**
-     * Best-effort graph side of "the user deleted (or rewrote) this remembered fact"; see {@link
-     * GraphMemoryErasure#forgetFactText}. Fails open like {@link #remember}: any failure is logged
-     * and reported as 0.
+     * Best-effort graph side of "the user deleted (or rewrote) this remembered fact".
+     *
+     * <p>Edges carry no fact id, so an edge cannot be tied to the one fact that produced it. This
+     * invalidates - {@code valid_to} stamp, the same temporal mechanism {@link #supersede} uses,
+     * never a DELETE - every currently-valid edge in the fact's own tier whose two entity names
+     * both occur in {@code factText}, unless one of {@code otherFactTexts} (the user's remaining
+     * facts in that tier) names both as well. No LLM call: the match is on the stored names, so it
+     * is deterministic and costs one read plus one write per edge.
+     *
+     * <p>The subject's currently-valid edges are read in a fixed order, {@value #FORGET_SCAN_PAGE}
+     * at a time, until a short page (at most {@value #FORGET_SCAN_MAX_PAGES} pages), so the result
+     * does not depend on which rows the database happened to return first.
+     *
+     * <p>Known limits: an edge whose entity names were paraphrased by the extractor (not present
+     * verbatim in the fact text) is left in place, and names containing a backslash are skipped.
+     * When the fact was edited rather than deleted, nothing is written for the new text - the graph
+     * learns it again only when an agent next saves it. {@link #eraseSubject} remains the complete
+     * erasure path.
+     *
+     * <p>Fails open like {@link #remember}: any failure is logged and reported as 0.
      *
      * @param agentId the agent whose private tier the fact lives in, or {@code null} for the
      *     tenant-shared tier ({@link #SHARED_AGENT_SENTINEL})
@@ -475,7 +558,34 @@ public class GraphMemoryService {
      */
     public int forgetFactText(
             String subjectKey, UUID agentId, String factText, Collection<String> otherFactTexts) {
-        return erasure.forgetFactText(subjectKey, agentId, factText, otherFactTexts);
+        if (subjectKey == null || subjectKey.isBlank() || factText == null || factText.isBlank()) {
+            return 0;
+        }
+        Collection<String> others = otherFactTexts == null ? List.of() : otherFactTexts;
+        try {
+            String graphName = GraphMemorySchemaSupport.currentGraphName();
+            String tierStr = GraphMemoryForget.tierFor(agentId);
+            String subjectKeyStr = sanitize(subjectKey);
+
+            Integer invalidated =
+                    onAge(
+                            st ->
+                                    GraphMemoryForget.scanAndInvalidate(
+                                            st,
+                                            graphName,
+                                            tierStr,
+                                            subjectKeyStr,
+                                            factText,
+                                            others,
+                                            properties.getForget(),
+                                            nowMillis()));
+            int count = invalidated == null ? 0 : invalidated;
+            log.debug("Invalidated {} graph edge(s) after a user-initiated fact removal", count);
+            return count;
+        } catch (Exception ex) {
+            log.warn("Graph memory forget-sync failed - vector memory is unaffected", ex);
+            return 0;
+        }
     }
 
     // ------------------------------------------------------------------
@@ -603,6 +713,8 @@ public class GraphMemoryService {
         String pattern =
                 boundedHops == 1 ? "-[r:RELATION]-" : "-[r:RELATION*1.." + boundedHops + "]-";
         String edgeFilter = boundedHops == 1 ? " AND " + singleEdgeFilter(asOfMillis) : "";
+        // codeql[java/sql-injection] -- tierStr/subjectKeyStr/hintStr are sanitize()d Cypher
+        // string content and maxPaths is an int; nothing reaches the query unsanitised.
         String cypher =
                 "MATCH p = (a:Entity)"
                         + pattern
@@ -627,30 +739,9 @@ public class GraphMemoryService {
 
         List<GraphFact> facts =
                 onAge(
-                        st -> {
-                            Set<GraphFact> result = new LinkedHashSet<>();
-                            try (ResultSet rs =
-                                    st.executeQuery(
-                                            cypherCall(graphName, cypher, "p ag_catalog.agtype"))) {
-                                while (rs != null && rs.next() && result.size() < maxFacts) {
-                                    try {
-                                        for (GraphFact fact :
-                                                parsePathFacts(rs.getString("p"), asOfMillis)) {
-                                            if (result.size() < maxFacts) {
-                                                result.add(fact);
-                                            }
-                                        }
-                                    } catch (
-                                            com.fasterxml.jackson.core.JsonProcessingException ex) {
-                                        throw new SQLException(
-                                                "Unparseable agtype path: "
-                                                        + ex.getOriginalMessage(),
-                                                ex);
-                                    }
-                                }
-                            }
-                            return new ArrayList<>(result);
-                        });
+                        st ->
+                                GraphMemoryRecall.collectFacts(
+                                        st, graphName, cypher, maxFacts, asOfMillis));
         return facts == null ? List.of() : facts;
     }
 }

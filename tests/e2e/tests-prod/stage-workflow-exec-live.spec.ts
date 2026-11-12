@@ -351,7 +351,7 @@ test.describe("workflow execution - kind stage", () => {
     expect(e1.status).toBe(400);
     expect(e1.body.detail).toMatch(/no nodes/);
     const nt = await mk("notrigger", [code("c", { operation: "uppercase" })], []);
-    expect((await run(nt, "x")).body.detail).toMatch(/exactly one Trigger/);
+    expect((await run(nt, "x")).body.detail).toMatch(/at least one Trigger/);
     const cyc = await mk("cycle", [trig, code("c", { operation: "uppercase" }), code("d", { operation: "lowercase" })], [E("t1", "c"), E("c", "d"), E("d", "c")]);
     expect((await run(cyc, "x")).body.detail).toMatch(/cycle/);
     expect((await api("POST", `/api/workflows/${id}/run`, { input: "x" }, {}, false)).status).toBe(401);

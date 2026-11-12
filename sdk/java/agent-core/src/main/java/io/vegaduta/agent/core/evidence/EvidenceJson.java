@@ -34,6 +34,11 @@ final class EvidenceJson {
     return raw(key, Long.toString(value));
   }
 
+  /** A number, or JSON {@code null} when absent. */
+  EvidenceJson put(String key, java.util.OptionalLong value) {
+    return raw(key, value.isPresent() ? Long.toString(value.getAsLong()) : "null");
+  }
+
   EvidenceJson put(String key, double value) {
     return raw(key, Double.isFinite(value) ? Double.toString(value) : "null");
   }

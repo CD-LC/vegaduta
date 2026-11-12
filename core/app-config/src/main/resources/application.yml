@@ -696,6 +696,14 @@ app:
     # Listed here so the key has one visible default.
     taint:
       mode: ${APP_AGENTS_TAINT_MODE:observe}
+      # Conversation-level taint: once a turn is tainted, a marker (sources, first-tainted-at) is kept with the
+      # chat session (same Redis TTL as the history) and seeds every later turn of that session, so a reply built
+      # from poisoned content does not start the next turn clean. Active only when mode != off. Cleared only by
+      # an explicit, audited DELETE /api/agents/{id}/chat/sessions/{sid}/taint.
+      session-persistence: ${APP_AGENTS_TAINT_SESSION_PERSISTENCE:true}
+      # Inbound channel turns: off | all | non-owner. DEFAULT off - policy not decided by the product owner. When
+      # on, an adapter that calls InboundChannelTaintPolicy.apply(turnContext.taint(), senderIsOwner) marks the turn.
+      inbound-channel-sources: ${APP_AGENTS_TAINT_INBOUND_CHANNEL_SOURCES:off}
     # Anthropic model alias. Check https://docs.anthropic.com/en/docs/about-claude/models
     # for the current default and adjust - model names are versioned and change over time.
     default-model: ${DEFAULT_MODEL:claude-sonnet-4-5}
@@ -4143,6 +4151,19 @@ app:
     # failing runs. See deploy/docker-compose.yml for the Temporal server
     # this connects to locally.
     execution-engine: ${WORKFLOW_EXECUTION_ENGINE:legacy}
+    # Effect journal (V680 workflow_effect_journal): exactly-once bookkeeping for the irreversible nodes
+    # (bulk_email, tool, crm_lead, device_control, media, output, workflow, non-GET http). STARTED is written
+    # before the side effect and COMPLETED (with the result) after it; a re-execution of a COMPLETED
+    # (run, node, iteration) replays the recorded result instead of running the effect again. A STARTED row with
+    # no COMPLETED after a crash is "effect uncertain": on-uncertain=fail (default) halts the node FAILED for a
+    # human decision; rerun re-executes it (the effect may then happen twice). journal.enabled=false restores the
+    # plain at-least-once behaviour. Rows older than retention-days are purged by WorkflowRunRecoveryJob.
+    effects:
+      on-uncertain: ${WORKFLOW_EFFECTS_ON_UNCERTAIN:fail}
+      journal:
+        enabled: ${WORKFLOW_EFFECTS_JOURNAL_ENABLED:true}
+        max-output-chars: ${WORKFLOW_EFFECTS_JOURNAL_MAX_OUTPUT_CHARS:200000}
+        retention-days: ${WORKFLOW_EFFECTS_JOURNAL_RETENTION_DAYS:30}
     # Workflow portability (WorkflowPortabilityService): export a workflow as the VegaDuta workflow DSL v1
     # (GET /api/workflows/{id}/export) and import one from a DSL file, an n8n export or a Dify app DSL as a
     # DRAFT (POST /api/workflows/import/preview, POST /api/workflows/import). false (default): all three

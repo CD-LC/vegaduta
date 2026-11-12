@@ -604,6 +604,14 @@ effective defaults are the ones in this table and now in the yml. Seeding keys a
 | `GRAPH_MEMORY_ARBITRATION_ENABLED` | `false` | graph-memory conflict arbitration | |
 | `APP_A2A_ENABLED` | `true` | the inbound A2A surface: agent cards, `/api/a2a` JSON-RPC and REST. `false` turns the whole surface off | |
 | `APP_A2A_SIGNING_ENABLED` | `true` | Ed25519-signed A2A agent cards | |
+| `APP_A2A_MAX_HOPS` (`app.a2a.max-hops`) | `4` | largest hop number an inbound A2A request may carry, and the largest an outbound `a2a_call_agent` may send (hop 1 = first agent-to-agent call of a chain; the hop is also propagated from the inbound request to calls made while serving it, with the originating trace id). `0` = off. Over the limit: JSON-RPC error `-32013` (REST: HTTP 508) | |
+| `APP_A2A_SERVER_VERIFY_SIGNATURES` (`app.a2a.server.verify-signatures`) | `true` | verify the detached message signature (`X-Vegaduta-A2A-Signature`: method, path, body digest, timestamp, nonce, hop) when a request carries one, with the timestamp window and nonce replay cache; also makes the Agent Card advertise the `urn:vegaduta:a2a:ext:message-integrity:v1` extension | |
+| `APP_A2A_SERVER_REQUIRE_SIGNED_MESSAGES` (`app.a2a.server.require-signed-messages`) | `false` | refuse A2A requests with no valid message signature (`-32011`). `false` for one release so peers that predate signing keep working; turn on once all peers advertise the extension. Implies verification | |
+| `APP_A2A_SERVER_TIMESTAMP_WINDOW` (`app.a2a.server.timestamp-window`) | `5m` | a signed request whose timestamp is further than this from the server clock is refused (`-32014`); nonces are remembered for twice this | |
+| `APP_A2A_SERVER_MAX_NONCES_PER_TENANT` (`app.a2a.server.max-nonces-per-tenant`) | `10000` | replay-cache size per tenant; when full of live nonces new signed requests are refused (`-32012`) rather than evicting one. Per replica, or shared through Redis with `APP_A2A_TASK_STORE=redis` | |
+| `APP_A2A_SERVER_TRUSTED_CARD_HOSTS` (`app.a2a.server.trusted-card-hosts`) | empty | optional allow-list (`host` or `*.suffix`) of hosts whose Agent Card may be fetched to find a caller's signing key; empty = any host the SSRF guard allows, for an authenticated caller | |
+| `APP_A2A_SERVER_KEY_CACHE_TTL` (`app.a2a.server.key-cache-ttl`) | `10m` | how long a caller's resolved signing key is cached (failures: 1 minute) | |
+| `APP_A2A_CLIENT_SIGN_REQUESTS` (`app.a2a.client.sign-requests`) | `true` | sign outbound A2A requests and send hop/trace, only to a peer whose card advertises the message-integrity extension; signing needs `APP_A2A_PUBLIC_BASE_URL` | |
 | `TOOL_AUTO_SELECTION_ENABLED` | `true` | automatic tool selection per turn | |
 | `APP_VISION_ENABLED` | `true` | image inputs in chat | |
 | `AGENT_JOB_TRIGGERS_ENABLED` | `true` | scheduled agent jobs | |
@@ -747,6 +755,10 @@ job resume, rerun and ownership, reasoning depth and injection screening keep th
 | `AGENT_HOOKS_ENABLED` | `app.agent-hooks.enabled` | `true` | `false` | declarative agent lifecycle hooks in the tool guard chain and the chat turn. Inert until someone defines a hook (one cached 15 s lookup per tool call). Set `app.agent-hooks.webhook.allowed-hosts` and `signing-secret` before defining a webhook hook. |
 | `TOOL_ARG_POLICIES_ENABLED` | `app.tool-arg-policies.enabled` | `true` | `false` | per-agent tool argument policies, evaluated before a tool runs. Inert until a policy exists; a policy lookup that throws follows `app.guardrails.fail-mode`. |
 | `APP_AGENTS_TAINT_MODE` | `app.agents.taint.mode` | `observe` | `enforce` (as before) | after a turn read content an outsider could write, count and audit the consequential calls that WOULD need approval. Behaviour unchanged; one audit row and one WARN per tool per tainted turn. `enforce` is the next step once the audit rows have been reviewed; `off` switches the layer off. |
+| `APP_AGENTS_TAINT_SESSION_PERSISTENCE` | `app.agents.taint.session-persistence` | `true` | `true` | conversation-level taint (active only when `app.agents.taint.mode` is not `off`). When a turn becomes tainted, a small marker (up to 8 source labels, first and last tainted time) is stored in Redis as `agentic:session-taint:<scoped session id>` with the history's TTL (`app.chat.session-ttl-hours`), and every later turn of that session starts tainted from it, so poisoned content replayed from history, or folded into the rolling summary, is not forgotten. Costs one Redis read per turn and a write when a new source appears. Fails open (a Redis error leaves only the turn's own taint). `GET`/`DELETE /api/agents/{agentId}/chat/sessions/{sessionId}/taint` show and clear it: the user clears their own, a tenant admin may pass `?subject=<user>`; a clear is audited (`agent-taint` / `session_taint_cleared`) and does not clean the history. `false` keeps taint per turn only |
+| `APP_AGENTS_TAINT_INBOUND_CHANNEL_SOURCES` | `app.agents.taint.inbound-channel-sources` | `off` | `off` | `off`, `all` or `non-owner`. A policy seam, **not decided**: `InboundChannelTaintPolicy.apply(turnContext.taint(), senderIsOwner)` marks an inbound channel turn `inbound_non_owner` for every sender (`all`) or only non-owners. Default `off` marks nothing (adapters still record their own `inbound:<channel>` label as before) |
+| `APP_KNOWLEDGE_INGEST_SCREEN_REFUSE_CREDENTIALS` | `app.knowledge.ingest-screen.refuse-credentials` | `true` | `true` | ingestion by upload, URL, connector or job refuses a document containing a credential or private key (AWS/Google/GitHub/Slack/`sk-` keys, PEM private keys, JWTs); the document is marked FAILED with the reason. `false` ingests it anyway |
+| `APP_KNOWLEDGE_INGEST_SCREEN_FLAG_INJECTION` | `app.knowledge.ingest-screen.flag-injection` | `true` | `true` | a chunk that matches an instruction-shaped phrase ("ignore the previous instructions", "reveal the system prompt", ...) is still ingested but carries `screen_flags: ["injection_phrase"]` in its metadata, and `search_knowledge_base` results show `screenFlags` so the model treats it as untrusted text. A regex tripwire: a document that quotes such a phrase (a security article) is flagged, not refused; a paraphrased injection is not caught. `remember_fact`, `remember_shared_fact`, `add_to_knowledge_base` and graph-memory writes by the agent REFUSE on either family instead (the agent can store the fact without the directive) |
 | `SKILLS_SUPPLY_CHAIN_ENFORCE` | `app.skills.supply-chain.enforce` | `true` | `false` | a custom skill whose content changed since an admin approved it, or that scans HIGH and was never approved, is withheld from `load_skill` and the skill list until an admin re-approves it on the Skills page or in the platform-admin Skill security page. Built-in skills are never withheld. The scan and the pins (`SKILLS_SUPPLY_CHAIN_ENABLED`) stay on in personal. |
 | `APP_CONTEXT_COMPACTION_ENABLED` | `app.context.compaction.enabled` | `true` | `true` | context budget planner and compaction in the chat turn (`restore_tool_result` stays on with it). A prompt inside the model's window is untouched; above 60% old tool results become restorable placeholders, above 85% the oldest turns become one summary written by the agent's own model unless `app.auxiliary-model.compaction` names another (a failed summary call is skipped). Costs: a compaction changes the prompt prefix, so a provider prompt cache misses once. |
 | `APP_CONTEXT_COMPACTION_RESERVE_OUTPUT_TOKENS` | `app.context.compaction.reserve-output-tokens` | `8192` | `8192` | tokens of the window kept back for the model's reply before the clear/compact fractions apply - headroom so a run at the compaction trigger still leaves room for the answer instead of riding at ~98% of the real window |
@@ -1263,6 +1275,12 @@ switch, `WHATSAPP_TEMPLATES_ENABLED`.
 
 | Property | Env | Default |
 |---|---|---|
+| `app.workflow.execution-engine` | `WORKFLOW_EXECUTION_ENGINE` | `legacy` (in-process); or `temporal` |
+| `app.workflow.effects.journal.enabled` | `WORKFLOW_EFFECTS_JOURNAL_ENABLED` | `true`; effect journal for irreversible workflow nodes (below). `false` = plain at-least-once, nothing journaled |
+| `app.workflow.effects.on-uncertain` | `WORKFLOW_EFFECTS_ON_UNCERTAIN` | `fail` (default): a node whose earlier attempt has a STARTED journal row but no COMPLETED halts FAILED for a human decision; `rerun`: execute it again (the external effect may happen twice) |
+| `app.workflow.effects.journal.max-output-chars` | `WORKFLOW_EFFECTS_JOURNAL_MAX_OUTPUT_CHARS` | `200000`; recorded output kept for replay (longer output is truncated and the replay says so) |
+| `app.workflow.effects.journal.retention-days` | `WORKFLOW_EFFECTS_JOURNAL_RETENTION_DAYS` | `30`; journal rows older than this are purged by the recovery sweep (`0` keeps them) |
+| `app.workflow.recovery.stale-after-minutes` | none (property only) | `120`; a RUNNING run on the in-process engine with no trace activity for this long is reaped FAILED. Deliberately not shorter by default: a single long node (an LLM or tool call) writes no trace entry until it finishes, so a lower value would reap healthy runs |
 | `app.workflow.execution-engine` | `WORKFLOW_EXECUTION_ENGINE` | `legacy` (in-process, best-effort); or `temporal` (durable) |
 | `app.workflow.temporal.target` | `TEMPORAL_TARGET` | `127.0.0.1:7233` |
 | `app.workflow.temporal.namespace` | `TEMPORAL_NAMESPACE` | `default` |
@@ -1283,6 +1301,23 @@ switch, `WHATSAPP_TEMPLATES_ENABLED`.
 `temporal` also needs the `temporal` Spring profile; without it core falls back
 to the in-process engine. Workers run in the `core-worker` shape.
 
+**Workflow effect journal.** The in-process engine is at-least-once: a node retry, a Temporal activity
+retry, an approval resume or a re-run after a crash can reach the same `(run, node, iteration)` twice. For
+the irreversible node types (`bulk_email`, `tool`, `crm_lead`, `device_control`, `media`, `output`,
+`workflow`, and `http` with a method other than GET/HEAD/OPTIONS) the engine writes a `STARTED` row to
+`workflow_effect_journal` (V680) before the side effect and `COMPLETED`, with the recorded result, after it.
+A second execution of a `COMPLETED` key returns the recorded output with a trace line ("side effect NOT
+re-run") instead of running the effect. A `STARTED` row without `COMPLETED` means the process died between the
+call and the bookkeeping, so whether the effect happened is unknown: with `on-uncertain=fail` the node halts the
+run `FAILED` with an "Effect uncertain at node ..." message and is never re-run silently. An operator checks the
+destination, then either records the effect as done or releases the key (`WorkflowEffectJournal#resolveUncertain`)
+and the run can be re-entered from that node. A handler exception or a halt (awaiting approval) releases the key,
+so ordinary retries still work. The iteration part of the key is the loop / fan-out / sub-flow item index, so
+iterations and parallel branches never share a key. The same stable `runId:nodeId:iteration` key is sent as the
+`Idempotency-Key` header by the HTTP node for POST/PUT/PATCH when the node does not set that header itself.
+When the recovery job reaps a crashed run it now says in `errorMessage` whether the journal holds an uncertain
+effect ("NOT resumable until a human ... resolves") or none ("Resumable from the node after 'X'"); no new run
+status was added.
 The in-process engine is best-effort: retry counts and the step ceiling are
 enforced, but the per-step timeout (`stepTimeoutSeconds`) is not applied, a
 parallel fan-out joins branches in completion order (fail-fast, but a running
@@ -1418,8 +1453,11 @@ to `core.env` or the Helm `core.env` map when you need them.
 | `app.security.outbound.egress-allow-list` | `APP_SECURITY_OUTBOUND_EGRESS_ALLOW_LIST` | empty (any public host); comma-separated `host` or `*.suffix`. When set, tenant-configured outbound calls (BYOK, OpenAPI, MCP URLs, web fetch, webhooks) may reach only these hosts; the private-address checks still apply and `allowed-private-hosts` entries are exempt. Platform-wide, not per agent |
 | `app.tenancy.fail-on-missing-context` | `APP_TENANCY_FAIL_ON_MISSING_CONTEXT` | `true`; `false` restores the shared-schema fallback (logged) |
 | `app.security.jwt.required-audience` | `APP_SECURITY_JWT_REQUIRED_AUDIENCE` | empty (off); needs a Keycloak audience mapper first |
-| `app.security.jwt.allow-unrestricted-audience` | `APP_SECURITY_JWT_ALLOW_UNRESTRICTED_AUDIENCE` | `false`. A non-Keycloak issuer (no `/realms/` in the issuer URI) with both `app.keycloak.allowed-azp` and `app.security.jwt.required-audience` empty fails startup; `true` downgrades that to an ERROR log |
+| `app.security.oidc.provider` | `APP_SECURITY_OIDC_PROVIDER` | `keycloak` or `generic`: the kind of issuer signing the tokens; the startup audience guard below applies to `generic` only. Unset: derived from the issuer URI (`/realms/` means `keycloak`) with a startup WARN asking you to set it, because the URI shape is only a heuristic. Any other value fails startup |
+| `app.security.jwt.allow-unrestricted-audience` | `APP_SECURITY_JWT_ALLOW_UNRESTRICTED_AUDIENCE` | `false`. A `generic` provider (`app.security.oidc.provider`) with both `app.keycloak.allowed-azp` and `app.security.jwt.required-audience` empty fails startup; `true` downgrades that to an ERROR log |
 | `app.tenant.status-fail-open-on-schema-check-error` | `APP_TENANT_STATUS_FAIL_OPEN_ON_SCHEMA_CHECK_ERROR` | `false`: a SQL error while checking an untracked tenant's schema refuses the request; `true` restores fail-open |
+| `app.tenancy.migrate-retry-interval` | `APP_TENANCY_MIGRATE_RETRY_INTERVAL` | `60s`: how often tenant schemas whose startup migration failed are retried; until one succeeds the tenant gets 403 on every shape (api, jobs, worker, other pods): the failure is persisted on the control-plane tenant row (`migration_failed_at`, `migration_error`; migration V690), read through the `app.tenant.status-cache-ttl` cache, and cleared by the next successful migration |
+| `app.security.jwt.allow-unrestricted-audience` | `APP_SECURITY_JWT_ALLOW_UNRESTRICTED_AUDIENCE` | `false`. A non-Keycloak issuer (no `/realms/` in the issuer URI) with both `app.keycloak.allowed-azp` and `app.security.jwt.required-audience` empty fails startup; `true` downgrades that to an ERROR log |
 | `app.tenancy.migrate-retry-interval` | `APP_TENANCY_MIGRATE_RETRY_INTERVAL` | `60s`: how often tenant schemas whose startup migration failed are retried; until one succeeds the tenant gets 403 |
 | `app.oauth.state.require-browser-cookie` | `APP_OAUTH_STATE_REQUIRE_BROWSER_COOKIE` | `false` |
 | `app.agent.share.visitor-token-secret` | `APP_AGENT_SHARE_VISITOR_TOKEN_SECRET` | empty: derived from `APP_ENCRYPTION_KEY` |

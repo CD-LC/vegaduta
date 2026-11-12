@@ -13,8 +13,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Single-node execution logic, extracted out of {@link WorkflowExecutionEngine} so it has exactly
- * one home shared by both execution paths this codebase now
- * has:
+ * one home shared by both execution paths this codebase now has:
  *
  * <ul>
  *   <li>{@link WorkflowExecutionEngine} - the original synchronous, in-process path (still the
@@ -57,6 +56,16 @@ public class WorkflowNodeExecutor {
     // served.
     private WorkflowPinStore pinStore;
 
+    // Effect journal (V680): exactly-once bookkeeping around irreversible nodes. Setter-injected
+    // and
+    // optional so hand-built executors (tests) run effects directly, as before.
+    private WorkflowEffectJournal effectJournal;
+
+    @Autowired(required = false)
+    void setEffectJournal(WorkflowEffectJournal effectJournal) {
+        this.effectJournal = effectJournal;
+    }
+
     @Autowired(required = false)
     void setPinStore(WorkflowPinStore pinStore) {
         this.pinStore = pinStore;
@@ -71,8 +80,8 @@ public class WorkflowNodeExecutor {
     static final java.util.Set<String> PIN_NOT_HONOURED_TYPES =
             java.util.Set.of("condition", "supervisor", "switch", "question_classifier");
 
-
-    // nlflow W5: WhatsApp approved-template sends from the Output node. Field-injected (default off)
+    // nlflow W5: WhatsApp approved-template sends from the Output node. Field-injected (default
+    // off)
     // and handed to handlers through the NodeInvocation; off = a node's template config is ignored
     // and plain text is sent, exactly as before.
     @org.springframework.beans.factory.annotation.Value(
@@ -264,7 +273,8 @@ public class WorkflowNodeExecutor {
                                     + ").");
                 }
                 if ("approval".equalsIgnoreCase(node.type())) {
-                    // SE-52: name what auto-approved it. The approval gate does not report which policy
+                    // SE-52: name what auto-approved it. The approval gate does not report which
+                    // policy
                     // matched, so state the action type it evaluated and that no human was asked.
                     return NodeExecutionResult.ok(
                             input,
@@ -301,7 +311,7 @@ public class WorkflowNodeExecutor {
                         : WorkflowDryRun.markRealExecution(
                                 resolvedNode,
                                 scope,
-                                dispatchNode(
+                                guardedDispatch(
                                         resolvedNode,
                                         workflowDefinitionId,
                                         workflowDefinitionName,
@@ -420,6 +430,38 @@ public class WorkflowNodeExecutor {
                 data,
                 result);
         return result;
+    }
+
+    /** Dispatches under the effect journal when one is wired (irreversible nodes only). */
+    private NodeExecutionResult guardedDispatch(
+            WorkflowNodeDto node,
+            String workflowDefinitionId,
+            String workflowDefinitionName,
+            String runId,
+            String input,
+            String requestedBy,
+            WorkflowIntelligenceSettings intelligenceSettings,
+            List<ChatInlineAttachment> attachments,
+            WorkflowExpressionResolver.NodeEvalInfo evalInfo,
+            ExpressionScope scope,
+            WorkflowNodeDto unresolvedNode) {
+        java.util.function.Supplier<NodeExecutionResult> effect =
+                () ->
+                        dispatchNode(
+                                node,
+                                workflowDefinitionId,
+                                workflowDefinitionName,
+                                runId,
+                                input,
+                                requestedBy,
+                                intelligenceSettings,
+                                attachments,
+                                evalInfo,
+                                scope,
+                                unresolvedNode);
+        return effectJournal == null
+                ? effect.get()
+                : effectJournal.guard(runId, node, scope, effect);
     }
 
     private NodeExecutionResult dispatchNode(

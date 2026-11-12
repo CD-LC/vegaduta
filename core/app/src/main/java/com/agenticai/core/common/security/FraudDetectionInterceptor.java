@@ -113,9 +113,11 @@ public class FraudDetectionInterceptor implements HandlerInterceptor {
             try {
                 Map<String, Object> body =
                         Map.of(
-                                "error", "fraud_detected_request_blocked",
+                                "error",
+                                "fraud_detected_request_blocked",
                                 "message",
-                                        "Your request has been blocked due to suspicious activity. Please try again later.");
+                                "Your request has been blocked due to suspicious activity."
+                                        + " Please try again later.");
                 res.getWriter().write(objectMapper.writeValueAsString(body));
             } catch (IOException e) {
                 log.error("Error writing fraud block response", e);

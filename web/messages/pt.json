@@ -2191,7 +2191,7 @@
     "adminOnlyEnforcedHint": "Regra aplicada pelo servidor, não apenas na tela. Tentativas de aprovação/rejeição por outros usuários (inclusive via API) serão bloqueadas.",
     "requireApprovalLabel": "Exigir aprovação humana para executar este nó",
     "deleteNode": "Excluir nó",
-    "triggerRequiredHint": "Todo workflow precisa de exatamente um nó de Gatilho.",
+    "triggerRequiredHint": "Todo workflow precisa de pelo menos um nó de Gatilho.",
     "toolNodeAgentLabel": "Agente (reutiliza o acesso a ferramentas deste agente)",
     "toolLabel": "Ferramenta",
     "loadingToolsPlaceholder": "Carregando ferramentas disponíveis…",

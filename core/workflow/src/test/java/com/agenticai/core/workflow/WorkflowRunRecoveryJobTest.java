@@ -1,6 +1,7 @@
 package com.agenticai.core.workflow;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,17 +33,16 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.ObjectProvider;
 
 /**
- * {@link WorkflowRunRecoveryJob} exists because a JVM crash mid-run leaves a
- * {@link WorkflowRun} row RUNNING forever - these tests pin the two halves of
- * "stale": old {@code startedAt} AND no recent trace activity. A run that is
- * merely old but whose trace is still growing (the engine saves the trace
- * after every node) must NOT be reaped, and one bad row must never stop the
- * rest of a tenant's batch.
+ * {@link WorkflowRunRecoveryJob} exists because a JVM crash mid-run leaves a {@link WorkflowRun}
+ * row RUNNING forever - these tests pin the two halves of "stale": old {@code startedAt} AND no
+ * recent trace activity. A run that is merely old but whose trace is still growing (the engine
+ * saves the trace after every node) must NOT be reaped, and one bad row must never stop the rest of
+ * a tenant's batch.
  *
- * <p>{@link TenantSchemaIterator} is mocked with a {@code doAnswer} that
- * immediately invokes the given action with one fixed schema name - same
- * convention as {@code WorkflowEventOutboxRelayTest}; multi-tenant iteration
- * and TenantContext handling are that class's own separately-tested concern.
+ * <p>{@link TenantSchemaIterator} is mocked with a {@code doAnswer} that immediately invokes the
+ * given action with one fixed schema name - same convention as {@code
+ * WorkflowEventOutboxRelayTest}; multi-tenant iteration and TenantContext handling are that class's
+ * own separately-tested concern.
  */
 class WorkflowRunRecoveryJobTest {
 
@@ -57,9 +57,9 @@ class WorkflowRunRecoveryJobTest {
     private WorkflowRunRecoveryJob job;
 
     /**
-     * Same reason as {@code WorkflowExecutionEngineFailProofTest#mapper}: the
-     * Spring-managed mapper has JavaTimeModule registered, a bare {@code new
-     * ObjectMapper()} cannot round-trip {@code NodeTraceEntry}'s Instants.
+     * Same reason as {@code WorkflowExecutionEngineFailProofTest#mapper}: the Spring-managed mapper
+     * has JavaTimeModule registered, a bare {@code new ObjectMapper()} cannot round-trip {@code
+     * NodeTraceEntry}'s Instants.
      */
     private static ObjectMapper mapper() {
         return new ObjectMapper().registerModule(new JavaTimeModule());
@@ -74,25 +74,35 @@ class WorkflowRunRecoveryJobTest {
         eventPublisher = mock(WorkflowEventPublisher.class);
         jobLockProvider = mock(ObjectProvider.class);
 
-        doAnswer(invocation -> {
-            Consumer<String> action = invocation.getArgument(0);
-            action.accept(SCHEMA);
-            return null;
-        }).when(schemaIterator).forEachActiveTenantSchema(any());
+        doAnswer(
+                        invocation -> {
+                            Consumer<String> action = invocation.getArgument(0);
+                            action.accept(SCHEMA);
+                            return null;
+                        })
+                .when(schemaIterator)
+                .forEachActiveTenantSchema(any());
 
-        job = new WorkflowRunRecoveryJob(
-            schemaIterator, runRepository, mapper(), issueService, eventPublisher, jobLockProvider,
-            STALE_AFTER_MINUTES);
+        job =
+                new WorkflowRunRecoveryJob(
+                        schemaIterator,
+                        runRepository,
+                        mapper(),
+                        issueService,
+                        eventPublisher,
+                        jobLockProvider,
+                        STALE_AFTER_MINUTES);
     }
 
     /**
-     * The entity deliberately has no setter for {@code startedAt} (the
-     * constructor stamps {@code now()}), so tests back-date it reflectively -
-     * same precedent as {@code WorkflowExecutionEngineFailProofTest}'s
-     * {@code definitionWithId}.
+     * The entity deliberately has no setter for {@code startedAt} (the constructor stamps {@code
+     * now()}), so tests back-date it reflectively - same precedent as {@code
+     * WorkflowExecutionEngineFailProofTest}'s {@code definitionWithId}.
      */
     private static WorkflowRun runStartedAgo(Duration age) throws ReflectiveOperationException {
-        WorkflowRun run = new WorkflowRun(UUID.randomUUID(), UUID.randomUUID(), "Test Workflow", "user@example.com");
+        WorkflowRun run =
+                new WorkflowRun(
+                        UUID.randomUUID(), UUID.randomUUID(), "Test Workflow", "user@example.com");
         Field startedAt = WorkflowRun.class.getDeclaredField("startedAt");
         startedAt.setAccessible(true);
         startedAt.set(run, Instant.now().minus(age));
@@ -100,23 +110,34 @@ class WorkflowRunRecoveryJobTest {
     }
 
     @Test
-    void staleRunIsMarkedFailedWithInterruptedReasonAndRecoveryTraceEntry() throws ReflectiveOperationException {
+    void staleRunIsMarkedFailedWithInterruptedReasonAndRecoveryTraceEntry()
+            throws ReflectiveOperationException {
         WorkflowRun stale = runStartedAgo(Duration.ofHours(3));
         when(runRepository.findByStatusAndStartedAtBefore(eq(WorkflowRunStatus.RUNNING), any()))
-            .thenReturn(List.of(stale));
+                .thenReturn(List.of(stale));
 
         job.sweepAllTenants();
 
         assertEquals(WorkflowRunStatus.FAILED, stale.getStatus());
         assertEquals(WorkflowRunRecoveryJob.FAILURE_REASON, stale.getErrorMessage());
         assertNotNull(stale.getCompletedAt());
-        assertTrue(stale.getTraceJson().contains("\"nodeId\":\"recovery\""),
-            "expected an appended recovery trace entry, got: " + stale.getTraceJson());
-        assertTrue(stale.getTraceJson().contains(WorkflowRunRecoveryJob.FAILURE_REASON),
-            "expected the trace entry to carry the interrupted reason, got: " + stale.getTraceJson());
+        assertTrue(
+                stale.getTraceJson().contains("\"nodeId\":\"recovery\""),
+                "expected an appended recovery trace entry, got: " + stale.getTraceJson());
+        assertTrue(
+                stale.getTraceJson().contains(WorkflowRunRecoveryJob.FAILURE_REASON),
+                "expected the trace entry to carry the interrupted reason, got: "
+                        + stale.getTraceJson());
         verify(runRepository).save(stale);
-        verify(eventPublisher).publish(eq("workflow.run.failed"), eq(stale.getId().toString()), any());
-        verify(issueService).record(any(), eq(stale.getWorkflowId().toString()), any(), anyString(), anyString());
+        verify(eventPublisher)
+                .publish(eq("workflow.run.failed"), eq(stale.getId().toString()), any());
+        verify(issueService)
+                .record(
+                        any(),
+                        eq(stale.getWorkflowId().toString()),
+                        any(),
+                        anyString(),
+                        anyString());
     }
 
     @Test
@@ -126,11 +147,19 @@ class WorkflowRunRecoveryJobTest {
         // run, exactly the case the trace-heartbeat refinement exists for.
         WorkflowRun longRunning = runStartedAgo(Duration.ofHours(3));
         Instant now = Instant.now();
-        longRunning.updateTrace(mapper().writeValueAsString(List.of(
-            new NodeTraceEntry("n1", "agent", "Agent", "OK", "done",
-                now.minus(Duration.ofMinutes(10)), now.minus(Duration.ofMinutes(5))))));
+        longRunning.updateTrace(
+                mapper().writeValueAsString(
+                                List.of(
+                                        new NodeTraceEntry(
+                                                "n1",
+                                                "agent",
+                                                "Agent",
+                                                "OK",
+                                                "done",
+                                                now.minus(Duration.ofMinutes(10)),
+                                                now.minus(Duration.ofMinutes(5))))));
         when(runRepository.findByStatusAndStartedAtBefore(eq(WorkflowRunStatus.RUNNING), any()))
-            .thenReturn(List.of(longRunning));
+                .thenReturn(List.of(longRunning));
 
         job.sweepAllTenants();
 
@@ -145,15 +174,22 @@ class WorkflowRunRecoveryJobTest {
         // bearing assertion is the cutoff this job derives: startedAt-based,
         // staleAfterMinutes before "now".
         when(runRepository.findByStatusAndStartedAtBefore(eq(WorkflowRunStatus.RUNNING), any()))
-            .thenReturn(List.of());
+                .thenReturn(List.of());
 
         job.sweepAllTenants();
 
         ArgumentCaptor<Instant> cutoff = ArgumentCaptor.forClass(Instant.class);
-        verify(runRepository).findByStatusAndStartedAtBefore(eq(WorkflowRunStatus.RUNNING), cutoff.capture());
+        verify(runRepository)
+                .findByStatusAndStartedAtBefore(eq(WorkflowRunStatus.RUNNING), cutoff.capture());
         Instant expected = Instant.now().minus(Duration.ofMinutes(STALE_AFTER_MINUTES));
         long driftSeconds = Math.abs(Duration.between(expected, cutoff.getValue()).getSeconds());
-        assertTrue(driftSeconds < 60, "cutoff should be ~" + STALE_AFTER_MINUTES + "min ago, drifted " + driftSeconds + "s");
+        assertTrue(
+                driftSeconds < 60,
+                "cutoff should be ~"
+                        + STALE_AFTER_MINUTES
+                        + "min ago, drifted "
+                        + driftSeconds
+                        + "s");
         verify(runRepository, never()).save(any());
     }
 
@@ -162,10 +198,10 @@ class WorkflowRunRecoveryJobTest {
         WorkflowRun first = runStartedAgo(Duration.ofHours(4));
         WorkflowRun second = runStartedAgo(Duration.ofHours(4));
         when(runRepository.findByStatusAndStartedAtBefore(eq(WorkflowRunStatus.RUNNING), any()))
-            .thenReturn(List.of(first, second));
+                .thenReturn(List.of(first, second));
         when(runRepository.save(any(WorkflowRun.class)))
-            .thenThrow(new RuntimeException("simulated DB failure on first row"))
-            .thenAnswer(invocation -> invocation.getArgument(0));
+                .thenThrow(new RuntimeException("simulated DB failure on first row"))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         job.sweepAllTenants();
 
@@ -180,7 +216,7 @@ class WorkflowRunRecoveryJobTest {
         String corrupt = "not-json{{{";
         stale.updateTrace(corrupt);
         when(runRepository.findByStatusAndStartedAtBefore(eq(WorkflowRunStatus.RUNNING), any()))
-            .thenReturn(List.of(stale));
+                .thenReturn(List.of(stale));
 
         job.sweepAllTenants();
 
@@ -196,10 +232,13 @@ class WorkflowRunRecoveryJobTest {
     void scheduledTickRunsUnderTheAdvisoryLockWhenTheBeanIsPresent() {
         PgAdvisoryJobLock lock = mock(PgAdvisoryJobLock.class);
         when(jobLockProvider.getIfAvailable()).thenReturn(lock);
-        doAnswer(invocation -> {
-            ((Runnable) invocation.getArgument(1)).run();
-            return true;
-        }).when(lock).tryRunExclusive(anyString(), any(Runnable.class));
+        doAnswer(
+                        invocation -> {
+                            ((Runnable) invocation.getArgument(1)).run();
+                            return true;
+                        })
+                .when(lock)
+                .tryRunExclusive(anyString(), any(Runnable.class));
 
         job.reapStaleRuns();
 
@@ -214,5 +253,74 @@ class WorkflowRunRecoveryJobTest {
         job.reapStaleRuns();
 
         verify(schemaIterator).forEachActiveTenantSchema(any());
+    }
+
+    // ---- effect journal (V680): the reaper says what the crash left behind ----
+
+    private WorkflowEffectJournal wireJournal(List<WorkflowEffectJournalEntry> uncertain) {
+        WorkflowEffectJournal journal = mock(WorkflowEffectJournal.class);
+        when(journal.isEnabled()).thenReturn(true);
+        when(journal.uncertainEffects(any())).thenReturn(uncertain);
+        @SuppressWarnings("unchecked")
+        ObjectProvider<WorkflowEffectJournal> provider = mock(ObjectProvider.class);
+        when(provider.getIfAvailable()).thenReturn(journal);
+        job.setEffectJournal(provider, 30);
+        return journal;
+    }
+
+    private WorkflowRun staleRunWithCompletedNode() throws Exception {
+        WorkflowRun stale = runStartedAgo(Duration.ofHours(3));
+        Instant t = Instant.now().minus(Duration.ofHours(3));
+        stale.updateTrace(
+                mapper().writeValueAsString(
+                                List.of(
+                                        new NodeTraceEntry(
+                                                "n1",
+                                                "agent",
+                                                "Draft reply",
+                                                "OK",
+                                                "done",
+                                                t,
+                                                t.plusSeconds(5)))));
+        when(runRepository.findByStatusAndStartedAtBefore(eq(WorkflowRunStatus.RUNNING), any()))
+                .thenReturn(List.of(stale));
+        return stale;
+    }
+
+    @Test
+    void crashWithNoUncertainEffectSaysWhereTheRunIsResumable() throws Exception {
+        WorkflowEffectJournal journal = wireJournal(List.of());
+        WorkflowRun stale = staleRunWithCompletedNode();
+
+        job.sweepAllTenants();
+
+        assertEquals(WorkflowRunStatus.FAILED, stale.getStatus());
+        assertTrue(stale.getErrorMessage().startsWith(WorkflowRunRecoveryJob.FAILURE_REASON));
+        assertTrue(
+                stale.getErrorMessage()
+                        .contains("Resumable from the node after 'Draft reply' (n1)"),
+                stale.getErrorMessage());
+        verify(journal).markRunEffectsUncertain(stale.getId());
+        verify(journal).purgeOlderThan(any());
+    }
+
+    @Test
+    void crashWithAnUncertainEffectIsExplicitlyNotResumable() throws Exception {
+        WorkflowEffectJournalEntry uncertain = mock(WorkflowEffectJournalEntry.class);
+        when(uncertain.getNodeType()).thenReturn("bulk_email");
+        when(uncertain.getNodeId()).thenReturn("mail1");
+        when(uncertain.getIterationKey()).thenReturn("4");
+        wireJournal(List.of(uncertain));
+        WorkflowRun stale = staleRunWithCompletedNode();
+
+        job.sweepAllTenants();
+
+        assertTrue(
+                stale.getErrorMessage()
+                        .contains("Effect uncertain: bulk_email node mail1 (iteration 4)"),
+                stale.getErrorMessage());
+        assertTrue(stale.getErrorMessage().contains("NOT resumable"));
+        assertFalse(stale.getErrorMessage().contains("Resumable from"));
+        assertTrue(stale.getTraceJson().contains("effect(s) of unknown outcome"));
     }
 }

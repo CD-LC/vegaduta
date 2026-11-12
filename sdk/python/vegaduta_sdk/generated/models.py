@@ -117,6 +117,8 @@ KnowledgeIngestionJobStatus = Literal["QUEUED", "PROCESSING", "COMPLETE", "FAILE
 
 KnowledgeReembedJobStatus = Literal["QUEUED", "EMBEDDING", "SWEEPING", "COMPLETED", "FAILED"]
 
+KnowledgeVisibility = Literal["PRIVATE", "TENANT", "SHARED"]
+
 LeadActivityType = Literal["NOTE", "EMAIL_SENT", "EMAIL_REPLY", "STAGE_CHANGE", "CALL", "TASK"]
 
 LeadStage = Literal["NEW", "CONTACTED", "REPLIED", "QUALIFIED", "PROPOSAL", "WON", "LOST"]
@@ -195,7 +197,7 @@ ReasoningDepth = Literal["FAST", "CAREFUL", "RIGOROUS", "PLANNED"]
 
 ReliabilityMetricId = Literal["PASS_AT_1", "PASS_AT_K", "PASS_HAT_K", "MEAN_SCORE"]
 
-ResourceType = Literal["AGENT", "WORKFLOW"]
+ResourceType = Literal["AGENT", "WORKFLOW", "KNOWLEDGE_COLLECTION"]
 
 SampleUnit = Literal["ROLLOUT", "CASE", "CASE_PAIR"]
 
@@ -4833,6 +4835,7 @@ class KnowledgeCollectionCreateRequest(_KnowledgeCollectionCreateRequestRequired
     textSearchConfig: str
     chunkSize: int
     chunkOverlap: int
+    visibility: KnowledgeVisibility
 
 
 class KnowledgeCollectionResponse(TypedDict, total=False):
@@ -4850,6 +4853,8 @@ class KnowledgeCollectionResponse(TypedDict, total=False):
     embeddingStatus: str
     chunkSize: int
     chunkOverlap: int
+    visibility: KnowledgeVisibility
+    createdBy: str
 
 
 class _KnowledgeCollectionUpdateRequestRequired(TypedDict):
@@ -4861,6 +4866,7 @@ class KnowledgeCollectionUpdateRequest(_KnowledgeCollectionUpdateRequestRequired
     parentCollectionId: str
     chunkSize: int
     chunkOverlap: int
+    visibility: KnowledgeVisibility
 
 
 class KnowledgeConnectorController_ConnectorUpdateRequest(TypedDict, total=False):
@@ -9170,6 +9176,7 @@ class SearchResultResponse(TypedDict, total=False):
     startChar: int
     endChar: int
     quote: str
+    screenFlags: List[str]
 
 
 class SecretResponse(TypedDict, total=False):
