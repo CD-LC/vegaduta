@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "id": "s03-knowledge-update",
+  "category": "knowledge-update",
+  "persona": {
+    "id": "p-scripted",
+    "name": "Scripted user",
+    "language": "en",
+    "description": "Single scripted user for a T1 scenario"
+  },
+  "seed": 103,
+  "sessions": [
+    {
+      "id": "s1",
+      "gap_days": 0,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "I live in Pune",
+          "plants": [
+            "f-pune"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s2",
+      "gap_days": 90,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "I moved to Bengaluru",
+          "plants": [
+            "f-blr"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s3",
+      "gap_days": 7,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Thanks for the help earlier",
+          "plants": []
+        }
+      ],
+      "forgets": []
+    }
+  ],
+  "ledger": [
+    {
+      "id": "f-pune",
+      "key": "home_city",
+      "value": "User lives in Pune",
+      "match": "Pune",
+      "planted_in": "s1",
+      "superseded_by": "f-blr",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "f-blr",
+      "key": "home_city",
+      "value": "User lives in Bengaluru",
+      "match": "Bengaluru",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p1"
+      ],
+      "kind": "FACT",
+      "valid_from": 90
+    }
+  ],
+  "probes": [
+    {
+      "id": "p1",
+      "after": "s3",
+      "type": "UPDATE",
+      "prompt": "What's the weather like where I live?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "home_city"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "knowledge_update",
+      "expect": {
+        "all": [
+          "Bengaluru"
+        ],
+        "none": [
+          "Pune"
+        ],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    }
+  ]
+}

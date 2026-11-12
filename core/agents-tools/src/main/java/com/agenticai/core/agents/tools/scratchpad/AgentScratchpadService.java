@@ -15,6 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
  * agent-authored notepad scoped per {@code (agentId, sessionId)} where a {@code null} sessionId is
  * an agent-long-term note.
  *
+ * <p><b>Whose notes.</b> A session-pad note belongs to the session (whose id is already derived per
+ * caller). An agent-pad note belongs to the caller's {@code subjectKey} (V711): the model's read,
+ * list, write and delete only reach the caller's own agent-pad notes, the cap and eviction are per
+ * caller, and a turn with no identified caller cannot use the agent pad at all. Rows that predate
+ * the column have no owner; they are never returned to the model (operators still see them).
+ *
  * <p>All bounds are enforced here, not in the callback layer and not in DDL, so they stay
  * configuration ({@link ScratchpadProperties}) and every caller - tool callback, future REST
  * surface - gets identical answers:
@@ -72,9 +78,48 @@ public class AgentScratchpadService {
      */
     @Transactional
     public WriteResult write(UUID agentId, UUID sessionId, String key, String body) {
+        return write(agentId, sessionId, null, key, body, NoteTrust.TRUSTED);
+    }
+
+    /**
+     * {@link #write(UUID, UUID, String, String)} with the provenance the turn's taint decided and
+     * no caller identity: only a session-pad write can succeed (an agent-pad write needs a subject,
+     * see {@link #write(UUID, UUID, String, String, String, NoteTrust)}).
+     */
+    @Transactional
+    public WriteResult write(
+            UUID agentId, UUID sessionId, String key, String body, NoteTrust provenance) {
+        return write(agentId, sessionId, null, key, body, provenance);
+    }
+
+    /**
+     * Writes on behalf of {@code subjectKey}, the caller of the turn. A QUARANTINED note is stored
+     * but hidden from {@link #read} and {@link #list} until a person approves it. Two things a
+     * quarantined write may not do, because both would let a tainted turn damage what was trusted:
+     * overwrite a TRUSTED note (the old text would be destroyed or silently replaced by attacker
+     * text), or evict a note to make room.
+     *
+     * @throws IllegalArgumentException as {@link #write(UUID, UUID, String, String)}, plus the two
+     *     refusals above, an agent-pad write with no {@code subjectKey}, and a write onto a session
+     *     note another subject owns
+     */
+    @Transactional
+    public WriteResult write(
+            UUID agentId,
+            UUID sessionId,
+            String subjectKey,
+            String key,
+            String body,
+            NoteTrust provenance) {
+        NoteTrust prov = provenance == null ? NoteTrust.TRUSTED : provenance;
         requireEnabled();
         Objects.requireNonNull(agentId, "agentId must not be null");
+        String subject = normalize(subjectKey);
         validateKey(key);
+        if (sessionId == null && subject == null) {
+            throw new IllegalArgumentException(
+                    "The agent pad is kept per user and this turn has no identified user - use the session pad");
+        }
         if (body == null) {
             throw new IllegalArgumentException("Scratchpad note body must not be null");
         }
@@ -87,17 +132,31 @@ public class AgentScratchpadService {
                             + properties.getMaxNoteBytes()
                             + "-byte limit (app.tools.scratchpad.max-note-bytes)");
         }
-        Optional<ScratchpadNote> existing =
-                repository.findByAgentIdAndSessionIdAndKey(agentId, sessionId, key);
+        Optional<ScratchpadNote> existing = lookup(agentId, sessionId, subject, key);
         if (existing.isPresent()) {
             ScratchpadNote note = existing.get();
-            note.update(body, byteSize);
+            if (!ownedBy(note, subject)) {
+                throw new IllegalArgumentException(
+                        "Scratchpad note '"
+                                + key
+                                + "' belongs to another user and cannot be written from here");
+            }
+            if (prov.quarantined() && !note.isQuarantined()) {
+                throw new IllegalArgumentException(
+                        "Scratchpad note '"
+                                + key
+                                + "' is trusted and this turn handled untrusted content, so it cannot be"
+                                + " overwritten from here - save the new text under a different key (it is"
+                                + " held for review) or ask the user");
+            }
+            note.update(body, byteSize, prov);
+            note.claim(subject);
             return new WriteResult(repository.save(note), null, 0);
         }
         int expiredRemoved = sweepExpired(agentId, sessionId);
         String evictedKey = null;
-        if (repository.countByAgentIdAndSessionId(agentId, sessionId) >= properties.getMaxNotes()) {
-            if (!properties.isEvictOldestOnCap()) {
+        if (count(agentId, sessionId, subject) >= properties.getMaxNotes()) {
+            if (prov.quarantined() || !properties.isEvictOldestOnCap()) {
                 throw new IllegalArgumentException(
                         "Scratchpad already holds "
                                 + properties.getMaxNotes()
@@ -105,8 +164,7 @@ public class AgentScratchpadService {
                                 + " - delete one or rewrite an existing key");
             }
             ScratchpadNote oldest =
-                    repository
-                            .findFirstByAgentIdAndSessionIdOrderByUpdatedAtAsc(agentId, sessionId)
+                    oldest(agentId, sessionId, subject)
                             .orElseThrow(
                                     () ->
                                             new IllegalStateException(
@@ -117,8 +175,47 @@ public class AgentScratchpadService {
             repository.delete(oldest);
         }
         ScratchpadNote saved =
-                repository.save(new ScratchpadNote(agentId, sessionId, key, body, byteSize));
+                repository.save(
+                        new ScratchpadNote(agentId, sessionId, subject, key, body, byteSize, prov));
         return new WriteResult(saved, evictedKey, expiredRemoved);
+    }
+
+    private static String normalize(String subjectKey) {
+        return subjectKey == null || subjectKey.isBlank() ? null : subjectKey;
+    }
+
+    /** The note in the caller's scope: the session's, or the caller's own agent-pad note. */
+    private Optional<ScratchpadNote> lookup(
+            UUID agentId, UUID sessionId, String subject, String key) {
+        if (sessionId != null) {
+            return repository.findByAgentIdAndSessionIdAndKey(agentId, sessionId, key);
+        }
+        return subject == null
+                ? Optional.empty()
+                : repository.findByAgentIdAndSessionIdIsNullAndSubjectKeyAndKey(
+                        agentId, subject, key);
+    }
+
+    private long count(UUID agentId, UUID sessionId, String subject) {
+        return sessionId != null
+                ? repository.countByAgentIdAndSessionId(agentId, sessionId)
+                : repository.countByAgentIdAndSessionIdIsNullAndSubjectKey(agentId, subject);
+    }
+
+    private Optional<ScratchpadNote> oldest(UUID agentId, UUID sessionId, String subject) {
+        return sessionId != null
+                ? repository.findFirstByAgentIdAndSessionIdOrderByUpdatedAtAsc(agentId, sessionId)
+                : repository.findFirstByAgentIdAndSessionIdIsNullAndSubjectKeyOrderByUpdatedAtAsc(
+                        agentId, subject);
+    }
+
+    /** Session notes: the caller's or nobody's (legacy). Agent-pad notes: only the caller's. */
+    private static boolean ownedBy(ScratchpadNote note, String subject) {
+        String owner = note.getSubjectKey();
+        if (note.getSessionId() == null) {
+            return subject != null && subject.equals(owner);
+        }
+        return owner == null || owner.equals(subject);
     }
 
     /**
@@ -138,56 +235,141 @@ public class AgentScratchpadService {
     }
 
     /**
-     * The note under {@code key} in the {@code (agentId, sessionId)} scope; null sessionId reads
-     * the agent-long-term note.
+     * {@link #read(UUID, UUID, String, String)} with no caller identity: reaches session-pad notes
+     * only.
      */
     @Transactional(readOnly = true)
     public Optional<ScratchpadNote> read(UUID agentId, UUID sessionId, String key) {
+        return read(agentId, sessionId, null, key);
+    }
+
+    /**
+     * The note under {@code key} in the {@code (agentId, sessionId)} scope as {@code subjectKey}
+     * sees it; a null sessionId reads the caller's own agent-pad note.
+     */
+    @Transactional(readOnly = true)
+    public Optional<ScratchpadNote> read(
+            UUID agentId, UUID sessionId, String subjectKey, String key) {
         requireEnabled();
         Objects.requireNonNull(agentId, "agentId must not be null");
         validateKey(key);
-        return repository.findByAgentIdAndSessionIdAndKey(agentId, sessionId, key);
+        String subject = normalize(subjectKey);
+        // A note held for review is invisible here: this is the model's read path.
+        return lookup(agentId, sessionId, subject, key)
+                .filter(note -> !note.isQuarantined())
+                .filter(note -> ownedBy(note, subject));
     }
 
-    /**
-     * Every note the agent can see from {@code sessionId} - the session's own notes AND its
-     * agent-long-term ones - newest-updated first. A null {@code sessionId} lists just the
-     * long-term notes.
-     */
+    /** {@link #list(UUID, UUID, String)} with no caller identity: session-pad notes only. */
     @Transactional(readOnly = true)
     public List<ScratchpadNote> list(UUID agentId, UUID sessionId) {
-        requireEnabled();
-        Objects.requireNonNull(agentId, "agentId must not be null");
-        return repository.findVisible(agentId, sessionId);
+        return list(agentId, sessionId, null);
     }
 
     /**
-     * {@link #list} as operator-facing views (no entity, no bodies) - the read-only admin surface's
-     * list shape.
+     * Every note the caller can see from {@code sessionId} - the session's own notes AND the
+     * caller's agent-pad ones - newest-updated first. A null {@code sessionId} lists just the agent
+     * pad.
+     */
+    @Transactional(readOnly = true)
+    public List<ScratchpadNote> list(UUID agentId, UUID sessionId, String subjectKey) {
+        requireEnabled();
+        Objects.requireNonNull(agentId, "agentId must not be null");
+        String subject = normalize(subjectKey);
+        return repository.findVisibleTo(agentId, sessionId, subject == null ? "" : subject);
+    }
+
+    /**
+     * Operator-facing views of the pad, every owner (no entity, no bodies) - the read-only admin
+     * surface's list shape.
      */
     @Transactional(readOnly = true)
     public List<ScratchpadNoteView> listViews(UUID agentId, UUID sessionId) {
-        return list(agentId, sessionId).stream()
+        requireEnabled();
+        Objects.requireNonNull(agentId, "agentId must not be null");
+        return repository.findVisible(agentId, sessionId).stream()
                 .map(note -> ScratchpadNoteView.of(note, false))
                 .toList();
     }
 
     /**
-     * {@link #read} as an operator-facing view carrying the body - the read-only admin surface's
-     * single-note shape.
+     * One note as an operator sees it, with its body. For the agent pad, {@code subjectKey} picks
+     * the owner; without it the key must be unique across owners.
+     *
+     * @throws IllegalArgumentException on a malformed key or an ambiguous agent-pad key
      */
     @Transactional(readOnly = true)
-    public Optional<ScratchpadNoteView> readView(UUID agentId, UUID sessionId, String key) {
-        return read(agentId, sessionId, key).map(note -> ScratchpadNoteView.of(note, true));
-    }
-
-    /** Removes the note under {@code key} in the scope; true when one existed. */
-    @Transactional
-    public boolean delete(UUID agentId, UUID sessionId, String key) {
+    public Optional<ScratchpadNoteView> readView(
+            UUID agentId, UUID sessionId, String key, String subjectKey) {
         requireEnabled();
         Objects.requireNonNull(agentId, "agentId must not be null");
         validateKey(key);
-        return repository.deleteByAgentIdAndSessionIdAndKey(agentId, sessionId, key) > 0;
+        return candidates(agentId, sessionId, key, normalize(subjectKey), false).stream()
+                .findFirst()
+                .filter(note -> !note.isQuarantined())
+                .map(note -> ScratchpadNoteView.of(note, true));
+    }
+
+    /** Removes the caller's note under {@code key} in the scope; true when one existed. */
+    @Transactional
+    public boolean delete(UUID agentId, UUID sessionId, String subjectKey, String key) {
+        requireEnabled();
+        Objects.requireNonNull(agentId, "agentId must not be null");
+        validateKey(key);
+        String subject = normalize(subjectKey);
+        Optional<ScratchpadNote> found =
+                lookup(agentId, sessionId, subject, key).filter(note -> ownedBy(note, subject));
+        found.ifPresent(repository::delete);
+        return found.isPresent();
+    }
+
+    /**
+     * {@link #delete(UUID, UUID, String, String)} with no caller identity: session-pad notes only.
+     */
+    @Transactional
+    public boolean delete(UUID agentId, UUID sessionId, String key) {
+        return delete(agentId, sessionId, null, key);
+    }
+
+    /**
+     * Data-subject erasure: deletes every note, on either pad of any agent, that {@code subjectKey}
+     * owns. Works with the scratchpad switched off (data written while it was on is still personal
+     * data).
+     */
+    @Transactional
+    public int eraseSubject(String subjectKey) {
+        String subject = normalize(subjectKey);
+        if (subject == null) {
+            return 0;
+        }
+        return (int) Math.min(repository.deleteBySubjectKey(subject), Integer.MAX_VALUE);
+    }
+
+    /**
+     * The notes an operator action addresses: the session's note, or the agent-pad notes under the
+     * key (narrowed to {@code subject} when given). More than one match is ambiguous.
+     */
+    private List<ScratchpadNote> candidates(
+            UUID agentId, UUID sessionId, String key, String subject, boolean onlyQuarantined) {
+        List<ScratchpadNote> found =
+                sessionId != null
+                        ? repository
+                                .findByAgentIdAndSessionIdAndKey(agentId, sessionId, key)
+                                .map(List::of)
+                                .orElse(List.of())
+                        : repository.findByAgentIdAndSessionIdIsNullAndKey(agentId, key);
+        List<ScratchpadNote> out =
+                found.stream()
+                        .filter(n -> subject == null || subject.equals(n.getSubjectKey()))
+                        .filter(n -> !onlyQuarantined || n.isQuarantined())
+                        .toList();
+        if (out.size() > 1) {
+            throw new IllegalArgumentException(
+                    "More than one user has a note '"
+                            + key
+                            + "' on the agent pad - pass subject to pick one");
+        }
+        return out;
     }
 
     private void requireEnabled() {
@@ -203,5 +385,59 @@ public class AgentScratchpadService {
                     "Scratchpad key must match ^[a-zA-Z0-9_.-]{1,64}$ (letters, digits, '_', '.', '-'; 1-64 chars), got: "
                             + key);
         }
+    }
+
+    /** Notes of this agent held for review (any pad), newest first. */
+    @Transactional(readOnly = true)
+    public List<QuarantinedNoteView> listQuarantined(UUID agentId) {
+        requireEnabled();
+        Objects.requireNonNull(agentId, "agentId must not be null");
+        return repository.findQuarantined(agentId).stream().map(QuarantinedNoteView::of).toList();
+    }
+
+    /**
+     * Makes a held note readable. False when there is no held note under that key in the scope. For
+     * the agent pad {@code subjectKey} picks the owner (optional while only one owner has a held
+     * note under the key).
+     */
+    @Transactional
+    public boolean approve(UUID agentId, UUID sessionId, String key, String subjectKey) {
+        requireEnabled();
+        Objects.requireNonNull(agentId, "agentId must not be null");
+        validateKey(key);
+        Optional<ScratchpadNote> held =
+                candidates(agentId, sessionId, key, normalize(subjectKey), true).stream()
+                        .findFirst();
+        held.ifPresent(
+                note -> {
+                    note.approve();
+                    repository.save(note);
+                });
+        return held.isPresent();
+    }
+
+    /** {@link #approve(UUID, UUID, String, String)} without an owner. */
+    @Transactional
+    public boolean approve(UUID agentId, UUID sessionId, String key) {
+        return approve(agentId, sessionId, key, null);
+    }
+
+    /** Deletes a held note. Never touches a trusted one. */
+    @Transactional
+    public boolean reject(UUID agentId, UUID sessionId, String key, String subjectKey) {
+        requireEnabled();
+        Objects.requireNonNull(agentId, "agentId must not be null");
+        validateKey(key);
+        Optional<ScratchpadNote> held =
+                candidates(agentId, sessionId, key, normalize(subjectKey), true).stream()
+                        .findFirst();
+        held.ifPresent(repository::delete);
+        return held.isPresent();
+    }
+
+    /** {@link #reject(UUID, UUID, String, String)} without an owner. */
+    @Transactional
+    public boolean reject(UUID agentId, UUID sessionId, String key) {
+        return reject(agentId, sessionId, key, null);
     }
 }

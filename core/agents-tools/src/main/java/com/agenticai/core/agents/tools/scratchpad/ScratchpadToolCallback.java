@@ -1,6 +1,7 @@
 package com.agenticai.core.agents.tools.scratchpad;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.knowledge.MemoryWriteScreen;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
@@ -77,21 +79,57 @@ public final class ScratchpadToolCallback implements ToolCallback {
      */
     private final UUID sessionUuid;
 
+    /**
+     * What tainted the turn this callback was built for (null result = clean): a note written on a
+     * tainted turn is held for review, and with no readable taint state it is held too.
+     */
+    private final Supplier<List<String>> turnTaint;
+
+    /**
+     * The caller of the turn (the same subject key {@code remember_fact} scopes by); the agent pad
+     * is kept per caller. Null/blank = no identified caller: only the session pad is usable.
+     */
+    private final String subjectKey;
+
+    /** A callback with no caller identity: the agent pad refuses every call (fail closed). */
     public ScratchpadToolCallback(
-            AgentScratchpadService service, Kind kind, UUID agentId, String sessionId) {
+            AgentScratchpadService service,
+            Kind kind,
+            UUID agentId,
+            String sessionId,
+            Supplier<List<String>> turnTaint) {
+        this(service, kind, agentId, sessionId, null, turnTaint);
+    }
+
+    public ScratchpadToolCallback(
+            AgentScratchpadService service,
+            Kind kind,
+            UUID agentId,
+            String sessionId,
+            String subjectKey,
+            Supplier<List<String>> turnTaint) {
         this.service = service;
         this.kind = kind;
         this.agentId = agentId;
         this.sessionUuid = sessionUuid(sessionId);
+        this.subjectKey = subjectKey;
+        this.turnTaint = turnTaint;
     }
 
     /** Test seam: build a callback with the session id already resolved. */
     ScratchpadToolCallback(
-            AgentScratchpadService service, Kind kind, UUID agentId, UUID sessionUuid) {
+            AgentScratchpadService service,
+            Kind kind,
+            UUID agentId,
+            UUID sessionUuid,
+            String subjectKey,
+            Supplier<List<String>> turnTaint) {
         this.service = service;
         this.kind = kind;
         this.agentId = agentId;
         this.sessionUuid = sessionUuid;
+        this.subjectKey = subjectKey;
+        this.turnTaint = turnTaint;
     }
 
     @Override
@@ -166,14 +204,32 @@ public final class ScratchpadToolCallback implements ToolCallback {
                         return error("body is required - the full note content.");
                     }
                     Scope scope = scopeOf(a);
+                    String text = a.path("body").asText();
+                    Optional<String> refusal = MemoryWriteScreen.refusal(text);
+                    if (refusal.isPresent()) {
+                        log.warn(
+                                "scratchpad_write refused by the memory write screen (agent {})",
+                                agentId);
+                        return error(refusal.get());
+                    }
+                    NoteTrust provenance = NoteTrust.of(turnTaint);
                     AgentScratchpadService.WriteResult result =
-                            service.write(agentId, scope.sessionId(), key, a.path("body").asText());
+                            service.write(
+                                    agentId, scope.sessionId(), subjectKey, key, text, provenance);
                     ScratchpadNote note = result.note();
                     out.put("written", true)
                             .put("key", note.getKey())
                             .put("scope", scope.name())
                             .put("updated_at", String.valueOf(note.getUpdatedAt()))
                             .put("byte_size", note.getByteSize());
+                    if (provenance.quarantined()) {
+                        // Hidden from scratchpad_read / scratchpad_list until a person approves it.
+                        out.put("quarantined", true)
+                                .put(
+                                        "note",
+                                        "Saved for review: this turn handled untrusted content, so the note is"
+                                                + " not readable until a person approves it.");
+                    }
                     if (result.evictedKey() != null) {
                         // The pad was full and evict-oldest-on-cap dropped the stalest note - tell
                         // the model which key it lost so it can re-persist under that key if the
@@ -192,7 +248,8 @@ public final class ScratchpadToolCallback implements ToolCallback {
                 case READ -> {
                     String key = requiredKey(a);
                     Scope scope = scopeOf(a);
-                    Optional<ScratchpadNote> found = service.read(agentId, scope.sessionId(), key);
+                    Optional<ScratchpadNote> found =
+                            service.read(agentId, scope.sessionId(), subjectKey, key);
                     if (found.isEmpty()) {
                         out.put("found", false)
                                 .put("key", key)
@@ -222,10 +279,10 @@ public final class ScratchpadToolCallback implements ToolCallback {
                         // list(agentId, session) already merges the session pad and the
                         // agent-long-term pad, newest-updated first; a null session lists the
                         // long-term pad alone.
-                        listed = service.list(agentId, sessionUuid);
+                        listed = service.list(agentId, sessionUuid, subjectKey);
                     } else {
                         Scope s = scopeOf(a);
-                        listed = service.list(agentId, s.sessionId());
+                        listed = service.list(agentId, s.sessionId(), subjectKey);
                         if ("session".equals(s.name())) {
                             // The merged read still applies: a session-scoped list keeps only this
                             // session's rows, not the agent pad findVisible adds.
@@ -246,7 +303,7 @@ public final class ScratchpadToolCallback implements ToolCallback {
                 case DELETE -> {
                     String key = requiredKey(a);
                     Scope scope = scopeOf(a);
-                    boolean deleted = service.delete(agentId, scope.sessionId(), key);
+                    boolean deleted = service.delete(agentId, scope.sessionId(), subjectKey, key);
                     out.put("deleted", deleted).put("key", key).put("scope", scope.name());
                     if (!deleted) {
                         out.put(

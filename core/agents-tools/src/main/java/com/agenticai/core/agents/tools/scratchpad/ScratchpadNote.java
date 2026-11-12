@@ -30,6 +30,9 @@ import java.util.UUID;
 @Table(name = "agent_scratchpad")
 public class ScratchpadNote {
 
+    private static final String TRUSTED = "TRUSTED";
+    private static final String QUARANTINED = "QUARANTINED";
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -56,6 +59,24 @@ public class ScratchpadNote {
     @Column(name = "byte_size", nullable = false)
     private int byteSize;
 
+    // TRUSTED (readable) or QUARANTINED (written on a turn that handled untrusted content, hidden
+    // from
+    // every read until a person approves it); see V678.
+    @Column(name = "trust", nullable = false, length = 16)
+    private String trust = TRUSTED;
+
+    // JSON array of what tainted the turn that wrote a quarantined note.
+    @Column(name = "source_taint", columnDefinition = "TEXT")
+    private String sourceTaint;
+
+    // Owner of an agent-pad note (V711): the caller's subject key, as agent_memory.subject_key.
+    // NULL on rows
+    // that predate the column (author unknown: not returned to the model) and on session-pad notes
+    // written
+    // without an identified caller.
+    @Column(name = "subject_key", columnDefinition = "TEXT")
+    private String subjectKey;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -67,6 +88,29 @@ public class ScratchpadNote {
     }
 
     public ScratchpadNote(UUID agentId, UUID sessionId, String key, String body, int byteSize) {
+        this(agentId, sessionId, key, body, byteSize, NoteTrust.TRUSTED);
+    }
+
+    public ScratchpadNote(
+            UUID agentId,
+            UUID sessionId,
+            String key,
+            String body,
+            int byteSize,
+            NoteTrust provenance) {
+        this(agentId, sessionId, null, key, body, byteSize, provenance);
+    }
+
+    public ScratchpadNote(
+            UUID agentId,
+            UUID sessionId,
+            String subjectKey,
+            String key,
+            String body,
+            int byteSize,
+            NoteTrust provenance) {
+        applyProvenance(provenance);
+        this.subjectKey = subjectKey;
         this.agentId = agentId;
         this.sessionId = sessionId;
         this.key = key;
@@ -79,9 +123,43 @@ public class ScratchpadNote {
 
     /** Overwrites the note content. Always bumps {@code updatedAt} - it is the list ordering. */
     public void update(String body, int byteSize) {
+        update(body, byteSize, NoteTrust.TRUSTED);
+    }
+
+    /**
+     * Overwrites the content and re-stamps its provenance: the new body is what the new trust
+     * describes.
+     */
+    public void update(String body, int byteSize, NoteTrust provenance) {
         this.body = body;
         this.byteSize = byteSize;
+        applyProvenance(provenance);
         this.updatedAt = Instant.now();
+    }
+
+    private void applyProvenance(NoteTrust provenance) {
+        NoteTrust p = provenance == null ? NoteTrust.TRUSTED : provenance;
+        this.trust = p.quarantined() ? QUARANTINED : TRUSTED;
+        this.sourceTaint = p.sourcesJson();
+    }
+
+    /**
+     * True while the note is held for review: read paths must not return it. Unknown values count
+     * as held.
+     */
+    public boolean isQuarantined() {
+        return !TRUSTED.equals(trust);
+    }
+
+    public java.util.List<String> getSourceTaint() {
+        return NoteTrust.parseSources(sourceTaint);
+    }
+
+    /**
+     * A person approved the held note: it becomes readable (its source_taint stays as provenance).
+     */
+    public void approve() {
+        this.trust = TRUSTED;
     }
 
     public UUID getId() {
@@ -95,6 +173,18 @@ public class ScratchpadNote {
     /** Null means agent-long-term: the note is not tied to any one session. */
     public UUID getSessionId() {
         return sessionId;
+    }
+
+    /** Owner (subject key) of the note; null for rows that predate V711. */
+    public String getSubjectKey() {
+        return subjectKey;
+    }
+
+    /** A caller writing into a legacy no-owner session note takes it over. */
+    void claim(String subjectKey) {
+        if (this.subjectKey == null) {
+            this.subjectKey = subjectKey;
+        }
     }
 
     public String getKey() {

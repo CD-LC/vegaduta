@@ -1,0 +1,894 @@
+{
+  "schema_version": 1,
+  "id": "s09-distractor-precision",
+  "category": "distractor-precision",
+  "persona": {
+    "id": "p-scripted",
+    "name": "Scripted user",
+    "language": "en",
+    "description": "Single scripted user for a T1 scenario"
+  },
+  "seed": 109,
+  "sessions": [
+    {
+      "id": "s1",
+      "gap_days": 0,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Note 01: Zorva01",
+          "plants": [
+            "f-b01"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 02: Zorva02",
+          "plants": [
+            "f-b02"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 03: Zorva03",
+          "plants": [
+            "f-b03"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 04: Zorva04",
+          "plants": [
+            "f-b04"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 05: Zorva05",
+          "plants": [
+            "f-b05"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s2",
+      "gap_days": 3,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Note 06: Zorva06",
+          "plants": [
+            "f-b06"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 07: Zorva07",
+          "plants": [
+            "f-b07"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 08: Zorva08",
+          "plants": [
+            "f-b08"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 09: Zorva09",
+          "plants": [
+            "f-b09"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 10: Zorva10",
+          "plants": [
+            "f-b10"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Son wears shoe size 7",
+          "plants": [
+            "f-shoe"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s3",
+      "gap_days": 3,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Note 11: Zorva11",
+          "plants": [
+            "f-b11"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 12: Zorva12",
+          "plants": [
+            "f-b12"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 13: Zorva13",
+          "plants": [
+            "f-b13"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 14: Zorva14",
+          "plants": [
+            "f-b14"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 15: Zorva15",
+          "plants": [
+            "f-b15"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s4",
+      "gap_days": 3,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Note 16: Zorva16",
+          "plants": [
+            "f-b16"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 17: Zorva17",
+          "plants": [
+            "f-b17"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 18: Zorva18",
+          "plants": [
+            "f-b18"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 19: Zorva19",
+          "plants": [
+            "f-b19"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 20: Zorva20",
+          "plants": [
+            "f-b20"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s5",
+      "gap_days": 3,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Note 21: Zorva21",
+          "plants": [
+            "f-b21"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 22: Zorva22",
+          "plants": [
+            "f-b22"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 23: Zorva23",
+          "plants": [
+            "f-b23"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 24: Zorva24",
+          "plants": [
+            "f-b24"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 25: Zorva25",
+          "plants": [
+            "f-b25"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Son attends Little Flower School",
+          "plants": [
+            "f-school"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s6",
+      "gap_days": 3,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Note 26: Zorva26",
+          "plants": [
+            "f-b26"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 27: Zorva27",
+          "plants": [
+            "f-b27"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 28: Zorva28",
+          "plants": [
+            "f-b28"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 29: Zorva29",
+          "plants": [
+            "f-b29"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 30: Zorva30",
+          "plants": [
+            "f-b30"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s7",
+      "gap_days": 3,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Note 31: Zorva31",
+          "plants": [
+            "f-b31"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 32: Zorva32",
+          "plants": [
+            "f-b32"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 33: Zorva33",
+          "plants": [
+            "f-b33"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 34: Zorva34",
+          "plants": [
+            "f-b34"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 35: Zorva35",
+          "plants": [
+            "f-b35"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Son's class teacher is Mrs Pillai",
+          "plants": [
+            "f-teacher"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s8",
+      "gap_days": 3,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Note 36: Zorva36",
+          "plants": [
+            "f-b36"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 37: Zorva37",
+          "plants": [
+            "f-b37"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 38: Zorva38",
+          "plants": [
+            "f-b38"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 39: Zorva39",
+          "plants": [
+            "f-b39"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Note 40: Zorva40",
+          "plants": [
+            "f-b40"
+          ]
+        }
+      ],
+      "forgets": []
+    }
+  ],
+  "ledger": [
+    {
+      "id": "f-b01",
+      "key": "benign_01",
+      "value": "Benign note 01: Zorva01",
+      "match": "Zorva01",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "f-b02",
+      "key": "benign_02",
+      "value": "Benign note 02: Zorva02",
+      "match": "Zorva02",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "f-b03",
+      "key": "benign_03",
+      "value": "Benign note 03: Zorva03",
+      "match": "Zorva03",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "f-b04",
+      "key": "benign_04",
+      "value": "Benign note 04: Zorva04",
+      "match": "Zorva04",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "f-b05",
+      "key": "benign_05",
+      "value": "Benign note 05: Zorva05",
+      "match": "Zorva05",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "f-b06",
+      "key": "benign_06",
+      "value": "Benign note 06: Zorva06",
+      "match": "Zorva06",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "f-b07",
+      "key": "benign_07",
+      "value": "Benign note 07: Zorva07",
+      "match": "Zorva07",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "f-b08",
+      "key": "benign_08",
+      "value": "Benign note 08: Zorva08",
+      "match": "Zorva08",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "f-b09",
+      "key": "benign_09",
+      "value": "Benign note 09: Zorva09",
+      "match": "Zorva09",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "f-b10",
+      "key": "benign_10",
+      "value": "Benign note 10: Zorva10",
+      "match": "Zorva10",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "f-shoe",
+      "key": "son_shoe_size",
+      "value": "Son wears shoe size 7",
+      "match": "size 7",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p1"
+      ],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "f-b11",
+      "key": "benign_11",
+      "value": "Benign note 11: Zorva11",
+      "match": "Zorva11",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 6
+    },
+    {
+      "id": "f-b12",
+      "key": "benign_12",
+      "value": "Benign note 12: Zorva12",
+      "match": "Zorva12",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 6
+    },
+    {
+      "id": "f-b13",
+      "key": "benign_13",
+      "value": "Benign note 13: Zorva13",
+      "match": "Zorva13",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 6
+    },
+    {
+      "id": "f-b14",
+      "key": "benign_14",
+      "value": "Benign note 14: Zorva14",
+      "match": "Zorva14",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 6
+    },
+    {
+      "id": "f-b15",
+      "key": "benign_15",
+      "value": "Benign note 15: Zorva15",
+      "match": "Zorva15",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 6
+    },
+    {
+      "id": "f-b16",
+      "key": "benign_16",
+      "value": "Benign note 16: Zorva16",
+      "match": "Zorva16",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 9
+    },
+    {
+      "id": "f-b17",
+      "key": "benign_17",
+      "value": "Benign note 17: Zorva17",
+      "match": "Zorva17",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 9
+    },
+    {
+      "id": "f-b18",
+      "key": "benign_18",
+      "value": "Benign note 18: Zorva18",
+      "match": "Zorva18",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 9
+    },
+    {
+      "id": "f-b19",
+      "key": "benign_19",
+      "value": "Benign note 19: Zorva19",
+      "match": "Zorva19",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 9
+    },
+    {
+      "id": "f-b20",
+      "key": "benign_20",
+      "value": "Benign note 20: Zorva20",
+      "match": "Zorva20",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 9
+    },
+    {
+      "id": "f-b21",
+      "key": "benign_21",
+      "value": "Benign note 21: Zorva21",
+      "match": "Zorva21",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 12
+    },
+    {
+      "id": "f-b22",
+      "key": "benign_22",
+      "value": "Benign note 22: Zorva22",
+      "match": "Zorva22",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 12
+    },
+    {
+      "id": "f-b23",
+      "key": "benign_23",
+      "value": "Benign note 23: Zorva23",
+      "match": "Zorva23",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 12
+    },
+    {
+      "id": "f-b24",
+      "key": "benign_24",
+      "value": "Benign note 24: Zorva24",
+      "match": "Zorva24",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 12
+    },
+    {
+      "id": "f-b25",
+      "key": "benign_25",
+      "value": "Benign note 25: Zorva25",
+      "match": "Zorva25",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 12
+    },
+    {
+      "id": "f-school",
+      "key": "son_school",
+      "value": "Son attends Little Flower School",
+      "match": "Little Flower",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p1"
+      ],
+      "kind": "FACT",
+      "valid_from": 12
+    },
+    {
+      "id": "f-b26",
+      "key": "benign_26",
+      "value": "Benign note 26: Zorva26",
+      "match": "Zorva26",
+      "planted_in": "s6",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 15
+    },
+    {
+      "id": "f-b27",
+      "key": "benign_27",
+      "value": "Benign note 27: Zorva27",
+      "match": "Zorva27",
+      "planted_in": "s6",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 15
+    },
+    {
+      "id": "f-b28",
+      "key": "benign_28",
+      "value": "Benign note 28: Zorva28",
+      "match": "Zorva28",
+      "planted_in": "s6",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 15
+    },
+    {
+      "id": "f-b29",
+      "key": "benign_29",
+      "value": "Benign note 29: Zorva29",
+      "match": "Zorva29",
+      "planted_in": "s6",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 15
+    },
+    {
+      "id": "f-b30",
+      "key": "benign_30",
+      "value": "Benign note 30: Zorva30",
+      "match": "Zorva30",
+      "planted_in": "s6",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 15
+    },
+    {
+      "id": "f-b31",
+      "key": "benign_31",
+      "value": "Benign note 31: Zorva31",
+      "match": "Zorva31",
+      "planted_in": "s7",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 18
+    },
+    {
+      "id": "f-b32",
+      "key": "benign_32",
+      "value": "Benign note 32: Zorva32",
+      "match": "Zorva32",
+      "planted_in": "s7",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 18
+    },
+    {
+      "id": "f-b33",
+      "key": "benign_33",
+      "value": "Benign note 33: Zorva33",
+      "match": "Zorva33",
+      "planted_in": "s7",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 18
+    },
+    {
+      "id": "f-b34",
+      "key": "benign_34",
+      "value": "Benign note 34: Zorva34",
+      "match": "Zorva34",
+      "planted_in": "s7",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 18
+    },
+    {
+      "id": "f-b35",
+      "key": "benign_35",
+      "value": "Benign note 35: Zorva35",
+      "match": "Zorva35",
+      "planted_in": "s7",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 18
+    },
+    {
+      "id": "f-teacher",
+      "key": "son_teacher",
+      "value": "Son's class teacher is Mrs Pillai",
+      "match": "Pillai",
+      "planted_in": "s7",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p1"
+      ],
+      "kind": "FACT",
+      "valid_from": 18
+    },
+    {
+      "id": "f-b36",
+      "key": "benign_36",
+      "value": "Benign note 36: Zorva36",
+      "match": "Zorva36",
+      "planted_in": "s8",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 21
+    },
+    {
+      "id": "f-b37",
+      "key": "benign_37",
+      "value": "Benign note 37: Zorva37",
+      "match": "Zorva37",
+      "planted_in": "s8",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 21
+    },
+    {
+      "id": "f-b38",
+      "key": "benign_38",
+      "value": "Benign note 38: Zorva38",
+      "match": "Zorva38",
+      "planted_in": "s8",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 21
+    },
+    {
+      "id": "f-b39",
+      "key": "benign_39",
+      "value": "Benign note 39: Zorva39",
+      "match": "Zorva39",
+      "planted_in": "s8",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 21
+    },
+    {
+      "id": "f-b40",
+      "key": "benign_40",
+      "value": "Benign note 40: Zorva40",
+      "match": "Zorva40",
+      "planted_in": "s8",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 21
+    }
+  ],
+  "probes": [
+    {
+      "id": "p1",
+      "after": "s8",
+      "type": "DISTRACTOR",
+      "prompt": "What shoe size and school does my son have, and who is his class teacher?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "son_shoe_size",
+        "son_school",
+        "son_teacher"
+      ],
+      "memory_dependent": true,
+      "expect": {
+        "all": [
+          "size 7",
+          "Little Flower",
+          "Pillai"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    }
+  ]
+}

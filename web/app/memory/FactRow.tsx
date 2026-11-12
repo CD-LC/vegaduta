@@ -50,6 +50,7 @@ export default function FactRow({
   maxChars,
   onEdit,
   onDelete,
+  onApprove,
 }: {
   fact: MemoryFact;
   agentName: string | null;
@@ -58,6 +59,8 @@ export default function FactRow({
   maxChars: number;
   onEdit: (fact: MemoryFact, content: string) => Promise<void>;
   onDelete: (fact: MemoryFact) => Promise<void>;
+  /** Approve a quarantined fact (private or shared); omitted when the page cannot. */
+  onApprove?: (fact: MemoryFact) => Promise<void>;
 }) {
   const t = useTranslations("memoryPage");
   const locale: string | undefined = useLocale();
@@ -187,6 +190,46 @@ export default function FactRow({
       ) : (
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
+            {fact.supersededAt && (
+              <div className="mb-1 text-xs text-muted-foreground" data-testid="memory-fact-superseded">
+                {t("supersededHint")}
+              </div>
+            )}
+            {fact.trust === "QUARANTINED" && (
+              <div className="mb-1 flex flex-wrap items-center gap-2" data-testid="memory-fact-quarantined">
+                <span className="rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-foreground">
+                  {t("quarantinedBadge")}
+                </span>
+                <span className="text-xs text-muted-foreground">{t("quarantinedHint")}</span>
+                {(fact.scope === "shared" || fact.agentId) && onApprove && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={busy}
+                    onClick={async () => {
+                      setBusy(true);
+                      try {
+                        await onApprove(fact);
+                      } finally {
+                        setBusy(false);
+                      }
+                    }}
+                  >
+                    {t("quarantinedApprove")}
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={busy}
+                  onClick={() => setConfirmDelete(true)}
+                >
+                  {t("quarantinedReject")}
+                </Button>
+              </div>
+            )}
             <p className="whitespace-pre-wrap break-words text-sm text-foreground">{fact.content}</p>
             <p className="mt-1 text-xs text-muted-foreground">
               {fact.scope === "shared"

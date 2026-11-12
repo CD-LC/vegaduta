@@ -38,6 +38,12 @@
       <groupId>com.agenticai</groupId>
       <artifactId>agents-turn</artifactId>
     </dependency>
+    <!-- The nightly consolidation sweep plans with the pure decay/planner classes of the
+         unified-memory store (ADR-0028 WP5b). No cycle: agents-memory depends on agents only. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-memory</artifactId>
+    </dependency>
     <!-- Research runs use the web search registry and the deep_research session
          and daily allowance (tools.web), which live in core/agents-browser
          (ADR-0023). agents-browser never depends on agents-jobs. -->

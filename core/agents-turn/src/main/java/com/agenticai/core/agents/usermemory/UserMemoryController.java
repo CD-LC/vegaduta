@@ -4,11 +4,14 @@ import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.memory.AgentMemoryEntry;
 import com.agenticai.core.agents.memory.AgentMemoryService;
 import com.agenticai.core.agents.memory.MemoryBlocks;
+import com.agenticai.core.agents.memory.MemoryTrust;
+import com.agenticai.core.agents.memory.SubjectDataEraser;
 import com.agenticai.core.agents.memory.TenantMemoryEntry;
 import com.agenticai.core.agents.memory.TenantMemoryService;
 import com.agenticai.core.graphmemory.GraphMemoryService;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.logging.LogSafe;
+import com.agenticai.core.sharing.PermissionLevel;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.Principal;
@@ -70,6 +73,7 @@ public class UserMemoryController {
     private final ObjectProvider<AgentMemoryService> agentMemoryService;
     private final ObjectProvider<TenantMemoryService> tenantMemoryService;
     private final ObjectProvider<GraphMemoryService> graphMemoryService;
+    private final ObjectProvider<SubjectDataEraser> otherStores;
     private final AgentService agentService;
     private final UserMemoryFactService facts;
     private final boolean selfServiceEnabled;
@@ -79,6 +83,7 @@ public class UserMemoryController {
             ObjectProvider<AgentMemoryService> agentMemoryService,
             ObjectProvider<TenantMemoryService> tenantMemoryService,
             ObjectProvider<GraphMemoryService> graphMemoryService,
+            ObjectProvider<SubjectDataEraser> otherStores,
             AgentService agentService,
             UserMemoryFactService facts,
             @Value("${app.memory.self-service.enabled:true}") boolean selfServiceEnabled,
@@ -87,6 +92,7 @@ public class UserMemoryController {
         this.agentMemoryService = agentMemoryService;
         this.tenantMemoryService = tenantMemoryService;
         this.graphMemoryService = graphMemoryService;
+        this.otherStores = otherStores;
         this.agentService = agentService;
         this.facts = facts;
         this.selfServiceEnabled = selfServiceEnabled;
@@ -95,7 +101,15 @@ public class UserMemoryController {
 
     public record BlockView(String label, String content, Instant updatedAt) {}
 
-    /** {@code scope} is "agent" (private to {@code agentId}) or "shared" (tenant-wide). */
+    /**
+     * {@code scope} is "agent" (private to {@code agentId}) or "shared" (tenant-wide). {@code
+     * trust} is "TRUSTED" or "QUARANTINED": a quarantined fact was written on a turn that handled
+     * untrusted content, is never recalled into a prompt, and waits for the person to approve or
+     * reject it (the agent-memory approve/reject endpoints). {@code sourceTaint} names the kinds of
+     * untrusted source, empty when trusted. {@code supersededAt} is set on a fact a newer one
+     * replaced: it is kept (listed, exported, erased with the rest) but no longer recalled into a
+     * prompt.
+     */
     public record FactView(
             UUID id,
             String scope,
@@ -103,7 +117,59 @@ public class UserMemoryController {
             String content,
             Instant createdAt,
             Instant lastUsedAt,
-            int useCount) {}
+            int useCount,
+            String trust,
+            List<String> sourceTaint,
+            Instant supersededAt) {
+        public FactView {
+            trust = trust == null ? MemoryTrust.QUARANTINED.name() : trust;
+            sourceTaint = sourceTaint == null ? List.of() : List.copyOf(sourceTaint);
+        }
+
+        public FactView(
+                UUID id,
+                String scope,
+                UUID agentId,
+                String content,
+                Instant createdAt,
+                Instant lastUsedAt,
+                int useCount,
+                String trust,
+                List<String> sourceTaint) {
+            this(
+                    id,
+                    scope,
+                    agentId,
+                    content,
+                    createdAt,
+                    lastUsedAt,
+                    useCount,
+                    trust,
+                    sourceTaint,
+                    null);
+        }
+
+        /** A fact the person just typed in: trusted by construction. */
+        public FactView(
+                UUID id,
+                String scope,
+                UUID agentId,
+                String content,
+                Instant createdAt,
+                Instant lastUsedAt,
+                int useCount) {
+            this(
+                    id,
+                    scope,
+                    agentId,
+                    content,
+                    createdAt,
+                    lastUsedAt,
+                    useCount,
+                    MemoryTrust.TRUSTED.name(),
+                    List.of());
+        }
+    }
 
     public record Limits(int maxCharsPerBlock, int maxProjectBlocks, int maxFactChars) {}
 
@@ -141,7 +207,9 @@ public class UserMemoryController {
             int graphEntities,
             boolean graphErased,
             boolean agentErased,
-            boolean sharedErased) {}
+            boolean sharedErased,
+            int otherStoreRows,
+            boolean otherStoresErased) {}
 
     public record MemoryExport(Instant exportedAt, List<BlockView> blocks, List<FactView> facts) {}
 
@@ -176,7 +244,10 @@ public class UserMemoryController {
                                 m.content(),
                                 m.createdAt(),
                                 m.lastUsedAt(),
-                                m.useCount()));
+                                m.useCount(),
+                                m.trust().name(),
+                                m.sourceTaint(),
+                                m.supersededAt()));
             }
         }
         if (tenant != null) {
@@ -189,7 +260,10 @@ public class UserMemoryController {
                                 m.content(),
                                 m.createdAt(),
                                 m.lastUsedAt(),
-                                m.useCount()));
+                                m.useCount(),
+                                m.trust().name(),
+                                m.sourceTaint(),
+                                m.supersededAt()));
             }
         }
         facts.sort((a, b) -> b.createdAt().compareTo(a.createdAt()));
@@ -217,8 +291,9 @@ public class UserMemoryController {
 
     /**
      * Forgets everything about the caller: every agent's private facts, the shared facts, the
-     * editable blocks and (when graph memory is on) the graph entities. Needs {@code confirm=true}
-     * so a stray DELETE on the collection cannot wipe it.
+     * editable blocks, the agent scratchpad notes the caller owns and (when graph memory is on) the
+     * graph entities. Needs {@code confirm=true} so a stray DELETE on the collection cannot wipe
+     * it.
      */
     @DeleteMapping
     public ForgetAllResult forgetAll(
@@ -267,22 +342,46 @@ public class UserMemoryController {
                 log.warn("Self-service forget-all: graph erase failed", e);
             }
         }
+        // Per-user data kept by modules this one cannot depend on (the agent scratchpad), through
+        // SubjectDataEraser.
+        int otherRows = 0;
+        boolean otherErased = true;
+        if (otherStores != null) {
+            for (SubjectDataEraser store : otherStores.orderedStream().toList()) {
+                try {
+                    otherRows += store.eraseSubject(subject);
+                } catch (Exception e) {
+                    otherErased = false;
+                    log.warn("Self-service forget-all: {} erase failed", store.store(), e);
+                }
+            }
+        }
         // The durable trace of a full self-erasure: which tenant, who (hashed, never the raw key)
         // and what went.
+        // codeql[java/sensitive-log] -- the subject is logged only as a SHA-256 fingerprint
         log.info(
                 "Self-service forget-all: tenant={} subject#={} agentFacts={} (ok={}) sharedAndBlocks={} (ok={}) "
-                        + "graphEntities={} (ok={})",
+                        + "graphEntities={} (ok={}) otherStores={} (ok={})",
                 LogSafe.clean(
                         TenantContext.current().map(TenantContext::getTenantId).orElse("unknown")),
                 LogSafe.clean(subjectFingerprint(subject)),
-                LogSafe.clean(agentFacts),
-                LogSafe.clean(agentErased),
-                LogSafe.clean(sharedAndBlocks),
-                LogSafe.clean(sharedErased),
-                LogSafe.clean(graphEntities),
-                LogSafe.clean(graphErased));
+                agentFacts,
+                agentErased,
+                sharedAndBlocks,
+                sharedErased,
+                graphEntities,
+                graphErased,
+                otherRows,
+                otherErased);
         return new ForgetAllResult(
-                agentFacts, sharedAndBlocks, graphEntities, graphErased, agentErased, sharedErased);
+                agentFacts,
+                sharedAndBlocks,
+                graphEntities,
+                graphErased,
+                agentErased,
+                sharedErased,
+                otherRows,
+                otherErased);
     }
 
     /**
@@ -378,6 +477,38 @@ public class UserMemoryController {
             syncGraphForget(graphForget, subject, content.strip());
         }
         return changed ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+    /**
+     * Approves the caller's own QUARANTINED shared fact so every sharing agent recalls it (and it
+     * is offered to the shared graph tier). An approved shared fact reaches every sharing agent, so
+     * this takes the same bar as {@code POST
+     * /api/agents/{agentId}/memories/shared/{memoryId}/approve}: EDITOR on the agent that wrote the
+     * fact. 404 when the fact is not the caller's or is not quarantined; 403 when the caller is not
+     * an editor of the writing agent (or the writing agent is not recorded). No subject key is
+     * taken from the client.
+     */
+    @PostMapping("/facts/shared/{id}/approve")
+    public ResponseEntity<Void> approveSharedFact(@PathVariable UUID id, Principal principal) {
+        String subject = subject(principal);
+        TenantMemoryService tenant = requireTenant();
+        TenantMemoryEntry target =
+                tenant.listFactsForSubject(subject).stream()
+                        .filter(m -> id.equals(m.id()) && m.trust() == MemoryTrust.QUARANTINED)
+                        .findFirst()
+                        .orElse(null);
+        if (target == null) {
+            return ResponseEntity.notFound().build();
+        }
+        if (target.createdByAgentId() == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Approving a shared memory needs editor access to the agent that wrote it.");
+        }
+        agentService.requireAccess(target.createdByAgentId(), PermissionLevel.EDITOR);
+        return tenant.approveFact(id, subject)
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/facts/{scope}/{id}")

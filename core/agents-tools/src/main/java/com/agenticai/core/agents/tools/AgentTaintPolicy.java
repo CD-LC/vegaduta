@@ -5,6 +5,7 @@ import com.agenticai.core.agents.tools.classification.ToolClassificationDecision
 import com.agenticai.core.agents.tools.classification.ToolClassificationRegistry;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
+import com.agenticai.core.guardrails.taint.SenderTrust;
 import com.agenticai.core.guardrails.taint.TaintGate;
 import com.agenticai.core.guardrails.taint.TaintMode;
 import com.agenticai.core.guardrails.taint.ToolTaintClassifier;
@@ -90,6 +91,13 @@ public class AgentTaintPolicy implements ToolTaintClassifier {
 
     private final TaintMode mode;
     private final Set<String> getAllowHosts;
+
+    /**
+     * {@code app.agents.taint.get-query-is-sink} (default false): a GET whose URL can carry data
+     * out is a sink even with no allow-list. Setter-injected so the constructor is unchanged.
+     */
+    private volatile boolean getQueryIsSink;
+
     private final ObjectProvider<ToolClassificationRegistry> registry;
     private final ObjectProvider<MeterRegistry> meters;
     private final ObjectProvider<AuditLogService> audit;
@@ -114,6 +122,12 @@ public class AgentTaintPolicy implements ToolTaintClassifier {
         this.registry = registry;
         this.meters = meters;
         this.audit = audit;
+    }
+
+    @org.springframework.beans.factory.annotation.Value(
+            "${app.agents.taint.get-query-is-sink:false}")
+    public void setGetQueryIsSink(boolean getQueryIsSink) {
+        this.getQueryIsSink = getQueryIsSink;
     }
 
     /** The prompt registry, for the wording of the spotlight banner; absent = the shipped text. */
@@ -149,6 +163,17 @@ public class AgentTaintPolicy implements ToolTaintClassifier {
         TurnTaint turn = turnTaint(turnKey);
         if (turn != null) {
             turn.mark(source);
+        }
+    }
+
+    /**
+     * {@link #seed(AtomicInteger, String)} for a sender of known standing: a {@link
+     * SenderTrust#TRUSTED} sender (agent owner, tenant member) leaves the turn clean, anyone else
+     * taints it. Fails closed - an unknown sender is untrusted.
+     */
+    public void seed(AtomicInteger turnKey, SenderTrust sender, String source) {
+        if (sender == null || sender == SenderTrust.UNTRUSTED) {
+            seed(turnKey, source);
         }
     }
 
@@ -229,9 +254,15 @@ public class AgentTaintPolicy implements ToolTaintClassifier {
                 return new ToolTaintProfile(
                         base.producesTaint(), true, base.label() + "+" + method);
             }
-            if (!getAllowHosts.isEmpty() && !hostAllowed(args.path("url").asText(""))) {
+            String url = args.path("url").asText("");
+            boolean listed = !getAllowHosts.isEmpty() && hostAllowed(url);
+            if (!getAllowHosts.isEmpty() && !listed) {
                 return new ToolTaintProfile(
                         base.producesTaint(), true, base.label() + "+host_not_allowlisted");
+            }
+            if (!listed && getQueryIsSink && canCarryData(url)) {
+                return new ToolTaintProfile(
+                        base.producesTaint(), true, base.label() + "+url_can_carry_data");
             }
             return base;
         } catch (Exception e) {
@@ -240,6 +271,47 @@ public class AgentTaintPolicy implements ToolTaintClassifier {
                     base.producesTaint(), true, base.label() + "+unparseable_args");
         }
     }
+
+    /**
+     * True when a GET to {@code url} can move data out: a query string, fragment or userinfo, a
+     * path segment longer than {@value #LONG_SEGMENT}, a scheme other than http(s), an IP-literal
+     * host, or a URL that does not parse (fail closed). A plain, short-path GET to a named host
+     * passes. Residual: data can still be encoded in a host name or a short path of a host the
+     * attacker controls; the allow-list is the control for that.
+     */
+    static boolean canCarryData(String url) {
+        try {
+            URI uri = new URI(url.trim());
+            String scheme = uri.getScheme();
+            String host = uri.getHost();
+            if (scheme == null
+                    || !(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))
+                    || host == null) {
+                return true;
+            }
+            if (uri.getRawQuery() != null
+                    || uri.getRawFragment() != null
+                    || uri.getRawUserInfo() != null) {
+                return true;
+            }
+            if (host.startsWith("[") || host.matches("[0-9.xXa-fA-F]*[0-9][0-9.xXa-fA-F]*")) {
+                return true;
+            }
+            String path = uri.getRawPath();
+            if (path != null) {
+                for (String segment : path.split("/")) {
+                    if (segment.length() > LONG_SEGMENT) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        } catch (java.net.URISyntaxException | RuntimeException e) {
+            return true;
+        }
+    }
+
+    private static final int LONG_SEGMENT = 64;
 
     private boolean hostAllowed(String url) {
         try {

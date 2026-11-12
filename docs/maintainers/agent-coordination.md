@@ -797,8 +797,37 @@ broken links. Worktree: /private/tmp/vd-dbdocs.
 
 Audited every place that states the project license against `LICENSE` (BUSL-1.1; `sdk/` is Apache-2.0; each version converts to Apache-2.0 four years after release). The license itself is unchanged. Corrected statements that called the platform Apache-2.0, said the public repository was not published yet, and the Helm and private-package metadata that declared Apache-2.0. Verified: `make gates`, `make helm-lint`, and the web tests for the touched pages.
 
+### Fix: forged control markers, lost approved actions, per-user budget bypasses (Claude cloud session, 2026-10-28)
+
+Branch `ccr-d9bcd3ff-ekgsbs` (no PR yet). Touches `core/guardrails` (`ToolResultMarker`, `ApprovalParked`,
+`ToolBudgetExhausted`, new `PlatformMarkerDocument`), `core/chat` (`ToolLoopMarkers`, `ToolLoopParkedClose`),
+`core/approval` (recovery sweep, execution claim) with tenant migration **V675**, `core/agents-budget`
+(`PerUserBudget*`), `application.yml` (`app.approvals.recovery.*`), `docs/configuration.md`, `CHANGELOG.md`.
+Wording prefixes ("This tool call (") are no longer read as a refusal by `ToolResultMarker`; producers must call
+`ToolResultMarker.mark`. Take both sides on a merge in `application.yml` / `CHANGELOG.md` / `docs/configuration.md`.
+
+### Phase 0 safety fan-out (Claude cloud session lead, 2026-11-03)
+
+Twelve work packages (A-L) in `docs/architecture/PHASE0-SAFETY-WORKFLOW-2026-11.md`, each in its own worktree with a
+file-ownership list; sub-agents commit locally and do not push, the lead integrates onto `ccr-d9bcd3ff-ekgsbs`. Areas
+claimed: `core/approval`, `core/guardrails`, `core/chat` tool loop, `core/agents-budget`, `core/agents-interop`, `core/app`
+security + new test packages, memory in `core/agents-turn`, taint in `core/agents-tools`, `docs/security`, `docs/compliance`.
+Flyway: V675+ reserved for this effort.
+
+### Unified-memory WP5b: nightly consolidation sweep (Devin subagent, 2026-11-04)
+
+Branch `ccr-wp5b` (worktree `/tmp/vd-wp5b`), off `ccr-d9bcd3ff-ekgsbs`. New package
+`core/agents-jobs/.../agents/learning/consolidation` (sweep, service, read-only
+`ConsolidationFactSource` port + adapter, run/tombstone entities and repositories, tombstone
+writer), tenant migration **V683** (`memory_consolidation_runs`, `memory_tombstone`),
+`core/agents-jobs/pom.xml` (agents-memory edge), `docs/configuration.md`, `CHANGELOG.md`,
+`docs/architecture/core-module-graph.md`, ADR-0028 "as built" note. Known: WP4c introduced a
+package cycle `memorystore -> tenancy -> ... -> agents.memory -> memorystore` that
+`StructureRulesTest` now flags - pre-existing on the base branch, not from this change.
+
 - 2026-11-02, test-coverage agent: added JUnit tests under `core/billing/src/test` only (Razorpay SDK calls, Stripe HTTP calls, billing email service) plus a test-scope `okhttp-jvm` dependency in `core/billing/pom.xml`. No production code changed. `core/billing` is in the lean personal edition agent's row; this PR touches only new test files and the one pom entry. Worktree: `vegaduta-coverage-wt`.
 - 2026-11-02, test-coverage agent: added JUnit tests under `core/brief/src/test` only (section rules, validator rules, service, tune service, both controllers, prune, rehearsal port, entities). No production code changed. Stacked on the `core/billing` test PR (`test/coverage-plus-10`). Worktree: `vegaduta-coverage-wt`.
+
 - 2026-11-02, test-coverage agent: added JUnit tests under `core/omnichannel/src/test` only (operator inbox and escalation, contact service and controller, agent send/control/query ports, Meta Graph client, WhatsApp QR receive loop, edge relay controller, sandbox channel controller). No production code changed. Worktree: `vegaduta-coverage-wt`.
 ### Release signing (Claude Code, 2026-11-01)
 

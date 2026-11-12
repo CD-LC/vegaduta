@@ -1,0 +1,911 @@
+{
+  "schema_version": 1,
+  "id": "persona-p4-support-agent",
+  "category": "persona",
+  "persona": {
+    "id": "p4-support-agent",
+    "name": "Support agent assistant",
+    "language": "en",
+    "description": "Recurring customer cases, prior refund decisions"
+  },
+  "seed": 204,
+  "sessions": [
+    {
+      "id": "s1",
+      "gap_days": 0,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Acme Traders has raised 3 tickets on invoice errors",
+          "plants": [
+            "f00"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Draft customer replies in a polite two-sentence format",
+          "plants": [
+            "f02"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Gold SLA is 4 hours",
+          "plants": [
+            "f03"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "favourite tea: Green tea",
+          "plants": [
+            "d00"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "favourite colour: navy",
+          "plants": [
+            "d06"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "favourite festival: Onam",
+          "plants": [
+            "d12"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s2",
+      "gap_days": 3,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Ticket 4412: refund approved for 1,500",
+          "plants": [
+            "f01"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Escalations go to Priya Nair",
+          "plants": [
+            "f05"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "The support queue closes at 6 PM",
+          "plants": [
+            "f07"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "favourite dish: Biryani",
+          "plants": [
+            "d01"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "shoe size: size 6",
+          "plants": [
+            "d07"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "cousin's city: Jaipur",
+          "plants": [
+            "d13"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s3",
+      "gap_days": 10,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Priya's channel is #escalations-demo",
+          "plants": [
+            "f06"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Bose Foods must never be phoned, email only",
+          "plants": [
+            "f09"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "commute: walk",
+          "plants": [
+            "d02"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "phone model: Vivo-demo",
+          "plants": [
+            "d08"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "vehicle: Alto",
+          "plants": [
+            "d14"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s4",
+      "gap_days": 30,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Gold SLA tightened, now 2 hours",
+          "plants": [
+            "f04"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Known bug: export fails above 10k rows",
+          "plants": [
+            "f10"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "pet: Tommy",
+          "plants": [
+            "d03"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "wake-up time: 6:15",
+          "plants": [
+            "d09"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "TV show: Sacred Games",
+          "plants": [
+            "d15"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s5",
+      "gap_days": 7,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Queue hours extended, closes at 8 PM now",
+          "plants": [
+            "f08"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Greet the Acme Traders contact Ritu by name",
+          "plants": [
+            "f11"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "hobby: gardening",
+          "plants": [
+            "d04"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "gym day: Thursday",
+          "plants": [
+            "d10"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "favourite sweet: kheer",
+          "plants": [
+            "d16"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s6",
+      "gap_days": 45,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "music: bhajans",
+          "plants": [
+            "d05"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "current book: Godan",
+          "plants": [
+            "d11"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "weekend spot: Sukhna Lake",
+          "plants": [
+            "d17"
+          ]
+        }
+      ],
+      "forgets": []
+    }
+  ],
+  "ledger": [
+    {
+      "id": "f00",
+      "key": "acme_cases",
+      "value": "Acme Traders raised 3 tickets on invoice errors",
+      "match": "3 tickets",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p1"
+      ],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "f01",
+      "key": "refund_4412",
+      "value": "Refund for ticket 4412 was approved for 1,500",
+      "match": "approved for 1,500",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p2"
+      ],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "f02",
+      "key": "draft_style",
+      "value": "Draft replies in a polite two-sentence format",
+      "match": "Thank you for reaching out; we are on it.",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p3"
+      ],
+      "kind": "PREFERENCE",
+      "valid_from": 0
+    },
+    {
+      "id": "f03",
+      "key": "gold_sla",
+      "value": "Gold SLA is 4 hours",
+      "match": "4 hours",
+      "planted_in": "s1",
+      "superseded_by": "f04",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "f04",
+      "key": "gold_sla",
+      "value": "Gold SLA is 2 hours",
+      "match": "2 hours",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p4"
+      ],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "f05",
+      "key": "escalation_owner",
+      "value": "Escalations go to Priya Nair",
+      "match": "Priya Nair",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p5"
+      ],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "f06",
+      "key": "escalation_channel",
+      "value": "Priya's channel is #escalations-demo",
+      "match": "#escalations-demo",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p5"
+      ],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "f07",
+      "key": "queue_close",
+      "value": "Support queue closes at 6 PM",
+      "match": "closes at 6 PM",
+      "planted_in": "s2",
+      "superseded_by": "f08",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "f08",
+      "key": "queue_close",
+      "value": "Support queue closes at 8 PM",
+      "match": "closes at 8 PM",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p7"
+      ],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "f09",
+      "key": "contact_rule",
+      "value": "Bose Foods must be contacted by email only",
+      "match": "email only",
+      "planted_in": "s3",
+      "sensitivity": "CRITICAL",
+      "relevant_to": [
+        "p8"
+      ],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "f10",
+      "key": "known_bug",
+      "value": "Known bug: export fails above 10k rows",
+      "match": "10k rows",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p9"
+      ],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "f11",
+      "key": "acme_contact",
+      "value": "Acme Traders contact is Ritu",
+      "match": "Ritu",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p10"
+      ],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "d00",
+      "key": "misc_fav_tea",
+      "value": "favourite tea: Green tea",
+      "match": "Green tea",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p12"
+      ],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "d01",
+      "key": "misc_fav_dish",
+      "value": "favourite dish: Biryani",
+      "match": "Biryani",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "d02",
+      "key": "misc_commute",
+      "value": "commute: walk",
+      "match": "walk",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "d03",
+      "key": "misc_pet_name",
+      "value": "pet: Tommy",
+      "match": "Tommy",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p11"
+      ],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "d04",
+      "key": "misc_hobby",
+      "value": "hobby: gardening",
+      "match": "gardening",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "d05",
+      "key": "misc_music",
+      "value": "music: bhajans",
+      "match": "bhajans",
+      "planted_in": "s6",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 95
+    },
+    {
+      "id": "d06",
+      "key": "misc_colour",
+      "value": "favourite colour: navy",
+      "match": "navy",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "d07",
+      "key": "misc_shoe",
+      "value": "shoe size: size 6",
+      "match": "size 6",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "d08",
+      "key": "misc_phone",
+      "value": "phone model: Vivo-demo",
+      "match": "Vivo-demo",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "d09",
+      "key": "misc_wake",
+      "value": "wake-up time: 6:15",
+      "match": "6:15",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "d10",
+      "key": "misc_gym",
+      "value": "gym day: Thursday",
+      "match": "Thursday",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "d11",
+      "key": "misc_book",
+      "value": "current book: Godan",
+      "match": "Godan",
+      "planted_in": "s6",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 95
+    },
+    {
+      "id": "d12",
+      "key": "misc_festival",
+      "value": "favourite festival: Onam",
+      "match": "Onam",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "d13",
+      "key": "misc_cousin",
+      "value": "cousin's city: Jaipur",
+      "match": "Jaipur",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "d14",
+      "key": "misc_vehicle",
+      "value": "vehicle: Alto",
+      "match": "Alto",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "d15",
+      "key": "misc_show",
+      "value": "TV show: Sacred Games",
+      "match": "Sacred Games",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "d16",
+      "key": "misc_sweet",
+      "value": "favourite sweet: kheer",
+      "match": "kheer",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "d17",
+      "key": "misc_spot",
+      "value": "weekend spot: Sukhna Lake",
+      "match": "Sukhna Lake",
+      "planted_in": "s6",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 95
+    }
+  ],
+  "probes": [
+    {
+      "id": "p1",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "How many tickets has Acme Traders raised?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "acme_cases"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "3 tickets"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p2",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "What was decided on ticket 4412?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "refund_4412"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "approved for 1,500"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p3",
+      "after": "s6",
+      "type": "PREFERENCE",
+      "prompt": "Draft a reply to the customer",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "draft_style"
+      ],
+      "memory_dependent": true,
+      "expect": {
+        "all": [
+          "Thank you for reaching out; we are on it."
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p4",
+      "after": "s6",
+      "type": "UPDATE",
+      "prompt": "What is the Gold SLA?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "gold_sla"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "knowledge_update",
+      "expect": {
+        "all": [
+          "2 hours"
+        ],
+        "none": [
+          "4 hours"
+        ],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p5",
+      "after": "s6",
+      "type": "MULTI_HOP",
+      "prompt": "Who handles escalations and where?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "escalation_owner",
+        "escalation_channel"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "multi_session_reasoning",
+      "expect": {
+        "all": [
+          "#escalations-demo"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p6",
+      "after": "s6",
+      "type": "ABSTENTION",
+      "prompt": "What is the customer's account manager's phone?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "am_phone"
+      ],
+      "memory_dependent": false,
+      "lme_ability": "abstention",
+      "expect": {
+        "all": [],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": true
+      }
+    },
+    {
+      "id": "p7",
+      "after": "s6",
+      "type": "UPDATE",
+      "prompt": "When does the support queue close?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "queue_close"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "knowledge_update",
+      "expect": {
+        "all": [
+          "closes at 8 PM"
+        ],
+        "none": [
+          "closes at 6 PM"
+        ],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p8",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "How should we contact Bose Foods?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "contact_rule"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "email only"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p9",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "What is the known export bug?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "known_bug"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "10k rows"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p10",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Who is the contact at Acme Traders?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "acme_contact"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "Ritu"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p11",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "What is my pet's name?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "misc_pet_name"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "Tommy"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p12",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Which tea do I like best?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "misc_fav_tea"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "Green tea"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p13",
+      "after": "s6",
+      "type": "ABSTENTION",
+      "prompt": "What is my passport number?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "passport"
+      ],
+      "memory_dependent": false,
+      "lme_ability": "abstention",
+      "expect": {
+        "all": [],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": true
+      }
+    }
+  ]
+}

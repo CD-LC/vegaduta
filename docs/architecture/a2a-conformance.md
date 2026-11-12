@@ -153,6 +153,14 @@ to a peer whose card lists the extension. Unsigned legacy requests stay accepted
 host is not bound, the nonce cache is per replica unless the task store is Redis, REST clients can sign but our
 outbound client uses JSON-RPC only. Verified with in-process tests, not with an external A2A implementation.
 
+A second, shared-secret scheme runs alongside it (`A2aMessageSecurityFilter` inbound, `A2aHmacSigner`
+outbound, `app.a2a.signed-peers`). A request may carry `X-A2A-Timestamp`, `X-A2A-Nonce`, `X-A2A-Hop` and, for a peer
+whose host is configured with a secret, a detached HMAC-SHA256 `X-A2A-Signature` (`v1=` base64url over method, path,
+timestamp, nonce, hop, body hash). The filter enforces the skew window (`app.a2a.replay-window`), a single-use nonce
+cache and `app.a2a.max-hops`; refusals use platform codes `-32090..-32095` (distinct from the card-key scheme's
+`-32010..-32014`). This path is opt-in per peer — it suits a known VegaDuta-to-VegaDuta deployment that does not want
+to resolve caller keys from Agent Cards; the two schemes are wire-compatible and a request may carry either or both.
+
 ## Known gaps worth scheduling
 
 1. `ListTasks` and `SubscribeToTask` (the card says `streaming: true`, so the second one is a

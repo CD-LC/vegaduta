@@ -6,6 +6,7 @@ import com.agenticai.core.agents.tools.ToolCallLogService;
 import com.agenticai.core.agents.turn.AgentChatService.StructuredAgentInput;
 import com.agenticai.core.agents.turn.AgentChatService.StructuredAgentOutput;
 import com.agenticai.core.agents.turn.AgentChatService.ToolCallSummary;
+import com.agenticai.core.guardrails.taint.SenderTrust;
 import com.agenticai.core.security.TenantContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
@@ -90,8 +91,12 @@ final class ChatStructuredCall {
                         .build();
         // ADR-0022 stage 4: chatWithParams is the entry for structured callers (workflow nodes,
         // evals); the tenant is the one its caller runs this thread under.
+        TurnContext context = TurnContext.forEntry(TenantContext.current().orElse(null), turn);
+        // Structured callers are workflow nodes (and evals) feeding trigger/upstream data as
+        // query and context_data: outsider content (docs/security/taint-entry-points.md).
+        SenderTrust.UNTRUSTED.seed(context.taint(), "inbound:workflow");
         String reply =
-                service.chat(TurnContext.forEntry(TenantContext.current().orElse(null), turn), turn)
+                service.chat(context, turn)
                         .collectList()
                         .map(chunks -> String.join("", chunks))
                         .blockOptional(timeout)

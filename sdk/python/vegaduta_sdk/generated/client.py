@@ -1337,12 +1337,47 @@ class AgentMemoryApi:
         """
         return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/memories", query={"subjectKey": subject_key})
 
+    def shared_memories(self, agent_id: str, *, subject_key: str, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.TenantMemoryEntry]:
+        """Shared memories.
+
+        GET /api/agents/{agentId}/memories/shared
+        """
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/memories/shared", query={"subjectKey": subject_key, "limit": limit, "offset": offset})
+
+    def approve_shared_memory(self, agent_id: str, memory_id: str, *, subject_key: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
+        """Approve shared memory.
+
+        POST /api/agents/{agentId}/memories/shared/{memoryId}/approve
+        """
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/memories/shared/{quote_path(memory_id)}/approve", query={"subjectKey": subject_key}, headers={"Idempotency-Key": idempotency_key}, response="void")
+
+    def reject_shared_memory(self, agent_id: str, memory_id: str, *, subject_key: str, idempotency_key: Optional[str] = None) -> None:
+        """Reject shared memory.
+
+        POST /api/agents/{agentId}/memories/shared/{memoryId}/reject
+        """
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/memories/shared/{quote_path(memory_id)}/reject", query={"subjectKey": subject_key}, headers={"Idempotency-Key": idempotency_key}, response="void")
+
     def forget_memory(self, agent_id: str, memory_id: str) -> None:
         """Forget memory.
 
         DELETE /api/agents/{agentId}/memories/{memoryId}
         """
         return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/memories/{quote_path(memory_id)}", response="void")
+
+    def approve_memory(self, agent_id: str, memory_id: str, *, idempotency_key: Optional[str] = None) -> None:
+        """Approve memory.
+
+        POST /api/agents/{agentId}/memories/{memoryId}/approve
+        """
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/memories/{quote_path(memory_id)}/approve", headers={"Idempotency-Key": idempotency_key}, response="void")
+
+    def reject_memory(self, agent_id: str, memory_id: str, *, idempotency_key: Optional[str] = None) -> None:
+        """Reject memory.
+
+        POST /api/agents/{agentId}/memories/{memoryId}/reject
+        """
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/memories/{quote_path(memory_id)}/reject", headers={"Idempotency-Key": idempotency_key}, response="void")
 
 
 class AgentPromptPreviewApi:
@@ -1461,12 +1496,42 @@ class AgentScratchpadApi:
         """
         return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/scratchpad", query={"session": session})
 
-    def read(self, agent_id: str, key: str, *, session: Optional[str] = None) -> m.ScratchpadNoteView:
+    def read(self, agent_id: str, key: str, *, session: Optional[str] = None, subject: Optional[str] = None) -> m.ScratchpadNoteView:
         """Read.
 
         GET /api/agents/{agentId}/scratchpad/{key}
         """
-        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/scratchpad/{quote_path(key)}", query={"session": session})
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/scratchpad/{quote_path(key)}", query={"session": session, "subject": subject})
+
+
+class AgentScratchpadQuarantineApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def list(self, agent_id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.QuarantinedNoteView]:
+        """List.
+
+        GET /api/agents/{agentId}/scratchpad-quarantine
+        """
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/scratchpad-quarantine", query={"limit": limit, "offset": offset})
+
+    def approve(self, agent_id: str, key: str, *, session_id: Optional[str] = None, subject: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
+        """Approve.
+
+        POST /api/agents/{agentId}/scratchpad-quarantine/{key}/approve
+
+        Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
+        """
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/scratchpad-quarantine/{quote_path(key)}/approve", query={"sessionId": session_id, "subject": subject}, headers={"Idempotency-Key": idempotency_key}, response="void")
+
+    def reject(self, agent_id: str, key: str, *, session_id: Optional[str] = None, subject: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
+        """Reject.
+
+        POST /api/agents/{agentId}/scratchpad-quarantine/{key}/reject
+
+        Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
+        """
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/scratchpad-quarantine/{quote_path(key)}/reject", query={"sessionId": session_id, "subject": subject}, headers={"Idempotency-Key": idempotency_key}, response="void")
 
 
 class AgentSessionLlmRequestApi:
@@ -3442,6 +3507,31 @@ class DataTableApi:
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
         return self._http.request("POST", f"/api/data-tables/{quote_path(table)}/import", body=body, body_type="multipart")
+
+    def quarantined(self, table: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.DataTableDtos_QuarantinedRowView]:
+        """Quarantined.
+
+        GET /api/data-tables/{table}/quarantine
+        """
+        return self._http.request("GET", f"/api/data-tables/{quote_path(table)}/quarantine", query={"limit": limit, "offset": offset})
+
+    def approve_quarantined(self, table: str, row_id: str, *, idempotency_key: Optional[str] = None) -> None:
+        """Approve quarantined.
+
+        POST /api/data-tables/{table}/quarantine/{rowId}/approve
+
+        Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
+        """
+        return self._http.request("POST", f"/api/data-tables/{quote_path(table)}/quarantine/{quote_path(row_id)}/approve", headers={"Idempotency-Key": idempotency_key}, response="void")
+
+    def reject_quarantined(self, table: str, row_id: str, *, idempotency_key: Optional[str] = None) -> None:
+        """Reject quarantined.
+
+        POST /api/data-tables/{table}/quarantine/{rowId}/reject
+
+        Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
+        """
+        return self._http.request("POST", f"/api/data-tables/{quote_path(table)}/quarantine/{quote_path(row_id)}/reject", headers={"Idempotency-Key": idempotency_key}, response="void")
 
     def rows(self, table: str, *, filter: Optional[str] = None, sort: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> m.DataTableDtos_RowPage:
         """Rows.
@@ -5881,6 +5971,56 @@ class KnowledgeIngestionJobApi:
         return self._http.request("GET", f"/api/knowledge/jobs/{quote_path(job_id)}")
 
 
+class KnowledgeQuarantineApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def list(self, *, collection_id: Optional[str] = None, limit: Optional[int] = None) -> List[m.KnowledgeQuarantineService_QuarantinedChunk]:
+        """List.
+
+        GET /api/knowledge/quarantine
+
+        Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
+        """
+        return self._http.request("GET", "/api/knowledge/quarantine", query={"collectionId": collection_id, "limit": limit})
+
+    def approve_note(self, *, collection_id: str, source: str, idempotency_key: Optional[str] = None) -> None:
+        """Approve note.
+
+        POST /api/knowledge/quarantine/notes/approve
+
+        Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
+        """
+        return self._http.request("POST", "/api/knowledge/quarantine/notes/approve", query={"collectionId": collection_id, "source": source}, headers={"Idempotency-Key": idempotency_key}, response="void")
+
+    def reject_note(self, *, collection_id: str, source: str, idempotency_key: Optional[str] = None) -> None:
+        """Reject note.
+
+        POST /api/knowledge/quarantine/notes/reject
+
+        Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
+        """
+        return self._http.request("POST", "/api/knowledge/quarantine/notes/reject", query={"collectionId": collection_id, "source": source}, headers={"Idempotency-Key": idempotency_key}, response="void")
+
+    def approve(self, chunk_id: str, *, idempotency_key: Optional[str] = None) -> None:
+        """Approve.
+
+        POST /api/knowledge/quarantine/{chunkId}/approve
+
+        Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
+        """
+        return self._http.request("POST", f"/api/knowledge/quarantine/{quote_path(chunk_id)}/approve", headers={"Idempotency-Key": idempotency_key}, response="void")
+
+    def reject(self, chunk_id: str, *, idempotency_key: Optional[str] = None) -> None:
+        """Reject.
+
+        POST /api/knowledge/quarantine/{chunkId}/reject
+
+        Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
+        """
+        return self._http.request("POST", f"/api/knowledge/quarantine/{quote_path(chunk_id)}/reject", headers={"Idempotency-Key": idempotency_key}, response="void")
+
+
 class KnowledgeRagSettingsApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
@@ -6796,6 +6936,86 @@ class MemoryImportApi:
         POST /api/memory/import/preview
         """
         return self._http.request("POST", "/api/memory/import/preview", headers={"Idempotency-Key": idempotency_key}, body=body)
+
+
+class MemoryItemApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def list(self, agent_id: str, *, status: Optional[str] = None, kind: Optional[str] = None, limit: Optional[int] = None) -> List[m.MemoryItemController_ItemView]:
+        """List.
+
+        GET /api/agents/{agentId}/memory-items
+        """
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/memory-items", query={"status": status, "kind": kind, "limit": limit})
+
+    def get(self, agent_id: str, item_id: str) -> m.MemoryItemController_DetailView:
+        """Get.
+
+        GET /api/agents/{agentId}/memory-items/{itemId}
+        """
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/memory-items/{quote_path(item_id)}")
+
+    def erase(self, agent_id: str, item_id: str) -> None:
+        """Erase.
+
+        DELETE /api/agents/{agentId}/memory-items/{itemId}
+        """
+        return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/memory-items/{quote_path(item_id)}", response="void")
+
+    def edit(self, agent_id: str, item_id: str, body: Optional[m.MemoryItemController_EditRequest] = None, *, idempotency_key: Optional[str] = None) -> m.MemoryItemController_ItemView:
+        """Edit.
+
+        PATCH /api/agents/{agentId}/memory-items/{itemId}
+        """
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/memory-items/{quote_path(item_id)}", headers={"Idempotency-Key": idempotency_key}, body=body)
+
+    def approve(self, agent_id: str, item_id: str, *, idempotency_key: Optional[str] = None) -> None:
+        """Approve.
+
+        POST /api/agents/{agentId}/memory-items/{itemId}/approve
+        """
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/memory-items/{quote_path(item_id)}/approve", headers={"Idempotency-Key": idempotency_key}, response="void")
+
+    def pin(self, agent_id: str, item_id: str, *, idempotency_key: Optional[str] = None) -> None:
+        """Pin.
+
+        POST /api/agents/{agentId}/memory-items/{itemId}/pin
+        """
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/memory-items/{quote_path(item_id)}/pin", headers={"Idempotency-Key": idempotency_key}, response="void")
+
+    def unpin(self, agent_id: str, item_id: str) -> None:
+        """Unpin.
+
+        DELETE /api/agents/{agentId}/memory-items/{itemId}/pin
+        """
+        return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/memory-items/{quote_path(item_id)}/pin", response="void")
+
+    def reject(self, agent_id: str, item_id: str, *, idempotency_key: Optional[str] = None) -> None:
+        """Reject.
+
+        POST /api/agents/{agentId}/memory-items/{itemId}/reject
+        """
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/memory-items/{quote_path(item_id)}/reject", headers={"Idempotency-Key": idempotency_key}, response="void")
+
+    def revert(self, agent_id: str, item_id: str, *, idempotency_key: Optional[str] = None) -> None:
+        """Revert.
+
+        POST /api/agents/{agentId}/memory-items/{itemId}/revert
+        """
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/memory-items/{quote_path(item_id)}/revert", headers={"Idempotency-Key": idempotency_key}, response="void")
+
+
+class MemoryItemExportApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def export(self, *, limit: Optional[int] = None) -> m.MemoryItemExportController_ExportView:
+        """Export.
+
+        GET /api/memory-items/export
+        """
+        return self._http.request("GET", "/api/memory-items/export", query={"limit": limit})
 
 
 class MetaEmbeddedSignupApi:
@@ -12035,6 +12255,13 @@ class UserMemoryApi:
         """
         return self._http.request("POST", "/api/memory/facts", headers={"Idempotency-Key": idempotency_key}, body=body)
 
+    def approve_shared_fact(self, id: str, *, idempotency_key: Optional[str] = None) -> None:
+        """Approve shared fact.
+
+        POST /api/memory/facts/shared/{id}/approve
+        """
+        return self._http.request("POST", f"/api/memory/facts/shared/{quote_path(id)}/approve", headers={"Idempotency-Key": idempotency_key}, response="void")
+
     def delete_fact(self, scope: str, id: str) -> None:
         """Delete fact.
 
@@ -13458,6 +13685,7 @@ class VegadutaClient:
         self.agent_runtime_limits = AgentRuntimeLimitsApi(self.http)
         self.agent_schedule = AgentScheduleApi(self.http)
         self.agent_scratchpad = AgentScratchpadApi(self.http)
+        self.agent_scratchpad_quarantine = AgentScratchpadQuarantineApi(self.http)
         self.agent_session_llm_request = AgentSessionLlmRequestApi(self.http)
         self.agent_session_llm_usage = AgentSessionLlmUsageApi(self.http)
         self.agent_settings = AgentSettingsApi(self.http)
@@ -13572,6 +13800,7 @@ class VegadutaClient:
         self.knowledge_collection = KnowledgeCollectionApi(self.http)
         self.knowledge_connector = KnowledgeConnectorApi(self.http)
         self.knowledge_ingestion_job = KnowledgeIngestionJobApi(self.http)
+        self.knowledge_quarantine = KnowledgeQuarantineApi(self.http)
         self.knowledge_rag_settings = KnowledgeRagSettingsApi(self.http)
         self.landing_event = LandingEventApi(self.http)
         self.lead = LeadApi(self.http)
@@ -13595,6 +13824,8 @@ class VegadutaClient:
         self.mcp_tool_pin = McpToolPinApi(self.http)
         self.me = MeApi(self.http)
         self.memory_import = MemoryImportApi(self.http)
+        self.memory_item = MemoryItemApi(self.http)
+        self.memory_item_export = MemoryItemExportApi(self.http)
         self.meta_embedded_signup = MetaEmbeddedSignupApi(self.http)
         self.meta_social_credential = MetaSocialCredentialApi(self.http)
         self.meta_social_send = MetaSocialSendApi(self.http)

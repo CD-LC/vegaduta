@@ -352,6 +352,7 @@ public final class TurnHarnessBridge {
                         null,
                         null,
                         null,
+                        null,
                         null);
         ChatTimeouts timeouts =
                 new ChatTimeouts(

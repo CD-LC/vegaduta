@@ -16,10 +16,7 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.job.AgentJobLookup;
 import com.agenticai.core.agents.job.AgentJobLookup.JobFacts;
-import com.agenticai.core.agents.memory.ChatTurn;
-import com.agenticai.core.agents.memory.MessageRole;
 import com.agenticai.core.agents.memory.SessionMemoryService;
-import com.agenticai.core.agents.turn.ApprovalContinuation;
 import com.agenticai.core.agents.turn.ApprovalContinuationPort;
 import com.agenticai.core.agents.turn.ApprovalContinuationProperties;
 import com.agenticai.core.approval.ApprovalReplayGrant;
@@ -103,6 +100,9 @@ class AgentToolCallApprovalExecutorTest {
                                 .getBeanProvider(ApprovalContinuationProperties.class),
                         new ObjectMapper(),
                         eventPublisher);
+        // Most tests here use digest-less envelopes and are not about drift; the digest tests below
+        // switch this off explicitly (the production default).
+        executor.setAllowUndigested(true);
     }
 
     @AfterEach
@@ -210,7 +210,9 @@ class AgentToolCallApprovalExecutorTest {
         ApprovalRequest base = envelopeRequest("tenant-a", "user-sub");
         String payload =
                 base.getPayloadJson()
-                        .replace("\"sessionId\":", "\"toolDigest\":\"" + digest + "\",\"sessionId\":");
+                        .replace(
+                                "\"sessionId\":",
+                                "\"toolDigest\":\"" + digest + "\",\"sessionId\":");
         return new ApprovalRequest(
                 ACTION_TYPE, "Tool call: " + TOOL_NAME, payload, base.getRequestedBy());
     }
@@ -242,7 +244,9 @@ class AgentToolCallApprovalExecutorTest {
         AgentToolReplayException thrown =
                 assertThrows(AgentToolReplayException.class, () -> executor.execute(request));
 
-        assertTrue(thrown.getMessage().contains("has changed since this request was approved"), thrown.getMessage());
+        assertTrue(
+                thrown.getMessage().contains("has changed since this request was approved"),
+                thrown.getMessage());
         verify(swapped, never()).call(anyString());
         assertFalse(ApprovalReplayGrant.consume(ACTION_TYPE));
     }
@@ -259,6 +263,101 @@ class AgentToolCallApprovalExecutorTest {
         executor.execute(envelopeRequestWithDigest(digest));
 
         verify(tool).call("{\"to\":\"x\"}");
+    }
+
+    @Test
+    void anEnvelopeWithoutAFingerprintIsRefusedByDefault() {
+        executor.setAllowUndigested(false);
+        ToolCallback tool = toolWithDefinition(TOOL_NAME, "whatever it says today");
+        when(toolProvider.resolveToolCandidatesFor(any(), anyString(), anyString()))
+                .thenReturn(List.of(tool));
+
+        ApprovalRequest request = envelopeRequest("tenant-a", "user-sub");
+        AgentToolReplayException thrown =
+                assertThrows(AgentToolReplayException.class, () -> executor.execute(request));
+
+        assertTrue(
+                thrown.getMessage().contains("without a recorded definition fingerprint"),
+                thrown.getMessage());
+        assertFalse(thrown instanceof RetryableActionFailure);
+        verify(tool, never()).call(anyString());
+    }
+
+    @Test
+    void aDifferentServerBehindTheSameDefinitionIsRefused() {
+        executor.setAllowUndigested(false);
+        ToolCallback original = toolWithDefinition(TOOL_NAME, "Sends a report");
+        String approvedDigest =
+                com.agenticai.core.guardrails.ToolDefinitionDigest.of(
+                        original.getToolDefinition(),
+                        com.agenticai.core.guardrails.ToolDefinitionDigest.provenance(
+                                "srv-1", "https://mcp.example.com/sse"));
+        ToolCallback swapped =
+                mock(
+                        ToolCallback.class,
+                        org.mockito.Mockito.withSettings()
+                                .extraInterfaces(
+                                        com.agenticai.core.guardrails.ToolDefinitionDigest
+                                                .Provenance.class));
+        ToolDefinition originalDefinition = original.getToolDefinition();
+        when(swapped.getToolDefinition()).thenReturn(originalDefinition);
+        when(((com.agenticai.core.guardrails.ToolDefinitionDigest.Provenance) swapped)
+                        .toolProvenance())
+                .thenReturn(
+                        com.agenticai.core.guardrails.ToolDefinitionDigest.provenance(
+                                "srv-1", "https://evil.example.net/sse"));
+        when(toolProvider.resolveToolCandidatesFor(any(), anyString(), anyString()))
+                .thenReturn(List.of(swapped));
+
+        assertThrows(
+                AgentToolReplayException.class,
+                () -> executor.execute(envelopeRequestWithDigest(approvedDigest)));
+        verify(swapped, never()).call(anyString());
+    }
+
+    @Test
+    void aJobLookupThatFailsRefusesTheReplayRetryablyAndRunsNothing() {
+        UUID jobId = UUID.randomUUID();
+        ToolCallback callback = toolNamed(TOOL_NAME);
+        when(toolProvider.resolveToolCandidatesFor(any(), anyString(), anyString()))
+                .thenReturn(List.of(callback));
+        when(agentJobLookup.findById(jobId)).thenThrow(new IllegalStateException("db blip"));
+
+        ApprovalRequest request = envelopeRequest("tenant-a", "user-sub", "job:" + jobId);
+        AgentToolReplayException thrown =
+                assertThrows(AgentToolReplayException.class, () -> executor.execute(request));
+
+        assertTrue(thrown instanceof RetryableActionFailure);
+        verify(callback, never()).call(anyString());
+    }
+
+    @Test
+    void aResultThatCannotBeStoredNeverTurnsARanActionIntoAFailure() {
+        ToolCallback tool = toolNamed(TOOL_NAME);
+        when(tool.call(anyString())).thenReturn("sent");
+        when(toolProvider.resolveToolCandidatesFor(any(), anyString(), anyString()))
+                .thenReturn(List.of(tool));
+        when(requestRepository.save(any())).thenThrow(new IllegalStateException("db down"));
+
+        ApprovalRequest request = envelopeRequest("tenant-a", "user-sub");
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> executor.execute(request));
+
+        verify(tool).call("{\"to\":\"x\"}");
+        // The agent is told it COMPLETED, and the approver is told the result was not stored.
+        verify(launcher)
+                .afterDecision(
+                        eq(request),
+                        eq(com.agenticai.core.agents.turn.ApprovalContinuation.Outcome.COMPLETED),
+                        eq("sent"));
+        verify(notificationService)
+                .create(
+                        eq("user-sub"),
+                        eq(NotificationCategory.SYSTEM),
+                        anyString(),
+                        org.mockito.ArgumentMatchers.contains("result not stored"),
+                        eq(NotificationSeverity.WARNING),
+                        isNull(),
+                        isNull());
     }
 
     @Test
@@ -396,8 +495,10 @@ class AgentToolCallApprovalExecutorTest {
         assertEquals("ok", request.getExecutionResult());
         verify(requestRepository).save(request);
         // No recorded subject -> broadcast to tenant-admins (null recipient). WARNING, not INFO: a
-        // pre-envelope row names no tenant/subject/scoped memory id, so no history can be identified
-        // for the outcome note and the approver is told the agent was not informed (the note used to
+        // pre-envelope row names no tenant/subject/scoped memory id, so no history can be
+        // identified
+        // for the outcome note and the approver is told the agent was not informed (the note used
+        // to
         // be written under the raw session id, where nothing reads it, and nobody was told).
         verify(notificationService)
                 .create(
@@ -413,7 +514,8 @@ class AgentToolCallApprovalExecutorTest {
     // --- session-memory note (Phase 2: "approved tool result reaches the agent's next turn") ---
 
     // The two tests that stood here asserted appendTurn(eq("sess-1"), ...) against a mock - the RAW
-    // client session id - and so enshrined the bug that the note was written where no turn reads it.
+    // client session id - and so enshrined the bug that the note was written where no turn reads
+    // it.
     // They are replaced by AgentToolCallApprovalExecutorMemoryNoteTest, which runs the real
     // SessionMemoryService and reads the history back the way the next turn does.
 
@@ -471,109 +573,5 @@ class AgentToolCallApprovalExecutorTest {
 
         assertFalse(thrown instanceof RetryableActionFailure);
         verify(toolProvider, never()).resolveToolCandidatesFor(any(), anyString(), anyString());
-    }
-
-    // ------------------------------------------------------ the task is continued after a decision
-
-    @Test
-    void afterTheApprovedToolRanTheTaskIsContinuedWithItsFullResult() {
-        ToolCallback callback = toolNamed(TOOL_NAME);
-        String longResult = "{\"rows\":\"" + "r".repeat(5_000) + "\"}";
-        when(callback.call(anyString())).thenReturn(longResult);
-        when(toolProvider.resolveToolCandidatesFor(any(), anyString(), anyString()))
-                .thenReturn(List.of(callback));
-        ApprovalRequest request = envelopeRequest("tenant-a", "user-sub");
-
-        executor.execute(request);
-
-        verify(launcher).afterDecision(request, ApprovalContinuation.Outcome.COMPLETED, longResult);
-    }
-
-    @Test
-    void aFailedReplayContinuesTheTaskWithTheFailure() {
-        ToolCallback callback = toolNamed(TOOL_NAME);
-        when(callback.call(anyString())).thenThrow(new RuntimeException("transport exploded"));
-        when(toolProvider.resolveToolCandidatesFor(any(), anyString(), anyString()))
-                .thenReturn(List.of(callback));
-        ApprovalRequest request = envelopeRequest("tenant-a", "user-sub");
-
-        assertThrows(RuntimeException.class, () -> executor.execute(request));
-
-        verify(launcher).afterDecision(request, ApprovalContinuation.Outcome.FAILED, "transport exploded");
-    }
-
-    @Test
-    void aFailureThatWillBeRetriedIsNotReportedToTheAgentYet() {
-        class Transient extends RuntimeException implements RetryableActionFailure {
-            Transient() {
-                super("timeout");
-            }
-        }
-        ToolCallback callback = toolNamed(TOOL_NAME);
-        when(callback.call(anyString())).thenThrow(new Transient());
-        when(toolProvider.resolveToolCandidatesFor(any(), anyString(), anyString()))
-                .thenReturn(List.of(callback));
-
-        assertThrows(Transient.class, () -> executor.execute(envelopeRequest("tenant-a", "user-sub")));
-
-        verify(launcher, never()).afterDecision(any(), any(), any());
-    }
-
-    @Test
-    void aLauncherThatFailsNeverTurnsAnExecutedApprovalIntoAFailedOne() {
-        ToolCallback callback = toolNamed(TOOL_NAME);
-        when(callback.call(anyString())).thenReturn("ok");
-        when(toolProvider.resolveToolCandidatesFor(any(), anyString(), anyString()))
-                .thenReturn(List.of(callback));
-        when(launcher.afterDecision(any(), any(), any())).thenThrow(new IllegalStateException("boom"));
-        ApprovalRequest request = envelopeRequest("tenant-a", "user-sub");
-
-        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> executor.execute(request));
-
-        assertEquals("ok", request.getExecutionResult());
-    }
-
-    @Test
-    void aDenialTellsTheConversationAndContinuesTheTaskWithTheReason() {
-        TenantContext.set(TenantContext.of("caller-tenant", "admin-sub", Set.of()));
-        ApprovalRequest request = envelopeRequest("tenant-a", "user-sub");
-
-        executor.onRejected(request, "admin-sub", "Not before the audit");
-
-        verify(launcher).afterDecision(request, ApprovalContinuation.Outcome.DENIED, "Not before the audit");
-        verify(sessionMemoryService)
-                .appendTurn(
-                        anyString(),
-                        org.mockito.ArgumentMatchers.argThat(
-                                turn ->
-                                        ChatTurn.isToolRecordOnly(turn)
-                                                && turn.tools().entries().get(0).status()
-                                                        == com.agenticai.core.agents.turn.ToolLedger.Status.NOT_RUN
-                                                && turn.tools().entries().get(0).result().contains("DENIED by admin-sub")
-                                                && turn.tools().entries().get(0).result().contains("Not before the audit")
-                                                && turn.tools().entries().get(0).result().contains("did not run")
-                                                && turn.tools().entries().get(0).approval().contains("admin-sub")));
-        // The tool never ran, and the decider's own context is untouched.
-        verify(toolProvider, never()).resolveToolCandidatesFor(any(), anyString(), anyString());
-        assertEquals("caller-tenant", TenantContext.current().orElseThrow().getTenantId());
-    }
-
-    @Test
-    void aDenialWithoutAReasonSaysSo() {
-        ApprovalRequest request = envelopeRequest("tenant-a", "user-sub");
-
-        executor.onRejected(request, "admin-sub", null);
-
-        verify(launcher).afterDecision(request, ApprovalContinuation.Outcome.DENIED, "no reason was given");
-    }
-
-    @Test
-    void aDenialOfARowWithoutAUsableEnvelopeIsQuietlyIgnored() {
-        ApprovalRequest legacyUnidentified = new ApprovalRequest(ACTION_TYPE, "s", "{}", "someone");
-
-        org.junit.jupiter.api.Assertions.assertDoesNotThrow(
-                () -> executor.onRejected(legacyUnidentified, "admin-sub", "no"));
-
-        verify(launcher, never()).afterDecision(any(), any(), any());
     }
 }

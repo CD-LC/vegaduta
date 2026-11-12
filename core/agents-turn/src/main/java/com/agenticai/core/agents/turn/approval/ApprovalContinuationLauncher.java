@@ -182,6 +182,9 @@ public class ApprovalContinuationLauncher implements ApprovalContinuationPort {
                         .toolNames(continuation.runToolNames())
                         .build();
         TurnContext context = TurnContext.forEntry(tenant, turn);
+        // taint-entry: trusted - the prompt is platform-written after a human decided; the
+        // conversation's persisted taint (ConversationTaint, attached in ChatTurnPreflight) still
+        // applies (docs/security/taint-entry-points.md)
         log.info(
                 "Continuing session '{}' of agent {} after the {} decision on approval request {} ('{}')",
                 continuation.sessionId(),

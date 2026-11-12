@@ -6,6 +6,7 @@ import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
+import com.agenticai.core.guardrails.taint.SenderTrust;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantScope;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
@@ -215,6 +216,9 @@ public class A2aTaskService {
                             .build();
             TurnContext turnContext =
                     TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
+            // An A2A peer is a remote agent acting for an unknown party: its message is outsider
+            // content, whatever the peer's credential says (docs/security/taint-entry-points.md).
+            SenderTrust.UNTRUSTED.seed(turnContext.taint(), "inbound:a2a");
             tokens = agentChatService.chat(turnContext, chatTurn);
         } catch (RuntimeException setupFailure) {
             // chat() validates eagerly (kill switch, budget, access) and throws

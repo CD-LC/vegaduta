@@ -97,18 +97,20 @@ class SettingsCatalogContractTest {
                         runtimeProps, rp, mock(ObjectProvider.class), mock(ObjectProvider.class));
         BehaviourSettingsCatalog behaviour =
                 new BehaviourSettingsCatalog(
-                        new ApprovalContinuationProperties(),
-                        new ApprovalExpiryProperties(),
-                        new ChatFinishProperties(),
-                        new LlmRetryProperties(),
-                        new ChatCacheProperties(),
-                        new FollowUpProperties(),
-                        new ContinuationProperties(),
-                        new ToolLoopProperties(),
-                        new RoutingSimpleProperties(),
-                        new MemoryLimitsProperties(),
-                        new GuardrailTuningProperties(),
-                        new AuxiliaryModelProperties());
+                                new ApprovalContinuationProperties(),
+                                new ApprovalExpiryProperties(),
+                                new ChatFinishProperties(),
+                                new LlmRetryProperties(),
+                                new ChatCacheProperties(),
+                                new FollowUpProperties(),
+                                new ContinuationProperties(),
+                                new ToolLoopProperties(),
+                                new RoutingSimpleProperties(),
+                                new MemoryLimitsProperties(),
+                                new GuardrailTuningProperties(),
+                                new AuxiliaryModelProperties())
+                        .withEpisodic(
+                                new com.agenticai.core.agents.memory.EpisodicMemoryProperties());
         registry =
                 new SettingsRegistry(
                         List.of(
@@ -125,6 +127,12 @@ class SettingsCatalogContractTest {
                                         new com.agenticai.core.agents.tools.scratchpad
                                                 .ScratchpadProperties()),
                                 new SkillPromptSettings(),
+                                new com.agenticai.core.agents.memorystore.MemoryUnifiedSettings(
+                                        new com.agenticai.core.agents.memorystore
+                                                .MemoryUnifiedProperties()),
+                                new com.agenticai.core.agents.memorystore.CompetenceSettings(
+                                        new com.agenticai.core.agents.memorystore
+                                                .CompetenceProperties()),
                                 new com.agenticai.core.agents.turn.PromptProfileSettings(
                                         "full", null),
                                 new com.agenticai.core.agents.memory.HistoryWindowCatalog(),
@@ -156,7 +164,7 @@ class SettingsCatalogContractTest {
 
     @Test
     void theCatalogIsTheCuratedSize() {
-        assertThat(registry.all()).hasSizeBetween(30, 80);
+        assertThat(registry.all()).hasSizeBetween(30, 90);
         assertThat(registry.all())
                 .extracting(SettingDefinition::key)
                 .contains(

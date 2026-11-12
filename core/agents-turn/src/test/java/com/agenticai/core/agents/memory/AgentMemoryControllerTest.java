@@ -84,4 +84,66 @@ class AgentMemoryControllerTest {
         controller.forgetMemory(agentId, memoryId, alice);
         verify(memoryService).forget(agentId, memoryId);
     }
+
+    @Test
+    void aViewerApprovesOnlyTheirOwnQuarantinedMemory() {
+        viewerOnly();
+        when(memoryService.approve(agentId, memoryId, "alice")).thenReturn(true);
+
+        assertThat(controller.approveMemory(agentId, memoryId, alice).getStatusCode().value())
+                .isEqualTo(204);
+        verify(memoryService, never()).approve(agentId, memoryId);
+    }
+
+    @Test
+    void aViewerCannotApproveSomeoneElsesMemory() {
+        viewerOnly();
+        when(memoryService.approve(agentId, memoryId, "alice")).thenReturn(false);
+
+        assertThat(controller.approveMemory(agentId, memoryId, alice).getStatusCode().value())
+                .isEqualTo(404);
+    }
+
+    @Test
+    void anEditorApprovesAnyQuarantinedMemory() {
+        when(memoryService.approve(agentId, memoryId)).thenReturn(true);
+
+        assertThat(controller.approveMemory(agentId, memoryId, alice).getStatusCode().value())
+                .isEqualTo(204);
+    }
+
+    @Test
+    void rejectDeletesTheMemory() {
+        controller.rejectMemory(agentId, memoryId, alice);
+        verify(memoryService).forget(agentId, memoryId);
+    }
+
+    @Test
+    void theSharedPoolIsReviewedByEditorsOnly() {
+        viewerOnly();
+        assertThatThrownBy(() -> controller.sharedMemories(agentId, "alice", 100, 0))
+                .isInstanceOf(ResourceAccessDeniedException.class);
+        assertThatThrownBy(() -> controller.approveSharedMemory(agentId, memoryId, "alice"))
+                .isInstanceOf(ResourceAccessDeniedException.class);
+    }
+
+    @Test
+    void anEditorApprovesASharedFactSubjectAgnosticallyWithoutASubjectKey() {
+        TenantMemoryService tenant = mock(TenantMemoryService.class);
+        when(tenant.approveFact(memoryId, null)).thenReturn(true);
+        @SuppressWarnings("unchecked")
+        ObjectProvider<AgentMemoryService> agents = mock(ObjectProvider.class);
+        @SuppressWarnings("unchecked")
+        ObjectProvider<TenantMemoryService> tenants = mock(ObjectProvider.class);
+        when(tenants.getIfAvailable()).thenReturn(tenant);
+        AgentMemoryController c = new AgentMemoryController(agentService, agents, tenants);
+
+        assertThat(c.approveSharedMemory(agentId, memoryId, null).getStatusCode().value())
+                .isEqualTo(204);
+        verify(tenant).approveFact(memoryId, null);
+
+        when(tenant.approveFact(memoryId, "bob")).thenReturn(false);
+        assertThat(c.approveSharedMemory(agentId, memoryId, "bob").getStatusCode().value())
+                .isEqualTo(404);
+    }
 }

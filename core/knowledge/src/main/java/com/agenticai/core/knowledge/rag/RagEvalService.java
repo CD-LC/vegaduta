@@ -506,7 +506,7 @@ public class RagEvalService {
                             "SELECT COUNT(*) FROM "
                                     + table
                                     + " WHERE collection_id = ? AND metadata->>'parent_id' IS NOT"
-                                    + " NULL",
+                                    + " NULL AND trust = 'TRUSTED'",
                             Long.class,
                             collectionId);
             return n == null ? 0L : n;

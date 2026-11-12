@@ -190,6 +190,15 @@ public class GraphMemoryService {
      * primary job (vector memory) has already succeeded by the time this runs.
      */
     public void remember(UUID agentId, String subjectKey, List<GraphTriple> triples) {
+        remember(agentId, subjectKey, triples, null);
+    }
+
+    /**
+     * As {@link #remember(UUID, String, List)}; new edges also carry {@code memory_id} (the fact's
+     * row id, may be null).
+     */
+    public void remember(
+            UUID agentId, String subjectKey, List<GraphTriple> triples, UUID memoryId) {
         if (triples == null || triples.isEmpty()) {
             return;
         }
@@ -205,7 +214,13 @@ public class GraphMemoryService {
                     st -> {
                         for (GraphTriple triple : triples) {
                             GraphMemoryWriter.writeTriple(
-                                    st, graphName, agentIdStr, subjectKeyStr, triple, nowMillis());
+                                    st,
+                                    graphName,
+                                    agentIdStr,
+                                    subjectKeyStr,
+                                    triple,
+                                    nowMillis(),
+                                    memoryId);
                         }
                         return null;
                     });
@@ -353,6 +368,14 @@ public class GraphMemoryService {
      * #remember}.
      */
     public void rememberShared(String subjectKey, List<GraphTriple> triples) {
+        rememberShared(subjectKey, triples, null);
+    }
+
+    /**
+     * As {@link #rememberShared(String, List)}; new edges also carry {@code memory_id} (the fact's
+     * row id, may be null).
+     */
+    public void rememberShared(String subjectKey, List<GraphTriple> triples, UUID memoryId) {
         if (triples == null || triples.isEmpty()) {
             return;
         }
@@ -371,7 +394,8 @@ public class GraphMemoryService {
                                     SHARED_AGENT_SENTINEL,
                                     subjectKeyStr,
                                     triple,
-                                    nowMillis());
+                                    nowMillis(),
+                                    memoryId);
                         }
                         return null;
                     });

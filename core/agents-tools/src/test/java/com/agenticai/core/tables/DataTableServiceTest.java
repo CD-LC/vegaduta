@@ -75,7 +75,7 @@ class DataTableServiceTest {
         when(tables.findById(TABLE_ID)).thenReturn(Optional.of(orders));
         when(tables.findForUpdate(TABLE_ID)).thenReturn(Optional.of(orders));
         when(tables.save(any(DataTable.class))).thenAnswer(inv -> inv.getArgument(0));
-        when(rows.insertAll(eq(TABLE_ID), anyList()))
+        when(rows.insertAll(eq(TABLE_ID), anyList(), any(RowTrust.class)))
                 .thenAnswer(
                         inv -> {
                             List<DataTableRow> out = new ArrayList<>();
@@ -291,7 +291,7 @@ class DataTableServiceTest {
 
         @SuppressWarnings("unchecked")
         ArgumentCaptor<List<Map<String, Object>>> captor = ArgumentCaptor.forClass(List.class);
-        verify(rows).insertAll(eq(TABLE_ID), captor.capture());
+        verify(rows).insertAll(eq(TABLE_ID), captor.capture(), any(RowTrust.class));
         assertThat(captor.getValue()).hasSize(1);
         assertThat(captor.getValue().get(0))
                 .containsEntry("email", "a@b.co")
@@ -328,7 +328,7 @@ class DataTableServiceTest {
                                                         Map.of("qty", "bad"))))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Row 2");
-        verify(rows, never()).insertAll(any(), anyList());
+        verify(rows, never()).insertAll(any(), anyList(), any(RowTrust.class));
 
         List<Map<String, Object>> max = new ArrayList<>();
         for (int i = 0; i < DataTableService.MAX_BULK_INSERT; i++) {
@@ -339,7 +339,7 @@ class DataTableServiceTest {
 
     @Test
     void thePerTableRowCapIsEnforcedOnInsert() {
-        when(rows.count(eq(TABLE_ID), any(Where.class))).thenReturn(9L);
+        when(rows.countAll(eq(TABLE_ID))).thenReturn(9L);
         DataTableService capped = service(true, true, 50, 10);
 
         assertThatThrownBy(
@@ -349,17 +349,16 @@ class DataTableServiceTest {
                                         List.of(Map.of("email", "a"), Map.of("email", "b"))))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("limit of 10");
-        verify(rows, never()).insertAll(any(), anyList());
+        verify(rows, never()).insertAll(any(), anyList(), any(RowTrust.class));
 
         capped.insertRow("orders", Map.of("email", "fits"));
-        verify(rows).insertAll(eq(TABLE_ID), anyList());
+        verify(rows).insertAll(eq(TABLE_ID), anyList(), any(RowTrust.class));
     }
 
     @Test
     void theRowCapMessageMentionsTheUpgradeOnlyForAFreeTenantWhosePlanCapBinds() {
         when(limits.plan("t1")).thenReturn(TenantPlan.FREE);
-        when(rows.count(eq(TABLE_ID), any(Where.class)))
-                .thenReturn((long) DataTableService.FREE_MAX_ROWS);
+        when(rows.countAll(eq(TABLE_ID))).thenReturn((long) DataTableService.FREE_MAX_ROWS);
 
         assertThatThrownBy(() -> service().insertRow("orders", Map.of("email", "a")))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -370,14 +369,14 @@ class DataTableServiceTest {
 
     @Test
     void upsertInsertsWhenNoRowHoldsTheKey() {
-        when(rows.count(eq(TABLE_ID), any(Where.class))).thenReturn(0L);
+        when(rows.countAll(eq(TABLE_ID))).thenReturn(0L);
 
         UpsertResult r =
                 service().upsertRow("orders", "email", Map.of("email", "a@b.co", "qty", 2));
 
         assertThat(r.created()).isTrue();
         assertThat(r.affected()).isEqualTo(1);
-        verify(rows).insertAll(eq(TABLE_ID), anyList());
+        verify(rows).insertAll(eq(TABLE_ID), anyList(), any(RowTrust.class));
         verify(rows, never()).update(any(), any(Where.class), anyString(), anyList());
     }
 
@@ -400,7 +399,7 @@ class DataTableServiceTest {
         assertThat(where.getValue().sql()).isEqualTo("(r.data ->> 'email') = :p0");
         assertThat(where.getValue().params()).containsEntry("p0", "a@b.co");
         assertThat(patch.getValue()).isEqualTo("{\"qty\":9}");
-        verify(rows, never()).insertAll(any(), anyList());
+        verify(rows, never()).insertAll(any(), anyList(), any(RowTrust.class));
     }
 
     @Test
@@ -489,14 +488,14 @@ class DataTableServiceTest {
 
     @Test
     void csvImportAppendsMappedRowsAndRespectsTheRowCap() {
-        when(rows.count(eq(TABLE_ID), any(Where.class))).thenReturn(0L);
+        when(rows.countAll(eq(TABLE_ID))).thenReturn(0L);
 
         ImportResult result = service().importCsv("orders", "email,qty\na@b.co,1\nc@d.co,2\n");
 
         assertThat(result.inserted()).isEqualTo(2);
         verify(rows).insertAll(eq(TABLE_ID), anyList());
 
-        when(rows.count(eq(TABLE_ID), any(Where.class))).thenReturn(9L);
+        when(rows.countAll(eq(TABLE_ID))).thenReturn(9L);
         assertThatThrownBy(() -> service(true, true, 50, 10).importCsv("orders", "email\na\nb\n"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("limit of 10");

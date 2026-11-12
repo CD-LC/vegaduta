@@ -1,0 +1,102 @@
+package com.agenticai.core.agents.learning.consolidation;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+
+import com.agenticai.core.tenancy.PgAdvisoryJobLock;
+import com.agenticai.core.tenancy.TenantSchemaIterator;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+
+/** The consolidation sweep exists only behind its flag, off by default. */
+class MemoryConsolidationWiringTest {
+
+    @Configuration
+    @Import({MemoryConsolidationService.class, MemoryConsolidationSweep.class})
+    static class Wiring {
+        @Bean
+        ConsolidationFactSource facts() {
+            return mock(ConsolidationFactSource.class);
+        }
+
+        @Bean
+        ConsolidationItemSource items() {
+            return mock(ConsolidationItemSource.class);
+        }
+
+        @Bean
+        ConsolidationProposalFiler filer() {
+            return mock(ConsolidationProposalFiler.class);
+        }
+
+        @Bean
+        MemoryConsolidationRunRepository runs() {
+            return mock(MemoryConsolidationRunRepository.class);
+        }
+
+        @Bean
+        MemoryTombstoneWriter tombstones() {
+            return mock(MemoryTombstoneWriter.class);
+        }
+
+        @Bean
+        TenantSchemaIterator tenants() {
+            return mock(TenantSchemaIterator.class);
+        }
+
+        @Bean
+        PgAdvisoryJobLock lock() {
+            return mock(PgAdvisoryJobLock.class);
+        }
+    }
+
+    private final ApplicationContextRunner runner =
+            new ApplicationContextRunner().withUserConfiguration(Wiring.class);
+
+    private static int count(org.springframework.context.ApplicationContext ctx) {
+        return ctx.getBeanNamesForType(MemoryConsolidationService.class).length
+                + ctx.getBeanNamesForType(MemoryConsolidationSweep.class).length;
+    }
+
+    @Test
+    void offByDefault() {
+        runner.run(ctx -> assertEquals(0, count(ctx)));
+    }
+
+    @Test
+    void flagOnCreatesServiceAndSweep() {
+        runner.withPropertyValues("app.memory.consolidation.enabled=true")
+                .run(ctx -> assertEquals(2, count(ctx)));
+    }
+
+    private static boolean applyEnabled(org.springframework.context.ApplicationContext ctx)
+            throws Exception {
+        MemoryConsolidationService s = ctx.getBean(MemoryConsolidationService.class);
+        java.lang.reflect.Field f =
+                MemoryConsolidationService.class.getDeclaredField("applyEnabled");
+        f.setAccessible(true);
+        return f.getBoolean(s);
+    }
+
+    @Test
+    void applyIsOffUnlessAutoApplyOrItsOlderAliasIsSet() {
+        runner.withPropertyValues("app.memory.consolidation.enabled=true")
+                .run(ctx -> org.junit.jupiter.api.Assertions.assertFalse(applyEnabled(ctx)));
+        runner.withPropertyValues(
+                        "app.memory.consolidation.enabled=true",
+                        "app.memory.consolidation.auto-apply=true")
+                .run(ctx -> org.junit.jupiter.api.Assertions.assertTrue(applyEnabled(ctx)));
+        runner.withPropertyValues(
+                        "app.memory.consolidation.enabled=true",
+                        "app.memory.consolidation.apply.enabled=true")
+                .run(ctx -> org.junit.jupiter.api.Assertions.assertTrue(applyEnabled(ctx)));
+        runner.withPropertyValues(
+                        "app.memory.consolidation.enabled=true",
+                        "app.memory.consolidation.apply.enabled=true",
+                        "app.memory.consolidation.auto-apply=false")
+                .run(ctx -> org.junit.jupiter.api.Assertions.assertFalse(applyEnabled(ctx)));
+    }
+}

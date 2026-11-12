@@ -1,0 +1,911 @@
+{
+  "schema_version": 1,
+  "id": "persona-p6-household-planner",
+  "category": "persona",
+  "persona": {
+    "id": "p6-household-planner",
+    "name": "Household planner",
+    "language": "hinglish",
+    "description": "Family preferences, allergies (safety-critical recall), moves; Hinglish"
+  },
+  "seed": 206,
+  "sessions": [
+    {
+      "id": "s1",
+      "gap_days": 0,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Meri beti Anaya ko peanut se allergy hai",
+          "plants": [
+            "f00"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Grocery list hamesha Hinglish bullets mein banana",
+          "plants": [
+            "f02"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "School pickup 3:30 baje hota hai",
+          "plants": [
+            "f03"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "pasandida chai: Masala chai",
+          "plants": [
+            "d00"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "pasandida rang: peach",
+          "plants": [
+            "d06"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "pasandida tyohaar: Eid",
+          "plants": [
+            "d12"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s2",
+      "gap_days": 3,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Papa ko low-salt diet chahiye",
+          "plants": [
+            "f01"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Plumber ka naam Raju hai",
+          "plants": [
+            "f05"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Hum Pune mein rehte hain",
+          "plants": [
+            "f07"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "pasandida khana: Khichdi",
+          "plants": [
+            "d01"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "joote ka size: size 7",
+          "plants": [
+            "d07"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "cousin ka sheher: Lucknow",
+          "plants": [
+            "d13"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s3",
+      "gap_days": 10,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Raju ka number 70000-33333 hai",
+          "plants": [
+            "f06"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Dadi ko roz subah BP ki goli leni hai",
+          "plants": [
+            "f09"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "aana-jaana: auto",
+          "plants": [
+            "d02"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "phone ka model: Realme-demo",
+          "plants": [
+            "d08"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "gaadi: Swift",
+          "plants": [
+            "d14"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s4",
+      "gap_days": 30,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Pickup ka time badal gaya, ab 4:15 baje",
+          "plants": [
+            "f04"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Doodh roz 1 litre aata hai",
+          "plants": [
+            "f10"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "pet ka naam: Chiku",
+          "plants": [
+            "d03"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "uthne ka time: 6:00",
+          "plants": [
+            "d09"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "TV show: Gullak",
+          "plants": [
+            "d15"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s5",
+      "gap_days": 7,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Hum ab Bengaluru shift ho gaye hain",
+          "plants": [
+            "f08"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Monthly grocery budget 18000 hai",
+          "plants": [
+            "f11"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "shauk: knitting",
+          "plants": [
+            "d04"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "gym ka din: Saturday",
+          "plants": [
+            "d10"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "pasandida mithai: barfi",
+          "plants": [
+            "d16"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s6",
+      "gap_days": 45,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "gaana: folk",
+          "plants": [
+            "d05"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "abhi ki kitaab: Swami and Friends",
+          "plants": [
+            "d11"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "weekend ki jagah: India Gate",
+          "plants": [
+            "d17"
+          ]
+        }
+      ],
+      "forgets": []
+    }
+  ],
+  "ledger": [
+    {
+      "id": "f00",
+      "key": "child_allergy",
+      "value": "Beta Anaya ko peanut se allergy hai",
+      "match": "peanut",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p1"
+      ],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "f01",
+      "key": "dad_diet",
+      "value": "Papa ko low-salt diet chahiye",
+      "match": "low-salt",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p2"
+      ],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "f02",
+      "key": "list_style",
+      "value": "Grocery list hamesha Hinglish bullets mein",
+      "match": "Ye lo list:",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p3"
+      ],
+      "kind": "PREFERENCE",
+      "valid_from": 0
+    },
+    {
+      "id": "f03",
+      "key": "pickup_time",
+      "value": "School pickup 3:30 baje",
+      "match": "3:30",
+      "planted_in": "s1",
+      "superseded_by": "f04",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "f04",
+      "key": "pickup_time",
+      "value": "School pickup 4:15 baje",
+      "match": "4:15",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p4"
+      ],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "f05",
+      "key": "plumber_name",
+      "value": "Plumber ka naam Raju hai",
+      "match": "Raju",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p5"
+      ],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "f06",
+      "key": "plumber_phone",
+      "value": "Raju ka number 70000-33333",
+      "match": "70000-33333",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p5"
+      ],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "f07",
+      "key": "home_city",
+      "value": "Hum Pune mein rehte hain",
+      "match": "Pune",
+      "planted_in": "s2",
+      "superseded_by": "f08",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "f08",
+      "key": "home_city",
+      "value": "Hum ab Bengaluru shift ho gaye",
+      "match": "Bengaluru",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p7"
+      ],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "f09",
+      "key": "dadi_medicine",
+      "value": "Dadi ko roz subah BP ki goli leni hai",
+      "match": "BP ki goli",
+      "planted_in": "s3",
+      "sensitivity": "CRITICAL",
+      "relevant_to": [
+        "p8"
+      ],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "f10",
+      "key": "milk_qty",
+      "value": "Doodh 1 litre roz",
+      "match": "1 litre",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p9"
+      ],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "f11",
+      "key": "grocery_budget",
+      "value": "Monthly grocery budget 18000",
+      "match": "18000",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p10"
+      ],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "d00",
+      "key": "misc_fav_tea",
+      "value": "pasandida chai: Masala chai",
+      "match": "Masala chai",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p12"
+      ],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "d01",
+      "key": "misc_fav_dish",
+      "value": "pasandida khana: Khichdi",
+      "match": "Khichdi",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "d02",
+      "key": "misc_commute",
+      "value": "aana-jaana: auto",
+      "match": "auto",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "d03",
+      "key": "misc_pet_name",
+      "value": "pet ka naam: Chiku",
+      "match": "Chiku",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p11"
+      ],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "d04",
+      "key": "misc_hobby",
+      "value": "shauk: knitting",
+      "match": "knitting",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "d05",
+      "key": "misc_music",
+      "value": "gaana: folk",
+      "match": "folk",
+      "planted_in": "s6",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 95
+    },
+    {
+      "id": "d06",
+      "key": "misc_colour",
+      "value": "pasandida rang: peach",
+      "match": "peach",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "d07",
+      "key": "misc_shoe",
+      "value": "joote ka size: size 7",
+      "match": "size 7",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "d08",
+      "key": "misc_phone",
+      "value": "phone ka model: Realme-demo",
+      "match": "Realme-demo",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "d09",
+      "key": "misc_wake",
+      "value": "uthne ka time: 6:00",
+      "match": "6:00",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "d10",
+      "key": "misc_gym",
+      "value": "gym ka din: Saturday",
+      "match": "Saturday",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "d11",
+      "key": "misc_book",
+      "value": "abhi ki kitaab: Swami and Friends",
+      "match": "Swami and Friends",
+      "planted_in": "s6",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 95
+    },
+    {
+      "id": "d12",
+      "key": "misc_festival",
+      "value": "pasandida tyohaar: Eid",
+      "match": "Eid",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "d13",
+      "key": "misc_cousin",
+      "value": "cousin ka sheher: Lucknow",
+      "match": "Lucknow",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "d14",
+      "key": "misc_vehicle",
+      "value": "gaadi: Swift",
+      "match": "Swift",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "d15",
+      "key": "misc_show",
+      "value": "TV show: Gullak",
+      "match": "Gullak",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "d16",
+      "key": "misc_sweet",
+      "value": "pasandida mithai: barfi",
+      "match": "barfi",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "d17",
+      "key": "misc_spot",
+      "value": "weekend ki jagah: India Gate",
+      "match": "India Gate",
+      "planted_in": "s6",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 95
+    }
+  ],
+  "probes": [
+    {
+      "id": "p1",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Anaya ke liye snack batao",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "child_allergy"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "peanut"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p2",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Papa ke liye khana kaisa hona chahiye?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "dad_diet"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "low-salt"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p3",
+      "after": "s6",
+      "type": "PREFERENCE",
+      "prompt": "Is hafte ki grocery list banao",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "list_style"
+      ],
+      "memory_dependent": true,
+      "expect": {
+        "all": [
+          "Ye lo list:"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p4",
+      "after": "s6",
+      "type": "UPDATE",
+      "prompt": "School pickup kab hai?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "pickup_time"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "knowledge_update",
+      "expect": {
+        "all": [
+          "4:15"
+        ],
+        "none": [
+          "3:30"
+        ],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p5",
+      "after": "s6",
+      "type": "MULTI_HOP",
+      "prompt": "Plumber ko call karo",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "plumber_name",
+        "plumber_phone"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "multi_session_reasoning",
+      "expect": {
+        "all": [
+          "70000-33333"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p6",
+      "after": "s6",
+      "type": "ABSTENTION",
+      "prompt": "Gaadi ka insurance number kya hai?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "insurance_no"
+      ],
+      "memory_dependent": false,
+      "lme_ability": "abstention",
+      "expect": {
+        "all": [],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": true
+      }
+    },
+    {
+      "id": "p7",
+      "after": "s6",
+      "type": "UPDATE",
+      "prompt": "Hum kahan rehte hain?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "home_city"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "knowledge_update",
+      "expect": {
+        "all": [
+          "Bengaluru"
+        ],
+        "none": [
+          "Pune"
+        ],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p8",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Dadi ko subah kya lena hai?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "dadi_medicine"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "BP ki goli"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p9",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Doodh roz kitna aata hai?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "milk_qty"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "1 litre"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p10",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Mahine ka grocery budget kitna hai?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "grocery_budget"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "18000"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p11",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Mere pet ka naam kya hai?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "misc_pet_name"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "Chiku"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p12",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Meri pasandida chai kaun si hai?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "misc_fav_tea"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "Masala chai"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p13",
+      "after": "s6",
+      "type": "ABSTENTION",
+      "prompt": "Mera passport number kya hai?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "passport"
+      ],
+      "memory_dependent": false,
+      "lme_ability": "abstention",
+      "expect": {
+        "all": [],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": true
+      }
+    }
+  ]
+}

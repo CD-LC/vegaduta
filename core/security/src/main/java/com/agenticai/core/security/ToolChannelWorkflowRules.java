@@ -128,6 +128,14 @@ final class ToolChannelWorkflowRules {
                         "/api/knowledge/collections/*/reembed",
                         "/api/knowledge/*/eval")
                 .hasAuthority("PERM_MANAGE_AGENTS")
+                // Quarantined knowledge (written on a turn that handled untrusted content) is
+                // attacker-
+                // authored text until a person approves it: reviewing it - listing it, approving it
+                // into
+                // every agent's retrieval, or rejecting it - is knowledge authoring, so the same
+                // bundle.
+                .requestMatchers("/api/knowledge/quarantine/**")
+                .hasAuthority("PERM_MANAGE_AGENTS")
                 .requestMatchers(HttpMethod.PUT, "/api/knowledge/collections/**")
                 .hasAuthority("PERM_MANAGE_AGENTS")
                 .requestMatchers(

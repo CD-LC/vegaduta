@@ -229,6 +229,11 @@ final class AdminIntegrationRules {
                 // one directly above.
                 .requestMatchers(HttpMethod.POST, "/api/agents/*/improvements/*/accept")
                 .hasAuthority("PERM_MANAGE_GUARDRAILS")
+                // Scratchpad notes held because they were written on a turn that handled untrusted
+                // content: approving one lets the agent read attacker-authored text back as its own
+                // note, so it is agent authoring (the handler also needs EDITOR on the agent).
+                .requestMatchers(HttpMethod.POST, "/api/agents/*/scratchpad-quarantine/**")
+                .hasAuthority("PERM_MANAGE_AGENTS")
                 // Moderation queue decisions: records
                 // ModerationReviewController's own check.
                 .requestMatchers(
@@ -404,7 +409,8 @@ final class AdminIntegrationRules {
                 // already gated for below - explicitly ROLE_tenant-admin
                 // rather than left to fall
                 // through to plain anyRequest().authenticated().
-                // How callers may authenticate to /mcp (OAuth settings, allowed origins): admin view.
+                // How callers may authenticate to /mcp (OAuth settings, allowed origins): admin
+                // view.
                 .requestMatchers(HttpMethod.GET, "/api/mcpserver/grants/auth-options")
                 .hasAuthority("PERM_MANAGE_INTEGRATIONS")
                 .requestMatchers(HttpMethod.GET, "/api/mcpserver/grants/*/tool-calls")

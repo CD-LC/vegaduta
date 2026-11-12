@@ -26,6 +26,7 @@ public final class TurnTaint {
 
     private final List<String> sources = new ArrayList<>(2);
     private final Set<String> reported = new HashSet<>();
+    private final List<Runnable> listeners = new ArrayList<>(1);
     private volatile boolean tainted;
     private volatile Consumer<List<String>> listener;
 
@@ -37,6 +38,7 @@ public final class TurnTaint {
     public boolean mark(String source) {
         String label = source == null || source.isBlank() ? "unknown" : source;
         boolean first;
+        List<Runnable> fire = List.of();
         boolean changed;
         List<String> snapshot = null;
         synchronized (sources) {
@@ -50,6 +52,10 @@ public final class TurnTaint {
             if (changed && listener != null) {
                 snapshot = List.copyOf(sources);
             }
+            if (first) {
+                fire = List.copyOf(listeners);
+                listeners.clear();
+            }
         }
         Consumer<List<String>> l = listener;
         if (snapshot != null && l != null) {
@@ -59,7 +65,34 @@ public final class TurnTaint {
                 // A persistence hook must never break the turn that is being tainted.
             }
         }
+        fire.forEach(TurnTaint::runQuietly);
         return first;
+    }
+
+    /**
+     * Runs {@code action} once, when this turn first becomes tainted - at once if it already is,
+     * otherwise on whichever thread marks it. The action must not rely on thread-local state; a
+     * throw is swallowed so a mark can never fail.
+     */
+    public void onTainted(Runnable action) {
+        if (action == null) {
+            return;
+        }
+        synchronized (sources) {
+            if (!tainted) {
+                listeners.add(action);
+                return;
+            }
+        }
+        runQuietly(action);
+    }
+
+    private static void runQuietly(Runnable action) {
+        try {
+            action.run();
+        } catch (RuntimeException ignored) {
+            // a listener must never break marking
+        }
     }
 
     /**
@@ -86,6 +119,28 @@ public final class TurnTaint {
 
     public boolean isTainted() {
         return tainted;
+    }
+
+    /**
+     * Starts this (child) turn with what {@code parent} knows at this moment: every source label
+     * the parent recorded, and the tainted flag. A delegated, specialist or team-branch turn calls
+     * this once when it is created, so it can never be cleaner than the turn that handed it work.
+     * It is a copy, not a link: marks the parent or a sibling gets later do not reach this turn,
+     * and marks this turn gets do not reach the parent (the parent reads the child's answer through
+     * the delegating tool, which is itself a taint source). No-op for a null or clean parent.
+     */
+    public void inheritFrom(TurnTaint parent) {
+        if (parent == null || parent == this || !parent.isTainted()) {
+            return;
+        }
+        List<String> inherited = parent.sources();
+        if (inherited.isEmpty()) {
+            mark("delegation");
+            return;
+        }
+        for (String source : inherited) {
+            mark(source);
+        }
     }
 
     /** Snapshot of the (bounded) sources that tainted this turn, in order of first appearance. */

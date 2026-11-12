@@ -159,6 +159,29 @@ public class KnowledgeIngestionService {
             int chunkOverlap,
             UUID collectionId,
             UUID documentId) {
+        return ingestFile(
+                filename,
+                content,
+                chunkSize,
+                chunkOverlap,
+                collectionId,
+                documentId,
+                ChunkProvenance.TRUSTED);
+    }
+
+    /**
+     * {@link #ingestFile(String, byte[], int, int, UUID, UUID)} for content an agent pulled in on a
+     * turn that handled untrusted content: a QUARANTINED {@code provenance} stores every chunk
+     * excluded from retrieval until a person approves it.
+     */
+    public IngestResponse ingestFile(
+            String filename,
+            byte[] content,
+            int chunkSize,
+            int chunkOverlap,
+            UUID collectionId,
+            UUID documentId,
+            ChunkProvenance provenance) {
         if (documentId != null) {
             documentService.markExtracting(documentId);
         }
@@ -171,7 +194,14 @@ public class KnowledgeIngestionService {
                                 ocrProviderConfigService.resolveActive().orElse(null));
         String sourceType = isImageFile(filename) ? SOURCE_TYPE_IMAGE : SOURCE_TYPE_TEXT;
         return ingest(
-                filename, text, chunkSize, chunkOverlap, collectionId, documentId, sourceType);
+                filename,
+                text,
+                chunkSize,
+                chunkOverlap,
+                collectionId,
+                documentId,
+                sourceType,
+                provenance);
     }
 
     private static boolean isImageFile(String filename) {
@@ -202,6 +232,31 @@ public class KnowledgeIngestionService {
     public IngestResponse ingest(
             String source, String text, int chunkSize, int chunkOverlap, UUID collectionId) {
         return ingest(source, text, chunkSize, chunkOverlap, collectionId, null, SOURCE_TYPE_TEXT);
+    }
+
+    /**
+     * {@link #ingest(String, String, int, int, UUID)} with explicit provenance (a distinct name: an
+     * overload would make every {@code ingest(..., null)} call site ambiguous): what an agent tool
+     * writes on a turn that may have read attacker-authored content. A QUARANTINED {@code
+     * provenance} stores the chunks but keeps them out of every retrieval path until a person
+     * approves them (see {@code KnowledgeQuarantineService}).
+     */
+    public IngestResponse ingestWithProvenance(
+            String source,
+            String text,
+            int chunkSize,
+            int chunkOverlap,
+            UUID collectionId,
+            ChunkProvenance provenance) {
+        return ingest(
+                source,
+                text,
+                chunkSize,
+                chunkOverlap,
+                collectionId,
+                null,
+                SOURCE_TYPE_TEXT,
+                provenance);
     }
 
     /**
@@ -243,6 +298,26 @@ public class KnowledgeIngestionService {
             UUID collectionId,
             UUID documentId,
             String sourceType) {
+        return ingest(
+                source,
+                text,
+                chunkSize,
+                chunkOverlap,
+                collectionId,
+                documentId,
+                sourceType,
+                ChunkProvenance.TRUSTED);
+    }
+
+    private IngestResponse ingest(
+            String source,
+            String text,
+            int chunkSize,
+            int chunkOverlap,
+            UUID collectionId,
+            UUID documentId,
+            String sourceType,
+            ChunkProvenance provenance) {
         if (refuseCredentials && ContentWriteScreen.credentialHit(text)) {
             // Before any embedding work; the callers mark the document FAILED with this message.
             throw new InvalidKnowledgeUploadException(
@@ -322,7 +397,8 @@ public class KnowledgeIngestionService {
         String metadataJson = toMetadataJson(sourceType);
 
         if (parentChildPlan != null) {
-            parentChunkStore.insertAll(collectionId, documentId, parentChildPlan.parentRows());
+            parentChunkStore.insertAll(
+                    collectionId, documentId, parentChildPlan.parentRows(), provenance);
         }
 
         List<UUID> ids = new ArrayList<>();
@@ -344,11 +420,11 @@ public class KnowledgeIngestionService {
             // via KnowledgeDocument.objectKey), not just the free-text
             // `source` filename column this table already had.
             jdbcTemplate.update(
+                    // codeql[java/sql-injection]
                     "INSERT INTO "
                             + table
-                            + " (id, source, chunk_index, content, embedding, collection_id,"
-                            + " embedding_model, document_id, metadata) VALUES (?, ?, ?, ?,"
-                            + " ?::public.vector, ?, ?, ?, ?::jsonb)",
+                            + " (id, source, chunk_index, content, embedding, collection_id, embedding_model, document_id, trust, source_taint, metadata) "
+                            + "VALUES (?, ?, ?, ?, ?::public.vector, ?, ?, ?, ?, ?, ?::jsonb)",
                     id,
                     source,
                     chunk.index(),
@@ -357,6 +433,8 @@ public class KnowledgeIngestionService {
                     collectionId,
                     embedded.model(),
                     documentId,
+                    provenance.trustName(),
+                    provenance.sourcesJson(),
                     chunkMetadata);
             ids.add(id);
         }
@@ -378,6 +456,7 @@ public class KnowledgeIngestionService {
                     ids.stream().map(UUID::toString).collect(Collectors.joining(",", "{", "}"));
             try {
                 jdbcTemplate.update(
+                        // codeql[java/sql-injection]
                         "UPDATE "
                                 + table
                                 + " SET content_tsv = to_tsvector(?::regconfig, content) WHERE id ="

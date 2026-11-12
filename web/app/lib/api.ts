@@ -36,6 +36,7 @@ import { agentTrustApi } from "./api/agentTrust";
 import { promptDirectivesApi } from "./api/promptDirectives";
 import { promptRegistryApi } from "./api/promptRegistry";
 import { memoryApi } from "./api/memory";
+import { memoryItemsApi } from "./api/memoryItems";
 import { researchApi } from "./api/research";
 import { tutorApi } from "./api/tutor";
 import { agentImportApi } from "./api/agentImport";
@@ -89,6 +90,7 @@ export const api = {
   ...promptDirectivesApi,
   ...promptRegistryApi,
   ...memoryApi,
+  ...memoryItemsApi,
   ...researchApi,
   ...tutorApi,
   ...agentImportApi,

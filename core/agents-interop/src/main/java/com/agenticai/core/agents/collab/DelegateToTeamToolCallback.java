@@ -3,6 +3,7 @@ package com.agenticai.core.agents.collab;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.agents.tools.StepJournal;
 import com.agenticai.core.agents.turn.AgentChatService;
+import com.agenticai.core.guardrails.taint.DelegationTaint;
 import com.agenticai.core.prompts.tool.ToolPromptTexts;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
@@ -42,10 +43,9 @@ import org.springframework.ai.tool.definition.ToolDefinition;
  * tool-scope binding is a ThreadLocal that does not propagate onto virtual threads.
  *
  * <p><b>Bounded:</b> at most {@code app.agents.collaboration.max-branches} branches per call and a
- * per-branch wall-clock timeout of {@code branch-timeout-seconds}, so a hung collaborator cannot pin
- * the turn forever and a model cannot fan out unboundedly. Branch results are capped at {@code
- * max-answer-chars}
- * chars each to keep the aggregate inside the calling model's context budget.
+ * per-branch wall-clock timeout of {@code branch-timeout-seconds}, so a hung collaborator cannot
+ * pin the turn forever and a model cannot fan out unboundedly. Branch results are capped at {@code
+ * max-answer-chars} chars each to keep the aggregate inside the calling model's context budget.
  */
 public class DelegateToTeamToolCallback implements ToolCallback {
 
@@ -56,33 +56,50 @@ public class DelegateToTeamToolCallback implements ToolCallback {
     static final String ERR_NOT_MEMBER = "not a member of this team";
     static final String ERR_QUESTION_REQUIRED = "question is required";
 
-    /** Branch, timeout and answer bounds ({@code app.agents.collaboration.*}); the shipped defaults until {@link #withLimits}. */
+    /**
+     * Branch, timeout and answer bounds ({@code app.agents.collaboration.*}); the shipped defaults
+     * until {@link #withLimits}.
+     */
     private volatile CollaborationProperties limits = new CollaborationProperties();
 
-    /** Applies the bound {@code app.agents.collaboration.*} settings; called by the factory right after construction. */
+    /**
+     * Applies the bound {@code app.agents.collaboration.*} settings; called by the factory right
+     * after construction.
+     */
     DelegateToTeamToolCallback withLimits(CollaborationProperties limits) {
         this.limits = limits;
         this.resolvedLimits = ResolvedCollaborationLimits.platformOnly(limits);
         return this;
     }
 
-    /** The branch and timeout bounds as the settings catalog resolves them; the platform values until {@link #withSettings}. */
-    private volatile ResolvedCollaborationLimits resolvedLimits = ResolvedCollaborationLimits.platformOnly(limits);
+    /**
+     * The branch and timeout bounds as the settings catalog resolves them; the platform values
+     * until {@link #withSettings}.
+     */
+    private volatile ResolvedCollaborationLimits resolvedLimits =
+            ResolvedCollaborationLimits.platformOnly(limits);
 
-    /** The bounds in force; the platform's own when no view was set (an instance made without its field initialisers). */
+    /**
+     * The bounds in force; the platform's own when no view was set (an instance made without its
+     * field initialisers).
+     */
     private ResolvedCollaborationLimits limitsView() {
         ResolvedCollaborationLimits view = resolvedLimits;
         return view != null ? view : ResolvedCollaborationLimits.platformOnly(limits);
     }
 
     /**
-     * Reads {@code delegation.maxBranches} and {@code delegation.branchTimeoutSeconds} through the settings catalog for
-     * {@code callerAgentId} (the agent whose turn offers the tool) and the tenant captured at construction; called by the
-     * factory right after {@link #withLimits}. A null resolver keeps the platform values.
+     * Reads {@code delegation.maxBranches} and {@code delegation.branchTimeoutSeconds} through the
+     * settings catalog for {@code callerAgentId} (the agent whose turn offers the tool) and the
+     * tenant captured at construction; called by the factory right after {@link #withLimits}. A
+     * null resolver keeps the platform values.
      */
-    DelegateToTeamToolCallback withSettings(com.agenticai.core.settings.SettingsResolver settings, UUID callerAgentId) {
+    DelegateToTeamToolCallback withSettings(
+            com.agenticai.core.settings.SettingsResolver settings, UUID callerAgentId) {
         if (settings != null) {
-            this.resolvedLimits = new ResolvedCollaborationLimits(limits, settings, callerAgentId, capturedContext);
+            this.resolvedLimits =
+                    new ResolvedCollaborationLimits(
+                            limits, settings, callerAgentId, capturedContext);
         }
         return this;
     }
@@ -187,7 +204,8 @@ public class DelegateToTeamToolCallback implements ToolCallback {
         for (Member m : members) {
             bySlug.put(m.slug(), m);
         }
-        // Not Map.copyOf: its iteration order is salted per JVM, which made the roster text (and the
+        // Not Map.copyOf: its iteration order is salted per JVM, which made the roster text (and
+        // the
         // not-a-member hint) list the members in a different order from run to run.
         this.membersBySlug = java.util.Collections.unmodifiableMap(bySlug);
     }
@@ -235,7 +253,8 @@ public class DelegateToTeamToolCallback implements ToolCallback {
                     },
                     "required": ["tasks"]
                 }
-                """.formatted(limitsView().maxBranches())))
+                """
+                                        .formatted(limitsView().maxBranches())))
                 .build();
     }
 
@@ -297,14 +316,20 @@ public class DelegateToTeamToolCallback implements ToolCallback {
         // shutdownNow() in the finally, not close(): close() would block on a branch that
         // ignores interrupts past the branch timeout (java:S2095 only recognises close()).
         @SuppressWarnings("java:S2095")
-        ExecutorService pool = TenantAwareExecutors.newVirtualThreadPerTaskExecutor("delegate-to-team-tool-callback-");
+        ExecutorService pool =
+                TenantAwareExecutors.newVirtualThreadPerTaskExecutor(
+                        "delegate-to-team-tool-callback-");
         try {
             List<Future<Map<String, Object>>> futures = new ArrayList<>();
             List<Member> dispatched = new ArrayList<>();
             for (int i = 0; i < runnable.size(); i++) {
                 Map<String, Object> task = runnable.get(i);
                 int branchIndex = i;
-                futures.add(pool.submit(() -> runBranch(runId, branchIndex, task)));
+                // propagating(): the branch copies the calling turn's taint when it starts
+                futures.add(
+                        pool.submit(
+                                DelegationTaint.propagating(
+                                        () -> runBranch(runId, branchIndex, task))));
                 Object ref = task.get("agent");
                 Member m = ref == null ? null : membersBySlug.get(ref.toString().trim());
                 dispatched.add(m);
@@ -403,7 +428,9 @@ public class DelegateToTeamToolCallback implements ToolCallback {
                         Map<Integer, SwarmVerifier.Item> fresh = new LinkedHashMap<>();
                         // Same shutdownNow()-in-finally lifecycle as pool above (java:S2095).
                         @SuppressWarnings("java:S2095")
-                        ExecutorService repairPool = TenantAwareExecutors.newVirtualThreadPerTaskExecutor("delegate-to-team-tool-callback-");
+                        ExecutorService repairPool =
+                                TenantAwareExecutors.newVirtualThreadPerTaskExecutor(
+                                        "delegate-to-team-tool-callback-");
                         try {
                             Map<Integer, Future<Map<String, Object>>> futures =
                                     new LinkedHashMap<>();
@@ -430,7 +457,12 @@ public class DelegateToTeamToolCallback implements ToolCallback {
                                 futures.put(
                                         idx,
                                         repairPool.submit(
-                                                () -> runBranch(runId, sessionIndex, task)));
+                                                DelegationTaint.propagating(
+                                                        () ->
+                                                                runBranch(
+                                                                        runId,
+                                                                        sessionIndex,
+                                                                        task))));
                             }
                             for (Map.Entry<Integer, Future<Map<String, Object>>> en :
                                     futures.entrySet()) {
@@ -438,7 +470,9 @@ public class DelegateToTeamToolCallback implements ToolCallback {
                                 try {
                                     raw =
                                             en.getValue()
-                                                    .get(limitsView().branchTimeoutSeconds(), TimeUnit.SECONDS);
+                                                    .get(
+                                                            limitsView().branchTimeoutSeconds(),
+                                                            TimeUnit.SECONDS);
                                 } catch (Exception e) {
                                     en.getValue().cancel(true);
                                     raw =

@@ -29,19 +29,29 @@ class FreeTierUsageLimiterMaxTokensCeilingTest {
         when(redis.opsForValue()).thenReturn(ops);
         PlatformSettingsService settings = mock(PlatformSettingsService.class);
         when(settings.getLong(anyString(), anyLong())).thenAnswer(inv -> inv.getArgument(1));
-        when(settings.getInt(anyString(), org.mockito.ArgumentMatchers.anyInt())).thenAnswer(inv -> inv.getArgument(1));
-        when(ops.increment(anyString(), anyLong())).thenAnswer(inv -> inv.getArgument(1));
-        FreeTierUsageLimiterService limiter = new FreeTierUsageLimiterService(
-            redis, settings, 400_000L, 2, 3, new SimpleMeterRegistry(), 2_000L, 0L, mock(ObjectProvider.class));
+        when(settings.getInt(anyString(), org.mockito.ArgumentMatchers.anyInt()))
+                .thenAnswer(inv -> inv.getArgument(1));
+        SpendCounterMocks.stubAll(redis, by -> by);
+        FreeTierUsageLimiterService limiter =
+                new FreeTierUsageLimiterService(
+                        redis,
+                        settings,
+                        400_000L,
+                        2,
+                        3,
+                        new SimpleMeterRegistry(),
+                        2_000L,
+                        0L,
+                        mock(ObjectProvider.class));
 
         // Default ceiling: a stored 50000 reserves 8192 + the prompt estimate, as before.
         assertThat(limiter.checkAndReserveTokenBudget("t", TenantPlan.FREE, 50_000))
-            .isEqualTo(8192L + 2_000L);
+                .isEqualTo(8192L + 2_000L);
 
         AgentGenerationProperties lowered = new AgentGenerationProperties();
         lowered.setMaxTokensCeiling(4096);
         limiter.useGenerationProperties(lowered);
         assertThat(limiter.checkAndReserveTokenBudget("t", TenantPlan.FREE, 50_000))
-            .isEqualTo(4096L + 2_000L);
+                .isEqualTo(4096L + 2_000L);
     }
 }

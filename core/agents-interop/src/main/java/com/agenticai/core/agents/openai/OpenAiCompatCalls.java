@@ -7,6 +7,7 @@ import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
+import com.agenticai.core.guardrails.taint.SenderTrust;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.sharing.PermissionLevel;
 import java.io.IOException;
@@ -196,6 +197,10 @@ final class OpenAiCompatCalls {
                         false);
         TurnContext turnContext =
                 TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
+        // The key behind this endpoint is routinely embedded in an application used by end users,
+        // so
+        // the prompt is outsider content (docs/security/taint-entry-points.md).
+        SenderTrust.UNTRUSTED.seed(turnContext.taint(), "inbound:openai_compat");
         return agentChatService.chat(turnContext, chatTurn);
     }
 

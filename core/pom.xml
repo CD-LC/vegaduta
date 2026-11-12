@@ -199,6 +199,8 @@
     <module>agents-budget</module>
     <module>agents</module>
     <module>agents-turn</module>
+    <!-- Unified agent memory (ADR-0028): gate, recall composer, proposals. Depends on agents only. -->
+    <module>agents-memory</module>
     <module>agents-tools</module>
     <module>agents-browser</module>
     <module>agents-jobs</module>
@@ -545,6 +547,11 @@
       <dependency>
         <groupId>com.agenticai</groupId>
         <artifactId>agents-budget</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>agents-memory</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

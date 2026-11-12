@@ -727,6 +727,9 @@ export interface AgentMemoryEntry {
   createdAt?: string;
   lastUsedAt?: string;
   useCount?: number;
+  trust?: MemoryTrust;
+  sourceTaint?: string[];
+  supersededAt?: string;
 }
 
 export interface AgentModalitiesView {
@@ -2652,6 +2655,13 @@ export interface DataTableDtos_ImportResult {
   errors?: string[];
   ignoredHeaders?: string[];
   table?: DataTableDtos_TableView;
+}
+
+export interface DataTableDtos_QuarantinedRowView {
+  id?: string;
+  data?: Record<string, unknown>;
+  sourceTaint?: string[];
+  createdAt?: string;
 }
 
 export interface DataTableDtos_RowPage {
@@ -4607,6 +4617,15 @@ export interface KnowledgeIngestionJobResponse {
 
 export type KnowledgeIngestionJobStatus = "QUEUED" | "PROCESSING" | "COMPLETE" | "FAILED";
 
+export interface KnowledgeQuarantineService_QuarantinedChunk {
+  id?: string;
+  collectionId?: string;
+  source?: string;
+  chunkIndex?: number;
+  content?: string;
+  sourceTaint?: string[];
+}
+
 export interface KnowledgeReembedJobResponse {
   id?: string;
   collectionId?: string;
@@ -5521,6 +5540,7 @@ export interface MemoryImportDtos_ImportFact {
   text?: string;
   scope?: string;
   agentId?: string;
+  confirmForgotten?: boolean;
 }
 
 export interface MemoryImportDtos_ImportLimits {
@@ -5571,12 +5591,69 @@ export interface MemoryImportDtos_SkippedFact {
   reason?: string;
 }
 
+export interface MemoryItemController_DetailView {
+  item?: MemoryItemController_ItemView;
+  lineage?: MemoryItemController_SourceView[];
+  events?: MemoryItemController_EventView[];
+}
+
+export interface MemoryItemController_EditRequest {
+  content?: string;
+}
+
+export interface MemoryItemController_EventView {
+  id?: string;
+  event?: string;
+  actorType?: string;
+  actorRef?: string;
+  fromStatus?: string;
+  toStatus?: string;
+  at?: string;
+}
+
+export interface MemoryItemController_ItemView {
+  id?: string;
+  agentId?: string;
+  kind?: string;
+  content?: string;
+  trust?: string;
+  status?: string;
+  writer?: string;
+  sourceType?: string;
+  sourceRef?: string;
+  sourceTaint?: string[];
+  modelGenerated?: boolean;
+  generation?: number;
+  subjectKeys?: string[];
+  version?: number;
+  supersedesId?: string;
+  createdAt?: string;
+  expiresAt?: string;
+  approvedBy?: string;
+  approvedAt?: string;
+  pinned?: boolean;
+}
+
+export interface MemoryItemController_SourceView {
+  sourceTable?: string;
+  sourceKey?: string;
+  sourceTrust?: string;
+}
+
+export interface MemoryItemExportController_ExportView {
+  exportedAt?: string;
+  subject?: string;
+  items?: MemoryItemController_ItemView[];
+}
+
 export interface MemoryProvenanceService_FactSource {
   agentId?: string;
   sessionId?: string;
   learnedAt?: string;
   matched?: boolean;
 }
+
+export type MemoryTrust = "TRUSTED" | "QUARANTINED";
 
 export interface MetaActivationRequest {
   phoneNumberId: string;
@@ -7745,6 +7822,16 @@ export interface QualitySummaryResponse {
   evaluatedAt?: string;
 }
 
+export interface QuarantinedNoteView {
+  key?: string;
+  scope?: string;
+  sessionId?: string;
+  subjectKey?: string;
+  body?: string;
+  sourceTaint?: string[];
+  updatedAt?: string;
+}
+
 export type QuickTaskChannel = "WHATSAPP" | "SMS" | "CALL" | "LOG";
 
 export interface QuickTaskPreviewRequest {
@@ -8799,6 +8886,7 @@ export interface ScratchpadNoteView {
   byteSize?: number;
   updatedAt?: string;
   body?: string;
+  subjectKey?: string;
 }
 
 export interface SearchRequest {
@@ -10066,6 +10154,20 @@ export interface TenantFeatureFlagController_FeatureFlagEvaluationResponse {
   variant?: string;
 }
 
+export interface TenantMemoryEntry {
+  id?: string;
+  subjectKey?: string;
+  content?: string;
+  distance?: number;
+  createdByAgentId?: string;
+  createdAt?: string;
+  lastUsedAt?: string;
+  useCount?: number;
+  trust?: MemoryTrust;
+  sourceTaint?: string[];
+  supersededAt?: string;
+}
+
 export type TenantPlan = "FREE" | "PREMIUM" | "UNLIMITED";
 
 export interface TenantSettingsResponse {
@@ -10656,6 +10758,9 @@ export interface UserMemoryController_FactView {
   createdAt?: string;
   lastUsedAt?: string;
   useCount?: number;
+  trust?: string;
+  sourceTaint?: string[];
+  supersededAt?: string;
 }
 
 export interface UserMemoryController_ForgetAllResult {
@@ -10665,6 +10770,8 @@ export interface UserMemoryController_ForgetAllResult {
   graphErased?: boolean;
   agentErased?: boolean;
   sharedErased?: boolean;
+  otherStoreRows?: number;
+  otherStoresErased?: boolean;
 }
 
 export interface UserMemoryController_Limits {

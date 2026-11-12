@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "id": "s04-contradiction-at-write",
+  "category": "contradiction",
+  "persona": {
+    "id": "p-scripted",
+    "name": "Scripted user",
+    "language": "en",
+    "description": "Single scripted user for a T1 scenario"
+  },
+  "seed": 104,
+  "sessions": [
+    {
+      "id": "s1",
+      "gap_days": 0,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "The team meeting is on Tuesday",
+          "plants": [
+            "f-tue"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s2",
+      "gap_days": 2,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "The team meeting is on Thursday",
+          "plants": [
+            "f-thu"
+          ]
+        }
+      ],
+      "forgets": []
+    }
+  ],
+  "ledger": [
+    {
+      "id": "f-tue",
+      "key": "meeting_day",
+      "value": "Meeting is on Tuesday",
+      "match": "Tuesday",
+      "planted_in": "s1",
+      "superseded_by": "f-thu",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "f-thu",
+      "key": "meeting_day",
+      "value": "Meeting is on Thursday",
+      "match": "Thursday",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p2"
+      ],
+      "kind": "FACT",
+      "valid_from": 2
+    }
+  ],
+  "probes": [
+    {
+      "id": "p1",
+      "after": "s2",
+      "type": "STORE_CHECK",
+      "prompt": "(store inspection)",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "meeting_day"
+      ],
+      "memory_dependent": false,
+      "store_check": "single_live",
+      "expect": {
+        "all": [],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p2",
+      "after": "s2",
+      "type": "UPDATE",
+      "prompt": "When is the team meeting?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "meeting_day"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "knowledge_update",
+      "expect": {
+        "all": [
+          "Thursday"
+        ],
+        "none": [
+          "Tuesday"
+        ],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    }
+  ]
+}

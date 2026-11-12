@@ -134,8 +134,7 @@ final class KnowledgeChunkScanner {
 
             float[] queryVector = sidecarClient.embedQuery(query, model);
             // Straight from float[]: the old List<Double> detour boxed ~768 values per query and
-            // per
-            // model.
+            // per model.
             String literal = KnowledgeIngestionService.toVectorLiteral(queryVector);
 
             List<Object> params = new ArrayList<>();
@@ -169,12 +168,12 @@ final class KnowledgeChunkScanner {
             // "type vector does not exist" - because pgvector's type lives
             // in public (pinned there by VectorSchemaInitializer).
             String sql =
-                    "SELECT id, source, chunk_index, content, collection_id, document_id, embedding"
-                            + " OPERATOR(public.<=>) ?::public.vector AS distance FROM "
+                    "SELECT id, source, chunk_index, content, collection_id, document_id, embedding OPERATOR(public.<=>) ?::public.vector AS distance FROM "
                             + table
                             + " WHERE embedding_model = ? AND collection_id IN ("
                             + placeholders
                             + ")"
+                            + " AND trust = 'TRUSTED'"
                             + (excludeImageSourced
                                     ? " AND COALESCE(metadata->>'source_type', '') <> 'image'"
                                     : "")
@@ -226,10 +225,9 @@ final class KnowledgeChunkScanner {
         } catch (HnswTuningRejectedException e) {
             if (hnswTuningSupported.compareAndSet(true, false)) {
                 log.warn(
-                        "Database rejected HNSW session settings (ef_search={}, iterative_scan={})"
-                                + " - vector search continues untuned. Check the pgvector version"
-                                + " (iterative_scan needs >= 0.8.0) or set"
-                                + " app.knowledge.vector-index.iterative-scan=off. Cause: {}",
+                        "Database rejected HNSW session settings (ef_search={}, iterative_scan={}) - vector search continues "
+                                + "untuned. Check the pgvector version (iterative_scan needs >= 0.8.0) or set "
+                                + "app.knowledge.vector-index.iterative-scan=off. Cause: {}",
                         hnswEfSearch,
                         hnswIterativeScan,
                         e.getCause() != null ? e.getCause().getMessage() : e.getMessage());
@@ -296,17 +294,18 @@ final class KnowledgeChunkScanner {
         String placeholders =
                 collectionIds.stream().map(id -> "?").collect(Collectors.joining(","));
         String sql =
-                "SELECT c.id, c.source, c.chunk_index, c.content, c.collection_id, c.document_id,"
-                        + " ts_rank_cd(c.content_tsv, plainto_tsquery(COALESCE(kc.text_search_config,"
-                        + " 'simple')::regconfig, ?)) AS rank FROM "
+                "SELECT c.id, c.source, c.chunk_index, c.content, c.collection_id, c.document_id, "
+                        + "ts_rank_cd(c.content_tsv, plainto_tsquery(COALESCE(kc.text_search_config, 'simple')::regconfig, ?)) AS rank"
+                        + " FROM "
                         + table
                         + " c JOIN "
                         + collectionTable
-                        + " kc ON kc.id = c.collection_id WHERE c.content_tsv @@"
-                        + " plainto_tsquery(COALESCE(kc.text_search_config, 'simple')::regconfig,"
-                        + " ?) AND c.collection_id IN ("
+                        + " kc ON kc.id = c.collection_id"
+                        + " WHERE c.content_tsv @@ plainto_tsquery(COALESCE(kc.text_search_config, 'simple')::regconfig, ?)"
+                        + " AND c.collection_id IN ("
                         + placeholders
                         + ")"
+                        + " AND c.trust = 'TRUSTED'"
                         + (excludeImageSourced
                                 ? " AND COALESCE(c.metadata->>'source_type', '') <> 'image'"
                                 : "")
@@ -347,8 +346,8 @@ final class KnowledgeChunkScanner {
                     params.toArray());
         } catch (DataAccessException e) {
             log.warn(
-                    "Keyword search failed (falling back to vector-only results) - likely a tenant"
-                            + " schema pending migration V87's content_tsv backfill: {}",
+                    "Keyword search failed (falling back to vector-only results) - likely a tenant schema pending "
+                            + "migration V87's content_tsv backfill: {}",
                     e.getMessage());
             return List.of();
         }

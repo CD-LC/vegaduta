@@ -2,12 +2,12 @@ package com.agenticai.core.common.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 /**
- * Client context: metadata extracted from a request for fraud detection analysis.
- * Captures IP, User-Agent, TLS fingerprint, authentication state, etc.
+ * Client context: metadata extracted from a request for fraud detection analysis. Captures IP,
+ * User-Agent, TLS fingerprint, authentication state, etc.
  */
 public class ClientContext {
     public final UUID tenantId;
@@ -18,8 +18,13 @@ public class ClientContext {
     public final String sessionId; // Session identifier for rate limiting
     public final long requestTimestamp;
 
-    public ClientContext(UUID tenantId, InetAddress ip, String userAgent, String tlsFingerprint,
-                        UUID userId, String sessionId) {
+    public ClientContext(
+            UUID tenantId,
+            InetAddress ip,
+            String userAgent,
+            String tlsFingerprint,
+            UUID userId,
+            String sessionId) {
         this.tenantId = tenantId;
         this.ip = ip;
         this.userAgent = userAgent != null ? userAgent : "unknown";
@@ -30,8 +35,8 @@ public class ClientContext {
     }
 
     /**
-     * Extract client context from an HTTP request.
-     * Handles X-Forwarded-For, X-Real-IP, and direct client IP.
+     * Extract client context from an HTTP request. The client IP is the container-resolved peer
+     * address; forwarding headers are not trusted.
      */
     public static ClientContext fromRequest(HttpServletRequest req, UUID tenantId, UUID userId) {
         InetAddress ip = extractClientIp(req);
@@ -42,38 +47,49 @@ public class ClientContext {
         return new ClientContext(tenantId, ip, userAgent, tlsFingerprint, userId, sessionId);
     }
 
-    private static InetAddress extractClientIp(HttpServletRequest req) {
-        // Check X-Forwarded-For header (behind proxy)
-        String xForwardedFor = req.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-            String clientIp = xForwardedFor.split(",")[0].trim();
-            try {
-                return InetAddress.getByName(clientIp);
-            } catch (UnknownHostException e) {
-                // Fall through to other methods
-            }
-        }
+    /**
+     * The container-resolved peer address only. {@code server.forward-headers-strategy=native} with
+     * the Tomcat remote-ip valve (application.yml) already replaces {@code getRemoteAddr()} with
+     * the real client address when, and only when, the direct peer is a trusted proxy, so
+     * X-Forwarded-For / X-Real-IP are never read here: they are client-controlled. The value is
+     * parsed as a literal IP, never resolved as a hostname (no DNS lookup).
+     */
+    static InetAddress extractClientIp(HttpServletRequest req) {
+        InetAddress ip = parseLiteralIp(req.getRemoteAddr());
+        return ip != null ? ip : InetAddress.getLoopbackAddress();
+    }
 
-        // Check X-Real-IP header (Nginx)
-        String xRealIp = req.getHeader("X-Real-IP");
-        if (xRealIp != null && !xRealIp.isEmpty()) {
-            try {
-                return InetAddress.getByName(xRealIp);
-            } catch (UnknownHostException e) {
-                // Fall through
-            }
-        }
+    private static final Pattern IPV4 =
+            Pattern.compile("^(25[0-5]|2[0-4]\\d|1?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|1?\\d?\\d)){3}$");
+    private static final Pattern IPV6_CHARS = Pattern.compile("^[0-9a-fA-F:.]+$");
 
-        // Fall back to remote address
+    /**
+     * Parse an IPv4/IPv6 literal without ever touching DNS; null for anything else (hostnames,
+     * junk, null). {@code InetAddress.getByName} only skips the resolver for literals, so the
+     * syntax is checked first.
+     */
+    static InetAddress parseLiteralIp(String raw) {
+        if (raw == null) {
+            return null;
+        }
+        String s = raw.trim();
+        if (s.startsWith("[") && s.endsWith("]")) {
+            s = s.substring(1, s.length() - 1);
+        }
+        int zone = s.indexOf('%');
+        if (zone >= 0) {
+            s = s.substring(0, zone);
+        }
+        boolean v6 = s.indexOf(':') >= 0;
+        if (s.isEmpty()
+                || s.length() > 45
+                || !(v6 ? IPV6_CHARS.matcher(s).matches() : IPV4.matcher(s).matches())) {
+            return null;
+        }
         try {
-            return InetAddress.getByName(req.getRemoteAddr());
-        } catch (UnknownHostException e) {
-            // Should not happen, but fallback to localhost
-            try {
-                return InetAddress.getByName("127.0.0.1");
-            } catch (UnknownHostException ex) {
-                throw new RuntimeException("Failed to parse client IP", ex);
-            }
+            return InetAddress.getByName(s);
+        } catch (java.net.UnknownHostException e) {
+            return null;
         }
     }
 
@@ -102,11 +118,16 @@ public class ClientContext {
 
     @Override
     public String toString() {
-        return "ClientContext{" +
-                "tenantId=" + tenantId +
-                ", ip=" + ip +
-                ", userId=" + userId +
-                ", userAgent='" + (userAgent.length() > 50 ? userAgent.substring(0, 50) + "..." : userAgent) + '\'' +
-                '}';
+        return "ClientContext{"
+                + "tenantId="
+                + tenantId
+                + ", ip="
+                + ip
+                + ", userId="
+                + userId
+                + ", userAgent='"
+                + (userAgent.length() > 50 ? userAgent.substring(0, 50) + "..." : userAgent)
+                + '\''
+                + '}';
     }
 }

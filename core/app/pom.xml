@@ -99,6 +99,10 @@
     </dependency>
     <dependency>
       <groupId>com.agenticai</groupId>
+      <artifactId>agents-memory</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
       <artifactId>approval</artifactId>
     </dependency>
     <dependency>
@@ -396,6 +400,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
+          <!-- redteam scenarios whose fix has not landed can be tagged pending-fix:<package> and excluded here until it merges -->
           <excludedGroups>integration</excludedGroups>
         </configuration>
       </plugin>

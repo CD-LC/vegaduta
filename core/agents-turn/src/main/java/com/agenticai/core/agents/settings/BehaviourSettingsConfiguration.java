@@ -35,21 +35,25 @@ class BehaviourSettingsConfiguration {
             ObjectProvider<ToolLoopProperties> toolLoop,
             ObjectProvider<RoutingSimpleProperties> routing,
             ObjectProvider<MemoryLimitsProperties> memory,
+            ObjectProvider<com.agenticai.core.agents.memory.EpisodicMemoryProperties> episodic,
             ObjectProvider<GuardrailTuningProperties> guardrails,
             ObjectProvider<AuxiliaryModelProperties> auxiliary) {
         return new BehaviourSettingsCatalog(
-                approvalContinuation.getIfAvailable(ApprovalContinuationProperties::new),
-                approvalExpiry.getIfAvailable(ApprovalExpiryProperties::new),
-                finish.getIfAvailable(ChatFinishProperties::new),
-                retry.getIfAvailable(LlmRetryProperties::new),
-                cache.getIfAvailable(ChatCacheProperties::new),
-                followUp.getIfAvailable(FollowUpProperties::new),
-                continuation.getIfAvailable(ContinuationProperties::new),
-                toolLoop.getIfAvailable(ToolLoopProperties::new),
-                routing.getIfAvailable(RoutingSimpleProperties::new),
-                memory.getIfAvailable(MemoryLimitsProperties::new),
-                guardrails.getIfAvailable(GuardrailTuningProperties::new),
-                auxiliary.getIfAvailable(AuxiliaryModelProperties::new));
+                        approvalContinuation.getIfAvailable(ApprovalContinuationProperties::new),
+                        approvalExpiry.getIfAvailable(ApprovalExpiryProperties::new),
+                        finish.getIfAvailable(ChatFinishProperties::new),
+                        retry.getIfAvailable(LlmRetryProperties::new),
+                        cache.getIfAvailable(ChatCacheProperties::new),
+                        followUp.getIfAvailable(FollowUpProperties::new),
+                        continuation.getIfAvailable(ContinuationProperties::new),
+                        toolLoop.getIfAvailable(ToolLoopProperties::new),
+                        routing.getIfAvailable(RoutingSimpleProperties::new),
+                        memory.getIfAvailable(MemoryLimitsProperties::new),
+                        guardrails.getIfAvailable(GuardrailTuningProperties::new),
+                        auxiliary.getIfAvailable(AuxiliaryModelProperties::new))
+                .withEpisodic(
+                        episodic.getIfAvailable(
+                                com.agenticai.core.agents.memory.EpisodicMemoryProperties::new));
     }
 
     @Bean

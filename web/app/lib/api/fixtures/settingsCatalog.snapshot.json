@@ -387,6 +387,48 @@
     "docsAnchor" : "behaviour-settings",
     "platformProperty" : "app.routing.simple.max-clauses"
   }, {
+    "key" : "memory.recall.enabled",
+    "group" : "memory",
+    "labelKey" : "settings.memory.recall.enabled.label",
+    "descriptionKey" : "settings.memory.recall.enabled.description",
+    "helpKey" : "settings.memory.recall.enabled.help",
+    "type" : "bool",
+    "risk" : "low",
+    "scopes" : [ "tenant", "agent" ],
+    "default" : true,
+    "minRole" : "EDITOR",
+    "restartRequired" : false,
+    "docsAnchor" : "behaviour-settings",
+    "platformProperty" : "app.memory.limits.recall-enabled"
+  }, {
+    "key" : "memory.write.enabled",
+    "group" : "memory",
+    "labelKey" : "settings.memory.write.enabled.label",
+    "descriptionKey" : "settings.memory.write.enabled.description",
+    "helpKey" : "settings.memory.write.enabled.help",
+    "type" : "bool",
+    "risk" : "low",
+    "scopes" : [ "tenant", "agent" ],
+    "default" : true,
+    "minRole" : "EDITOR",
+    "restartRequired" : false,
+    "docsAnchor" : "behaviour-settings",
+    "platformProperty" : "app.memory.limits.write-enabled"
+  }, {
+    "key" : "memory.episodic.enabled",
+    "group" : "memory",
+    "labelKey" : "settings.memory.episodic.enabled.label",
+    "descriptionKey" : "settings.memory.episodic.enabled.description",
+    "helpKey" : "settings.memory.episodic.enabled.help",
+    "type" : "bool",
+    "risk" : "low",
+    "scopes" : [ "tenant", "agent" ],
+    "default" : false,
+    "minRole" : "EDITOR",
+    "restartRequired" : false,
+    "docsAnchor" : "behaviour-settings",
+    "platformProperty" : "app.memory.episodic.enabled"
+  }, {
     "key" : "memory.recall.agentTopK",
     "group" : "memory",
     "labelKey" : "settings.memory.recall.agentTopK.label",
@@ -886,6 +928,34 @@
     "restartRequired" : false,
     "docsAnchor" : "behaviour-settings",
     "platformProperty" : "app.skills.prompt.max-block-chars"
+  }, {
+    "key" : "memory.unified.enabled",
+    "group" : "memory",
+    "labelKey" : "settings.memory.unified.enabled.label",
+    "descriptionKey" : "settings.memory.unified.enabled.description",
+    "helpKey" : "settings.memory.unified.enabled.help",
+    "type" : "bool",
+    "risk" : "low",
+    "scopes" : [ "tenant", "agent" ],
+    "default" : false,
+    "minRole" : "EDITOR",
+    "restartRequired" : false,
+    "docsAnchor" : "behaviour-settings",
+    "platformProperty" : "app.memory.unified.enabled"
+  }, {
+    "key" : "memory.competence.enabled",
+    "group" : "memory",
+    "labelKey" : "settings.memory.competence.enabled.label",
+    "descriptionKey" : "settings.memory.competence.enabled.description",
+    "helpKey" : "settings.memory.competence.enabled.help",
+    "type" : "bool",
+    "risk" : "low",
+    "scopes" : [ "tenant", "agent" ],
+    "default" : false,
+    "minRole" : "EDITOR",
+    "restartRequired" : false,
+    "docsAnchor" : "behaviour-settings",
+    "platformProperty" : "app.memory.competence.enabled"
   }, {
     "key" : "chat.prompt.profile",
     "group" : "chat",

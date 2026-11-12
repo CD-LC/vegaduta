@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.agenticai</groupId>
+    <artifactId>core</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>agents-memory</artifactId>
+  <name>agents-memory</name>
+  <description>
+    Unified agent memory (ADR-0028), package com.agenticai.core.agents.memorystore: the
+    feature gate (platform AND tenant AND agent, default OFF), the recall composer that merges
+    every registered MemoryRecallSource under one token budget, and the proposal policy/sink
+    (proposals only, never ACTIVE). Depends on agents (the memory.spi ports) and nothing in the
+    turn path: it must not depend on agents-turn, which depends on the spi instead and
+    contributes SemanticMemorySource. WP3 adds the store for the new kinds (tables V681/V682, raw JDBC
+    in the tenant schema): MemoryItemStore (recall source), StoreMemoryProposalSink (PENDING or QUARANTINED
+    rows only) and MemoryItemReviewService (the only path to TRUSTED + ACTIVE, human actor required).
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents</artifactId>
+    </dependency>
+    <!-- SettingsResolver and SettingsContributor for the memory.unified.enabled tenant/agent levels (settings depends
+         only on security and audit). -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>settings</artifactId>
+    </dependency>
+    <!-- TenantContext (fail-closed tenant check) and TenantSchemaResolver (the tenant schema the raw-JDBC
+         tables are qualified with). Neither depends on agents-memory. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>tenancy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-jdbc</artifactId>
+    </dependency>
+    <!-- The WP6 REST surface (@RestController). The jobs/worker shapes exclude @RestController
+         beans from their component scan, so this does not turn them into web apps. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.tngtech.archunit</groupId>
+      <artifactId>archunit-junit5</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

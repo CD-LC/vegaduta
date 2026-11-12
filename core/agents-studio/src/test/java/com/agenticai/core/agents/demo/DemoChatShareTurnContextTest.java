@@ -100,6 +100,8 @@ class DemoChatShareTurnContextTest {
         assertEquals("s-1", context.getValue().sessionId());
         assertEquals("demo:" + sessionUuid, request.getValue().subjectKey());
         assertNotNull(context.getValue().requestId());
+        org.junit.jupiter.api.Assertions.assertEquals(
+                java.util.List.of("inbound:demo_chat"), context.getValue().taint().sources());
     }
 
     @Test
@@ -129,5 +131,7 @@ class DemoChatShareTurnContextTest {
         assertEquals(agentId, context.getValue().requestedAgentId());
         assertEquals(request.getValue().sessionId(), context.getValue().sessionId());
         assertEquals("demo:" + sessionUuid, request.getValue().subjectKey());
+        org.junit.jupiter.api.Assertions.assertEquals(
+                java.util.List.of("inbound:demo_share"), context.getValue().taint().sources());
     }
 }

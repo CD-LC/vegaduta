@@ -104,4 +104,13 @@ class ChatStructuredCallTurnContextTest {
         assertNull(context.tenant());
         assertEquals(agentId, context.requestedAgentId());
     }
+
+    @Test
+    void aStructuredCallersTurnIsTainted() {
+        invoke();
+
+        TurnContext context = captured();
+        org.junit.jupiter.api.Assertions.assertTrue(context.taint().isTainted());
+        assertEquals(java.util.List.of("inbound:workflow"), context.taint().sources());
+    }
 }

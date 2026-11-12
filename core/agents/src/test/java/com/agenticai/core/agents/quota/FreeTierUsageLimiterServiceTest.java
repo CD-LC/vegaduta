@@ -5,10 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -23,15 +21,13 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
 /**
- * Covers the single rolling-30-day token window (post-2026-09-26
- * simplification - the message-count and daily-token windows were removed;
- * see the service's class javadoc): {@link
- * FreeTierUsageLimiterService#checkAndReserveTokenBudget} atomically reserves
- * a conservative token estimate ({@code maxTokens + tokenReservationPromptEstimate})
- * against the monthly window before comparing against the cap - undoing the
- * reservation before throwing if the window would go over - and {@link
- * FreeTierUsageLimiterService#reconcileTokenReservation} corrects it to the
- * real total once known.
+ * Covers the single rolling-30-day token window (post-2026-09-26 simplification - the message-count
+ * and daily-token windows were removed; see the service's class javadoc): {@link
+ * FreeTierUsageLimiterService#checkAndReserveTokenBudget} atomically reserves a conservative token
+ * estimate ({@code maxTokens + tokenReservationPromptEstimate}) against the monthly window before
+ * comparing against the cap - undoing the reservation before throwing if the window would go over -
+ * and {@link FreeTierUsageLimiterService#reconcileTokenReservation} corrects it to the real total
+ * once known.
  */
 class FreeTierUsageLimiterServiceTest {
 
@@ -57,43 +53,61 @@ class FreeTierUsageLimiterServiceTest {
         // PerUserBudgetServiceTest#setUp.
         when(settings.getLong(anyString(), anyLong())).thenAnswer(inv -> inv.getArgument(1));
         when(settings.getInt(anyString(), anyInt())).thenAnswer(inv -> inv.getArgument(1));
-        service = new FreeTierUsageLimiterService(
-            redisTemplate, settings, MONTHLY_TOKEN_LIMIT, 2, 3,
-            new SimpleMeterRegistry(), PROMPT_ESTIMATE, 0L, mock(ObjectProvider.class));
+        service =
+                new FreeTierUsageLimiterService(
+                        redisTemplate,
+                        settings,
+                        MONTHLY_TOKEN_LIMIT,
+                        2,
+                        3,
+                        new SimpleMeterRegistry(),
+                        PROMPT_ESTIMATE,
+                        0L,
+                        mock(ObjectProvider.class));
     }
 
     @Test
     void reservesMaxTokensPlusPromptEstimateAtomicallyWhenUnderCap() {
         // maxTokens=1000 + promptEstimate=2000 = 3000 reservation, well under the cap.
-        when(valueOps.increment(anyString(), eq(3000L))).thenReturn(3000L);
+        SpendCounterMocks.stub(redisTemplate, "", 3000L, (Long) (long) (3000L));
 
         long reserved = service.checkAndReserveTokenBudget(TENANT, TenantPlan.FREE, 1000);
 
         assertThat(reserved).isEqualTo(3000L);
-        verify(valueOps).increment(contains("monthly-tokens"), eq(3000L));
-        // First write to the window - expiry set once, on the write that created the key.
-        verify(redisTemplate).expire(contains("monthly-tokens"), eq(java.time.Duration.ofDays(30)));
+        SpendCounterMocks.verifyAdded(redisTemplate, "monthly-tokens", 3000L);
+        // The expiry (30 days, in millis) is set by the same atomic script that adds, not by a
+        // second command.
+        verify(redisTemplate)
+                .execute(
+                        eq(com.agenticai.core.security.SpendCounters.INCR_WITH_TTL),
+                        org.mockito.ArgumentMatchers.anyList(),
+                        eq("3000"),
+                        eq("2592000000"));
     }
 
     @Test
     void undoesTheReservationAndThrowsWhenTheMonthlyCapWouldBeExceeded() {
         long reservation = 3000L;
-        when(valueOps.increment(contains("monthly-tokens"), eq(reservation))).thenReturn(MONTHLY_TOKEN_LIMIT + 5000);
+        SpendCounterMocks.stub(
+                redisTemplate,
+                "monthly-tokens",
+                reservation,
+                (Long) (long) (MONTHLY_TOKEN_LIMIT + 5000));
 
         assertThatThrownBy(() -> service.checkAndReserveTokenBudget(TENANT, TenantPlan.FREE, 1000))
-            .isInstanceOf(TenantLimitExceededException.class)
-            .hasMessageContaining("monthly token limit");
+                .isInstanceOf(TenantLimitExceededException.class)
+                .hasMessageContaining("monthly token limit");
 
         // The reservation is undone - a rejected call must not be left stuck
         // against the cap.
-        verify(valueOps).increment(contains("monthly-tokens"), eq(-reservation));
+        SpendCounterMocks.verifyAdded(redisTemplate, "monthly-tokens", -reservation);
     }
 
     @Test
     void premiumPlanDoublesTheEffectiveMonthlyTokenLimit() {
         long reservation = 3000L;
         // Over the FREE cap (400,000) but under PREMIUM's doubled 800,000 cap.
-        when(valueOps.increment(anyString(), eq(reservation))).thenReturn(500_000L);
+        SpendCounterMocks.stub(redisTemplate, "", reservation, (Long) (long) (500_000L));
 
         long reserved = service.checkAndReserveTokenBudget(TENANT, TenantPlan.PREMIUM, 1000);
 
@@ -104,7 +118,7 @@ class FreeTierUsageLimiterServiceTest {
     void unlimitedPlanTriplesTheEffectiveMonthlyTokenLimit() {
         long reservation = 3000L;
         // Over PREMIUM's 800,000 but under UNLIMITED's tripled 1,200,000 cap.
-        when(valueOps.increment(anyString(), eq(reservation))).thenReturn(900_000L);
+        SpendCounterMocks.stub(redisTemplate, "", reservation, (Long) (long) (900_000L));
 
         long reserved = service.checkAndReserveTokenBudget(TENANT, TenantPlan.UNLIMITED, 1000);
 
@@ -113,7 +127,6 @@ class FreeTierUsageLimiterServiceTest {
 
     @Test
     void failsOpenAndReservesNothingOnARedisOutage() {
-        when(valueOps.increment(anyString(), anyLong())).thenReturn(null);
 
         long reserved = service.checkAndReserveTokenBudget(TENANT, TenantPlan.FREE, 1000);
 
@@ -124,14 +137,22 @@ class FreeTierUsageLimiterServiceTest {
     void zeroReservationIsANoOpThatNeverTouchesRedis() {
         // A service configured with no prompt-estimate buffer and a caller
         // requesting maxTokens=0 - nothing to reserve.
-        FreeTierUsageLimiterService zeroEstimateService = new FreeTierUsageLimiterService(
-            redisTemplate, settings, MONTHLY_TOKEN_LIMIT, 2, 3,
-            new SimpleMeterRegistry(), 0L, 0L, mock(ObjectProvider.class));
+        FreeTierUsageLimiterService zeroEstimateService =
+                new FreeTierUsageLimiterService(
+                        redisTemplate,
+                        settings,
+                        MONTHLY_TOKEN_LIMIT,
+                        2,
+                        3,
+                        new SimpleMeterRegistry(),
+                        0L,
+                        0L,
+                        mock(ObjectProvider.class));
 
         long reserved = zeroEstimateService.checkAndReserveTokenBudget(TENANT, TenantPlan.FREE, 0);
 
         assertThat(reserved).isZero();
-        verify(valueOps, never()).increment(anyString(), anyLong());
+        SpendCounterMocks.verifyNothingAdded(redisTemplate);
     }
 
     // ---- reconcileTokenReservation ------------------------------------------
@@ -142,14 +163,14 @@ class FreeTierUsageLimiterServiceTest {
         // over-reservation back.
         service.reconcileTokenReservation(TENANT, 3000L, 1200L);
 
-        verify(valueOps).increment(contains("monthly-tokens"), eq(-1800L));
+        SpendCounterMocks.verifyAdded(redisTemplate, "monthly-tokens", -1800L);
     }
 
     @Test
     void reconcileIsANoOpWhenActualMatchesReservedExactly() {
         service.reconcileTokenReservation(TENANT, 3000L, 3000L);
 
-        verify(valueOps, never()).increment(anyString(), anyLong());
+        SpendCounterMocks.verifyNothingAdded(redisTemplate);
     }
 
     @Test
@@ -159,13 +180,13 @@ class FreeTierUsageLimiterServiceTest {
         // still be recorded via the plain additive path, not silently dropped.
         service.reconcileTokenReservation(TENANT, 0L, 1500L);
 
-        verify(valueOps).increment(contains("monthly-tokens"), eq(1500L));
+        SpendCounterMocks.verifyAdded(redisTemplate, "monthly-tokens", 1500L);
     }
 
     @Test
     void reconcileWithNothingReservedAndZeroActualTokensDoesNothing() {
         service.reconcileTokenReservation(TENANT, 0L, 0L);
 
-        verify(valueOps, never()).increment(anyString(), anyLong());
+        SpendCounterMocks.verifyNothingAdded(redisTemplate);
     }
 }

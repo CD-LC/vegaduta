@@ -1563,11 +1563,51 @@ export class AgentMemoryApi {
   }
 
   /**
+   * Shared memories.
+   * `GET /api/agents/{agentId}/memories/shared`
+   */
+  sharedMemories(agentId: string, options: CallOptions<{ subjectKey: string; limit?: number; offset?: number }, HeaderParams> & { query: { subjectKey: string; limit?: number; offset?: number } }): Promise<T.TenantMemoryEntry[]> {
+    return this.http.request<T.TenantMemoryEntry[]>({ ...options, method: "GET", path: `/api/agents/${encodeURIComponent(String(agentId))}/memories/shared` });
+  }
+
+  /**
+   * Approve shared memory.
+   * `POST /api/agents/{agentId}/memories/shared/{memoryId}/approve`
+   */
+  approveSharedMemory(agentId: string, memoryId: string, options?: CallOptions<{ subjectKey?: string }, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/memories/shared/${encodeURIComponent(String(memoryId))}/approve`, response: "void" });
+  }
+
+  /**
+   * Reject shared memory.
+   * `POST /api/agents/{agentId}/memories/shared/{memoryId}/reject`
+   */
+  rejectSharedMemory(agentId: string, memoryId: string, options: CallOptions<{ subjectKey: string }, { "Idempotency-Key"?: string }> & { query: { subjectKey: string } }): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/memories/shared/${encodeURIComponent(String(memoryId))}/reject`, response: "void" });
+  }
+
+  /**
    * Forget memory.
    * `DELETE /api/agents/{agentId}/memories/{memoryId}`
    */
   forgetMemory(agentId: string, memoryId: string, options?: CallOptions): Promise<void> {
     return this.http.request<void>({ ...options, method: "DELETE", path: `/api/agents/${encodeURIComponent(String(agentId))}/memories/${encodeURIComponent(String(memoryId))}`, response: "void" });
+  }
+
+  /**
+   * Approve memory.
+   * `POST /api/agents/{agentId}/memories/{memoryId}/approve`
+   */
+  approveMemory(agentId: string, memoryId: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/memories/${encodeURIComponent(String(memoryId))}/approve`, response: "void" });
+  }
+
+  /**
+   * Reject memory.
+   * `POST /api/agents/{agentId}/memories/{memoryId}/reject`
+   */
+  rejectMemory(agentId: string, memoryId: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/memories/${encodeURIComponent(String(memoryId))}/reject`, response: "void" });
   }
 }
 
@@ -1718,8 +1758,44 @@ export class AgentScratchpadApi {
    * Read.
    * `GET /api/agents/{agentId}/scratchpad/{key}`
    */
-  read(agentId: string, key: string, options?: CallOptions<{ session?: string }, HeaderParams>): Promise<T.ScratchpadNoteView> {
+  read(agentId: string, key: string, options?: CallOptions<{ session?: string; subject?: string }, HeaderParams>): Promise<T.ScratchpadNoteView> {
     return this.http.request<T.ScratchpadNoteView>({ ...options, method: "GET", path: `/api/agents/${encodeURIComponent(String(agentId))}/scratchpad/${encodeURIComponent(String(key))}` });
+  }
+}
+
+export class AgentScratchpadQuarantineApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * List.
+   * `GET /api/agents/{agentId}/scratchpad-quarantine`
+   */
+  list(agentId: string, options?: CallOptions<{ limit?: number; offset?: number }, HeaderParams>): Promise<T.QuarantinedNoteView[]> {
+    return this.http.request<T.QuarantinedNoteView[]>({ ...options, method: "GET", path: `/api/agents/${encodeURIComponent(String(agentId))}/scratchpad-quarantine` });
+  }
+
+  /**
+   * Approve.
+   * `POST /api/agents/{agentId}/scratchpad-quarantine/{key}/approve`
+   *
+   * Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
+   */
+  approve(agentId: string, key: string, options?: CallOptions<{ sessionId?: string; subject?: string }, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/scratchpad-quarantine/${encodeURIComponent(String(key))}/approve`, response: "void" });
+  }
+
+  /**
+   * Reject.
+   * `POST /api/agents/{agentId}/scratchpad-quarantine/{key}/reject`
+   *
+   * Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
+   */
+  reject(agentId: string, key: string, options?: CallOptions<{ sessionId?: string; subject?: string }, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/scratchpad-quarantine/${encodeURIComponent(String(key))}/reject`, response: "void" });
   }
 }
 
@@ -4070,6 +4146,34 @@ export class DataTableApi {
    */
   importCsv(table: string, body: FormData, options?: CallOptions): Promise<T.DataTableDtos_ImportResult> {
     return this.http.request<T.DataTableDtos_ImportResult>({ ...options, method: "POST", path: `/api/data-tables/${encodeURIComponent(String(table))}/import`, body, bodyType: "multipart" });
+  }
+
+  /**
+   * Quarantined.
+   * `GET /api/data-tables/{table}/quarantine`
+   */
+  quarantined(table: string, options?: CallOptions<{ limit?: number; offset?: number }, HeaderParams>): Promise<T.DataTableDtos_QuarantinedRowView[]> {
+    return this.http.request<T.DataTableDtos_QuarantinedRowView[]>({ ...options, method: "GET", path: `/api/data-tables/${encodeURIComponent(String(table))}/quarantine` });
+  }
+
+  /**
+   * Approve quarantined.
+   * `POST /api/data-tables/{table}/quarantine/{rowId}/approve`
+   *
+   * Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
+   */
+  approveQuarantined(table: string, rowId: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/data-tables/${encodeURIComponent(String(table))}/quarantine/${encodeURIComponent(String(rowId))}/approve`, response: "void" });
+  }
+
+  /**
+   * Reject quarantined.
+   * `POST /api/data-tables/{table}/quarantine/{rowId}/reject`
+   *
+   * Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
+   */
+  rejectQuarantined(table: string, rowId: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/data-tables/${encodeURIComponent(String(table))}/quarantine/${encodeURIComponent(String(rowId))}/reject`, response: "void" });
   }
 
   /**
@@ -6955,6 +7059,64 @@ export class KnowledgeIngestionJobApi {
   }
 }
 
+export class KnowledgeQuarantineApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * List.
+   * `GET /api/knowledge/quarantine`
+   *
+   * Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
+   */
+  list(options?: CallOptions<{ collectionId?: string; limit?: number }, HeaderParams>): Promise<T.KnowledgeQuarantineService_QuarantinedChunk[]> {
+    return this.http.request<T.KnowledgeQuarantineService_QuarantinedChunk[]>({ ...options, method: "GET", path: "/api/knowledge/quarantine" });
+  }
+
+  /**
+   * Approve note.
+   * `POST /api/knowledge/quarantine/notes/approve`
+   *
+   * Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
+   */
+  approveNote(options: CallOptions<{ collectionId: string; source: string }, { "Idempotency-Key"?: string }> & { query: { collectionId: string; source: string } }): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: "/api/knowledge/quarantine/notes/approve", response: "void" });
+  }
+
+  /**
+   * Reject note.
+   * `POST /api/knowledge/quarantine/notes/reject`
+   *
+   * Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
+   */
+  rejectNote(options: CallOptions<{ collectionId: string; source: string }, { "Idempotency-Key"?: string }> & { query: { collectionId: string; source: string } }): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: "/api/knowledge/quarantine/notes/reject", response: "void" });
+  }
+
+  /**
+   * Approve.
+   * `POST /api/knowledge/quarantine/{chunkId}/approve`
+   *
+   * Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
+   */
+  approve(chunkId: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/knowledge/quarantine/${encodeURIComponent(String(chunkId))}/approve`, response: "void" });
+  }
+
+  /**
+   * Reject.
+   * `POST /api/knowledge/quarantine/{chunkId}/reject`
+   *
+   * Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
+   */
+  reject(chunkId: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/knowledge/quarantine/${encodeURIComponent(String(chunkId))}/reject`, response: "void" });
+  }
+}
+
 export class KnowledgeRagSettingsApi {
   private readonly http: HttpClient;
 
@@ -8032,6 +8194,102 @@ export class MemoryImportApi {
    */
   preview(body: T.MemoryImportDtos_PreviewRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.MemoryImportDtos_PreviewResponse> {
     return this.http.request<T.MemoryImportDtos_PreviewResponse>({ ...options, method: "POST", path: "/api/memory/import/preview", body });
+  }
+}
+
+export class MemoryItemApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * List.
+   * `GET /api/agents/{agentId}/memory-items`
+   */
+  list(agentId: string, options?: CallOptions<{ status?: string; kind?: string; limit?: number }, HeaderParams>): Promise<T.MemoryItemController_ItemView[]> {
+    return this.http.request<T.MemoryItemController_ItemView[]>({ ...options, method: "GET", path: `/api/agents/${encodeURIComponent(String(agentId))}/memory-items` });
+  }
+
+  /**
+   * Get.
+   * `GET /api/agents/{agentId}/memory-items/{itemId}`
+   */
+  get(agentId: string, itemId: string, options?: CallOptions): Promise<T.MemoryItemController_DetailView> {
+    return this.http.request<T.MemoryItemController_DetailView>({ ...options, method: "GET", path: `/api/agents/${encodeURIComponent(String(agentId))}/memory-items/${encodeURIComponent(String(itemId))}` });
+  }
+
+  /**
+   * Erase.
+   * `DELETE /api/agents/{agentId}/memory-items/{itemId}`
+   */
+  erase(agentId: string, itemId: string, options?: CallOptions): Promise<void> {
+    return this.http.request<void>({ ...options, method: "DELETE", path: `/api/agents/${encodeURIComponent(String(agentId))}/memory-items/${encodeURIComponent(String(itemId))}`, response: "void" });
+  }
+
+  /**
+   * Edit.
+   * `PATCH /api/agents/{agentId}/memory-items/{itemId}`
+   */
+  edit(agentId: string, itemId: string, body?: T.MemoryItemController_EditRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.MemoryItemController_ItemView> {
+    return this.http.request<T.MemoryItemController_ItemView>({ ...options, method: "PATCH", path: `/api/agents/${encodeURIComponent(String(agentId))}/memory-items/${encodeURIComponent(String(itemId))}`, body });
+  }
+
+  /**
+   * Approve.
+   * `POST /api/agents/{agentId}/memory-items/{itemId}/approve`
+   */
+  approve(agentId: string, itemId: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/memory-items/${encodeURIComponent(String(itemId))}/approve`, response: "void" });
+  }
+
+  /**
+   * Pin.
+   * `POST /api/agents/{agentId}/memory-items/{itemId}/pin`
+   */
+  pin(agentId: string, itemId: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/memory-items/${encodeURIComponent(String(itemId))}/pin`, response: "void" });
+  }
+
+  /**
+   * Unpin.
+   * `DELETE /api/agents/{agentId}/memory-items/{itemId}/pin`
+   */
+  unpin(agentId: string, itemId: string, options?: CallOptions): Promise<void> {
+    return this.http.request<void>({ ...options, method: "DELETE", path: `/api/agents/${encodeURIComponent(String(agentId))}/memory-items/${encodeURIComponent(String(itemId))}/pin`, response: "void" });
+  }
+
+  /**
+   * Reject.
+   * `POST /api/agents/{agentId}/memory-items/{itemId}/reject`
+   */
+  reject(agentId: string, itemId: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/memory-items/${encodeURIComponent(String(itemId))}/reject`, response: "void" });
+  }
+
+  /**
+   * Revert.
+   * `POST /api/agents/{agentId}/memory-items/{itemId}/revert`
+   */
+  revert(agentId: string, itemId: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/memory-items/${encodeURIComponent(String(itemId))}/revert`, response: "void" });
+  }
+}
+
+export class MemoryItemExportApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * Export.
+   * `GET /api/memory-items/export`
+   */
+  export(options?: CallOptions<{ limit?: number }, HeaderParams>): Promise<T.MemoryItemExportController_ExportView> {
+    return this.http.request<T.MemoryItemExportController_ExportView>({ ...options, method: "GET", path: "/api/memory-items/export" });
   }
 }
 
@@ -14231,6 +14489,14 @@ export class UserMemoryApi {
   }
 
   /**
+   * Approve shared fact.
+   * `POST /api/memory/facts/shared/{id}/approve`
+   */
+  approveSharedFact(id: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/memory/facts/shared/${encodeURIComponent(String(id))}/approve`, response: "void" });
+  }
+
+  /**
    * Delete fact.
    * `DELETE /api/memory/facts/{scope}/{id}`
    */
@@ -15901,6 +16167,7 @@ export class VegadutaClient {
   readonly agentRuntimeLimits: AgentRuntimeLimitsApi;
   readonly agentSchedule: AgentScheduleApi;
   readonly agentScratchpad: AgentScratchpadApi;
+  readonly agentScratchpadQuarantine: AgentScratchpadQuarantineApi;
   readonly agentSessionLlmRequest: AgentSessionLlmRequestApi;
   readonly agentSessionLlmUsage: AgentSessionLlmUsageApi;
   readonly agentSettings: AgentSettingsApi;
@@ -16015,6 +16282,7 @@ export class VegadutaClient {
   readonly knowledgeCollection: KnowledgeCollectionApi;
   readonly knowledgeConnector: KnowledgeConnectorApi;
   readonly knowledgeIngestionJob: KnowledgeIngestionJobApi;
+  readonly knowledgeQuarantine: KnowledgeQuarantineApi;
   readonly knowledgeRagSettings: KnowledgeRagSettingsApi;
   readonly landingEvent: LandingEventApi;
   readonly lead: LeadApi;
@@ -16038,6 +16306,8 @@ export class VegadutaClient {
   readonly mcpToolPin: McpToolPinApi;
   readonly me: MeApi;
   readonly memoryImport: MemoryImportApi;
+  readonly memoryItem: MemoryItemApi;
+  readonly memoryItemExport: MemoryItemExportApi;
   readonly metaEmbeddedSignup: MetaEmbeddedSignupApi;
   readonly metaSocialCredential: MetaSocialCredentialApi;
   readonly metaSocialSend: MetaSocialSendApi;
@@ -16244,6 +16514,7 @@ export class VegadutaClient {
     this.agentRuntimeLimits = new AgentRuntimeLimitsApi(this.http);
     this.agentSchedule = new AgentScheduleApi(this.http);
     this.agentScratchpad = new AgentScratchpadApi(this.http);
+    this.agentScratchpadQuarantine = new AgentScratchpadQuarantineApi(this.http);
     this.agentSessionLlmRequest = new AgentSessionLlmRequestApi(this.http);
     this.agentSessionLlmUsage = new AgentSessionLlmUsageApi(this.http);
     this.agentSettings = new AgentSettingsApi(this.http);
@@ -16358,6 +16629,7 @@ export class VegadutaClient {
     this.knowledgeCollection = new KnowledgeCollectionApi(this.http);
     this.knowledgeConnector = new KnowledgeConnectorApi(this.http);
     this.knowledgeIngestionJob = new KnowledgeIngestionJobApi(this.http);
+    this.knowledgeQuarantine = new KnowledgeQuarantineApi(this.http);
     this.knowledgeRagSettings = new KnowledgeRagSettingsApi(this.http);
     this.landingEvent = new LandingEventApi(this.http);
     this.lead = new LeadApi(this.http);
@@ -16381,6 +16653,8 @@ export class VegadutaClient {
     this.mcpToolPin = new McpToolPinApi(this.http);
     this.me = new MeApi(this.http);
     this.memoryImport = new MemoryImportApi(this.http);
+    this.memoryItem = new MemoryItemApi(this.http);
+    this.memoryItemExport = new MemoryItemExportApi(this.http);
     this.metaEmbeddedSignup = new MetaEmbeddedSignupApi(this.http);
     this.metaSocialCredential = new MetaSocialCredentialApi(this.http);
     this.metaSocialSend = new MetaSocialSendApi(this.http);

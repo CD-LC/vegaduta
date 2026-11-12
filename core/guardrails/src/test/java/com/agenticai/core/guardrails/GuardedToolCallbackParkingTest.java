@@ -17,11 +17,11 @@ import com.agenticai.core.approval.ApprovalRequest;
 import com.agenticai.core.approval.HumanApprovalGateService;
 import com.agenticai.core.approval.ToolCallOrigin;
 import java.util.Set;
-import org.mockito.ArgumentCaptor;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 
@@ -49,7 +49,7 @@ class GuardedToolCallbackParkingTest {
         gate = mock(HumanApprovalGateService.class);
         guardrails = mock(GuardrailService.class);
         when(guardrails.sanitizeToolOutput(anyString(), anyString(), any()))
-            .thenAnswer(i -> i.getArgument(1));
+                .thenAnswer(i -> i.getArgument(1));
         state = new TurnApprovalState(SCOPED_MEMORY_ID);
         turn = new AtomicInteger();
     }
@@ -65,7 +65,7 @@ class GuardedToolCallbackParkingTest {
 
     private GuardedToolCallback guard(ToolCallback cb) {
         return new GuardedToolCallback(cb, turn, 10, guardrails, policy, gate, AGENT_ID, SESSION)
-            .withTurnApproval(state);
+                .withTurnApproval(state);
     }
 
     private ApprovalRequest pending() {
@@ -75,8 +75,18 @@ class GuardedToolCallbackParkingTest {
     }
 
     private void recordingReturns(ApprovalRequest... requests) {
-        var stub = when(gate.recordToolCallForApproval(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any()));
+        var stub =
+                when(
+                        gate.recordToolCallForApproval(
+                                anyString(),
+                                anyString(),
+                                anyString(),
+                                anyString(),
+                                anyString(),
+                                any(),
+                                anyString(),
+                                any(),
+                                any()));
         stub.thenReturn(requests[0], java.util.Arrays.copyOfRange(requests, 1, requests.length));
     }
 
@@ -102,8 +112,10 @@ class GuardedToolCallbackParkingTest {
         String result = guard(tool("send_invoice", "ran")).withApprovalParkTexts(texts).call("{}");
 
         assertTrue(result.contains("custom park text for send_invoice"), result);
-        assertTrue(result.contains(ApprovalParked.MARKER),
-            "a parked result carries the marker the tool loop reads to end the invocation: " + result);
+        assertTrue(
+                result.contains(ApprovalParked.MARKER),
+                "a parked result carries the marker the tool loop reads to end the invocation: "
+                        + result);
     }
 
     @Test
@@ -120,8 +132,16 @@ class GuardedToolCallbackParkingTest {
     @Test
     void aFailedRecordingGivesTheModelAnErrorResultAndDoesNotParkTheTurn() {
         when(gate.recordToolCallForApproval(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any()))
-            .thenThrow(new IllegalStateException("db down"));
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        any(),
+                        anyString(),
+                        any(),
+                        any()))
+                .thenThrow(new IllegalStateException("db down"));
         ToolCallback invoice = tool("send_invoice", "ran");
         ToolCallback other = tool("lookup", "found");
 
@@ -130,7 +150,9 @@ class GuardedToolCallbackParkingTest {
         assertTrue(result.contains("send_invoice"), result);
         assertTrue(result.contains("NOT executed"), result);
         assertTrue(result.toLowerCase().contains("could not be recorded"), result);
-        assertFalse(state.isParked(), "nothing is waiting for approval, so the turn must not be parked");
+        assertFalse(
+                state.isParked(),
+                "nothing is waiting for approval, so the turn must not be parked");
         verify(invoice, never()).call(anyString());
         // The turn is not stuck: a later tool in the same turn still runs.
         assertEquals("found", guard(other).call("{}"));
@@ -147,12 +169,22 @@ class GuardedToolCallbackParkingTest {
         String result = guard(sibling).call("{\"q\":\"x\"}");
 
         verify(sibling, never()).call(anyString());
-        verify(gate).recordToolCallForApproval(
-            eq("mcp_tool.lookup"), eq("lookup"), anyString(), eq("{\"q\":\"x\"}"),
-            anyString(), eq(AGENT_ID), eq(SESSION), any(), eq(SCOPED_MEMORY_ID));
+        verify(gate)
+                .recordToolCallForApproval(
+                        eq("mcp_tool.lookup"),
+                        eq("lookup"),
+                        anyString(),
+                        eq("{\"q\":\"x\"}"),
+                        anyString(),
+                        eq(AGENT_ID),
+                        eq(SESSION),
+                        any(),
+                        eq(SCOPED_MEMORY_ID));
         assertTrue(result.contains("lookup"), result);
-        assertTrue(result.contains(second.getId().toString()), "names the queued request: " + result);
-        assertTrue(result.contains("send_invoice"), "names the call it is waiting behind: " + result);
+        assertTrue(
+                result.contains(second.getId().toString()), "names the queued request: " + result);
+        assertTrue(
+                result.contains("send_invoice"), "names the call it is waiting behind: " + result);
         assertFalse(result.contains("STOP NOW"), result);
     }
 
@@ -165,8 +197,17 @@ class GuardedToolCallbackParkingTest {
         String firstTry = guard(sibling).call("{\"q\":\"x\"}");
         String secondTry = guard(sibling).call("{\"q\":\"x\"}");
 
-        verify(gate, times(2)).recordToolCallForApproval(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any());
+        verify(gate, times(2))
+                .recordToolCallForApproval(
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        any(),
+                        anyString(),
+                        any(),
+                        any());
         assertEquals(firstTry, secondTry);
     }
 
@@ -179,9 +220,20 @@ class GuardedToolCallbackParkingTest {
         guard(invoice).call("{\"to\":\"a\"}");
         String repeat = guard(invoice).call("{\"to\":\"a\"}");
 
-        verify(gate, times(1)).recordToolCallForApproval(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any());
-        assertTrue(repeat.contains(first.getId().toString()), "points at the request already waiting: " + repeat);
+        verify(gate, times(1))
+                .recordToolCallForApproval(
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        any(),
+                        anyString(),
+                        any(),
+                        any());
+        assertTrue(
+                repeat.contains(first.getId().toString()),
+                "points at the request already waiting: " + repeat);
         verify(invoice, never()).call(anyString());
     }
 
@@ -191,12 +243,24 @@ class GuardedToolCallbackParkingTest {
         guard(tool("send_invoice", "ran")).call("{}");
         ToolCallback plumbing = tool("search_tools", "matched");
 
-        String result = guard(plumbing).withQueueExcludedTools(Set.of("search_tools")).call("{\"query\":\"x\"}");
+        String result =
+                guard(plumbing)
+                        .withQueueExcludedTools(Set.of("search_tools"))
+                        .call("{\"query\":\"x\"}");
 
         // Only the parked call filed an approval; the plumbing call was refused unrecorded so an
         // approver never sees a request whose replay could not do anything.
-        verify(gate, times(1)).recordToolCallForApproval(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any());
+        verify(gate, times(1))
+                .recordToolCallForApproval(
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        any(),
+                        anyString(),
+                        any(),
+                        any());
         verify(plumbing, never()).call(anyString());
         assertTrue(result.contains("NOT executed"), result);
         assertTrue(result.contains("cannot be queued"), result);
@@ -207,13 +271,20 @@ class GuardedToolCallbackParkingTest {
     void aParkedOrQueuedResultCarriesTheMarkerTheToolLoopReadsToEndTheTurn() {
         recordingReturns(pending(), pending());
 
-        String parked = guard(tool("send_invoice", "ran")).call("{}");
-        String queued = guard(tool("lookup", "found")).call("{\"q\":\"x\"}");
+        GuardedToolCallback parkingGuard = guard(tool("send_invoice", "ran"));
+        GuardedToolCallback queuingGuard = guard(tool("lookup", "found"));
+        String parked = parkingGuard.call("{}");
+        String queued = queuingGuard.call("{\"q\":\"x\"}");
 
         assertTrue(ApprovalParked.isParked(parked), parked);
         assertTrue(ApprovalParked.isParked(queued), queued);
-        assertTrue(ToolResultMarker.classify(parked).orElseThrow() == ToolResultMarker.Kind.PARKED);
-        assertTrue(ToolResultMarker.isPlatformAnswer(queued));
+        assertTrue(
+                ToolResultMarker.classify(parked, parkingGuard.turnApprovalState().markerScope())
+                                .orElseThrow()
+                        == ToolResultMarker.Kind.PARKED);
+        assertTrue(
+                ToolResultMarker.kindOf(queued, queuingGuard.turnApprovalState().markerScope())
+                        .isPresent());
     }
 
     @Test
@@ -230,8 +301,17 @@ class GuardedToolCallbackParkingTest {
         }
 
         // 1 parked call + 2 queued siblings; the other three were refused without a record.
-        verify(gate, times(3)).recordToolCallForApproval(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any());
+        verify(gate, times(3))
+                .recordToolCallForApproval(
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        any(),
+                        anyString(),
+                        any(),
+                        any());
         assertTrue(last.contains("NOT executed"), last);
         assertTrue(last.toLowerCase().contains("not queued"), last);
     }
@@ -240,27 +320,63 @@ class GuardedToolCallbackParkingTest {
     void aTurnWithoutAnExplicitStateStillTracksParkingPerStepCounter() {
         recordingReturns(pending());
         GuardedToolCallback plain =
-            new GuardedToolCallback(tool("send_invoice", "ran"), turn, 10, guardrails, policy, gate, AGENT_ID, SESSION);
+                new GuardedToolCallback(
+                        tool("send_invoice", "ran"),
+                        turn,
+                        10,
+                        guardrails,
+                        policy,
+                        gate,
+                        AGENT_ID,
+                        SESSION);
 
         plain.call("{}");
 
         assertTrue(plain.turnApprovalState().isParked());
-        assertTrue(new GuardedToolCallback(
-            tool("lookup", "found"), turn, 10, guardrails, policy, gate, AGENT_ID, SESSION)
-            .turnApprovalState().isParked(), "tools of the same turn share the state through the step counter");
-        assertFalse(new GuardedToolCallback(
-            tool("lookup", "found"), new AtomicInteger(), 10, guardrails, policy, gate, AGENT_ID, SESSION)
-            .turnApprovalState().isParked());
+        assertTrue(
+                new GuardedToolCallback(
+                                tool("lookup", "found"),
+                                turn,
+                                10,
+                                guardrails,
+                                policy,
+                                gate,
+                                AGENT_ID,
+                                SESSION)
+                        .turnApprovalState()
+                        .isParked(),
+                "tools of the same turn share the state through the step counter");
+        assertFalse(
+                new GuardedToolCallback(
+                                tool("lookup", "found"),
+                                new AtomicInteger(),
+                                10,
+                                guardrails,
+                                policy,
+                                gate,
+                                AGENT_ID,
+                                SESSION)
+                        .turnApprovalState()
+                        .isParked());
     }
 
     @Test
     void theFallbackRegistryDoesNotKeepFinishedTurnsAlive() throws Exception {
         recordingReturns(pending());
         AtomicInteger finished = new AtomicInteger();
-        new GuardedToolCallback(tool("send_invoice", "ran"), finished, 10, guardrails, policy, gate, AGENT_ID, SESSION)
-            .call("{}");
+        new GuardedToolCallback(
+                        tool("send_invoice", "ran"),
+                        finished,
+                        10,
+                        guardrails,
+                        policy,
+                        gate,
+                        AGENT_ID,
+                        SESSION)
+                .call("{}");
         assertTrue(GuardedToolCallback.trackedTurnCount() >= 1);
-        java.lang.ref.WeakReference<AtomicInteger> ref = new java.lang.ref.WeakReference<>(finished);
+        java.lang.ref.WeakReference<AtomicInteger> ref =
+                new java.lang.ref.WeakReference<>(finished);
         finished = null;
 
         long deadline = System.nanoTime() + java.util.concurrent.TimeUnit.SECONDS.toNanos(10);
@@ -269,43 +385,76 @@ class GuardedToolCallbackParkingTest {
             Thread.sleep(20);
         }
 
-        assertEquals(null, ref.get(), "the turn's step counter must be collectable once the turn is over");
+        assertEquals(
+                null,
+                ref.get(),
+                "the turn's step counter must be collectable once the turn is over");
         assertEquals(0, GuardedToolCallback.trackedTurnCount());
     }
 
-    // ------------------------------------------------- the goal rides in the envelope (continuation)
+    // ------------------------------------------------- the goal rides in the envelope
+    // (continuation)
 
     private void originRecordingReturns(ApprovalRequest request) {
         when(gate.recordToolCallWithOrigin(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any()))
-            .thenReturn(request);
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        any(),
+                        anyString(),
+                        any(),
+                        any()))
+                .thenReturn(request);
     }
 
     @Test
     void aTurnThatKnowsItsGoalRecordsItWithWhoAskedSoTheTaskCanBeContinued() {
         UUID requested = UUID.randomUUID();
-        state = new TurnApprovalState(SCOPED_MEMORY_ID, "Send invoice INV-7731.", requested, "user-1", Set.of());
+        state =
+                new TurnApprovalState(
+                        SCOPED_MEMORY_ID, "Send invoice INV-7731.", requested, "user-1", Set.of());
         originRecordingReturns(pending());
 
         String result = guard(tool("send_invoice", "ran")).call("{\"to\":\"a\"}");
 
         ArgumentCaptor<ToolCallOrigin> origin = ArgumentCaptor.forClass(ToolCallOrigin.class);
-        verify(gate).recordToolCallWithOrigin(
-            eq("mcp_tool.send_invoice"), eq("send_invoice"), anyString(), eq("{\"to\":\"a\"}"),
-            anyString(), eq(AGENT_ID), eq(SESSION), any(), origin.capture());
+        verify(gate)
+                .recordToolCallWithOrigin(
+                        eq("mcp_tool.send_invoice"),
+                        eq("send_invoice"),
+                        anyString(),
+                        eq("{\"to\":\"a\"}"),
+                        anyString(),
+                        eq(AGENT_ID),
+                        eq(SESSION),
+                        any(),
+                        origin.capture());
         assertEquals(SCOPED_MEMORY_ID, origin.getValue().memorySessionId());
         assertEquals("Send invoice INV-7731.", origin.getValue().goal());
         assertEquals(requested, origin.getValue().requestedAgentId());
         assertEquals("user-1", origin.getValue().subjectKey());
-        verify(gate, never()).recordToolCallForApproval(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any(String.class));
+        verify(gate, never())
+                .recordToolCallForApproval(
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        any(),
+                        anyString(),
+                        any(),
+                        any(String.class));
         assertTrue(state.isParked());
         assertTrue(result.contains("send_invoice"), result);
     }
 
     @Test
     void aLongGoalIsCutAtTheConfiguredLimitWithAMarker() {
-        state = new TurnApprovalState(SCOPED_MEMORY_ID, "g".repeat(50), UUID.randomUUID(), "user-1", Set.of());
+        state =
+                new TurnApprovalState(
+                        SCOPED_MEMORY_ID, "g".repeat(50), UUID.randomUUID(), "user-1", Set.of());
         originRecordingReturns(pending());
         ApprovalParkProperties texts = new ApprovalParkProperties();
         texts.setMaxGoalChars(10);
@@ -313,38 +462,77 @@ class GuardedToolCallbackParkingTest {
         guard(tool("send_invoice", "ran")).withApprovalParkTexts(texts).call("{}");
 
         ArgumentCaptor<ToolCallOrigin> origin = ArgumentCaptor.forClass(ToolCallOrigin.class);
-        verify(gate).recordToolCallWithOrigin(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), origin.capture());
+        verify(gate)
+                .recordToolCallWithOrigin(
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        any(),
+                        anyString(),
+                        any(),
+                        origin.capture());
         assertEquals("g".repeat(10) + " [...message shortened]", origin.getValue().goal());
     }
 
     @Test
     void aZeroGoalLimitRecordsNoGoalSoTheRequestIsReplayableButNotContinuable() {
-        state = new TurnApprovalState(SCOPED_MEMORY_ID, "Send invoice.", UUID.randomUUID(), "user-1", Set.of());
+        state =
+                new TurnApprovalState(
+                        SCOPED_MEMORY_ID, "Send invoice.", UUID.randomUUID(), "user-1", Set.of());
         recordingReturns(pending());
         ApprovalParkProperties texts = new ApprovalParkProperties();
         texts.setMaxGoalChars(0);
 
         guard(tool("send_invoice", "ran")).withApprovalParkTexts(texts).call("{}");
 
-        verify(gate, never()).recordToolCallWithOrigin(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any());
-        verify(gate).recordToolCallForApproval(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(),
-            eq(SCOPED_MEMORY_ID));
+        verify(gate, never())
+                .recordToolCallWithOrigin(
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        any(),
+                        anyString(),
+                        any(),
+                        any());
+        verify(gate)
+                .recordToolCallForApproval(
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        any(),
+                        anyString(),
+                        any(),
+                        eq(SCOPED_MEMORY_ID));
     }
 
     @Test
     void aQueuedSiblingCallCarriesTheSameGoal() {
-        state = new TurnApprovalState(SCOPED_MEMORY_ID, "Send invoice.", UUID.randomUUID(), "user-1", Set.of());
+        state =
+                new TurnApprovalState(
+                        SCOPED_MEMORY_ID, "Send invoice.", UUID.randomUUID(), "user-1", Set.of());
         originRecordingReturns(pending());
 
         guard(tool("send_invoice", "ran")).call("{}");
         guard(tool("lookup", "found")).call("{\"q\":\"x\"}");
 
         ArgumentCaptor<ToolCallOrigin> origin = ArgumentCaptor.forClass(ToolCallOrigin.class);
-        verify(gate, times(2)).recordToolCallWithOrigin(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), origin.capture());
+        verify(gate, times(2))
+                .recordToolCallWithOrigin(
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        any(),
+                        anyString(),
+                        any(),
+                        origin.capture());
         assertEquals("Send invoice.", origin.getAllValues().get(1).goal());
     }
 }

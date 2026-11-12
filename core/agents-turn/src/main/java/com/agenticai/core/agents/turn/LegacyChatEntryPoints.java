@@ -2,6 +2,7 @@ package com.agenticai.core.agents.turn;
 
 import com.agenticai.core.agents.dto.ChatInlineAttachment;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
+import com.agenticai.core.guardrails.taint.SenderTrust;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.ai.tool.ToolCallback;
@@ -32,7 +33,10 @@ public abstract class LegacyChatEntryPoints {
      */
     @Deprecated
     public Flux<String> chat(ChatTurnRequest request) {
-        return chat(TurnContext.atEntry(request), request);
+        TurnContext context = TurnContext.atEntry(request);
+        // Deprecated, caller unknown: fail closed (docs/security/taint-entry-points.md).
+        SenderTrust.UNTRUSTED.seed(context.taint(), "inbound:legacy");
+        return chat(context, request);
     }
 
     /**

@@ -14,6 +14,8 @@ import com.agenticai.core.chat.LlmMetricsAdvisor;
 import com.agenticai.core.chat.ProviderErrorTranslator;
 import com.agenticai.core.chat.gateway.GatewayCallSpec;
 import com.agenticai.core.chat.gateway.LlmGatewayService;
+import com.agenticai.core.guardrails.taint.DelegationTaint;
+import com.agenticai.core.guardrails.taint.TurnTaint;
 import com.agenticai.core.providers.ProviderCredentialResolver;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.sharing.PermissionLevel;
@@ -73,15 +75,14 @@ final class ChatDelegateCall {
     }
 
     /**
-     * Runs ONE turn for a
-     * collaborator agent that another agent just delegated a question to, called by {@code
-     * DelegateToAgentToolCallback}. Deliberately NOT a call to {@link #chat}: a delegated call is a
-     * single question-in, answer-out exchange, not a saved conversation - it uses a fresh,
-     * throwaway session id, never touches {@code sessionMemoryService} at all (nothing is
-     * persisted, nothing is replayed into it later), and never recalls the delegating agent's own
-     * long-term memories or history. Synchronous ({@code .call()}, not {@code .stream()}) since the
-     * caller is a {@code ToolCallback} - it has to return a plain {@code String}, the same
-     * constraint every other tool in this codebase has.
+     * Runs ONE turn for a collaborator agent that another agent just delegated a question to,
+     * called by {@code DelegateToAgentToolCallback}. Deliberately NOT a call to {@link #chat}: a
+     * delegated call is a single question-in, answer-out exchange, not a saved conversation - it
+     * uses a fresh, throwaway session id, never touches {@code sessionMemoryService} at all
+     * (nothing is persisted, nothing is replayed into it later), and never recalls the delegating
+     * agent's own long-term memories or history. Synchronous ({@code .call()}, not {@code
+     * .stream()}) since the caller is a {@code ToolCallback} - it has to return a plain {@code
+     * String}, the same constraint every other tool in this codebase has.
      *
      * <p>Tools for the collaborator are resolved via {@code
      * AgentToolProvider#resolveToolsForDelegatedCall}, NOT the normal {@code resolveToolsFor} -
@@ -191,16 +192,24 @@ final class ChatDelegateCall {
                                 agent.getTopP(),
                                 null,
                                 providerOptions(agent.getProviderName(), agent)));
-        List<ToolCallback> tools =
-                DelegateOptions.filter(
-                        options,
-                        agentToolProvider.resolveToolsForDelegatedCall(
-                                agentId, delegatedSessionId, question, chatClient));
+        // The sub-turn starts with a copy of the delegating turn's taint (read now, at the moment
+        // of delegation);
+        // the delegate's tools are resolved against that same instance so their taint gate sees it.
+        TurnTaint childTaint = DelegationTaint.childOfCurrent();
+        List<ToolCallback> tools;
+        try (DelegationTaint.Scope ignored = DelegationTaint.openResolving(childTaint)) {
+            tools =
+                    DelegateOptions.filter(
+                            options,
+                            agentToolProvider.resolveToolsForDelegatedCall(
+                                    agentId, delegatedSessionId, question, chatClient));
+        }
         String experimentVariants = this.experimentVariants.apply(tenantId);
 
         // Skills block sits between the agent's own prompt and the forwarded context so the
         // stable part stays a prefix - a delegated specialist is exactly who benefits from skills.
-        // The delegate's own overrides (agent, tenant, platform) for every text below, not the built-in text.
+        // The delegate's own overrides (agent, tenant, platform) for every text below, not the
+        // built-in text.
         ResolvedDirectives promptsForDelegate = directiveGates.directivesForAgent().apply(agentId);
         String delegatePrompt =
                 withSkillsBlock(
@@ -240,8 +249,10 @@ final class ChatDelegateCall {
                         options,
                         directiveBlock == null ? basePrompt : basePrompt + "\n\n" + directiveBlock);
 
-        // Screening, hooks, journal, guardrails and the continuation policy run in the sub-turn, the same stages a
-        // buffered turn has (see SubAgentTurn); it also keeps the provider fallback this call always had.
+        // Screening, hooks, journal, guardrails and the continuation policy run in the sub-turn,
+        // the same stages a
+        // buffered turn has (see SubAgentTurn); it also keeps the provider fallback this call
+        // always had.
         return subTurn.run(
                 new SubAgentTurn.Request(
                         "delegate",
@@ -254,6 +265,7 @@ final class ChatDelegateCall {
                         tools,
                         experimentVariants,
                         tenantId,
-                        promptsForDelegate.textOrShipped("delegation.empty_answer.collaborator")));
+                        promptsForDelegate.textOrShipped("delegation.empty_answer.collaborator"),
+                        childTaint));
     }
 }

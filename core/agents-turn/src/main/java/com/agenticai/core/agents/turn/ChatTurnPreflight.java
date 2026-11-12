@@ -71,6 +71,11 @@ final class ChatTurnPreflight {
     /** DPDP-oriented notice-and-consent step; set by {@link ConsentGateWiring}, null = none. */
     volatile com.agenticai.core.agents.consent.ConversationConsentGate consentGate;
 
+    /**
+     * Conversation-level taint; set by {@link ConversationTaintWiring}, null = per-turn taint only.
+     */
+    volatile com.agenticai.core.guardrails.taint.ConversationTaint conversationTaint;
+
     ChatTurnPreflight(AgentChatService svc) {
         this.svc = svc;
     }
@@ -182,6 +187,18 @@ final class ChatTurnPreflight {
                         subjectKey,
                         sessionId); // SEC-004: session memory and the cancel flag use only this id
         // (SessionMemoryService#scopedSessionId); events, logs, metrics keep the raw one.
+        // memory.write.enabled: a conversation whose agent has memory writes off gets no
+        // rolling-summary fold.
+        com.agenticai.core.agents.memory.SessionWriteSwitch.mark(
+                memorySessionId, svc.memoryRecall.writesSwitchedOff(agentId));
+        // A conversation that has had a tainted turn keeps its poisoned content in the history this
+        // turn is about to replay: start the turn tainted, and flag the conversation as soon as
+        // this turn taints. Captured by value, so a tool thread without a tenant context can write.
+        com.agenticai.core.guardrails.taint.ConversationTaint conversationTaint =
+                this.conversationTaint;
+        if (conversationTaint != null) {
+            conversationTaint.attach(context.taint(), currentTenantId, memorySessionId);
+        }
         Agent liveAgentRow = agentService.getEntity(agentId);
         // C1 versioning: resolve the version this turn pins and - under the
         // versioning_explicit_publish tenant flag - execute the PRODUCTION
@@ -200,7 +217,8 @@ final class ChatTurnPreflight {
                 versioned ? svc.featureFlagService.evaluateActiveFlags(currentTenantId) : null;
         final Agent agent =
                 versioned
-                        ? svc.agentRouting.pinAndApplyEffectiveAgent(agentId, liveAgentRow, activeFlags)
+                        ? svc.agentRouting.pinAndApplyEffectiveAgent(
+                                agentId, liveAgentRow, activeFlags)
                         : liveAgentRow;
 
         // Cross-tenant object-read fix (security audit 2026-07-29 §2 item 3).
@@ -266,7 +284,12 @@ final class ChatTurnPreflight {
         // fail-closed (refusal, turn never starts) on an actual violation.
         Flux<String> guardrailRefusal =
                 guardrails.enforceInboundGuardrails(
-                        agent, agentId, sessionId, screenedMessage, currentTenantId, currentTenantPlan);
+                        agent,
+                        agentId,
+                        sessionId,
+                        screenedMessage,
+                        currentTenantId,
+                        currentTenantPlan);
         if (guardrailRefusal != null) {
             // Step-event vocabulary (2026-09-09): a step-event turn also gets a
             // typed `guardrail` event on the side channel, so a trace UI / the
@@ -327,9 +350,12 @@ final class ChatTurnPreflight {
                         && safeAttachmentKey == null
                         && (inlineAttachments == null || inlineAttachments.isEmpty())
                         && (extraTools == null || extraTools.isEmpty());
-        // What the caches may do with this turn beyond the shape above (app.chat.cache.*): an agent that
-        // offers tools is not cacheable (a turn that read live data must not be answered from, or stored
-        // in, a cache), and the key includes the conversation before the message. Looked up only for a
+        // What the caches may do with this turn beyond the shape above (app.chat.cache.*): an agent
+        // that
+        // offers tools is not cacheable (a turn that read live data must not be answered from, or
+        // stored
+        // in, a cache), and the key includes the conversation before the message. Looked up only
+        // for a
         // turn that could use a cache at all, so an agent without caching pays nothing.
         ChatCachePolicy cachePolicy = svc.turns.cachePolicy;
         String cacheConversationKey = "";
@@ -340,13 +366,20 @@ final class ChatTurnPreflight {
             semanticEligible = false;
         }
         if ((cacheEligible || semanticEligible) && cachePolicy.keyOnConversation()) {
-            cacheConversationKey = cachePolicy.conversationKey(
-                            sessionMemoryService.getHistory(memorySessionId), context.scope(), agentId);
+            cacheConversationKey =
+                    cachePolicy.conversationKey(
+                            sessionMemoryService.getHistory(memorySessionId),
+                            context.scope(),
+                            agentId);
         }
         if (cacheEligible) {
             Optional<String> cached =
                     responseCacheService.get(
-                            currentTenantId, agentId, subjectKey, userMessage, cacheConversationKey);
+                            currentTenantId,
+                            agentId,
+                            subjectKey,
+                            userMessage,
+                            cacheConversationKey);
             if (cached.isPresent()) {
                 // Recorded exactly like a live turn so later messages in this
                 // session still see a coherent back-and-forth - the caller
@@ -400,13 +433,14 @@ final class ChatTurnPreflight {
     }
 
     /**
-     * Whether the agent would be offered at least one tool: the same merged, allow-list-filtered candidate
-     * set a turn resolves its tools from, without the per-message trimming. A failure to tell is answered
-     * "yes": the turn is then not cacheable, never cached on a guess.
+     * Whether the agent would be offered at least one tool: the same merged, allow-list-filtered
+     * candidate set a turn resolves its tools from, without the per-message trimming. A failure to
+     * tell is answered "yes": the turn is then not cacheable, never cached on a guess.
      */
     private boolean offersTools(UUID agentId, String sessionId, String subjectKey) {
         try {
-            List<ToolCallback> candidates = svc.agentToolProvider.resolveToolCandidatesFor(agentId, sessionId, subjectKey);
+            List<ToolCallback> candidates =
+                    svc.agentToolProvider.resolveToolCandidatesFor(agentId, sessionId, subjectKey);
             return candidates != null && !candidates.isEmpty();
         } catch (RuntimeException e) {
             AgentChatService.log.warn(

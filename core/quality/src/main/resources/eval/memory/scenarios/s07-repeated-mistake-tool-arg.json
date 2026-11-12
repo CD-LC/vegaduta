@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "id": "s07-repeated-mistake-tool-arg",
+  "category": "repeated-mistake",
+  "persona": {
+    "id": "p-scripted",
+    "name": "Scripted user",
+    "language": "en",
+    "description": "Single scripted user for a T1 scenario"
+  },
+  "seed": 107,
+  "sessions": [
+    {
+      "id": "s1",
+      "gap_days": 0,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "fetch_inventory(region=us) failed: region not enabled. User: use ap-south-1; retry worked",
+          "plants": [
+            "f-fix"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s2",
+      "gap_days": 5,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Let's check stock again",
+          "plants": []
+        }
+      ],
+      "forgets": []
+    }
+  ],
+  "ledger": [
+    {
+      "id": "f-fix",
+      "key": "region_arg",
+      "value": "fetch_inventory must use region=ap-south-1",
+      "match": "region=ap-south-1",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p1"
+      ],
+      "kind": "CORRECTION",
+      "valid_from": 0
+    }
+  ],
+  "probes": [
+    {
+      "id": "p1",
+      "after": "s2",
+      "type": "MISTAKE",
+      "prompt": "Check inventory for SKU-100",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "region_arg"
+      ],
+      "memory_dependent": true,
+      "task": {
+        "tool": "fetch_inventory",
+        "default_arg": "region=us",
+        "memory_key": "region_arg",
+        "mode": "REPLACE_ARG"
+      },
+      "expect": {
+        "all": [],
+        "none": [],
+        "tool": {
+          "name": "fetch_inventory",
+          "arg_contains": "ap-south-1"
+        },
+        "forbid_tools": [
+          {
+            "name": "fetch_inventory",
+            "arg_contains": "region=us"
+          }
+        ],
+        "abstain": false
+      }
+    }
+  ]
+}

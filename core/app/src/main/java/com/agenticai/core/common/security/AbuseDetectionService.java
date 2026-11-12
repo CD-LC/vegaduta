@@ -62,6 +62,14 @@ public class AbuseDetectionService {
     @Value("${fraud-detection.auto-block-duration-minutes:60}")
     private int autoBlockDurationMinutes;
 
+    @Value("${app.encryption.key:}")
+    private String encryptionKey;
+
+    @Value("${fraud-detection.challenge-pass-ttl-seconds:300}")
+    private long challengePassTtlSeconds = 300;
+
+    private volatile ChallengePass challengePass;
+
     // In-memory rate limiting buckets (keyed by tenant:ip or tenant:userid)
     private final Map<String, RateLimitBucket> rateLimitBuckets = new ConcurrentHashMap<>();
 
@@ -326,6 +334,42 @@ public class AbuseDetectionService {
 
         challengeNonceRepo.save(challenge);
         return nonce;
+    }
+
+    private ChallengePass challengePass() {
+        ChallengePass cp = challengePass;
+        if (cp == null) {
+            synchronized (this) {
+                if (challengePass == null) {
+                    Duration ttl =
+                            challengePassTtlSeconds > 0
+                                    ? Duration.ofSeconds(challengePassTtlSeconds)
+                                    : ChallengePass.DEFAULT_TTL;
+                    challengePass =
+                            new ChallengePass(encryptionKey, java.time.Clock.systemUTC(), ttl);
+                }
+                cp = challengePass;
+            }
+        }
+        return cp;
+    }
+
+    /**
+     * Issue the signed, short-lived, single-use pass for a solved challenge, bound to tenant,
+     * client IP and nonce. Null when no signing key is configured.
+     */
+    public String issueChallengePass(UUID tenantId, InetAddress clientIp, String nonceId) {
+        return challengePass().issue(tenantId, clientIp, nonceId);
+    }
+
+    /** Lifetime of an issued pass, in seconds. */
+    public long challengePassTtlSeconds() {
+        return challengePass().ttl().toSeconds();
+    }
+
+    /** Consume a pass: true exactly once for a genuine, unexpired pass for this tenant and IP. */
+    public boolean redeemChallengePass(String token, UUID tenantId, InetAddress clientIp) {
+        return challengePass().redeem(token, tenantId, clientIp);
     }
 
     /** Verify a challenge nonce and hCaptcha token. */

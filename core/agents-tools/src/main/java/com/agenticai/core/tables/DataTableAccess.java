@@ -11,7 +11,6 @@ import com.agenticai.core.tables.DataTableDtos.Config;
 import com.agenticai.core.tables.DataTableDtos.RowView;
 import com.agenticai.core.tables.DataTableDtos.TableView;
 import com.agenticai.core.tables.DataTableFilter.Condition;
-import com.agenticai.core.tables.DataTableQueryBuilder.Where;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
@@ -188,7 +187,7 @@ final class DataTableAccess {
     }
 
     void requireRoom(Caps caps, DataTable t, int adding) {
-        long current = rows.count(t.getId(), Where.none());
+        long current = rows.countAll(t.getId());
         if (current + adding > caps.rowsPerTable()) {
             throw limit(
                     caps,
@@ -204,8 +203,7 @@ final class DataTableAccess {
         }
     }
 
-    static void requireFilterOrConfirm(
-            List<Condition> filter, boolean confirmAll, String verb) {
+    static void requireFilterOrConfirm(List<Condition> filter, boolean confirmAll, String verb) {
         if ((filter == null || filter.isEmpty()) && !confirmAll) {
             throw new IllegalArgumentException(
                     "Refusing to "

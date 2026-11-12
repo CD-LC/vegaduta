@@ -84,6 +84,27 @@ public class LessonLearningService implements LessonLearningGateway.Observer {
      */
     record Previous(String userMessage, String answer) {}
 
+    private volatile ObjectProvider<com.agenticai.core.agents.memory.AgentMemoryService> memory;
+
+    /**
+     * Lets {@code memory.write.enabled} stop this loop for an agent whose memory writes are off.
+     */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setAgentMemory(
+            ObjectProvider<com.agenticai.core.agents.memory.AgentMemoryService> memory) {
+        this.memory = memory;
+    }
+
+    private boolean memoryWritesOff(java.util.UUID agentId) {
+        try {
+            com.agenticai.core.agents.memory.AgentMemoryService service =
+                    memory == null ? null : memory.getIfAvailable();
+            return service != null && service.writesSwitchedOff(agentId);
+        } catch (RuntimeException e) {
+            return false;
+        }
+    }
+
     private final ObjectProvider<LearningProposalService> proposals;
     private final ToolCallLogService toolCalls;
     private final AgentLabCompletionService lab;
@@ -137,6 +158,12 @@ public class LessonLearningService implements LessonLearningGateway.Observer {
                 || o.sessionId() == null
                 || o.cancelled()
                 || o.scope().isEmpty()) {
+            return;
+        }
+        if (memoryWritesOff(o.agentId())) {
+            log.debug(
+                    "Lesson learning skipped for agent {}: memory.write.enabled is off",
+                    o.agentId());
             return;
         }
         Previous before = remember(o);

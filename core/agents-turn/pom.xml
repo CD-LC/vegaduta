@@ -40,6 +40,13 @@
       <groupId>com.agenticai</groupId>
       <artifactId>agents-budget</artifactId>
     </dependency>
+    <!-- The unified-memory ports MemoryEmbedder and MemoryContentScreen (ADR-0028 WP4c): this module owns the
+         sidecar embedding path and the knowledge write screen, so it contributes the adapters. agents-memory does
+         not depend on this module (MemoryStoreArchTest). -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-memory</artifactId>
+    </dependency>
     <dependency>
       <groupId>com.agenticai</groupId>
       <artifactId>json</artifactId>

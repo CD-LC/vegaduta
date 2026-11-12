@@ -112,6 +112,22 @@ public class SessionTaintStore {
     }
 
     /**
+     * Whether the session has a marker, for callers that must not mistake "could not read" for
+     * "clean": unlike {@link #load}, a Redis failure is thrown, so the caller can treat the
+     * conversation as tainted. False when persistence is switched off.
+     */
+    public boolean hasMarkerStrict(String sessionId) {
+        if (!enabled || sessionId == null || sessionId.isBlank()) {
+            return false;
+        }
+        boolean present = Boolean.TRUE.equals(redis.hasKey(key(sessionId)));
+        if (present) {
+            redis.expire(key(sessionId), ttl);
+        }
+        return present;
+    }
+
+    /**
      * Seeds {@code turn} from the session's marker (if any) and keeps the marker current for the
      * rest of the turn: every new taint source the turn records is merged into it. Call once per
      * turn, before the first mark the turn itself will make that you want persisted (marks made

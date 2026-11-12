@@ -47,6 +47,19 @@ final class GraphMemoryWriter {
             GraphTriple triple,
             long now)
             throws SQLException {
+        writeTriple(st, graphName, tierStr, subjectKeyStr, triple, now, null);
+    }
+
+    /** As above; a non-null {@code memoryId} (the fact's row id) is stored on the new edge. */
+    static void writeTriple(
+            Statement st,
+            String graphName,
+            String tierStr,
+            String subjectKeyStr,
+            GraphTriple triple,
+            long now,
+            java.util.UUID memoryId)
+            throws SQLException {
         if (triple.tripsWriteScreen()) {
             log.warn("Graph triple dropped: write screen tripped (injection phrase or credential)");
             return;
@@ -104,6 +117,7 @@ final class GraphMemoryWriter {
                                 + relation
                                 + "', valid_from: "
                                 + now
+                                + (memoryId == null ? "" : ", memory_id: '" + memoryId + "'")
                                 + "}]->(b)",
                         ONE_COLUMN));
     }

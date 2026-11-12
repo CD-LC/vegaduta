@@ -10910,6 +10910,11 @@
           "label": "हर टर्न च याद कीतियां जाने आलियां सांझियां यादां",
           "description": "हर मैसेज आस्तै वर्कस्पेस च सांझियां कीतियां यादें चा कन्नियां दिक्खियां जांदियां न।",
           "help": "मतियां यादां ज्यादा संदर्भ दिंदियां न पर मते टोकन बरतदियां न।"
+        },
+        "enabled": {
+          "description": "Whether remembered facts and memory blocks are put into the agent's prompt at all.",
+          "help": "Turn it off to see how the agent answers without any memory. Nothing is deleted, and what the agent saves is unchanged; only recall into the prompt stops.",
+          "label": "Use memory in replies"
         }
       },
       "agent": {
@@ -10943,6 +10948,34 @@
           "label": "हर लुकअप च पढ़े जाने आले ग्राफ रस्ते",
           "description": "इक लुकअप दे तथ्य लब्भने आस्तै मेमोरी ग्राफ दे कन्ने संपर्क पढ़े जंदे न।",
           "help": "कई संपर्क इक्कै तथ्य तकर पुजाई सकदे न, इस आस्तै घने जुड़ी दी यादें च सब किश लब्भने आस्तै मती संख्या दी लोड़ होई सकदी ऐ। मतियां संख्यां हर लुकअप गी धीमा करदियां न।"
+        }
+      },
+      "competence": {
+        "enabled": {
+          "description": "Whether the agent keeps a running count of how well it does on each kind of task.",
+          "help": "The counts come only from checked facts (tool results, approval decisions, a person's rating), never from what the agent says about itself. They are numbers, not notes. The platform must also allow it; turning it off here stops new counting only.",
+          "label": "Track task competence"
+        }
+      },
+      "episodic": {
+        "enabled": {
+          "description": "Whether the agent may propose a short record of what happened after a turn.",
+          "help": "Records are built only from checked facts (tool results, approval decisions, a person's rating), never from what the agent says about itself, and wait for review before they are used. The platform must also allow it; turning it off here stops new records only.",
+          "label": "Propose episode records"
+        }
+      },
+      "write": {
+        "enabled": {
+          "description": "Whether the agent saves anything to memory at all.",
+          "help": "Turn it off to see how the agent behaves with no memory. The remember tools answer that memory is disabled and save nothing, conversation summaries stop being written, and lessons and preferences stop being proposed. Nothing is deleted, and what the agent already knows is still used unless 'Use memory in replies' is also off.",
+          "label": "Save to memory"
+        }
+      },
+      "unified": {
+        "enabled": {
+          "description": "Whether the agent may draw on recalled notes of every kind in its replies, in one budgeted block.",
+          "help": "This can only switch the feature off for your workspace or this agent; the platform operator decides whether it exists at all. Off means the agent uses the memory it has today and nothing else changes.",
+          "label": "Unified memory"
         }
       }
     },
@@ -27977,7 +28010,9 @@
     "overviewUsedNone": "अजें तगर किशें गल्लबात च कोई तथ्य नेईं बप्हरेआ गेआ।",
     "overviewUsedEmptyTitle": "अजें तगर कोई तथ्य नेईं बप्हरेआ गेआ",
     "overviewUsedEmptyHint": "कोई तथ्य ओदों बप्हरेआ मन्नेआ जंदा ऐ जदूं सहायक गल्लबात दौरान इसगी याद करदा ऐ।",
-    "overviewUsedCaption": "घट्ट-शा-घट्ट इक बारी बप्हरे गेदे {used} तथ्यें चा मते {shown}।"
+    "overviewUsedCaption": "घट्ट-शा-घट्ट इक बारी बप्हरे गेदे {used} तथ्यें चा मते {shown}।",
+    "tab_items": "Items",
+    "tab_items_purpose": "Each assistant's unified memory: review what it proposed, what it can recall, and what was retired."
   },
   "chatMemory": {
     "projectLabel": "प्रोजेक्ट",
@@ -35533,5 +35568,87 @@
     "s12": "is a real workflow, built and shared by its owner on",
     "s13": "is a workflow you can run, shared by",
     "s14": "Opening this shared workflow…"
+  },
+  "memory": {
+    "approve": "Approve",
+    "reject": "Reject",
+    "revert": "Revert",
+    "erase": "Erase",
+    "cancel": "Cancel",
+    "retry": "Try again",
+    "details": "Show details",
+    "detailsHide": "Hide details",
+    "detailsLoading": "Loading details…",
+    "detailsUnavailable": "Details are not available for this item.",
+    "modelGenerated": "Written by the assistant",
+    "writerIs": "Written by {writer}",
+    "savedOn": "Saved {date}",
+    "subjects": "About {subjects}",
+    "detailStatus": "Status",
+    "detailExpires": "Expires",
+    "detailSource": "Source",
+    "detailApprovedBy": "Approved by",
+    "lineage": "Lineage",
+    "lineageEmpty": "No upstream sources recorded.",
+    "events": "History",
+    "eventsEmpty": "No events recorded, or you do not have edit access to see them.",
+    "eventTransition": "{from} to {to}",
+    "eraseConfirmTitle": "Erase this memory item?",
+    "eraseConfirmBody": "The item and everything derived from it will be permanently erased, including its history. This cannot be undone.",
+    "eraseConfirmButton": "Erase",
+    "itemsAgentLabel": "Assistant",
+    "itemsKindLabel": "Filter by kind",
+    "itemsKindAll": "All kinds",
+    "itemsLoading": "Loading memory items…",
+    "itemsLoadFailedTitle": "Could not load memory items",
+    "itemsLoadFailedBody": "The request failed, so nothing is shown. Nothing was changed.",
+    "itemsOffTitle": "Unified memory is off for this assistant",
+    "itemsOffHint": "Unified memory is switched off at the platform, workspace or assistant level. Turn it on in settings to review what this assistant remembers.",
+    "itemsEmptyTitle": "No memory items yet",
+    "itemsEmptyHint": "When this assistant writes to its unified memory, the items appear here for review.",
+    "itemsNoAgentsTitle": "No assistants yet",
+    "itemsNoAgentsHint": "Create an assistant first; its memory items will be reviewed here.",
+    "exportButton": "Export my items",
+    "exporting": "Preparing…",
+    "group_review": "Needs review",
+    "group_review_hint": "Proposals and quarantined writes. They are not used until you approve them.",
+    "group_active": "Active",
+    "group_active_hint": "Trusted items the assistant can recall in conversations.",
+    "group_tombstoned": "Tombstoned",
+    "group_tombstoned_hint": "Rejected, superseded and reverted items kept for the audit trail. They are never recalled.",
+    "kind_EPISODIC": "Episodic",
+    "kind_SEMANTIC": "Semantic",
+    "kind_PROCEDURAL": "Procedural",
+    "kind_SELF_MODEL": "Self-model",
+    "kind_other": "Other",
+    "status_PENDING": "Pending",
+    "status_ACTIVE": "Active",
+    "status_REJECTED": "Rejected",
+    "status_SUPERSEDED": "Superseded",
+    "status_REVERTED": "Reverted",
+    "status_other": "Unknown",
+    "trust_TRUSTED": "Trusted",
+    "trust_QUARANTINED": "Quarantined",
+    "trust_other": "Unknown",
+    "event_CREATED": "Created",
+    "event_APPROVED": "Approved",
+    "event_REJECTED": "Rejected",
+    "event_EDITED": "Edited",
+    "event_REVERTED": "Reverted",
+    "event_EXPIRED": "Expired",
+    "event_ERASED": "Erased",
+    "event_PINNED": "Pinned",
+    "event_REFUSED": "Refused",
+    "event_other": "Event",
+    "edit": "Edit",
+    "editTitle": "Edit this memory item",
+    "editBody": "Saving creates a new version that needs your approval. The current version stays in use until then.",
+    "editLabel": "Memory text",
+    "editSave": "Save new version",
+    "editSaving": "Saving...",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "pinned": "Pinned",
+    "event_UNPINNED": "Unpinned"
   }
 }

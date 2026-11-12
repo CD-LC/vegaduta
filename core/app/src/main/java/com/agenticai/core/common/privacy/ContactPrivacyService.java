@@ -4,6 +4,7 @@ import com.agenticai.core.agents.memory.AgentMemoryEntry;
 import com.agenticai.core.agents.memory.AgentMemoryService;
 import com.agenticai.core.agents.memory.ChatTurn;
 import com.agenticai.core.agents.memory.SessionMemoryService;
+import com.agenticai.core.agents.memory.SubjectDataEraser;
 import com.agenticai.core.agents.memory.TenantMemoryEntry;
 import com.agenticai.core.agents.memory.TenantMemoryService;
 import com.agenticai.core.audit.AuditLogService;
@@ -95,6 +96,7 @@ public class ContactPrivacyService {
     private final ObjectProvider<TenantMemoryService> tenantMemory;
     private final ObjectProvider<GraphMemoryService> graphMemory;
     private final ObjectProvider<SessionMemoryService> sessionMemory;
+    private final ObjectProvider<SubjectDataEraser> otherStores;
 
     public ContactPrivacyService(
             JdbcTemplate jdbc,
@@ -103,7 +105,8 @@ public class ContactPrivacyService {
             ObjectProvider<AgentMemoryService> agentMemory,
             ObjectProvider<TenantMemoryService> tenantMemory,
             ObjectProvider<GraphMemoryService> graphMemory,
-            ObjectProvider<SessionMemoryService> sessionMemory) {
+            ObjectProvider<SessionMemoryService> sessionMemory,
+            ObjectProvider<SubjectDataEraser> otherStores) {
         this.jdbc = jdbc;
         this.audit = audit;
         this.ledger = ledger;
@@ -111,11 +114,13 @@ public class ContactPrivacyService {
         this.tenantMemory = tenantMemory;
         this.graphMemory = graphMemory;
         this.sessionMemory = sessionMemory;
+        this.otherStores = otherStores;
     }
 
     // ------------------------------------------------------------------ export
 
-    public ExportReport export(String channelName, String externalId, boolean includeLeads, String actor) {
+    public ExportReport export(
+            String channelName, String externalId, boolean includeLeads, String actor) {
         String channel = channel(channelName);
         requireExternalId(externalId);
         Map<String, Object> data = new LinkedHashMap<>();
@@ -145,17 +150,27 @@ public class ContactPrivacyService {
         if (agent != null) {
             List<Map<String, Object>> facts = new ArrayList<>();
             for (AgentMemoryEntry e : agent.listAllForSubject(externalId)) {
-                facts.add(Map.of("agentId", e.agentId(), "content", e.content(), "createdAt", e.createdAt()));
+                facts.add(
+                        Map.of(
+                                "agentId", e.agentId(),
+                                "content", e.content(),
+                                "createdAt", e.createdAt(),
+                                "trust", e.trust().name()));
             }
             data.put("agentMemory", facts);
         } else {
-            notIncluded.add("Agent memory was not exported: the memory service is not active here.");
+            notIncluded.add(
+                    "Agent memory was not exported: the memory service is not active here.");
         }
         TenantMemoryService tenant = tenantMemory.getIfAvailable();
         if (tenant != null) {
             List<Map<String, Object>> facts = new ArrayList<>();
             for (TenantMemoryEntry e : tenant.listFactsForSubject(externalId)) {
-                facts.add(Map.of("content", e.content(), "createdAt", e.createdAt()));
+                facts.add(
+                        Map.of(
+                                "content", e.content(),
+                                "createdAt", e.createdAt(),
+                                "trust", e.trust().name()));
             }
             data.put("sharedMemory", facts);
         }
@@ -167,7 +182,8 @@ public class ContactPrivacyService {
         SessionMemoryService history = sessionMemory.getIfAvailable();
         if (history != null && session.isPresent()) {
             List<Map<String, Object>> turns = new ArrayList<>();
-            for (ChatTurn t : history.getFullHistory(String.valueOf(session.get().get("session_id")))) {
+            for (ChatTurn t :
+                    history.getFullHistory(String.valueOf(session.get().get("session_id")))) {
                 turns.add(Map.of("role", String.valueOf(t.role()), "content", t.content()));
             }
             data.put("liveConversationWindow", turns);
@@ -176,7 +192,7 @@ public class ContactPrivacyService {
             data.put(
                     "derivedKnowledgeChunks",
                     jdbc.queryForList(
-                            "SELECT id, collection_id, source, content FROM knowledge_chunks"
+                            "SELECT id, collection_id, source, content, trust FROM knowledge_chunks"
                                     + " WHERE source LIKE ?",
                             derivedChunkPattern(String.valueOf(session.get().get("session_id")))));
         }
@@ -197,7 +213,8 @@ public class ContactPrivacyService {
 
     // ------------------------------------------------------------------ erase
 
-    public ErasureReport erase(String channelName, String externalId, EraseOptions options, String actor) {
+    public ErasureReport erase(
+            String channelName, String externalId, EraseOptions options, String actor) {
         String channel = channel(channelName);
         requireExternalId(externalId);
         Map<String, Long> erased = new LinkedHashMap<>();
@@ -237,16 +254,33 @@ public class ContactPrivacyService {
         }
         AgentMemoryService agent = agentMemory.getIfAvailable();
         if (agent != null) {
-            step("agentMemory", erased, failures, () -> (long) agent.forgetAllForSubject(externalId));
+            step(
+                    "agentMemory",
+                    erased,
+                    failures,
+                    () -> (long) agent.forgetAllForSubject(externalId));
         }
         TenantMemoryService tenant = tenantMemory.getIfAvailable();
         if (tenant != null) {
-            step("sharedMemory", erased, failures, () -> (long) tenant.forgetAllForSubject(externalId));
+            step(
+                    "sharedMemory",
+                    erased,
+                    failures,
+                    () -> (long) tenant.forgetAllForSubject(externalId));
+        }
+        for (SubjectDataEraser store : otherStores.orderedStream().toList()) {
+            // Per-user stores owned by modules this one reaches through the port (the agent
+            // scratchpad).
+            step(store.store(), erased, failures, () -> (long) store.eraseSubject(externalId));
         }
         GraphMemoryService graph = graphMemory.getIfAvailable();
         if (graph != null) {
             // eraseSubject deliberately does not fail open; a failure lands in `failures`.
-            step("graphMemoryEntities", erased, failures, () -> (long) graph.eraseSubject(externalId));
+            step(
+                    "graphMemoryEntities",
+                    erased,
+                    failures,
+                    () -> (long) graph.eraseSubject(externalId));
         }
         step(
                 "contactRecords",
@@ -275,7 +309,11 @@ public class ContactPrivacyService {
             step("crmLeads", erased, failures, () -> deleteLeads(channel, externalId));
         }
         if (!options.keepConsentProof()) {
-            step("consentRecords", erased, failures, () -> (long) ledger.deleteFor(channel, externalId));
+            step(
+                    "consentRecords",
+                    erased,
+                    failures,
+                    () -> (long) ledger.deleteFor(channel, externalId));
         }
         // The session row last: contact rows point at it, and a retried erasure can still find
         // the session key if an earlier step failed.
@@ -324,7 +362,8 @@ public class ContactPrivacyService {
         long run();
     }
 
-    private static void step(String name, Map<String, Long> erased, List<String> failures, Step step) {
+    private static void step(
+            String name, Map<String, Long> erased, List<String> failures, Step step) {
         try {
             erased.put(name, step.run());
         } catch (RuntimeException e) {
@@ -369,10 +408,14 @@ public class ContactPrivacyService {
         if (digits == null) {
             return 0;
         }
-        return jdbc.update("DELETE FROM lead WHERE regexp_replace(phone, '\\D', '', 'g') = ?", digits);
+        return jdbc.update(
+                "DELETE FROM lead WHERE regexp_replace(phone, '\\D', '', 'g') = ?", digits);
     }
 
-    /** {@code AddToKnowledgeBaseToolCallback#buildSource} stamps ", session <id>, at " in the source. */
+    /**
+     * {@code AddToKnowledgeBaseToolCallback#buildSource} stamps ", session <id>, at " in the
+     * source.
+     */
     static String derivedChunkPattern(String sessionKey) {
         String escaped = sessionKey.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
         return "Agent memory: %(written by agent %, session " + escaped + ", at %";
@@ -385,7 +428,9 @@ public class ContactPrivacyService {
     }
 
     static String mask(String externalId) {
-        return externalId.length() >= 4 ? "***" + externalId.substring(externalId.length() - 4) : "***";
+        return externalId.length() >= 4
+                ? "***" + externalId.substring(externalId.length() - 4)
+                : "***";
     }
 
     private static String channel(String name) {
@@ -404,6 +449,7 @@ public class ContactPrivacyService {
 
     /** Used by the consent gate on withdrawal. */
     ErasureReport eraseOnWithdrawal(String channel, String externalId) {
-        return erase(channel, externalId, new EraseOptions(false, true), "system:consent-withdrawal");
+        return erase(
+                channel, externalId, new EraseOptions(false, true), "system:consent-withdrawal");
     }
 }

@@ -1,176 +1,176 @@
 {
   "ar": {
-    "enKeys": 15518,
-    "present": 8490,
-    "coverage": 54.71,
+    "enKeys": 18792,
+    "present": 12778,
+    "coverage": 68,
     "dead": 0
   },
   "as": {
-    "enKeys": 15518,
-    "present": 8250,
-    "coverage": 53.16,
+    "enKeys": 18792,
+    "present": 18764,
+    "coverage": 99.85,
     "dead": 0
   },
   "bn": {
-    "enKeys": 15518,
-    "present": 8305,
-    "coverage": 53.52,
+    "enKeys": 18792,
+    "present": 11562,
+    "coverage": 61.53,
     "dead": 0
   },
   "brx": {
-    "enKeys": 15518,
-    "present": 8288,
-    "coverage": 53.41,
+    "enKeys": 18792,
+    "present": 11543,
+    "coverage": 61.43,
     "dead": 0
   },
   "de": {
-    "enKeys": 15518,
-    "present": 8239,
-    "coverage": 53.09,
+    "enKeys": 18792,
+    "present": 15638,
+    "coverage": 83.22,
     "dead": 0
   },
   "doi": {
-    "enKeys": 15518,
-    "present": 8248,
-    "coverage": 53.15,
+    "enKeys": 18792,
+    "present": 18693,
+    "coverage": 99.47,
     "dead": 0
   },
   "es": {
-    "enKeys": 15518,
-    "present": 8239,
-    "coverage": 53.09,
+    "enKeys": 18792,
+    "present": 18679,
+    "coverage": 99.4,
     "dead": 0
   },
   "fr": {
-    "enKeys": 15518,
-    "present": 8490,
-    "coverage": 54.71,
+    "enKeys": 18792,
+    "present": 18726,
+    "coverage": 99.65,
     "dead": 0
   },
   "gu": {
-    "enKeys": 15518,
-    "present": 8310,
-    "coverage": 53.55,
+    "enKeys": 18792,
+    "present": 11565,
+    "coverage": 61.54,
     "dead": 0
   },
   "hi": {
-    "enKeys": 15518,
-    "present": 8490,
-    "coverage": 54.71,
+    "enKeys": 18792,
+    "present": 11745,
+    "coverage": 62.5,
     "dead": 0
   },
   "ja": {
-    "enKeys": 15518,
-    "present": 8310,
-    "coverage": 53.55,
+    "enKeys": 18792,
+    "present": 11593,
+    "coverage": 61.69,
     "dead": 0
   },
   "kn": {
-    "enKeys": 15518,
-    "present": 8486,
-    "coverage": 54.68,
+    "enKeys": 18792,
+    "present": 18764,
+    "coverage": 99.85,
     "dead": 0
   },
   "kok": {
-    "enKeys": 15518,
-    "present": 8242,
-    "coverage": 53.11,
+    "enKeys": 18792,
+    "present": 11497,
+    "coverage": 61.18,
     "dead": 0
   },
   "ks": {
-    "enKeys": 15518,
-    "present": 8284,
-    "coverage": 53.38,
+    "enKeys": 18792,
+    "present": 15738,
+    "coverage": 83.75,
     "dead": 0
   },
   "mai": {
-    "enKeys": 15518,
-    "present": 8286,
-    "coverage": 53.4,
+    "enKeys": 18792,
+    "present": 11895,
+    "coverage": 63.3,
     "dead": 0
   },
   "ml": {
-    "enKeys": 15518,
-    "present": 8295,
-    "coverage": 53.45,
+    "enKeys": 18792,
+    "present": 18763,
+    "coverage": 99.85,
     "dead": 0
   },
   "mni": {
-    "enKeys": 15518,
-    "present": 8243,
-    "coverage": 53.12,
+    "enKeys": 18792,
+    "present": 11498,
+    "coverage": 61.19,
     "dead": 0
   },
   "mr": {
-    "enKeys": 15518,
-    "present": 8306,
-    "coverage": 53.52,
+    "enKeys": 18792,
+    "present": 11561,
+    "coverage": 61.52,
     "dead": 0
   },
   "ne": {
-    "enKeys": 15518,
-    "present": 8290,
-    "coverage": 53.42,
+    "enKeys": 18792,
+    "present": 11545,
+    "coverage": 61.44,
     "dead": 0
   },
   "or": {
-    "enKeys": 15518,
-    "present": 8291,
-    "coverage": 53.43,
+    "enKeys": 18792,
+    "present": 18684,
+    "coverage": 99.43,
     "dead": 0
   },
   "pa": {
-    "enKeys": 15518,
-    "present": 8295,
-    "coverage": 53.45,
+    "enKeys": 18792,
+    "present": 15638,
+    "coverage": 83.22,
     "dead": 0
   },
   "pt": {
-    "enKeys": 15518,
-    "present": 8419,
-    "coverage": 54.25,
+    "enKeys": 18792,
+    "present": 18764,
+    "coverage": 99.85,
     "dead": 0
   },
   "sa": {
-    "enKeys": 15518,
-    "present": 8272,
-    "coverage": 53.31,
+    "enKeys": 18792,
+    "present": 11567,
+    "coverage": 61.55,
     "dead": 0
   },
   "sat": {
-    "enKeys": 15518,
-    "present": 8243,
-    "coverage": 53.12,
+    "enKeys": 18792,
+    "present": 11498,
+    "coverage": 61.19,
     "dead": 0
   },
   "sd": {
-    "enKeys": 15518,
-    "present": 8288,
-    "coverage": 53.41,
+    "enKeys": 18792,
+    "present": 11543,
+    "coverage": 61.43,
     "dead": 0
   },
   "ta": {
-    "enKeys": 15518,
-    "present": 8489,
-    "coverage": 54.7,
+    "enKeys": 18792,
+    "present": 11744,
+    "coverage": 62.49,
     "dead": 0
   },
   "te": {
-    "enKeys": 15518,
-    "present": 8490,
-    "coverage": 54.71,
+    "enKeys": 18792,
+    "present": 11745,
+    "coverage": 62.5,
     "dead": 0
   },
   "ur": {
-    "enKeys": 15518,
-    "present": 8306,
-    "coverage": 53.52,
+    "enKeys": 18792,
+    "present": 11561,
+    "coverage": 61.52,
     "dead": 0
   },
   "zh": {
-    "enKeys": 15518,
-    "present": 8490,
-    "coverage": 54.71,
+    "enKeys": 18792,
+    "present": 11785,
+    "coverage": 62.71,
     "dead": 0
   }
 }

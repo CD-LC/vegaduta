@@ -14,79 +14,64 @@ import org.springframework.ai.chat.model.ChatResponse;
 import reactor.core.publisher.Flux;
 
 /**
- * PLATFORM-ADMIN-GOVERNANCE-AND-CONTROLS.md §4 - the post-call other half of
- * {@link PerUserBudgetService#checkAndReserveBudget} (the pre-call gate).
- * Layered onto the platform-hosted {@link org.springframework.ai.chat.client.ChatClient} a
- * metered turn actually uses (see {@link
+ * PLATFORM-ADMIN-GOVERNANCE-AND-CONTROLS.md §4 - the post-call other half of {@link
+ * PerUserBudgetService#checkAndReserveBudget} (the pre-call gate). Layered onto the platform-hosted
+ * {@link org.springframework.ai.chat.client.ChatClient} a metered turn actually uses (see {@link
  * FreeTierChatClientService#buildClientForFreeTenant}), exactly like {@link
  * FreeTierTokenTrackingAdvisor} sits next to {@code
- * FreeTierUsageLimiterService#reconcileTokenReservation} - this reads the
- * call's real usage metadata and feeds it to {@link
- * PerUserBudgetService#reconcileSpendReservationForUsage} - the {@link
- * org.springframework.ai.chat.metadata.Usage}-carrying overload, since
- * 2026-10-05, so the billable cache buckets and out-of-completion reasoning
- * tokens reach the budget with the same arithmetic {@code llm_call_log}
- * prices - which turns tokens into dollars, corrects the reservation {@link
- * PerUserBudgetService#checkAndReserveBudget} made to the real cost, and
+ * FreeTierUsageLimiterService#reconcileTokenReservation} - this reads the call's real usage
+ * metadata and feeds it to {@link PerUserBudgetService#reconcileSpendReservationForUsage} - the
+ * {@link org.springframework.ai.chat.metadata.Usage}-carrying overload, since 2026-10-05, so the
+ * billable cache buckets and out-of-completion reasoning tokens reach the budget with the same
+ * arithmetic {@code llm_call_log} prices - which turns tokens into dollars, corrects the
+ * reservation {@link PerUserBudgetService#checkAndReserveBudget} made to the real cost, and
  * decrements/increments the (tenant, user, modality) window by the delta.
  *
- * <p>{@code tenantId}/{@code userKey}/{@code modality}/{@code model} are all
- * captured once at construction (per-call client, never shared across
- * tenants/users), so this carries none of {@code LlmMetricsAdvisor}'s
- * thread-hop/{@code TenantContext}-recapture complexity - same simplification
+ * <p>{@code tenantId}/{@code userKey}/{@code modality}/{@code model} are all captured once at
+ * construction (per-call client, never shared across tenants/users), so this carries none of {@code
+ * LlmMetricsAdvisor}'s thread-hop/{@code TenantContext}-recapture complexity - same simplification
  * {@code FreeTierTokenTrackingAdvisor} documents.
  *
- * <p><b>Only ever reconciles on SUCCESS, deliberately - see {@link
- * FreeTierTokenTrackingAdvisor}'s class javadoc for the full reasoning.</b>
- * Unlike that advisor this one is NOT shared across chain links (a fresh
- * instance per {@code HostedChainLink}, since it needs each link's own
- * {@code model} to price correctly on success), but the SAME
- * {@code reservedMicroCents} value - and, since 2026-08-12, the SAME
- * turn-scoped {@link TurnReservationGuards} - is threaded into every one of
- * them for a given turn, so the ONE reservation is reconciled at most once
- * regardless of how many sibling instances reach a terminal signal (see the
- * guard-scope paragraph below for why "at most one ever does" was NOT a safe
- * assumption). The turn's other possible outcome (every link fails) is
- * released at the outer level by {@code AgentChatService}'s existing {@code
+ * <p><b>Only ever reconciles on SUCCESS, deliberately - see {@link FreeTierTokenTrackingAdvisor}'s
+ * class javadoc for the full reasoning.</b> Unlike that advisor this one is NOT shared across chain
+ * links (a fresh instance per {@code HostedChainLink}, since it needs each link's own {@code model}
+ * to price correctly on success), but the SAME {@code reservedMicroCents} value - and, since
+ * 2026-08-12, the SAME turn-scoped {@link TurnReservationGuards} - is threaded into every one of
+ * them for a given turn, so the ONE reservation is reconciled at most once regardless of how many
+ * sibling instances reach a terminal signal (see the guard-scope paragraph below for why "at most
+ * one ever does" was NOT a safe assumption). The turn's other possible outcome (every link fails)
+ * is released at the outer level by {@code AgentChatService}'s existing {@code
  * HostedPoolExhaustedException} handling - through the same shared guard.
  *
- * <p>2026-08-09 leak fix: same {@code doOnCancel} addition as {@link
- * FreeTierTokenTrackingAdvisor} - a client-disconnect cancel is not a
- * retryable link-level error, it ends the whole turn, so releasing the
- * reservation here can never double- or under-count.
+ * <p>2026-08-09 leak fix: same {@code doOnCancel} addition as {@link FreeTierTokenTrackingAdvisor}
+ * - a client-disconnect cancel is not a retryable link-level error, it ends the whole turn, so
+ * releasing the reservation here can never double- or under-count.
  *
  * <p><b>2026-08-11 double-reconciliation fix - same one-shot guard as {@link
- * FreeTierTokenTrackingAdvisor} (see its class javadoc for the full write-up),
- * here for the dollar reservation.</b> The "at most one link's stream ever
- * completes" reasoning above covers the FIRST terminal signal only - the
- * winning link's ChatClient (this advisor still attached as a default) is
- * then reused for EXTRA same-turn calls (quality judge, consistency checker,
- * reflexion, task planning, toxicity guardrail, entity extraction), each of
- * which re-entered {@link #adviseCall}/{@link #adviseStream} on THIS instance
- * and re-reconciled the SAME {@code reservedMicroCents}, additively releasing
- * the one dollar reservation once per extra call. Now only the turn's
- * first terminal reconciliation sees the reservation; every later one passes
- * {@code reservedMicroCents=0}, which {@link
- * PerUserBudgetService#reconcileSpendReservationForUsage} documents as "fall
- * back to plain additive {@code recordSpendForUsage}" - the extra calls' real
+ * FreeTierTokenTrackingAdvisor} (see its class javadoc for the full write-up), here for the dollar
+ * reservation.</b> The "at most one link's stream ever completes" reasoning above covers the FIRST
+ * terminal signal only - the winning link's ChatClient (this advisor still attached as a default)
+ * is then reused for EXTRA same-turn calls (quality judge, consistency checker, reflexion, task
+ * planning, toxicity guardrail, entity extraction), each of which re-entered {@link
+ * #adviseCall}/{@link #adviseStream} on THIS instance and re-reconciled the SAME {@code
+ * reservedMicroCents}, additively releasing the one dollar reservation once per extra call. Now
+ * only the turn's first terminal reconciliation sees the reservation; every later one passes {@code
+ * reservedMicroCents=0}, which {@link PerUserBudgetService#reconcileSpendReservationForUsage}
+ * documents as "fall back to plain additive {@code recordSpendForUsage}" - the extra calls' real
  * cost still lands, the reservation is never re-touched.
  *
- * <p><b>2026-08-12 guard-scope fix - the guard is TURN-scoped and shared
- * across all sibling link instances ({@link TurnReservationGuards}), not
- * per-instance.</b> The original per-instance guard leaned on "at most one
- * link ever reaches a terminal success/cancel", which the mid-stream idle
- * timeout falsifies: {@code Flux.timeout} in {@code
- * AgentChatService#streamFast} CANCELS the current link's stream (firing
- * this advisor's {@code doOnCancel}, which released the full {@code
- * reservedMicroCents}) and then surfaces as a retryable 408, so a LATER
- * sibling link can still reach its own terminal success - and its own
- * instance's unconsumed guard let it reconcile the same reservation again,
- * crediting the user the full reservation per timeout-then-success event.
- * The shared {@code FreeTierTokenTrackingAdvisor} (one instance across the
- * whole chain) already survived that sequence correctly, which is exactly
- * the shape the shared guard restores here: one reservation, one turn-wide
- * guard, whichever sibling (or the outer pool-exhausted release) terminates
- * first consumes it.
+ * <p><b>2026-08-12 guard-scope fix - the guard is TURN-scoped and shared across all sibling link
+ * instances ({@link TurnReservationGuards}), not per-instance.</b> The original per-instance guard
+ * leaned on "at most one link ever reaches a terminal success/cancel", which the mid-stream idle
+ * timeout falsifies: {@code Flux.timeout} in {@code AgentChatService#streamFast} CANCELS the
+ * current link's stream (firing this advisor's {@code doOnCancel}, which released the full {@code
+ * reservedMicroCents}) and then surfaces as a retryable 408, so a LATER sibling link can still
+ * reach its own terminal success - and its own instance's unconsumed guard let it reconcile the
+ * same reservation again, crediting the user the full reservation per timeout-then-success event.
+ * The shared {@code FreeTierTokenTrackingAdvisor} (one instance across the whole chain) already
+ * survived that sequence correctly, which is exactly the shape the shared guard restores here: one
+ * reservation, one turn-wide guard, whichever sibling (or the outer pool-exhausted release)
+ * terminates first consumes it.
  */
 public class PerUserBudgetTrackingAdvisor implements CallAdvisor, StreamAdvisor {
 
@@ -95,36 +80,69 @@ public class PerUserBudgetTrackingAdvisor implements CallAdvisor, StreamAdvisor 
     private final String userKey;
     private final Modality modality;
     private final String model;
-    /** See {@link PerUserBudgetService#reconcileSpendReservationForUsage}'s
-     * {@code reservedMicroCents} parameter - {@code <= 0} means nothing was
-     * reserved for this turn (falls back to a plain additive record). */
+
+    /**
+     * See {@link PerUserBudgetService#reconcileSpendReservationForUsage}'s {@code
+     * reservedMicroCents} parameter - {@code <= 0} means nothing was reserved for this turn (falls
+     * back to a plain additive record).
+     */
     private final long reservedMicroCents;
+
     private final TenantPlan knownPlan;
-    /** 2026-08-11 double-reconciliation fix, re-scoped to the turn on
-     * 2026-08-12 (see class javadoc): the SAME instance is shared by every
-     * sibling link's advisor and the outer pool-exhausted release, so only
-     * the turn's first terminal reconciliation anywhere sees the
-     * reservation; every later one behaves as if nothing was reserved (pure
-     * additive record). */
+
+    /**
+     * 2026-08-11 double-reconciliation fix, re-scoped to the turn on 2026-08-12 (see class
+     * javadoc): the SAME instance is shared by every sibling link's advisor and the outer
+     * pool-exhausted release, so only the turn's first terminal reconciliation anywhere sees the
+     * reservation; every later one behaves as if nothing was reserved (pure additive record).
+     */
     private final TurnReservationGuards guards;
 
     /** V484 - see the nine-argument constructor. */
     private final boolean zeroCost;
 
-    /** Convenience for tests/simple callers - a private, per-instance guard
-     * (correct only when this is the turn's sole reservation holder). */
+    /**
+     * Convenience for tests/simple callers - a private, per-instance guard (correct only when this
+     * is the turn's sole reservation holder).
+     */
     public PerUserBudgetTrackingAdvisor(
-        PerUserBudgetService budgetService, String tenantId, String userKey, Modality modality, String model,
-        long reservedMicroCents, TenantPlan knownPlan
-    ) {
-        this(budgetService, tenantId, userKey, modality, model, reservedMicroCents, knownPlan, new TurnReservationGuards());
+            PerUserBudgetService budgetService,
+            String tenantId,
+            String userKey,
+            Modality modality,
+            String model,
+            long reservedMicroCents,
+            TenantPlan knownPlan) {
+        this(
+                budgetService,
+                tenantId,
+                userKey,
+                modality,
+                model,
+                reservedMicroCents,
+                knownPlan,
+                new TurnReservationGuards());
     }
 
     public PerUserBudgetTrackingAdvisor(
-        PerUserBudgetService budgetService, String tenantId, String userKey, Modality modality, String model,
-        long reservedMicroCents, TenantPlan knownPlan, TurnReservationGuards guards
-    ) {
-        this(budgetService, tenantId, userKey, modality, model, reservedMicroCents, knownPlan, guards, false);
+            PerUserBudgetService budgetService,
+            String tenantId,
+            String userKey,
+            Modality modality,
+            String model,
+            long reservedMicroCents,
+            TenantPlan knownPlan,
+            TurnReservationGuards guards) {
+        this(
+                budgetService,
+                tenantId,
+                userKey,
+                modality,
+                model,
+                reservedMicroCents,
+                knownPlan,
+                guards,
+                false);
     }
 
     /**
@@ -133,9 +151,15 @@ public class PerUserBudgetTrackingAdvisor implements CallAdvisor, StreamAdvisor 
      * row would answer) is released in full and nothing is recorded as spend.
      */
     public PerUserBudgetTrackingAdvisor(
-        PerUserBudgetService budgetService, String tenantId, String userKey, Modality modality, String model,
-        long reservedMicroCents, TenantPlan knownPlan, TurnReservationGuards guards, boolean zeroCost
-    ) {
+            PerUserBudgetService budgetService,
+            String tenantId,
+            String userKey,
+            Modality modality,
+            String model,
+            long reservedMicroCents,
+            TenantPlan knownPlan,
+            TurnReservationGuards guards,
+            boolean zeroCost) {
         this.zeroCost = zeroCost;
         this.budgetService = budgetService;
         this.tenantId = tenantId;
@@ -160,14 +184,17 @@ public class PerUserBudgetTrackingAdvisor implements CallAdvisor, StreamAdvisor 
     }
 
     @Override
-    public ChatClientResponse adviseCall(ChatClientRequest chatClientRequest, CallAdvisorChain callAdvisorChain) {
+    public ChatClientResponse adviseCall(
+            ChatClientRequest chatClientRequest, CallAdvisorChain callAdvisorChain) {
         ChatClientResponse response = callAdvisorChain.nextCall(chatClientRequest);
-        reconcile(usageOf(response == null ? null : response.chatResponse()));
+        ChatResponse chat = response == null ? null : response.chatResponse();
+        reconcile(usageOf(chat), textLength(chat));
         return response;
     }
 
     @Override
-    public Flux<ChatClientResponse> adviseStream(ChatClientRequest chatClientRequest, StreamAdvisorChain streamAdvisorChain) {
+    public Flux<ChatClientResponse> adviseStream(
+            ChatClientRequest chatClientRequest, StreamAdvisorChain streamAdvisorChain) {
         // 2026-10-05 cost-tracing audit fix: usage is MERGED across chunks,
         // not read off the last one - the same StreamUsageAccumulator
         // LlmMetricsAdvisor feeds the durable llm_call_log row and the
@@ -177,25 +204,72 @@ public class PerUserBudgetTrackingAdvisor implements CallAdvisor, StreamAdvisor 
         // chunk carried output only, so a streamed hosted call debited the
         // dollar budget for completion tokens alone) and dropped the merged
         // chunk's native usage that carries billable cache/reasoning counts.
-        LlmMetricsAdvisor.StreamUsageAccumulator usage = new LlmMetricsAdvisor.StreamUsageAccumulator();
-        return streamAdvisorChain.nextStream(chatClientRequest)
-            .doOnNext(usage::accept)
-            .doOnComplete(() -> reconcile(usage.merged()))
-            .doOnCancel(() -> reconcile(usage.merged()));
+        LlmMetricsAdvisor.StreamUsageAccumulator usage =
+                new LlmMetricsAdvisor.StreamUsageAccumulator();
+        java.util.concurrent.atomic.AtomicLong received =
+                new java.util.concurrent.atomic.AtomicLong();
+        return streamAdvisorChain
+                .nextStream(chatClientRequest)
+                .doOnNext(
+                        chunk -> {
+                            usage.accept(chunk);
+                            received.addAndGet(
+                                    textLength(chunk == null ? null : chunk.chatResponse()));
+                        })
+                .doOnComplete(() -> reconcile(usage.merged(), received.get()))
+                .doOnCancel(() -> reconcile(usage.merged(), received.get()));
         // Still no doOnError hook - deliberately (see class javadoc).
     }
 
     private static Usage usageOf(ChatResponse chatResponse) {
-        return (chatResponse == null || chatResponse.getMetadata() == null) ? null : chatResponse.getMetadata().getUsage();
+        return (chatResponse == null || chatResponse.getMetadata() == null)
+                ? null
+                : chatResponse.getMetadata().getUsage();
     }
 
-    private void reconcile(Usage usage) {
-        // A null usage (no usage metadata at all - a partial/failed response
-        // typically carries none) flows straight through to
+    private static boolean hasTokens(Integer tokens) {
+        return tokens != null && tokens > 0;
+    }
+
+    /**
+     * True when the provider reported any token count at all (Spring AI's empty usage reports
+     * none).
+     */
+    private static boolean isMeasured(Usage usage) {
+        return usage != null
+                && (hasTokens(usage.getPromptTokens()) || hasTokens(usage.getCompletionTokens()));
+    }
+
+    /** Characters of model text in a response (0 for none, a tool-call-only turn included). */
+    private static long textLength(ChatResponse chatResponse) {
+        try {
+            if (chatResponse == null
+                    || chatResponse.getResult() == null
+                    || chatResponse.getResult().getOutput() == null) {
+                return 0L;
+            }
+            String text = chatResponse.getResult().getOutput().getText();
+            return text == null ? 0L : text.length();
+        } catch (RuntimeException e) {
+            return 0L;
+        }
+    }
+
+    /**
+     * @param receivedChars characters of model text that reached the caller. A response with text
+     *     but no usage, or with a prompt count and no completion count (a stream cancelled after
+     *     the first event), used to release the whole reservation and cost nothing; it is now
+     *     charged for what was received (see {@link
+     *     PerUserBudgetService#chargeUnmeasuredResponse}).
+     */
+    private void reconcile(Usage usage, long receivedChars) {
+        // A null usage with NO text received (a failed call, a stream cancelled
+        // before the first token) flows straight through to
         // reconcileSpendReservationForUsage exactly like a real call with 0
-        // tokens would: no price to derive, so it releases the full
-        // reservation (or no-ops if nothing was reserved) - no separate
-        // branch needed here.
+        // tokens would: nothing was produced, so it releases the full
+        // reservation (or no-ops if nothing was reserved). A null or
+        // completion-less usage WITH text received is a call that happened
+        // and cost money - that is charged below, not released.
         //
         // 2026-08-08 edge-case audit: a provider that bills for a partial
         // completion before erroring mid-stream is NOT reconciled against
@@ -220,12 +294,40 @@ public class PerUserBudgetTrackingAdvisor implements CallAdvisor, StreamAdvisor 
         if (zeroCost) {
             // V484 - nothing to price: give back whatever was reserved up front, once.
             if (guards.consumeSpendReservation() && reservedMicroCents > 0) {
-                budgetService.releaseSpendReservation(tenantId, userKey, modality, reservedMicroCents, knownPlan);
+                budgetService.releaseSpendReservation(
+                        tenantId, userKey, modality, reservedMicroCents, knownPlan);
             }
             return;
         }
         long reservedForThisReconcile = guards.consumeSpendReservation() ? reservedMicroCents : 0L;
+        if (receivedChars > 0 && !isMeasured(usage)) {
+            budgetService.chargeUnmeasuredResponse(
+                    tenantId,
+                    userKey,
+                    modality,
+                    reservedForThisReconcile,
+                    receivedChars,
+                    knownPlan);
+            return;
+        }
+        if (receivedChars > 0 && !hasTokens(usage.getCompletionTokens())) {
+            // The prompt was measured and the completion was not (a stream cancelled after its
+            // first event): price
+            // the prompt as reported and the completion from the text that arrived.
+            usage =
+                    new org.springframework.ai.chat.metadata.DefaultUsage(
+                            usage.getPromptTokens(),
+                            (int)
+                                    Math.min(
+                                            Integer.MAX_VALUE,
+                                            Math.ceil(
+                                                    receivedChars
+                                                            / PerUserBudgetService
+                                                                    .CHARS_PER_TOKEN)),
+                            null,
+                            usage.getNativeUsage());
+        }
         budgetService.reconcileSpendReservationForUsage(
-            tenantId, userKey, modality, reservedForThisReconcile, model, usage, knownPlan);
+                tenantId, userKey, modality, reservedForThisReconcile, model, usage, knownPlan);
     }
 }

@@ -164,6 +164,7 @@ final class FastStreamTurn {
                 null,
                 TurnJournals.runToolNames(context));
         TurnJournals.recordApprovalDecision(turn, context);
+        TurnJournals.recordMemoryRecall(turn, context);
         this.journaledTools = turn.wrapTools(tools, context == null ? null : context.approval());
         this.fabricationCheckStartedAt = Instant.now();
         this.callsAtStart = activity().finishedCalls();

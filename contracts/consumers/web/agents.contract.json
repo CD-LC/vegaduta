@@ -1567,6 +1567,113 @@
       }
     },
     {
+      "id": "post-api-agents-agentId-memories-memoryId-approve",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/memories/{memoryId}/approve",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-memory-items",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/memory-items",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].agentId",
+          "$[*].content",
+          "$[*].id"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-agents-agentId-memory-items-itemId",
+      "method": "DELETE",
+      "path": "/api/agents/{agentId}/memory-items/{itemId}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-memory-items-itemId",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/memory-items/{itemId}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.events",
+          "$.item",
+          "$.lineage"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-memory-items-itemId",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/memory-items/{itemId}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.content"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.content",
+          "$.id"
+        ]
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-memory-items-itemId-approve",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/memory-items/{itemId}/approve",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-agents-agentId-memory-items-itemId-pin",
+      "method": "DELETE",
+      "path": "/api/agents/{agentId}/memory-items/{itemId}/pin",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-memory-items-itemId-pin",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/memory-items/{itemId}/pin",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-memory-items-itemId-reject",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/memory-items/{itemId}/reject",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-memory-items-itemId-revert",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/memory-items/{itemId}/revert",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
       "id": "patch-api-agents-agentId-model",
       "method": "PATCH",
       "path": "/api/agents/{agentId}/model",

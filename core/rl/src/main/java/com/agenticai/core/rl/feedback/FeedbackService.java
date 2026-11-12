@@ -42,10 +42,14 @@ public class FeedbackService {
 
     private RlFeedbackProperties feedbackProperties = new RlFeedbackProperties();
 
-    /** {@code rl.feedback.*}: the reward each signal maps to. Without it the built-in mapping applies. */
+    /**
+     * {@code rl.feedback.*}: the reward each signal maps to. Without it the built-in mapping
+     * applies.
+     */
     @Autowired(required = false)
     public void setFeedbackProperties(RlFeedbackProperties feedbackProperties) {
-        this.feedbackProperties = feedbackProperties == null ? new RlFeedbackProperties() : feedbackProperties;
+        this.feedbackProperties =
+                feedbackProperties == null ? new RlFeedbackProperties() : feedbackProperties;
     }
 
     public FeedbackService(
@@ -61,7 +65,10 @@ public class FeedbackService {
         this.banditService = banditService;
     }
 
-    /** Optional: lets other modules learn from a stored comment (see {@link TurnFeedbackRecordedEvent}). */
+    /**
+     * Optional: lets other modules learn from a stored comment (see {@link
+     * TurnFeedbackRecordedEvent}).
+     */
     @Autowired(required = false)
     void setEvents(ApplicationEventPublisher events) {
         this.events = events;
@@ -108,12 +115,26 @@ public class FeedbackService {
         if (events != null && createdBy != null && comment != null && !comment.isBlank()) {
             try {
                 events.publishEvent(
-                        new TurnFeedbackRecordedEvent(this, createdBy, agentId, sessionId, comment));
+                        new TurnFeedbackRecordedEvent(
+                                this, createdBy, agentId, sessionId, comment));
             } catch (RuntimeException ignored) {
                 // A listener must never undo a stored rating.
             }
         }
         return feedback;
+    }
+
+    /**
+     * What people said about one session's turns since {@code since}, newest first, at most 20
+     * rows. A read-only view for the episodic recorder (ADR-0028), which derives an
+     * accepted/rejected verdict from it and never changes feedback.
+     */
+    @Transactional(readOnly = true)
+    public java.util.List<TurnFeedback> recentForSession(
+            UUID agentId, String sessionId, Instant since) {
+        return feedbackRepository
+                .findTop20ByAgentIdAndSessionIdAndCreatedAtGreaterThanEqualOrderByCreatedAtDesc(
+                        agentId, sessionId, since);
     }
 
     /**
@@ -188,13 +209,14 @@ public class FeedbackService {
      * Maps a human signal onto a [0,1] reward target for the arm that produced the turn:
      *
      * <ul>
-     *   <li>THUMBS_UP -&gt; 1.0, THUMBS_DOWN -&gt; 0.0 (rl.feedback.thumbs-up-reward / thumbs-down-reward).
+     *   <li>THUMBS_UP -&gt; 1.0, THUMBS_DOWN -&gt; 0.0 (rl.feedback.thumbs-up-reward /
+     *       thumbs-down-reward).
      *   <li>RESOLVED -&gt; 1.0, UNRESOLVED -&gt; 0.0 (did the turn actually resolve the user's
      *       need).
      *   <li>RATING -&gt; (rating-1)/4 so 1 star -&gt; 0.0 and 5 stars -&gt; 1.0.
-     *   <li>EDIT -&gt; 0.0 (rl.feedback.edit-reward): the arm's own output needed human correction, so it is trained AWAY
-     *       from; the corrected text becomes the "chosen" side of a DPO preference pair on export
-     *       instead.
+     *   <li>EDIT -&gt; 0.0 (rl.feedback.edit-reward): the arm's own output needed human correction,
+     *       so it is trained AWAY from; the corrected text becomes the "chosen" side of a DPO
+     *       preference pair on export instead.
      * </ul>
      */
     private double signalToReward(FeedbackSignal signal, Short rating) {
@@ -205,7 +227,10 @@ public class FeedbackService {
             case UNRESOLVED -> feedbackProperties.getUnresolvedReward();
             case EDIT -> feedbackProperties.getEditReward();
             case RATING -> {
-                int r = rating == null ? feedbackProperties.getDefaultRating() : Math.max(1, Math.min(5, rating));
+                int r =
+                        rating == null
+                                ? feedbackProperties.getDefaultRating()
+                                : Math.max(1, Math.min(5, rating));
                 yield (r - 1) / 4.0;
             }
         };

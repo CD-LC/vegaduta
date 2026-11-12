@@ -1,8 +1,6 @@
 package com.agenticai.core.tables;
 
-import com.agenticai.core.tenancy.ListPaging;
 import com.agenticai.core.tables.DataTableDtos.AddColumnRequest;
-import com.agenticai.core.tenancy.ListPaging;
 import com.agenticai.core.tables.DataTableDtos.AlterColumnRequest;
 import com.agenticai.core.tables.DataTableDtos.BulkRowsRequest;
 import com.agenticai.core.tables.DataTableDtos.Config;
@@ -14,6 +12,7 @@ import com.agenticai.core.tables.DataTableDtos.RowRequest;
 import com.agenticai.core.tables.DataTableDtos.RowView;
 import com.agenticai.core.tables.DataTableDtos.TableView;
 import com.agenticai.core.tables.DataTableDtos.UpdateTableRequest;
+import com.agenticai.core.tenancy.ListPaging;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -35,15 +34,19 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * {@code /api/data-tables}: the console's view of Data Tables. Thin on purpose - the feature flag, plan gate,
- * limits, validation and status codes are all decided in {@link DataTableService}. {@code {table}} is a table id
- * or its (case-insensitive) name. Authenticated like every other tenant route (no SecurityConfig entry).
+ * {@code /api/data-tables}: the console's view of Data Tables. Thin on purpose - the feature flag,
+ * plan gate, limits, validation and status codes are all decided in {@link DataTableService}.
+ * {@code {table}} is a table id or its (case-insensitive) name. Authenticated like every other
+ * tenant route (no SecurityConfig entry).
  */
 @RestController
 @RequestMapping("/api/data-tables")
 public class DataTableController {
 
-    /** Refuse an absurd upload before reading it; the configured, much lower import cap is applied by the service. */
+    /**
+     * Refuse an absurd upload before reading it; the configured, much lower import cap is applied
+     * by the service.
+     */
     private static final long HARD_UPLOAD_LIMIT_BYTES = 20L * 1024 * 1024;
 
     private final DataTableService service;
@@ -60,10 +63,10 @@ public class DataTableController {
     // ---- tables
 
     @GetMapping
-    public ResponseEntity<List<TableView>> list(@RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
-        return ListPaging.window(
-            service.list(),
-            limit, offset, 50, 500);
+    public ResponseEntity<List<TableView>> list(
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
+        return ListPaging.window(service.list(), limit, offset, 50, 500);
     }
 
     @PostMapping
@@ -72,10 +75,14 @@ public class DataTableController {
         return service.create(request.name(), request.description(), request.columns());
     }
 
-    /** Multipart CSV: creates a table named {@code name} from the file (header = columns, types inferred). */
+    /**
+     * Multipart CSV: creates a table named {@code name} from the file (header = columns, types
+     * inferred).
+     */
     @PostMapping("/import")
     @ResponseStatus(HttpStatus.CREATED)
-    public ImportResult createFromCsv(@RequestParam("name") String name, @RequestParam("file") MultipartFile file) {
+    public ImportResult createFromCsv(
+            @RequestParam("name") String name, @RequestParam("file") MultipartFile file) {
         return service.createFromCsv(name, readCsv(file));
     }
 
@@ -104,7 +111,10 @@ public class DataTableController {
     }
 
     @PutMapping("/{table}/columns/{column}")
-    public TableView alterColumn(@PathVariable String table, @PathVariable String column, @RequestBody AlterColumnRequest request) {
+    public TableView alterColumn(
+            @PathVariable String table,
+            @PathVariable String column,
+            @RequestBody AlterColumnRequest request) {
         return service.alterColumn(table, column, request.newName(), request.type());
     }
 
@@ -116,18 +126,23 @@ public class DataTableController {
     // ---- rows
 
     /**
-     * {@code filter} is JSON: a list of {@code {column, op, value}} or an object of column/value pairs;
-     * {@code sort} is {@code column} or {@code column:desc}.
+     * {@code filter} is JSON: a list of {@code {column, op, value}} or an object of column/value
+     * pairs; {@code sort} is {@code column} or {@code column:desc}.
      */
     @GetMapping("/{table}/rows")
     public RowPage rows(
-        @PathVariable String table,
-        @RequestParam(required = false) String filter,
-        @RequestParam(required = false) String sort,
-        @RequestParam(defaultValue = "50") int limit,
-        @RequestParam(defaultValue = "0") int offset
-    ) {
-        return service.queryRows(table, new RowQuery(DataTableFilter.parse(filter), DataTableFilter.parseSort(sort), limit, offset));
+            @PathVariable String table,
+            @RequestParam(required = false) String filter,
+            @RequestParam(required = false) String sort,
+            @RequestParam(defaultValue = "50") int limit,
+            @RequestParam(defaultValue = "0") int offset) {
+        return service.queryRows(
+                table,
+                new RowQuery(
+                        DataTableFilter.parse(filter),
+                        DataTableFilter.parseSort(sort),
+                        limit,
+                        offset));
     }
 
     @PostMapping("/{table}/rows")
@@ -138,12 +153,14 @@ public class DataTableController {
 
     @PostMapping("/{table}/rows/bulk")
     @ResponseStatus(HttpStatus.CREATED)
-    public List<RowView> insertRows(@PathVariable String table, @RequestBody BulkRowsRequest request) {
+    public List<RowView> insertRows(
+            @PathVariable String table, @RequestBody BulkRowsRequest request) {
         return service.insertRows(table, request.rows());
     }
 
     @PutMapping("/{table}/rows/{rowId}")
-    public RowView updateRow(@PathVariable String table, @PathVariable UUID rowId, @RequestBody RowRequest request) {
+    public RowView updateRow(
+            @PathVariable String table, @PathVariable UUID rowId, @RequestBody RowRequest request) {
         return service.updateRow(table, rowId, request.values());
     }
 
@@ -153,11 +170,40 @@ public class DataTableController {
         service.deleteRow(table, rowId);
     }
 
+    // ---- rows held for review (written by an agent on a turn that handled untrusted content)
+
+    @GetMapping("/{table}/quarantine")
+    public ResponseEntity<List<DataTableDtos.QuarantinedRowView>> quarantined(
+            @PathVariable String table,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
+        return ListPaging.window(service.quarantinedRows(table, 500), limit, offset, 50, 500);
+    }
+
+    /** Makes the held row readable; 404 when no row of that table is held under that id. */
+    @PostMapping("/{table}/quarantine/{rowId}/approve")
+    public ResponseEntity<Void> approveQuarantined(
+            @PathVariable String table, @PathVariable UUID rowId) {
+        return service.approveQuarantinedRow(table, rowId)
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.notFound().build();
+    }
+
+    /** Deletes the held row; 404 when no row of that table is held under that id. */
+    @PostMapping("/{table}/quarantine/{rowId}/reject")
+    public ResponseEntity<Void> rejectQuarantined(
+            @PathVariable String table, @PathVariable UUID rowId) {
+        return service.rejectQuarantinedRow(table, rowId)
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.notFound().build();
+    }
+
     // ---- CSV
 
     /** Multipart CSV appended to an existing table (headers matched to columns). */
     @PostMapping("/{table}/import")
-    public ImportResult importCsv(@PathVariable String table, @RequestParam("file") MultipartFile file) {
+    public ImportResult importCsv(
+            @PathVariable String table, @RequestParam("file") MultipartFile file) {
         return service.importCsv(table, readCsv(file));
     }
 
@@ -165,9 +211,9 @@ public class DataTableController {
     public ResponseEntity<byte[]> exportCsv(@PathVariable String table) {
         byte[] body = service.exportCsv(table).getBytes(StandardCharsets.UTF_8);
         return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"data-table.csv\"")
-            .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
-            .body(body);
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"data-table.csv\"")
+                .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
+                .body(body);
     }
 
     private static String readCsv(MultipartFile file) {

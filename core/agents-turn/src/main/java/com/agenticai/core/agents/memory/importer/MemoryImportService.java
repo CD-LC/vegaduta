@@ -3,6 +3,7 @@ package com.agenticai.core.agents.memory.importer;
 import com.agenticai.core.agents.core.AgentNotFoundException;
 import com.agenticai.core.agents.memory.AgentMemoryEntry;
 import com.agenticai.core.agents.memory.AgentMemoryService;
+import com.agenticai.core.agents.memory.MemoryTrust;
 import com.agenticai.core.agents.memory.TenantMemoryEntry;
 import com.agenticai.core.agents.memory.TenantMemoryService;
 import com.agenticai.core.agents.memory.importer.MemoryImportDtos.Capacity;
@@ -14,6 +15,7 @@ import com.agenticai.core.agents.memory.importer.MemoryImportDtos.PreviewRequest
 import com.agenticai.core.agents.memory.importer.MemoryImportDtos.PreviewResponse;
 import com.agenticai.core.agents.memory.importer.MemoryImportDtos.PreviewStats;
 import com.agenticai.core.agents.memory.importer.MemoryImportDtos.SkippedFact;
+import com.agenticai.core.agents.memorystore.MemoryTombstoneGuard;
 import com.agenticai.core.agents.usermemory.UserMemoryController;
 import com.agenticai.core.agents.usermemory.UserMemoryFactService;
 import com.agenticai.core.audit.AuditLogService;
@@ -51,8 +53,10 @@ import org.springframework.web.server.ResponseStatusException;
  * agent the caller may run, else 404) and embedding all behave exactly as for a hand-added fact.
  * Every fact is re-screened and re-deduped here; the client's preview is never trusted.
  *
- * <p>The memory tables carry no provenance column, so "imported from &lt;source&gt;" is recorded as
- * an audit log entry per import (counts + source, never the fact text). Gated by {@code
+ * <p>The memory tables' provenance columns (V676: {@code trust} and {@code source_taint}, see
+ * {@code MemoryProvenance}) record whether a row is recallable and what tainted its turn, but have
+ * no field for the import source, so "imported from &lt;source&gt;" is recorded as an audit log
+ * entry per import (counts + source, never the fact text). Gated by {@code
  * app.memory.import.enabled} (default true) and, like the facts endpoint it reuses, by {@code
  * app.memory.self-service.enabled}: either off = 404.
  */
@@ -77,6 +81,7 @@ public class MemoryImportService {
     static final String S_INVALID_SCOPE = "invalid_scope";
     static final String S_AGENT_REQUIRED = "agent_required";
     static final String S_DUPLICATE = "duplicate";
+    static final String S_FORGOTTEN = "forgotten";
     static final String S_LIMIT = "limit_reached";
     static final String S_AGENT_UNAVAILABLE = "agent_unavailable";
     static final String S_UNAVAILABLE = "unavailable";
@@ -93,6 +98,16 @@ public class MemoryImportService {
     private final int maxChars;
     private final int maxFactsPerAgent;
     private final int maxSharedFacts;
+    private volatile MemoryTombstoneGuard tombstones = MemoryTombstoneGuard.inactive();
+
+    /**
+     * Resurrection guard: an import skips a fact whose text was forgotten unless the person
+     * re-confirms it.
+     */
+    @Autowired(required = false)
+    public void setTombstoneGuard(MemoryTombstoneGuard guard) {
+        this.tombstones = guard == null ? MemoryTombstoneGuard.inactive() : guard;
+    }
 
     @Autowired
     public MemoryImportService(
@@ -153,10 +168,20 @@ public class MemoryImportService {
         List<AgentMemoryEntry> agentFacts =
                 agent == null ? List.of() : agent.listAllForSubject(subject);
         Map<String, String> existing = new HashMap<>();
+        // Duplicate detection looks at TRUSTED rows only: a quarantined twin is not something the
+        // person
+        // has accepted, so it must not swallow their own paste (it stays listed on the Memory page
+        // for review).
         for (TenantMemoryEntry m : sharedFacts) {
+            if (m.trust() != MemoryTrust.TRUSTED || m.supersededAt() != null) {
+                continue;
+            }
             existing.putIfAbsent(MemoryImportParser.dedupeKey(m.content()), m.content());
         }
         for (AgentMemoryEntry m : agentFacts) {
+            if (m.trust() != MemoryTrust.TRUSTED || m.supersededAt() != null) {
+                continue;
+            }
             existing.putIfAbsent(MemoryImportParser.dedupeKey(m.content()), m.content());
         }
 
@@ -257,12 +282,31 @@ public class MemoryImportService {
                 skipped.add(new SkippedFact(display(screened.text()), blocked));
                 continue;
             }
+            // Resurrection guard, before the duplicate check: a forgotten fact still has its
+            // (hidden) row, which would
+            // otherwise read as a duplicate and swallow both the refusal and the person's explicit
+            // re-confirmation.
+            boolean forgotten =
+                    tombstones.isForgotten(
+                            SCOPE_SHARED.equals(scope)
+                                    ? MemoryTombstoneGuard.KIND_SHARED
+                                    : MemoryTombstoneGuard.KIND_AGENT,
+                            subject,
+                            f.agentId(),
+                            screened.text());
+            if (forgotten && !Boolean.TRUE.equals(f.confirmForgotten())) {
+                skipped.add(new SkippedFact(display(screened.text()), S_FORGOTTEN));
+                continue;
+            }
             Set<String> keys = keysByTarget.get(target);
             if (keys == null) {
                 keys = new HashSet<>();
                 if (SCOPE_SHARED.equals(scope)) {
                     if (tenant != null) {
                         for (TenantMemoryEntry m : tenant.listFactsForSubject(subject)) {
+                            if (m.trust() != MemoryTrust.TRUSTED || m.supersededAt() != null) {
+                                continue; // see preview(): only accepted facts count as duplicates
+                            }
                             keys.add(MemoryImportParser.dedupeKey(m.content()));
                         }
                     }
@@ -271,6 +315,9 @@ public class MemoryImportService {
                         existingAgentKeys = new HashMap<>();
                         if (agent != null) {
                             for (AgentMemoryEntry m : agent.listAllForSubject(subject)) {
+                                if (m.trust() != MemoryTrust.TRUSTED || m.supersededAt() != null) {
+                                    continue;
+                                }
                                 existingAgentKeys
                                         .computeIfAbsent(m.agentId(), k -> new HashSet<>())
                                         .add(MemoryImportParser.dedupeKey(m.content()));
@@ -282,7 +329,7 @@ public class MemoryImportService {
                 keysByTarget.put(target, keys);
             }
             String key = MemoryImportParser.dedupeKey(screened.text());
-            if (keys.contains(key)) {
+            if (!forgotten && keys.contains(key)) {
                 skipped.add(new SkippedFact(display(screened.text()), S_DUPLICATE));
                 continue;
             }
@@ -354,8 +401,8 @@ public class MemoryImportService {
     }
 
     /**
-     * The only provenance the memory tables allow: an audit entry per import. Never throws, never
-     * carries fact text.
+     * The import source is not a provenance value the memory tables store: an audit entry per
+     * import carries it. Never throws, never carries fact text.
      */
     private void recordAudit(String subject, String source, int saved, int skippedCount) {
         String tenantId = TenantContext.current().map(TenantContext::getTenantId).orElse("unknown");

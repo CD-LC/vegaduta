@@ -106,7 +106,7 @@ that ticks in the API shape.
 
 ### Also run in the API shape
 
-These tick in the API pod as well. <!-- gen-shapes:begin alsolocked -->All 23<!-- gen-shapes:end alsolocked --> take the Postgres advisory lock, so one pod wins each tick; they
+These tick in the API pod as well. <!-- gen-shapes:begin alsolocked -->All 25<!-- gen-shapes:end alsolocked --> take the Postgres advisory lock, so one pod wins each tick; they
 still borrow a pinned database connection in a chat pod, and each can move to the jobs family once its owner
 confirms it depends on no API-pod state. `AbuseSignalService` is the exception: it writes into the API JVM's
 throttle map, which the API's request filters read, so it stays on the API pods.
@@ -118,10 +118,12 @@ throttle map, which the API's request filters read, so it stays on the API pods.
 | `AgentSentinelSweep` | agents-jobs | yes | yes | - | advisory lock |
 | `AgentSupervisorSweep` | app | yes | yes | - | advisory lock |
 | `ApprovalExpiryJob` | approval | yes | yes | - | advisory lock |
+| `ApprovalRecoveryJob` | approval | yes | yes | - | advisory lock |
 | `BriefTrustWatcher` | brief | yes | yes | - | advisory lock |
 | `ChatBranchRetentionPurge` | agents-turn | yes | yes | - | advisory lock |
 | `CompGrantReminderJob` | tenancy | yes | yes, unless its pool is on | billing | advisory lock |
 | `DataRetentionPurge` | platform | yes | yes | - | advisory lock |
+| `MemoryConsolidationSweep` | agents-jobs | yes | yes | - | advisory lock |
 | `MemoryReviewSweep` | agents-jobs | yes | yes | - | advisory lock |
 | `PaymentReconciliationJob` | payments | yes | yes, unless its pool is on | billing | advisory lock |
 | `QualityRunOrphanSweep` | quality | yes | yes | - | advisory lock |

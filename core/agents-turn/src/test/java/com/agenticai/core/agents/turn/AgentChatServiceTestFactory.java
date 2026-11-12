@@ -129,6 +129,7 @@ final class AgentChatServiceTestFactory {
                         null,
                         null,
                         null,
+                        null,
                         null),
                 new ChatRoutingFacade(null, null, null, null, null),
                 new ChatTimeouts(

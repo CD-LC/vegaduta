@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "files": [
+    "scenarios/s01-basic-recall.json",
+    "scenarios/s02-preference-unprompted.json",
+    "scenarios/s03-knowledge-update.json",
+    "scenarios/s04-contradiction-at-write.json",
+    "scenarios/s05-multi-hop.json",
+    "scenarios/s06-abstention.json",
+    "scenarios/s07-repeated-mistake-tool-arg.json",
+    "scenarios/s08-repeated-mistake-approval-denial.json",
+    "scenarios/s09-distractor-precision.json",
+    "scenarios/s10-forget-request.json",
+    "scenarios/s11-poison-user-chat.json",
+    "scenarios/s12-poison-tool-output.json",
+    "scenarios/s13-poison-slow-drip.json",
+    "scenarios/s14-cross-user-isolation.json",
+    "scenarios/s15-cross-tenant-isolation.json",
+    "personas/p1-kirana-owner.json",
+    "personas/p2-solo-founder.json",
+    "personas/p3-student.json",
+    "personas/p4-support-agent.json",
+    "personas/p5-engineer.json",
+    "personas/p6-household-planner.json",
+    "personas/p7-sales-rep.json",
+    "personas/p8-executive.json",
+    "mistakes.json"
+  ]
+}

@@ -166,6 +166,9 @@ L low, M medium, H high, S security. **Use site** is the code that must consult 
 | `chat.toolLoop.resultClearing.thresholdChars` | i 500-200000 | L | T,A | `app.chat.tools.result-clearing.threshold-chars` | **wired**: as above |
 | `routing.simple.maxChars` | i 0-2000 | L | T,A | `app.routing.simple.max-chars` | **wired**: agents-turn `QueryComplexityClassifier` |
 | `routing.simple.maxClauses` | i 1-10 | L | T,A | `app.routing.simple.max-clauses` | **wired**: agents-turn `QueryComplexityClassifier` |
+| `memory.recall.enabled` | b | L | T,A | `app.memory.limits.recall-enabled` | **wired**: agents-turn `ChatMemoryRecall` (switched off = no blocks, facts or shared facts read or injected for the agent's turns; the turn journal and `TurnContext.memoryRecall()` record `enabled=false`; writes unaffected) |
+| `memory.write.enabled` | b | L | T,A | `app.memory.limits.write-enabled` | **wired**: agents-turn `RememberFactToolCallback`, `RememberSharedFactToolCallback` (switched off = the tool answers `memory_write_disabled` and writes no row or graph triple; the turn journal records a `memory_write_skipped` GUARD event with counts only), `SessionSummaryFolder` (no summary fold for the agent's conversations), agents-jobs `LessonLearningService` / `PreferenceLearningService` (no proposals); human actions (approving a proposal, editing memory by hand, import) are unaffected |
+| `memory.unified.enabled` | b | L | T,A | `app.memory.unified.enabled` | **wired**: agents-memory `SettingsMemoryFlagOverride` (the tenant and agent levels of `MemoryUnifiedGate`; platform AND tenant AND agent, any level can only veto) read by `MemoryRecallComposer` for agents-turn `ChatMemoryRecall`, which adds a delimited, budgeted unified-memory block to the prompt only while the gate is on and `memory.recall.enabled` is on; platform default off = the prompt is byte-identical to before |
 | `memory.recall.agentTopK` | i 1-50 | L | T,A | `app.memory.limits.agent-recall-top-k` | **wired**: agents-turn `AgentMemoryService` |
 | `memory.recall.tenantTopK` | i 1-50 | L | T,A | `app.memory.limits.tenant-recall-top-k` | **wired**: agents-turn `TenantMemoryService` for the chat turn's shared recall (per agent); other callers without an agent (agents-tools `AgentKnowledgeToolResolver`) read the workspace value |
 | `memory.agent.maxMemories` | i 1-5000 | M | T,A | `app.memory.limits.agent-max-memories` | **wired**: agents-turn `AgentMemoryService` |
@@ -622,12 +625,16 @@ Ask-AI assist, Evals / LLM-as-judge), which `AuxiliaryModelResolver` reads befor
 | `app.memory.blocks.enabled` | B | feature switch: whether memory blocks are read and given to agents (true); the size limits of blocks are separate properties and a workspace-level on/off was not requested |
 | `app.memory.import.enabled` | B | feature switch: lets a member import memory facts exported from another assistant (also needs self-service memory); an operator opt-in to an import surface |
 | `app.memory.limits.agent-max-memories` | A | `memory.agent.maxMemories` |
+| `app.memory.limits.recall-enabled` | A | `memory.recall.enabled` |
+| `app.memory.limits.write-enabled` | A | `memory.write.enabled` |
+| `app.memory.unified.enabled` | A | `memory.unified.enabled` |
 | `app.memory.limits.agent-recall-top-k` | A | `memory.recall.agentTopK` |
 | `app.memory.limits.edge-memory-max-facts` | A | `memory.edge.maxFacts` |
 | `app.memory.limits.session-fold-batch` | B | sizing constant: out-of-window turns folded into the rolling summary at a time (40); one summarisation call per batch, a cost and quality trade-off inside the platform |
 | `app.memory.limits.session-max-stored-entries` | B | storage bound: turns kept in a session's Redis list (400): the hard storage bound and the ceiling of the replay window; raising it per workspace would raise Redis usage |
 | `app.memory.limits.tenant-max-memories` | A | `memory.tenant.maxMemories` |
 | `app.memory.limits.tenant-recall-top-k` | A | `memory.recall.tenantTopK` |
+| `app.metrics.turn-usage.enabled` | B | feature switch: an in-process per-session token and latency tally for evaluation harnesses (off); an operator/engineering diagnostic, not a workspace behaviour |
 | `app.models.context-windows.<model-id>` | B | model data: overrides the catalog's context window for one model; reference data about the model, the same for every workspace |
 | `app.models.default-preference-keywords` | B | algorithm constant: keywords that rank models when choosing a default (`flash`, `mini`, `haiku`, ...); selection heuristic of the model catalog |
 | `app.models.defaults.<provider>` | B | model data: the default model for each provider (what new agents get); platform-curated catalog data |
@@ -773,3 +780,7 @@ Ask-AI assist, Evals / LLM-as-judge), which `AuxiliaryModelResolver` reads befor
 | `tool-sandbox.max-memory-mb` | B | safety bound: hard ceiling a tenant's requested memory is clamped into (512 MB); raising it per workspace would raise the host's exposure |
 | `tool-sandbox.max-source-bytes` | B | safety bound: largest tenant-authored program accepted (64 KiB) |
 | `tool-sandbox.max-timeout-ms` | B | safety bound: hard ceiling a tenant's requested timeout is clamped into (15000 ms) |
+| `memory.episodic.enabled` | b | L | T,A | `app.memory.episodic.enabled` | **wired**: agents-jobs `EpisodeRecorder` (ADR-0028 WP4b; platform default off, tenant and agent can only switch it off further; on = after a completed turn one template episode built from verified signals only is filed as a PENDING or QUARANTINED proposal via `MemoryProposalSink`; skipped, with `memory.episode.skipped{reason}` counted, when `memory.write.enabled` is off) |
+| `app.memory.episodic.enabled` | A | `memory.episodic.enabled` |
+| `memory.competence.enabled` | b | L | T,A | `app.memory.competence.enabled` | **wired**: agents-memory `CompetenceTracker` / `CompetenceGate` (ADR-0028 WP9; platform default off, tenant and agent can only switch it off further; on = the episode recorder counts verified outcomes per task class in `memory_competence` and `SelfModelRecallSource` may render a numbers-only summary) |
+| `app.memory.competence.enabled` | A | `memory.competence.enabled` |

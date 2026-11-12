@@ -1,14 +1,17 @@
 package com.agenticai.core.agents.tools.tables;
 
+import com.agenticai.core.knowledge.MemoryWriteScreen;
 import com.agenticai.core.tables.DataTableDtos.RowView;
 import com.agenticai.core.tables.DataTableDtos.UpsertResult;
 import com.agenticai.core.tables.DataTableFilter;
 import com.agenticai.core.tables.DataTableService;
+import com.agenticai.core.tables.RowTrust;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
@@ -34,8 +37,69 @@ public class DataTableWriteToolCallback implements ToolCallback {
 
     private final DataTableService service;
 
-    public DataTableWriteToolCallback(DataTableService service) {
+    /**
+     * What tainted the turn this callback was built for (null result = clean): rows inserted on a
+     * tainted turn are held for review, and with no readable taint state they are held too.
+     */
+    private final Supplier<List<String>> turnTaint;
+
+    public DataTableWriteToolCallback(DataTableService service, Supplier<List<String>> turnTaint) {
         this.service = service;
+        this.turnTaint = turnTaint;
+    }
+
+    /**
+     * Refuses a cell that is itself an injected directive, a credential or an exfiltration channel.
+     */
+    private static void screen(Object value) {
+        if (value instanceof CharSequence text) {
+            MemoryWriteScreen.refusal(text.toString())
+                    .ifPresent(
+                            reason -> {
+                                throw new IllegalArgumentException(reason);
+                            });
+        } else if (value instanceof Map<?, ?> map) {
+            map.values().forEach(DataTableWriteToolCallback::screen);
+        } else if (value instanceof Iterable<?> items) {
+            items.forEach(DataTableWriteToolCallback::screen);
+        }
+    }
+
+    /**
+     * What the turn's taint decides for a write; {@code held} rows are hidden until a person
+     * approves.
+     */
+    private record Verdict(RowTrust trust) {
+        boolean held() {
+            return trust.quarantined();
+        }
+    }
+
+    private Verdict verdict() {
+        try {
+            List<String> sources =
+                    turnTaint == null ? List.of("taint-state-unavailable") : turnTaint.get();
+            return new Verdict(sources == null ? RowTrust.TRUSTED : RowTrust.held(sources));
+        } catch (RuntimeException e) {
+            return new Verdict(RowTrust.held(List.of("taint-state-unavailable")));
+        }
+    }
+
+    private static void markHeld(Map<String, Object> out, Verdict v) {
+        if (v.held()) {
+            out.put("quarantined", true);
+            out.put(
+                    "note",
+                    "Saved for review: this turn handled untrusted content, so the rows are not readable (or"
+                            + " changeable) until a person approves them.");
+        }
+    }
+
+    private static IllegalArgumentException heldTurn(String what) {
+        return new IllegalArgumentException(
+                "this turn handled untrusted content, so it cannot "
+                        + what
+                        + " rows that already exist - insert new rows instead (they are held for review) or ask the user");
     }
 
     @Override
@@ -98,9 +162,12 @@ public class DataTableWriteToolCallback implements ToolCallback {
                             throw new IllegalArgumentException(
                                     "values (an object of column to value) is required");
                         }
-                        RowView row = service.insertRow(table, values);
+                        screen(values);
+                        Verdict v = verdict();
+                        RowView row = service.insertRow(table, values, v.trust());
                         out.put("inserted", 1);
                         out.put("rowId", row.id());
+                        markHeld(out, v);
                         return DataTableToolSupport.json(out);
                     }
                 case "insert_rows":
@@ -122,7 +189,10 @@ public class DataTableWriteToolCallback implements ToolCallback {
                                             + MAX_INSERT_ROWS
                                             + " rows per call");
                         }
-                        out.put("inserted", service.insertRows(table, rows).size());
+                        screen(rows);
+                        Verdict v = verdict();
+                        out.put("inserted", service.insertRows(table, rows, v.trust()).size());
+                        markHeld(out, v);
                         return DataTableToolSupport.json(out);
                     }
                 case "update_rows":
@@ -132,6 +202,14 @@ public class DataTableWriteToolCallback implements ToolCallback {
                         if (values == null) {
                             throw new IllegalArgumentException(
                                     "values (an object of column to value) is required");
+                        }
+                        screen(values);
+                        if (verdict().held()) {
+                            // Changing a trusted row in place cannot be held for review without
+                            // hiding the
+                            // trusted row, and attacker text must not replace trusted data
+                            // unreviewed.
+                            throw heldTurn("change");
                         }
                         // confirmAll is never passed through from a model: an empty filter is
                         // refused by the service.
@@ -151,6 +229,10 @@ public class DataTableWriteToolCallback implements ToolCallback {
                         String key = DataTableToolSupport.str(args, "keyColumn");
                         if (values == null || key == null) {
                             throw new IllegalArgumentException("keyColumn and values are required");
+                        }
+                        screen(values);
+                        if (verdict().held()) {
+                            throw heldTurn("upsert");
                         }
                         UpsertResult r = service.upsertRow(table, key, values);
                         out.put("created", r.created());

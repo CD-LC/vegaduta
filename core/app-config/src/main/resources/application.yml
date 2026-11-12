@@ -2301,6 +2301,12 @@ app:
       agent-max-memories: ${APP_MEMORY_LIMITS_AGENT_MAX_MEMORIES:50}
       # Shared memories one tenant keeps (memory blocks excluded); the oldest are pruned past it.
       tenant-max-memories: ${APP_MEMORY_LIMITS_TENANT_MAX_MEMORIES:300}
+      # Whether automatic recall puts memory into the prompt. A tenant or an agent can switch it off for itself
+      # (setting memory.recall.enabled); writes and extraction are unaffected.
+      recall-enabled: ${APP_MEMORY_LIMITS_RECALL_ENABLED:true}
+      # Whether the agent's memory writes happen (remember tools, session summary, lesson/preference learning). A
+      # tenant or an agent can switch it off for itself (setting memory.write.enabled); reads and recall are unaffected.
+      write-enabled: ${APP_MEMORY_LIMITS_WRITE_ENABLED:true}
       # Memories automatic recall injects into a turn, per agent and per tenant.
       agent-recall-top-k: ${APP_MEMORY_LIMITS_AGENT_RECALL_TOP_K:5}
       tenant-recall-top-k: ${APP_MEMORY_LIMITS_TENANT_RECALL_TOP_K:5}
@@ -2310,6 +2316,25 @@ app:
       session-fold-batch: ${APP_MEMORY_LIMITS_SESSION_FOLD_BATCH:40}
       # Facts the edge (on-device) memory endpoint returns; they go into a 4k-8k context window.
       edge-memory-max-facts: ${APP_MEMORY_LIMITS_EDGE_MEMORY_MAX_FACTS:24}
+    # Relevance of AUTOMATIC recall (the facts and episodes put into the prompt each turn). The always-in-context
+    # blocks below, the self-model line and the explicit memory tools are not affected. 0 for both = every line of each
+    # store's top-k, as before. Defaults come from the real-pipeline memory eval (scorecard doc, Addendum F).
+    recall:
+      # Cosine similarity between the user's message and a recalled line below which the line is left out (0 = no floor).
+      min-similarity: ${APP_MEMORY_RECALL_MIN_SIMILARITY:0.20}
+      # Most recalled facts and episodes one turn injects, private + shared + unified together (0 = each store's own top-k).
+      max-items: ${APP_MEMORY_RECALL_MAX_ITEMS:3}
+    # A corrected fact replaces the fact it corrects (V685): the old row is marked superseded, never deleted, and is
+    # left out of recall; it stays in the Memory page, the export and the erasure. A QUARANTINED fact replaces nothing
+    # until a person approves it. false = every fact is a new row, as before.
+    supersession:
+      enabled: ${APP_MEMORY_SUPERSESSION_ENABLED:true}
+      # Cosine similarity at or above which a new fact replaces an older one of the same person on similarity alone.
+      # Safe starting point for the sidecar's sentence-embedding models; calibrate per embedding model.
+      min-similarity: ${APP_MEMORY_SUPERSESSION_MIN_SIMILARITY:0.85}
+      # Cosine similarity at or above which the text named in remember_fact's `replaces` resolves to a stored fact
+      # when it does not match one word for word.
+      replace-min-similarity: ${APP_MEMORY_SUPERSESSION_REPLACE_MIN_SIMILARITY:0.60}
     blocks:
       # false = no prompt injection, and /api/memory block endpoints return 404 (facts stay editable).
       enabled: ${APP_MEMORY_BLOCKS_ENABLED:true}
@@ -3182,6 +3207,16 @@ app:
       attack-scenarios:
         enabled: ${SIMULATION_ATTACK_SCENARIOS_ENABLED:true}
   guardrails:
+    # OWASP LLM07 output-side system-prompt leak control. mode: off (nothing runs) | warn (a per-turn
+    # canary is added to the system prompt, replies are scanned, detections are counted and audited,
+    # replies are never changed) | enforce (also applies action). action: warn | redact | block.
+    # min-chars: letters/digits of verbatim prompt text that count as a leak. stream-holdback-chars:
+    # stream text held back so a leak split across chunks is caught first (first text arrives that late).
+    prompt-leak:
+      mode: ${APP_GUARDRAILS_PROMPT_LEAK_MODE:off}
+      action: ${APP_GUARDRAILS_PROMPT_LEAK_ACTION:warn}
+      min-chars: 60
+      stream-holdback-chars: 256
     # What a guardrail does when its OWN machinery fails (the tool-policy lookup throws, the
     # injection judge errors or answers nothing, content moderation throws). A violation always
     # blocks; this is about failures. closed (default) refuses the tool call, withholds the tool
@@ -4273,6 +4308,19 @@ app:
       # No ${...} env override: a placeholder default cannot contain the braces.
       expired-reason: >-
         No one approved or rejected this request within {ttl}, so it expired and the action was NOT performed. The request can no longer be approved. If the action is still needed, ask for it again or take another route to the goal.
+    # Approved-but-never-executed recovery (ApprovalRecoveryJob, migration V675). A decision is committed before the
+    # action runs, so a process that died in between left an approved request nothing ran. A never-started action is
+    # run once if the decision is younger than max-recovery-age, else closed as not done; one that started and never
+    # reported its end is closed as interrupted and NOT re-run (a second send or charge is worse than a reported gap).
+    recovery:
+      enabled: ${APP_APPROVALS_RECOVERY_ENABLED:true}
+      sweep-interval: ${APP_APPROVALS_RECOVERY_SWEEP_INTERVAL:PT1M}
+      initial-delay: ${APP_APPROVALS_RECOVERY_INITIAL_DELAY:PT2M}
+      unstarted-grace: ${APP_APPROVALS_RECOVERY_UNSTARTED_GRACE:PT2M}
+      max-recovery-age: ${APP_APPROVALS_RECOVERY_MAX_AGE:PT1H}
+      # Longer than the slowest executor (a code-workspace run) or a live run is reported lost.
+      started-stale-after: ${APP_APPROVALS_RECOVERY_STARTED_STALE_AFTER:PT30M}
+      batch-size: ${APP_APPROVALS_RECOVERY_BATCH_SIZE:50}
     # What the platform does after a human decides one of an agent's gated tool calls: it CONTINUES the task
     # (core/agents-turn approval/ApprovalContinuation*; typed ApprovalContinuationProperties, whose code defaults are
     # approval/continuation.properties - keep the two in step, ApprovalContinuationDefaultsTest pins it). A chat

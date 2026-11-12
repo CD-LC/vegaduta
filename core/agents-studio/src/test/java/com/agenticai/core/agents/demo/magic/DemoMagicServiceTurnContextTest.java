@@ -107,6 +107,8 @@ class DemoMagicServiceTurnContextTest {
         ArgumentCaptor<ChatTurnRequest> request = ArgumentCaptor.forClass(ChatTurnRequest.class);
         verify(chat).chat(context.capture(), request.capture());
         assertSame(sandboxTenant, context.getValue().tenant());
+        org.junit.jupiter.api.Assertions.assertEquals(
+                java.util.List.of("inbound:demo_magic"), context.getValue().taint().sources());
         assertEquals("demo_schema", context.getValue().tenantId());
         assertEquals(agentId, context.getValue().requestedAgentId());
         assertEquals(request.getValue().sessionId(), context.getValue().sessionId());

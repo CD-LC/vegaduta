@@ -52,15 +52,54 @@ public interface ScratchpadNoteRepository extends JpaRepository<ScratchpadNote, 
     long deleteByAgentIdAndSessionIdAndUpdatedAtBefore(
             UUID agentId, UUID sessionId, Instant cutoff);
 
+    /** The caller's own agent-pad note under {@code key}. */
+    Optional<ScratchpadNote> findByAgentIdAndSessionIdIsNullAndSubjectKeyAndKey(
+            UUID agentId, String subjectKey, String key);
+
+    /** Every agent-pad note under {@code key}, whoever owns it (operator review paths only). */
+    List<ScratchpadNote> findByAgentIdAndSessionIdIsNullAndKey(UUID agentId, String key);
+
+    /** How many agent-pad notes one caller holds: the cap is per caller, not per agent. */
+    long countByAgentIdAndSessionIdIsNullAndSubjectKey(UUID agentId, String subjectKey);
+
+    /** The caller's stalest agent-pad note: the eviction candidate. */
+    Optional<ScratchpadNote> findFirstByAgentIdAndSessionIdIsNullAndSubjectKeyOrderByUpdatedAtAsc(
+            UUID agentId, String subjectKey);
+
+    /** Data-subject erasure: every note (either pad, any agent) owned by the subject. */
+    long deleteBySubjectKey(String subjectKey);
+
     /**
-     * Everything the agent can see from {@code sessionId}: that session's notes AND the
-     * agent-long-term ({@code sessionId IS NULL}) ones, newest-updated first. A null {@code
-     * sessionId} argument yields just the long-term notes.
+     * What the model may see for one caller: the session's notes (those owned by the caller or by
+     * nobody, since the session id is already per caller) and the caller's own agent-pad notes.
+     * Notes with a null owner on the agent pad (pre-V711) are never returned here.
      */
     @Query(
             "select n from ScratchpadNote n where n.agentId = :agentId"
+                    + " and n.trust = 'TRUSTED'"
+                    + " and ((n.sessionId = :sessionId and (n.subjectKey = :subject or n.subjectKey is null))"
+                    + " or (n.sessionId is null and n.subjectKey = :subject))"
+                    + " order by n.updatedAt desc")
+    List<ScratchpadNote> findVisibleTo(
+            @Param("agentId") UUID agentId,
+            @Param("sessionId") UUID sessionId,
+            @Param("subject") String subject);
+
+    /**
+     * Operator view, every owner: the session's notes AND the agent-long-term ({@code sessionId IS
+     * NULL}) ones, newest-updated first. Never use this for a model-facing read.
+     */
+    @Query(
+            "select n from ScratchpadNote n where n.agentId = :agentId"
+                    + " and n.trust = 'TRUSTED'"
                     + " and (n.sessionId = :sessionId or n.sessionId is null)"
                     + " order by n.updatedAt desc")
     List<ScratchpadNote> findVisible(
             @Param("agentId") UUID agentId, @Param("sessionId") UUID sessionId);
+
+    /** Notes held for review (written on a turn that handled untrusted content), newest first. */
+    @Query(
+            "select n from ScratchpadNote n where n.agentId = :agentId and n.trust = 'QUARANTINED'"
+                    + " order by n.updatedAt desc")
+    List<ScratchpadNote> findQuarantined(@Param("agentId") UUID agentId);
 }

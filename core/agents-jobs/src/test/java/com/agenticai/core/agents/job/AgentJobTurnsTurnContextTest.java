@@ -110,14 +110,19 @@ class AgentJobTurnsTurnContextTest {
     }
 
     @Test
-    void bothTurnShapesCarryTheJobsDeadlineSoABufferedDepthIsNotCutAtItsOwnShorterTimeout() throws Exception {
+    void bothTurnShapesCarryTheJobsDeadlineSoABufferedDepthIsNotCutAtItsOwnShorterTimeout()
+            throws Exception {
         Instant deadline = deadline();
 
         turns.runOneTurn(job, deadline, "goal", false);
-        ArgumentCaptor<ChatTurnRequest> goalRequest = ArgumentCaptor.forClass(ChatTurnRequest.class);
+        ArgumentCaptor<ChatTurnRequest> goalRequest =
+                ArgumentCaptor.forClass(ChatTurnRequest.class);
         TurnContext goal = capturedContext(goalRequest);
 
-        assertEquals(deadline, goal.deadline(), "the job's own timeoutSeconds is the authority on how long the turn may take");
+        assertEquals(
+                deadline,
+                goal.deadline(),
+                "the job's own timeoutSeconds is the authority on how long the turn may take");
     }
 
     @Test
@@ -130,24 +135,29 @@ class AgentJobTurnsTurnContextTest {
         assertEquals(deadline, capturedContext(request).deadline());
     }
 
-    // --- the job's tool-call budget, enforced inside the turn --------------------------------------
+    // --- the job's tool-call budget, enforced inside the turn
+    // --------------------------------------
 
     @Test
     void theGoalTurnCarriesWhatIsLeftOfTheJobsToolBudgetAsACapOnItsOwnCalls() throws Exception {
         // queuedJob(60, 15): the job may make 15 calls in all; 4 are already on its session.
-        when(toolCallLogs.countByAgentIdAndSessionId(job.getAgentId(), job.getSessionId())).thenReturn(4L);
+        when(toolCallLogs.countByAgentIdAndSessionId(job.getAgentId(), job.getSessionId()))
+                .thenReturn(4L);
 
         turns.runOneTurn(job, deadline(), "goal", false);
 
         ArgumentCaptor<ChatTurnRequest> request = ArgumentCaptor.forClass(ChatTurnRequest.class);
         capturedContext(request);
-        assertEquals(11, request.getValue().caps().getMaxToolSteps(),
+        assertEquals(
+                11,
+                request.getValue().caps().getMaxToolSteps(),
                 "the turn may make the calls the job has left, not just the per-turn ceiling");
     }
 
     @Test
     void aJobsCapNeverAsksForMoreThanItHasLeftEvenWhenItIsTheOnlyLimit() throws Exception {
-        when(toolCallLogs.countByAgentIdAndSessionId(job.getAgentId(), job.getSessionId())).thenReturn(14L);
+        when(toolCallLogs.countByAgentIdAndSessionId(job.getAgentId(), job.getSessionId()))
+                .thenReturn(14L);
 
         turns.runOneTurn(job, deadline(), "goal", false);
 
@@ -167,18 +177,82 @@ class AgentJobTurnsTurnContextTest {
 
     @Test
     void oneJobsBoundaryCountNeverLeaksIntoAnotherJobsTurnOnTheSharedInstance() throws Exception {
-        // AgentJobTurns is one instance shared by every worker thread: job B's boundary check must not
+        // AgentJobTurns is one instance shared by every worker thread: job B's boundary check must
+        // not
         // change what job A's turn is allowed to spend.
         AgentJob other = AgentJobTestSupport.queuedJob(60, 15);
-        when(toolCallLogs.countByAgentIdAndSessionId(job.getAgentId(), job.getSessionId())).thenReturn(2L);
-        when(toolCallLogs.countByAgentIdAndSessionId(other.getAgentId(), other.getSessionId())).thenReturn(9L);
+        when(toolCallLogs.countByAgentIdAndSessionId(job.getAgentId(), job.getSessionId()))
+                .thenReturn(2L);
+        when(toolCallLogs.countByAgentIdAndSessionId(other.getAgentId(), other.getSessionId()))
+                .thenReturn(9L);
 
         turns.guardBeforeTurn(job);
-        turns.guardBeforeTurn(other); // interleaved: B's boundary check lands between A's check and A's turn
+        turns.guardBeforeTurn(
+                other); // interleaved: B's boundary check lands between A's check and A's turn
         turns.runOneTurn(job, deadline(), "goal", false);
 
         ArgumentCaptor<ChatTurnRequest> request = ArgumentCaptor.forClass(ChatTurnRequest.class);
         capturedContext(request);
-        assertEquals(13, request.getValue().caps().getMaxToolSteps(), "A has 15 - 2 left, whatever B has used");
+        assertEquals(
+                13,
+                request.getValue().caps().getMaxToolSteps(),
+                "A has 15 - 2 left, whatever B has used");
+    }
+
+    private AgentJob jobWithOrigin(AgentJobOrigin origin) {
+        return AgentJob.queued(
+                java.util.UUID.randomUUID(),
+                AgentJobTestSupport.TENANT,
+                java.util.UUID.randomUUID(),
+                "goal",
+                "job-runner",
+                "job-runner",
+                Set.of("ROLE_user"),
+                origin,
+                null,
+                60,
+                1,
+                15,
+                null);
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.EnumSource(
+            value = AgentJobOrigin.class,
+            names = {"EVENT", "APPROVAL"})
+    void aJobStartedByAnEventOrAProposalRunsTaintedInBothTurnShapes(AgentJobOrigin origin)
+            throws Exception {
+        AgentJob outsider = jobWithOrigin(origin);
+        String expected = "inbound:job_" + origin.name().toLowerCase(java.util.Locale.ROOT);
+
+        turns.runOneTurn(outsider, deadline(), "goal", false);
+        turns.runOneTurn(outsider, deadline(), "repair", true);
+
+        ArgumentCaptor<TurnContext> ctx = ArgumentCaptor.forClass(TurnContext.class);
+        verify(chat, org.mockito.Mockito.times(2)).chat(ctx.capture(), any(ChatTurnRequest.class));
+        for (TurnContext context : ctx.getAllValues()) {
+            assertTrue(context.taint().isTainted(), "an event payload is outsider content");
+            assertEquals(java.util.List.of(expected), context.taint().sources());
+        }
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.EnumSource(
+            value = AgentJobOrigin.class,
+            names = {"API", "SCHEDULE"})
+    void aJobAMemberSubmittedOrTheOwnersScheduleFiredRunsClean(AgentJobOrigin origin)
+            throws Exception {
+        turns.runOneTurn(jobWithOrigin(origin), deadline(), "goal", false);
+
+        ArgumentCaptor<ChatTurnRequest> request = ArgumentCaptor.forClass(ChatTurnRequest.class);
+        assertFalse(capturedContext(request).taint().isTainted());
+    }
+
+    @Test
+    void aJobWithNoOriginIsUntrusted() {
+        assertSame(
+                com.agenticai.core.guardrails.taint.SenderTrust.UNTRUSTED,
+                AgentJobTurns.trustOf(null),
+                "unknown is untrusted");
     }
 }

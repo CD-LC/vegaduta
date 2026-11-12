@@ -592,10 +592,10 @@ final class ChatTurnDispatcher {
                         sessionId,
                         userMessage,
                         fastDispatchStartedAt,
-                        context.tenantContext());
+                        context.tenantContext(),
+                        context.taint());
         // Preferences-from-behavior loop (app.learning.preferences.enabled, off by default): hands
-        // over the
-        // person's message only; the reply stream is not touched and nothing blocks.
+        // over the person's message only; the reply stream is not touched and nothing blocks.
         com.agenticai.core.agents.skills.PreferenceSignalGateway.observe(
                 agentId, sessionId, userMessage, context.tenantContext());
         // A turn is stored only if it is cacheable now, not just when it began: an agent that
