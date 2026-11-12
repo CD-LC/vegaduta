@@ -246,14 +246,16 @@ public class TenantSchemaResolver
     static boolean effectiveFailClosed(boolean configured, Environment environment) {
         if (configured && environment != null && environment.matchesProfiles("insecure")) {
             log.warn(
-                    "app.tenancy.fail-on-missing-context forced to false: the dev-only 'insecure' profile has no "
-                            + "tenant contexts, so every query legitimately runs against the public schema.");
+                    "app.tenancy.fail-on-missing-context forced to false: the dev-only 'insecure'"
+                            + " profile has no tenant contexts, so every query legitimately runs"
+                            + " against the public schema.");
             return false;
         }
         if (!configured) {
             log.warn(
-                    "app.tenancy.fail-on-missing-context=false - context-less threads fall back to the public "
-                            + "schema (pre-SEC-017 behaviour). This is an escape hatch, not a supported production setting.");
+                    "app.tenancy.fail-on-missing-context=false - context-less threads fall back to"
+                            + " the public schema (pre-SEC-017 behaviour). This is an escape hatch, not"
+                            + " a supported production setting.");
         }
         return configured;
     }
@@ -290,9 +292,10 @@ public class TenantSchemaResolver
                 .filter(ctx -> ctx.getTenantId() != null && !ctx.getTenantId().isBlank())
                 .map(
                         ctx ->
-                                refuseSystemSchema(
+                                enforceSchema(
                                         SchemaNameSanitizer.sanitize(
-                                                ctx.getTenantId(), DEFAULT_SCHEMA)))
+                                                ctx.getTenantId(), DEFAULT_SCHEMA),
+                                        ctx))
                 .orElse(DEFAULT_SCHEMA);
     }
 
@@ -306,7 +309,8 @@ public class TenantSchemaResolver
         if (current.isPresent()) {
             String tenantId = current.get().getTenantId();
             if (tenantId != null && !tenantId.isBlank()) {
-                return refuseSystemSchema(SchemaNameSanitizer.sanitize(tenantId, DEFAULT_SCHEMA));
+                return enforceSchema(
+                        SchemaNameSanitizer.sanitize(tenantId, DEFAULT_SCHEMA), current.get());
             }
         }
         FallbackKind kind = classifyFallback(current.orElse(null));
@@ -321,16 +325,29 @@ public class TenantSchemaResolver
     }
 
     /**
-     * SEC-001/SEC-017 hardening: a tenant id (JWT claim / explicit context) that sanitises to a
-     * platform or system schema is never a tenant. The legacy {@code public} value is NOT exempt
-     * (since 2026-10-27): the webhook paths that once set it explicitly for unmapped senders now
-     * resolve a real schema via TenantResolutionService and reject unmapped senders, so a {@code
-     * public} here means a claim that tried to route into the shared legacy schema - refused like
-     * any reserved name. The no-context fallbacks (health checks, platform-admin/scope, onboarding)
-     * never pass through this method: they return {@value #DEFAULT_SCHEMA} directly from {@link
-     * #publicFallback}, which is untouched.
+     * The single enforcement chokepoint for which schema a {@link TenantContext} may reach: every
+     * Hibernate session and every raw-JDBC {@link #currentSchemaName()} call passes through here,
+     * whoever built the context. SEC-001/SEC-017 hardening: a tenant id that sanitises to a
+     * platform or system schema is never a tenant. The legacy {@code public} value is refused
+     * unless the context was built through {@link TenantContext#ofPlatformDefaultSchema} / {@link
+     * TenantContext#ofWebhookSchema} (the deliberate Twilio fallbacks). The no-context fallbacks
+     * (health checks, platform-admin/scope, onboarding) never pass through this method: they return
+     * {@value #DEFAULT_SCHEMA} directly from {@link #publicFallback}, which is untouched.
      */
-    private static String refuseSystemSchema(String schema) {
+    private static String enforceSchema(String schema, TenantContext context) {
+        if (DEFAULT_SCHEMA.equals(schema)) {
+            // Only the explicit, named API (the Twilio webhook fallbacks, pinned by
+            // PlatformDefaultSchemaCallersTest) may run on the legacy schema; every other context
+            // - JWT, API key, delegation token, a job, a hand-built one - is refused.
+            if (!context.isPlatformDefaultSchema()) {
+                throw new MissingTenantContextException(
+                        "Tenant id resolves to the default schema without an explicit"
+                                + " platform-default context - refusing to route tenant queries"
+                                + " there (use TenantContext.ofWebhookSchema for deliberate"
+                                + " webhook fallbacks)");
+            }
+            return schema;
+        }
         if (TenantSchemaGuard.isProtectedSchema(schema)) {
             throw new MissingTenantContextException(
                     "Tenant id resolves to the reserved schema '"
@@ -375,14 +392,14 @@ public class TenantSchemaResolver
                 // Counted and warned BEFORE throwing - the whole point of
                 // fail-closed mode is that the metric/log trail survives it.
                 throw new MissingTenantContextException(
-                        "TenantContext is empty but the current thread carries an authenticated JWT with a "
-                                + "tenant_id claim (nearest caller: "
+                        "TenantContext is empty but the current thread carries an authenticated JWT"
+                                + " with a tenant_id claim (nearest caller: "
                                 + caller
-                                + "). TenantContextFilter should have "
-                                + "populated it - filter ordering regressed, or an async hop propagated the Spring "
-                                + "Security context without propagating TenantContext. Failing closed "
-                                + "(app.tenancy.fail-on-missing-context=true) instead of silently querying the "
-                                + "public schema.");
+                                + "). TenantContextFilter should have populated it - filter"
+                                + " ordering regressed, or an async hop propagated the Spring"
+                                + " Security context without propagating TenantContext. Failing"
+                                + " closed (app.tenancy.fail-on-missing-context=true) instead of"
+                                + " silently querying the public schema.");
             }
         }
         return DEFAULT_SCHEMA;
@@ -395,9 +412,9 @@ public class TenantSchemaResolver
         }
         Counter.builder(FALLBACK_METRIC)
                 .description(
-                        "Tenant-schema resolutions that fell back to the public schema, by resolution "
-                                + "path (kind) and nearest non-infrastructure caller. See TenantSchemaResolver's javadoc "
-                                + "for which kinds are legitimate.")
+                        "Tenant-schema resolutions that fell back to the public schema, by"
+                                + " resolution path (kind) and nearest non-infrastructure caller. See"
+                                + " TenantSchemaResolver's javadoc for which kinds are legitimate.")
                 .tag("kind", kind.tag)
                 .tag("caller", caller)
                 .register(registry)
@@ -419,11 +436,12 @@ public class TenantSchemaResolver
         if (now - last >= WARN_INTERVAL_MILLIS
                 && lastSuspiciousWarnAtMillis.compareAndSet(last, now)) {
             log.warn(
-                    "Tenant-schema resolution fell back to the public schema on a thread that still carries "
-                            + "an authenticated JWT with a tenant_id claim (nearest caller: {}). This is the "
-                            + "TenantContext-propagation bug signature - see TenantSchemaResolver's F-14 javadoc. "
-                            + "Rate-limited to one warning per minute; the {} counter (kind=authenticated_no_context) "
-                            + "has the true rate.",
+                    "Tenant-schema resolution fell back to the public schema on a thread that still"
+                            + " carries an authenticated JWT with a tenant_id claim (nearest caller:"
+                            + " {}). This is the TenantContext-propagation bug signature - see"
+                            + " TenantSchemaResolver's F-14 javadoc. Rate-limited to one warning per"
+                            + " minute; the {} counter (kind=authenticated_no_context) has the true"
+                            + " rate.",
                     caller,
                     FALLBACK_METRIC);
         }

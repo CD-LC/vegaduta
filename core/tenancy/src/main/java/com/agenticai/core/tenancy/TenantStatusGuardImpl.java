@@ -134,7 +134,26 @@ public class TenantStatusGuardImpl implements TenantStatusGuard {
         // reach another tenant's schema.
         if (tenantId == null || !SchemaNameSanitizer.sanitize(tenantId).equals(tenantId)) {
             log.warn(
-                    "Rejecting a tenant claim that is not a canonical schema name (sanitised form differs)");
+                    "Rejecting a tenant claim that is not a canonical schema name (sanitised form"
+                            + " differs)");
+            return false;
+        }
+        // The raw claim must already be a canonical schema name. The sanitizer is lossy ("Acme-Co"
+        // and "acme_co" both become "acme_co"), so a claim that only matches after sanitising could
+        // reach another tenant's schema.
+        if (tenantId == null || !SchemaNameSanitizer.sanitize(tenantId).equals(tenantId)) {
+            log.warn("Rejecting a tenant claim that is not a canonical schema name");
+            return false;
+        }
+        // A schema whose startup migration failed is stale: refuse it until a later migration
+        // succeeds. The flag is persisted on the tenant row (TenantMigrationFailures), so this sees
+        // failures recorded by ANY shape or pod; it sits inside the TTL cache and the recording pod
+        // evicts its own entry when it marks or clears.
+        if (migrationFailures.hasFailed(tenantId)) {
+            log.warn(
+                    "Refusing tenant '{}': its schema migration failed and has not been retried"
+                            + " successfully",
+                    LogSafe.clean(tenantId));
             return false;
         }
         return tenantRepository
@@ -155,7 +174,8 @@ public class TenantStatusGuardImpl implements TenantStatusGuard {
         try (Connection connection = dataSource.getConnection();
                 PreparedStatement statement =
                         connection.prepareStatement(
-                                "SELECT 1 FROM information_schema.schemata WHERE schema_name = ?")) {
+                                "SELECT 1 FROM information_schema.schemata WHERE schema_name ="
+                                        + " ?")) {
             statement.setString(1, schemaName);
             try (ResultSet resultSet = statement.executeQuery()) {
                 return resultSet.next();

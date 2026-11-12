@@ -8,6 +8,7 @@
 # Prefer a SecurityConfig rule or @PreAuthorize to a new line here. A new line needs the same
 # review: say what checks access, and where.
 DELETE /api/agents/{agentId}  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+DELETE /api/agents/{agentId}/chat/sessions/{sessionId}/taint  # HANDLER: SessionTaintController (requireAccess RUNNER; the marker key is derived from the caller, so only their own session; acting for another subject needs tenant-admin; the clear is audited)
 DELETE /api/agents/{agentId}/memories/{memoryId}  # HANDLER: AgentMemoryController: the caller's own memories with VIEWER, any subject's with EDITOR (review step 8)
 DELETE /api/agents/{agentId}/quality/datasets/{datasetId}  # HANDLER: QualityAgentAccessGate (EDITOR on writes)
 DELETE /api/agents/{agentId}/quality/datasets/{datasetId}/cases/{caseId}  # HANDLER: QualityAgentAccessGate (EDITOR on writes)
@@ -28,6 +29,7 @@ DELETE /api/workflows/{workflowId}/comments/{commentId}  # HANDLER: WorkflowComm
 DELETE /api/workflows/{workflowId}/nodes/{nodeId}/pin  # HANDLER: WorkflowPinService (EDITOR)
 DELETE /api/workflows/{workflowId}/share  # HANDLER: WorkflowShareService (requireOwnerAccess owner/admin)
 DELETE /api/{resourceKind:agents|workflows}/{resourceId}/grants/{grantId}  # HANDLER: ResourceAccessService.revoke requireOwnerOrAdmin (resource owner or tenant-admin)
+DELETE /api/knowledge/{resourceKind:collections}/{resourceId}/grants/{grantId}  # HANDLER: ResourceAccessService.revoke requireOwnerOrAdmin (resource owner or tenant-admin)
 PATCH /api/agents/{agentId}/autonomy-tier  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
 PATCH /api/agents/{agentId}/biometric-consent  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
 PATCH /api/agents/{agentId}/capabilities/{capabilityKey}  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
@@ -156,6 +158,7 @@ POST /api/workflows/{workflowId}/versions/rollback  # HANDLER: WorkflowVersionCo
 POST /api/workflows/{workflowId}/versions/{versionNumber}/promote  # HANDLER: WorkflowVersionController (EDITOR)
 POST /api/workflows/{workflowId}/versions/{versionNumber}/restore  # HANDLER: WorkflowService (EDITOR + assertEditable)
 POST /api/{resourceKind:agents|workflows}/{resourceId}/grants  # HANDLER: ResourceAccessService.grant requireOwnerOrAdmin (resource owner or tenant-admin)
+POST /api/knowledge/{resourceKind:collections}/{resourceId}/grants  # HANDLER: ResourceAccessService.grant requireOwnerOrAdmin (resource owner or tenant-admin)
 PUT /api/account/phone  # MEMBER: the caller's own account (AccountController currentUser)
 PUT /api/agents/{agentId}/quality/datasets/{datasetId}  # HANDLER: QualityAgentAccessGate (EDITOR)
 PUT /api/agents/{agentId}/quality/datasets/{datasetId}/cases/{caseId}  # HANDLER: QualityAgentAccessGate (EDITOR)

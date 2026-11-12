@@ -2191,7 +2191,7 @@
     "adminOnlyEnforcedHint": "Wird vom Server erzwungen, nicht nur auf diesem Bildschirm. Jeder andere, der versucht, diese Anfrage zu genehmigen oder abzulehnen (auch direkt über die API), wird abgewiesen.",
     "requireApprovalLabel": "Menschliche Genehmigung vor Ausführung dieses Knotens erfordern",
     "deleteNode": "Knoten löschen",
-    "triggerRequiredHint": "Jeder Workflow benötigt genau einen Trigger-Knoten.",
+    "triggerRequiredHint": "Jeder Workflow benötigt mindestens einen Trigger-Knoten.",
     "toolNodeAgentLabel": "Agent (dessen Tool-Zugriff dieser Aufruf wiederverwendet)",
     "toolLabel": "Tool",
     "loadingToolsPlaceholder": "Verfügbare Tools werden geladen…",

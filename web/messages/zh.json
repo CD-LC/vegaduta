@@ -1794,7 +1794,7 @@
     "adminOnlyEnforcedHint": "由服务器强制执行，不仅限于此屏幕 - 其他任何人（包括直接通过 API）尝试批准或拒绝此请求都将被拒绝。",
     "requireApprovalLabel": "运行此节点前需要人工批准",
     "deleteNode": "删除节点",
-    "triggerRequiredHint": "每个工作流都需要且仅需要一个触发器节点。",
+    "triggerRequiredHint": "每个工作流至少需要一个触发器节点。",
     "toolNodeAgentLabel": "代理（此调用将复用其工具访问权限）",
     "toolLabel": "工具",
     "loadingToolsPlaceholder": "正在加载可用工具…",

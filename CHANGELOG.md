@@ -52,6 +52,8 @@ Release notes on GitHub are generated from the section for each version.
   tools visible (`app.tools.search.local-always-on`, env `TOOL_SEARCH_LOCAL_ALWAYS_ON`) and lists at most
   waiting note), so that call no longer competes with the continuation on a single-slot local model.
 ### Added
+
+- **The grants list of an agent, workflow or knowledge collection can be paged.** `GET /api/{agents|workflows}/{id}/grants` and `GET /api/knowledge/collections/{id}/grants` accept `limit` (1 to 500, default 50) and `offset` and return `X-Total-Count` and `X-Has-More`. Without either parameter the whole list comes back, as before.
 ### Changed
 - **code-intel: offline heuristic security scan.** New `GET /repos/{repo_id}/security-scan` and read-only MCP tool `security_scan` report hard-coded secrets (always redacted), dangerous sinks in Python/JS/TS/Java (command exec, eval, unsafe deserialization, SQL string building, weak crypto, disabled TLS verification) and a normalized dependency inventory (requirements, package.json/lock, pom.xml, go.mod). Deterministic, no network or LLM, tenant-scoped like the other analyses. It is a regex/entropy heuristic, not a replacement for CodeQL/gitleaks/Trivy, and does no CVE matching (an advisory-provider hook is provided for callers).
 - Release signing for the Setup app: the macOS `.dmg` (and a new `.pkg`) can be Developer ID signed, notarized and stapled, and the Windows `.exe` Authenticode-signed, by `release.yml` when the signing secrets are set. With none set the release builds what it built before. See `docs/maintainers/release-signing.md`.
@@ -192,6 +194,43 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Added
 
+- **Workflow effect journal: exactly-once effects for irreversible nodes.** New tenant table
+  `workflow_effect_journal` (V680) and `WorkflowEffectJournal`: `bulk_email`, `tool`, `crm_lead`,
+  `device_control`, `media`, `output`, `workflow` and non-GET `http` nodes record `STARTED` before and
+  `COMPLETED` (with the result) after their side effect, keyed `(run, node, iteration)`. A retry, crash
+  re-run or approval resume of a completed key replays the recorded output with a trace line instead of
+  repeating the effect; a `STARTED` row with no `COMPLETED` is "effect uncertain" and fails the node for a
+  human decision (`app.workflow.effects.on-uncertain=fail|rerun`, default `fail`). The HTTP node sends the
+  stable `runId:nodeId:iteration` key as `Idempotency-Key` on POST/PUT/PATCH unless the node sets one.
+  `WorkflowRunRecoveryJob` now states in the failed run's message whether the crash left an uncertain effect
+  or the run is resumable after its last completed node, and purges journal rows past
+  `app.workflow.effects.journal.retention-days`. Off switch: `app.workflow.effects.journal.enabled=false`.
+### Security
+
+- **Taint now survives across the turns of a conversation.** A turn that became tainted (web page, email, recalled memory, inbound channel) leaves a small marker with the chat session, and every later turn of the same session starts tainted from it, including after the history is summarised. `GET`/`DELETE /api/agents/{id}/chat/sessions/{sid}/taint` show and clear it (audited). `app.agents.taint.session-persistence`, default on whenever the taint layer is.
+- **Memory and knowledge writes are screened.** `remember_fact`, `remember_shared_fact` and graph-memory writes refuse injection phrases and credentials (one shared `ContentWriteScreen`); ingestion by upload, URL, connector or job refuses credentials and records a `screen_flags` marker on chunks that match an injection phrase, which `search_knowledge_base` results now show the model.
+- **`app.agents.taint.inbound-channel-sources` (`off` | `all` | `non-owner`, default `off`)** and `InboundChannelTaintPolicy`: the seam for marking inbound channel turns, without choosing the policy.
+
+### Fixed
+
+- **Workflow step timeout no longer breaks slow nodes.** The workflow-level `stepTimeoutSeconds` (default 30 in every existing row, never enforced before) now bounds only fast node types (`http`, `condition`); agent, supervisor, sub-workflow, tool, code and other long-running nodes get a 600 s floor (`-Dvegaduta.workflow.longRunningStepTimeoutSeconds`, 0 = no limit). A node's own `timeoutSeconds` (1..3600) overrides both. A timed-out attempt is never retried, because its worker may still be running.
+- **Workflow engine: duplicate side effects on retry, unenforced step timeout,
+  approvals inside loop bodies.** (1) The default retry path no longer retries
+  irreversible nodes (`bulk_email`, `tool`, `crm_lead`, `device_control`,
+  `media`, sub-`workflow`, non-GET `http`) unless the node sets
+  `retryUnsafe=true`, matching the per-node error strategy. (2) Saving a graph
+  whose loop, fan-out or sub-flow body is an `approval` / `human_input` node or
+  has `requiresApproval=true` is now rejected (a paused run cannot resume at the
+  right iteration); the "needs exactly one Trigger node" message now says "at
+  least one" (several triggers were always allowed). (3) `stepTimeoutSeconds` is
+  now enforced per node attempt by the in-process engine (the attempt is
+  interrupted and fails), parallel branches are cancelled when a sibling fails,
+  and the parallel join is bounded.
+- **Untrusted-content taint now covers auto-injected memory recall and the workflow `knowledge` node.** A non-empty recalled-facts block injected into the prompt marks the turn tainted (source `memory_recall`; sinks need approval in enforce mode, recorded in observe mode) via `TurnTaintSeeds`, bound to the turn's taint key when tools are resolved. The `knowledge` workflow node wraps retrieved chunks in the untrusted-data spotlight with numbered source citations, skips with a clear result on an invalid `collectionId`, and clamps `topK` to 1..20.
+- **Tenant isolation hardening.** A JWT or API-key tenant claim naming the `public` (or a reserved) schema is rejected with 403 instead of running tenant queries in the legacy schema (webhook paths that set `public` deliberately are unchanged); the tenant status guard now fails closed on a schema-check SQL error (`app.tenant.status-fail-open-on-schema-check-error=true` restores the old behavior) and rejects claims the schema-name sanitizer would rewrite; tenants whose startup schema migration failed get 403 until a background retry (`app.tenancy.migrate-retry-interval`) migrates them; a non-Keycloak JWT issuer with neither an azp allowlist nor a required audience now fails startup (`app.security.jwt.allow-unrestricted-audience=true` opts out).
+- **Workflow editor hint** now says a workflow needs "at least one" Trigger node (it said "exactly
+  one"; the validator allows several). Control-UI translation keys were back-filled with English
+  fallbacks in every locale file.
 - **Agent scratchpad: discoverability, lifecycle and an operator view.** The
   four `scratchpad_*` tools are deferred (behind `search_tools`), so a model
   that never searched for tools never learned the notepad existed. A new
@@ -210,6 +249,20 @@ Release notes on GitHub are generated from the section for each version.
   read-only REST window, `GET /api/agents/{agentId}/scratchpad[?session=...]`
   and `GET .../scratchpad/{key}` (VIEWER access; `session=agent` or omitted
   reads the long-term pad).
+- **Per-collection access control for the knowledge base.** A collection now has an owner and a
+  visibility (`TENANT`, `SHARED`, `PRIVATE`; tenant migration V710). Every existing collection stays
+  `TENANT` with no owner, so nothing changes on upgrade. `SHARED` collections honour grants made at
+  `/api/knowledge/collections/{id}/grants` (same `ShareController` and `resource_grant` table as agents
+  and workflows): `VIEWER` can search and download, `EDITOR` can also ingest, re-embed and delete
+  documents; `PRIVATE` is owner and tenant/platform admin only. Search, document download, ingest,
+  delete, re-embed, retrieval settings, eval, connectors, job polling and the collection list are
+  enforced (404 on denial, audited as `knowledge.collection.access.denied`). Retrieval is enforced
+  centrally in `KnowledgeSearchService`, so the REST search, `search_knowledge_base`, workflow
+  knowledge nodes and the MCP `search_knowledge` tool all get it. An agent turn reads its
+  allow-list intersected with the invoking user's access; background runs, public share links and MCP
+  keys carry no user and see `TENANT` collections only, unless the run is wired to act as the agent
+  owner (`KnowledgeSearchToolCallback.asOwner`). An unresolvable caller reads nothing. The
+  `knowledge_collection` API gains `visibility`/`createdBy` fields.
 
 - **On-screen keyboard follows the selected language.** A keyboard toggle in
   the topbar (next to the language switcher) opens a floating board in the
@@ -285,6 +338,31 @@ Release notes on GitHub are generated from the section for each version.
   `"retryUnsafe": true`. Tool node calls are additionally claimed through
   the output dedup guard keyed on (run, node, loop index + resolved input),
   so a replayed attempt is suppressed instead of re-invoking the tool.
+
+- **Python Agent SDK: audit-chain ordering, truncation anchors and approval
+  defaults.** `evidence_bundle` (and `verify(sort_by_seq=True)`) verify in
+  `chain.seq` order, so a concurrently written log stored out of order is no
+  longer reported broken (Java parity). `verify`/`evidence_bundle` take optional
+  `expected_first_seq`/`expected_first_prev`/`expected_last_seq`/
+  `expected_head_hash` anchors to detect prefix/suffix deletion, and the bundle
+  exposes `head_hash`/`last_seq`. `ApprovalGate` now defaults to
+  `FourEyesAuthorizer` (opt out with `authorizer=allow_any`); resumption
+  failures store the exception type and a bounded, redacted message instead of
+  raw text; `ApprovalStore.update` documents the compare-and-set requirement for
+  multi-process use.
+- **Tenant isolation hardening, follow-up.** A failed startup tenant-schema migration is now
+  persisted on the control-plane tenant row (`migration_failed_at`, `migration_error`, migration
+  V690) instead of a per-JVM set, so the jobs, worker, migrate-only and other API pods refuse a
+  tenant stuck on a stale schema too; the status guard reads it through its TTL cache and a
+  successful (retried) migration clears it. The `public`/system-schema refusal is enforced in
+  `TenantSchemaResolver` for every `TenantContext` (delegation tokens included), with the explicit
+  `TenantContext.ofWebhookSchema` / `ofPlatformDefaultSchema` API for the Twilio webhook fallbacks
+  (callers pinned by `PlatformDefaultSchemaCallersTest`); the delegation-token branch of
+  `TenantContextFilter` now rejects system-schema claims and runs the tenant status guard; the guard
+  rejects claims the sanitizer would rewrite. New `app.security.oidc.provider`
+  (`keycloak`|`generic`) drives the non-Keycloak issuer startup guard instead of the `/realms/`
+  heuristic (unset: derived, with a warning), and `app.security.jwt.allow-unrestricted-audience`
+  is now honoured.
 - **`tenant_id=public` claims can no longer route into the legacy shared
   schema.** A JWT or API key asserting the `public` tenant used to pass the
   schema-exists fallback (Postgres always has `public`) and land tenant
@@ -295,6 +373,33 @@ Release notes on GitHub are generated from the section for each version.
   `app.security.jwt.required-audience`, or the boot refuses to start rather
   than accept tokens with no client-bound check.
 
+- **Python Agent SDK 0.2.0 (breaking for 0.1.x): approval decisions are
+  compare-and-set.** `ApprovalStore.update(request, expected_status)` returns
+  whether the write applied; `SqliteApprovalStore` runs it as `UPDATE ... WHERE
+  id=? AND status=?` and `ApprovalGate` routes approve, reject, expiry and the
+  result write through it, so two gates, connections or processes sharing a
+  database can no longer both approve a request and run its resumption twice
+  (the loser gets `ApprovalAlreadyDecidedException`). A custom store whose
+  `update` lacks `expected_status` still works but makes the gate warn. With
+  the four-eyes default and the failure-result redaction above, this is why the
+  package moves from `0.1.0` to `0.2.0`: code that relied on self-approval must
+  pass `authorizer=allow_any`. `Mandate.is_expired` is now true at the expiry
+  instant (Java parity), mandates are validated when decoded, and
+  `verify_chain` checks each hop was issued by its parent's subject. `Mandate.encode()` now emits the Java wire text exactly (`exp` URL-encoded, no trailing `;`). See
+  "Release notes" in `sdk/python-agent/README.md`. Not tagged or published.
+- **Java Agent SDK: `JdbcApprovalStore` approvals were not compare-and-set.**
+  It inherited `ApprovalStore.saveIfStatus`'s non-atomic find-then-save default,
+  so two gates on one database could both read `PENDING`, both approve, and
+  execute the action twice. It now overrides it with one `UPDATE ... WHERE id=?
+  AND status=?` and checks the row count. The gate's expiry-on-read uses the
+  same compare-and-set, so a decision that lands between the read and the
+  write is no longer overwritten by `EXPIRED`, and a failed execution stores
+  and audits the exception type plus a bounded, redacted message (matching the
+  Python SDK) instead of `e.toString()`. `ApprovalStore` documents the
+  atomicity requirement; `ApprovalDecisionAuthorizer.allowAny()` is the
+  explicit opt-out of the four-eyes default (`permitAll()` stays as an alias).
+  The Java default itself does not change (four-eyes was already on), so the
+  Java version stays `0.1.1`.
 - **`add_to_knowledge_base` could be relevance-trimmed from a turn while its
   search siblings stayed.** The write tool was missing from both standing-
   capability lists (`ALWAYS_RELEVANT_TOOL_NAMES` and the tool-search always-on
@@ -357,6 +462,22 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Added
 
+- **Java Agent SDK: audit-chain truncation anchors, cross-SDK fixtures.**
+  `HashChainedAuditSink.verify(events, verifier, ChainAnchors)` and the
+  `EvidenceBundle` builder (`expectedFirstSeq`/`expectedFirstPrev`/
+  `expectedLastSeq`/`expectedHeadHash`) pin either end of a chain to values
+  stored outside the log, so a deleted prefix or suffix (invisible to the log
+  alone) fails verification with a message naming the anchor. The bundle
+  exposes `firstSeq()`, `firstPrev()`, `lastSeq()`, `headHash()` over the whole
+  chain, and the EU AI Act JSON Lines/Markdown export carries `firstSeq`,
+  `firstPrev`, `lastSeq`, `headHash` under the same names as the Python SDK
+  (`headHash` was the last event of the reporting period, now the head of the
+  chain). The canonical form is unchanged. `sdk/testdata/cross-sdk` holds a
+  signed chain and a mandate chain written by each SDK; both test suites verify
+  both, including after anchoring, and the Java test asserts it reproduces
+  Python's hashes and HMAC signatures byte for byte.
+
+- **A2A message signing, replay protection and a hop limit.** Outbound A2A requests to a peer whose Agent Card advertises `urn:vegaduta:a2a:ext:message-integrity:v1` carry a detached Ed25519 signature (method, path, body digest, timestamp, nonce, hop; same key as card signing), the hop number and the trace id. The server verifies the signature against the caller's card key, enforces a 5-minute timestamp window and a per-tenant nonce replay cache, and refuses a hop above `app.a2a.max-hops` (default 4) with JSON-RPC errors `-32010..-32014` (REST: 401/409/508). The hop of an inbound request is propagated to the `a2a_call_agent` calls made while serving it. Unsigned legacy peers are still accepted (`app.a2a.server.require-signed-messages=false`, default for one release). New settings are in `docs/configuration.md`.
 - **Piper: a local, keyless TTS provider for the voice agent.** Until now
   every voice reply needed a paid hosted key (ElevenLabs preferred, Sarvam
   fallback); a deployment with neither fell back to browser-side speech.

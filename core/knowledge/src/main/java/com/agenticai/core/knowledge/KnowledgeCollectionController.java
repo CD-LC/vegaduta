@@ -44,10 +44,10 @@ public class KnowledgeCollectionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<KnowledgeCollectionResponse>> list(@RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
-        return ListPaging.window(
-            collectionService.listAll(),
-            limit, offset, 50, 500);
+    public ResponseEntity<List<KnowledgeCollectionResponse>> list(
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
+        return ListPaging.window(collectionService.listAll(), limit, offset, 50, 500);
     }
 
     // Multi-model ingestion - the fixed catalog KnowledgeCollectionsPanel's
@@ -56,7 +56,9 @@ public class KnowledgeCollectionController {
     // prefers the more specific literal match (see EmbeddingModelCatalog's
     // javadoc for the model list itself).
     @GetMapping("/embedding-models")
-    public ResponseEntity<List<EmbeddingModelCatalog.ModelOption>> embeddingModels(@RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
+    public ResponseEntity<List<EmbeddingModelCatalog.ModelOption>> embeddingModels(
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
         return ListPaging.window(EmbeddingModelCatalog.all(), limit, offset, 100, 500);
     }
 
@@ -65,7 +67,9 @@ public class KnowledgeCollectionController {
     // (per-collection FTS language, migration V154). Same literal-path-
     // segment reasoning as /embedding-models above.
     @GetMapping("/text-search-configs")
-    public ResponseEntity<List<TextSearchConfigCatalog.ConfigOption>> textSearchConfigs(@RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
+    public ResponseEntity<List<TextSearchConfigCatalog.ConfigOption>> textSearchConfigs(
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
         return ListPaging.window(TextSearchConfigCatalog.all(), limit, offset, 100, 500);
     }
 
@@ -97,7 +101,7 @@ public class KnowledgeCollectionController {
             @PathVariable UUID collectionId,
             @RequestParam(required = false) Integer limit,
             @RequestParam(required = false) Long offset) {
-        collectionService.requireExists(collectionId);
+        collectionService.requireReadable(collectionId);
         List<KnowledgeDocumentResponse> rows =
                 documentService.listByCollection(collectionId, limit, offset);
         // Truncation must be visible: X-Total-Count is the real count (queried only

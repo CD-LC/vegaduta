@@ -1695,7 +1695,7 @@
     "adminOnlyEnforcedHint": "この画面だけでなくサーバーによって強制されます。他のユーザー (API経由を含む) がこのリクエストを承認または拒否しようとすると、拒否されます。",
     "requireApprovalLabel": "このノードの実行前に人間の承認を要求する",
     "deleteNode": "ノードを削除",
-    "triggerRequiredHint": "すべてのワークフローには、トリガーノードが1つだけ必要です。",
+    "triggerRequiredHint": "すべてのワークフローには、トリガーノードが少なくとも1つ必要です。",
     "toolNodeAgentLabel": "エージェント (この呼び出しがツールアクセスを再利用する対象)",
     "toolLabel": "ツール",
     "loadingToolsPlaceholder": "利用可能なツールを読み込み中…",

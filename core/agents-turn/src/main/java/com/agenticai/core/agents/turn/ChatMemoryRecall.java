@@ -47,6 +47,34 @@ final class ChatMemoryRecall {
         this.prompts = prompts == null ? ResolvedDirectives.DEFAULTS_FOR_AGENT : prompts;
     }
 
+    /** Conversation-level taint store; absent in slim test contexts (then no session taint). */
+    private volatile ObjectProvider<com.agenticai.core.agents.memory.SessionTaintStore>
+            sessionTaint;
+
+    void useSessionTaint(
+            ObjectProvider<com.agenticai.core.agents.memory.SessionTaintStore> sessionTaint) {
+        this.sessionTaint = sessionTaint;
+    }
+
+    /**
+     * Seeds {@code taint} from the session's persisted marker and keeps the marker current (see
+     * {@link com.agenticai.core.agents.memory.SessionTaintStore}). Never throws.
+     */
+    void seedSessionTaint(com.agenticai.core.guardrails.taint.TurnTaint taint, String sessionId) {
+        ObjectProvider<com.agenticai.core.agents.memory.SessionTaintStore> provider = sessionTaint;
+        if (provider == null) {
+            return;
+        }
+        try {
+            com.agenticai.core.agents.memory.SessionTaintStore store = provider.getIfAvailable();
+            if (store != null) {
+                store.seedAndTrack(taint, sessionId);
+            }
+        } catch (RuntimeException e) {
+            log.warn("Could not apply the session taint marker", e);
+        }
+    }
+
     ChatMemoryRecall(
             ObjectProvider<AgentMemoryService> agentMemoryService,
             ObjectProvider<TenantMemoryService> tenantMemoryService,

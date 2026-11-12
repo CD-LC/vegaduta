@@ -2290,7 +2290,7 @@
     "adminOnlyEnforcedHint": "Appliqué par le serveur, pas seulement par cet écran. Toute autre personne tentant d'approuver ou de rejeter cette demande (y compris via l'API) sera rejetée.",
     "requireApprovalLabel": "Exiger une approbation humaine avant l'exécution de ce nœud",
     "deleteNode": "Supprimer le nœud",
-    "triggerRequiredHint": "Chaque workflow nécessite exactement un nœud Déclencheur.",
+    "triggerRequiredHint": "Chaque workflow nécessite au moins un nœud Déclencheur.",
     "toolNodeAgentLabel": "Agent (dont l'accès aux outils est réutilisé par cet appel)",
     "toolLabel": "Outil",
     "loadingToolsPlaceholder": "Chargement des outils disponibles…",

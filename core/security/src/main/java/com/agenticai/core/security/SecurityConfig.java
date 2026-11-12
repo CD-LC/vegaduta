@@ -29,9 +29,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
-import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
@@ -139,6 +137,23 @@ public class SecurityConfig {
     private String requiredAudience = "";
 
     /**
+     * Opt-out for the generic-OIDC startup guard: accept a {@code generic} provider with neither an
+     * azp allowlist nor a required audience (logged at ERROR). Env: {@code
+     * APP_SECURITY_JWT_ALLOW_UNRESTRICTED_AUDIENCE}.
+     */
+    @Value("${app.security.jwt.allow-unrestricted-audience:false}")
+    private boolean allowUnrestrictedAudience;
+
+    /**
+     * Which kind of identity provider signs the tokens: {@code keycloak} (the bundled realm) or
+     * {@code generic} (Auth0, Entra, Okta, any other OIDC issuer). Env: {@code
+     * APP_SECURITY_OIDC_PROVIDER}. Empty means unset: derived from the issuer URI with a warning
+     * (see {@link #resolveProvider}).
+     */
+    @Value("${app.security.oidc.provider:}")
+    private String oidcProvider = "";
+
+    /**
      * Generic-OIDC claim mapping ({@link OidcClaimMapping}) - where roles, tenant and (optionally)
      * scopes live in the token. The defaults reproduce the Keycloak layout EXACTLY ({@code
      * realm_access.roles}, {@code tenant_id}, no scope mapping), so an unconfigured deployment is
@@ -209,37 +224,39 @@ public class SecurityConfig {
         };
     }
 
-    /**
-     * SEC-056 follow-up: a generic-OIDC issuer (Auth0/Entra/Okta) with BOTH client-bound checks
-     * empty validates neither {@code azp} nor {@code aud} - the only way such a token was even
-     * accepted before was the documented emergency lever of emptying the Keycloak-specific azp
-     * allow-list. Keycloak issuers always contain {@code /realms/} (the lever stays available
-     * there); any other issuer must configure at least one of the two checks or the boot refuses to
-     * start.
-     */
-    static void requireClientCheckForNonKeycloakIssuer(
-            String issuerUri, String allowedAuthorizedParties, String requiredAudience) {
-        boolean keycloakStyleIssuer = issuerUri != null && issuerUri.contains("/realms/");
-        if (!keycloakStyleIssuer
-                && isBlank(allowedAuthorizedParties)
-                && isBlank(requiredAudience)) {
-            throw new IllegalStateException(
-                    "issuer-uri '"
-                            + issuerUri
-                            + "' is not a Keycloak /realms/ issuer, but both"
-                            + " app.keycloak.allowed-azp (APP_KEYCLOAK_ALLOWED_AZP) and"
-                            + " app.security.jwt.required-audience (APP_SECURITY_JWT_REQUIRED_AUDIENCE)"
-                            + " are empty - a generic-OIDC deployment must configure at least one of"
-                            + " them, or no token is checked against the client it was issued to.");
-        }
+    /** The two supported values of {@code app.security.oidc.provider}. */
+    enum OidcProvider {
+        KEYCLOAK,
+        GENERIC
     }
 
-    /** {@link #requireClientCheckForNonKeycloakIssuer} behind an explicit opt-out lever. */
+    static OidcProvider resolveProvider(String configured, String issuerUri) {
+        return OidcIssuerGuard.resolveProvider(configured, issuerUri);
+    }
+
+    static void requireClientCheckForNonKeycloakIssuer(
+            String issuerUri, String allowedAuthorizedParties, String requiredAudience) {
+        OidcIssuerGuard.requireClientCheckForNonKeycloakIssuer(
+                issuerUri, allowedAuthorizedParties, requiredAudience);
+    }
+
+    static void requireClientCheckForNonKeycloakIssuer(
+            String provider,
+            String issuerUri,
+            String allowedAuthorizedParties,
+            String requiredAudience,
+            boolean allowUnrestricted) {
+        OidcIssuerGuard.requireClientCheckForNonKeycloakIssuer(
+                provider, issuerUri, allowedAuthorizedParties, requiredAudience, allowUnrestricted);
+    }
+
+    /**
+     * {@link OidcIssuerGuard#requireClientCheckForNonKeycloakIssuer} behind an explicit opt-out
+     * lever.
+     */
     static void checkTokenAcceptanceConfig(
             String issuerUri, String azp, String audience, boolean allowNoClientCheck) {
-        if (!allowNoClientCheck) {
-            requireClientCheckForNonKeycloakIssuer(issuerUri, azp, audience);
-        }
+        OidcIssuerGuard.checkTokenAcceptanceConfig(issuerUri, azp, audience, allowNoClientCheck);
     }
 
     private static java.util.Set<String> csvToSet(String csv) {
@@ -279,7 +296,8 @@ public class SecurityConfig {
         String jwkSetUri = environment.getProperty("app.keycloak.jwk-set-uri", "");
         if (issuerUri.isBlank() || jwkSetUri.isBlank()) {
             throw new IllegalStateException(
-                    "app.auth.mode=keycloak needs spring.security.oauth2.resourceserver.jwt.issuer-uri"
+                    "app.auth.mode=keycloak needs"
+                            + " spring.security.oauth2.resourceserver.jwt.issuer-uri"
                             + " (KEYCLOAK_ISSUER_URI) and app.keycloak.jwk-set-uri"
                             + " (KEYCLOAK_JWK_SET_URI); set them, or use app.auth.mode=local");
         }
@@ -291,7 +309,11 @@ public class SecurityConfig {
         // least one of the two client-bound checks, or the boot refuses to start rather than
         // silently accepting any token from the realm.
         requireClientCheckForNonKeycloakIssuer(
-                issuerUri, allowedAuthorizedParties, requiredAudience);
+                oidcProvider,
+                issuerUri,
+                allowedAuthorizedParties,
+                requiredAudience,
+                allowUnrestrictedAudience);
         NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
 
         java.util.LinkedHashSet<String> acceptedIssuers = new java.util.LinkedHashSet<>();
@@ -572,50 +594,15 @@ public class SecurityConfig {
      * JWT).
      */
     static boolean hasGrantKeyBearer(HttpServletRequest request) {
-        String header = request.getHeader("Authorization");
-        return header != null
-                && header.regionMatches(true, 0, "Bearer vmcp_", 0, "Bearer vmcp_".length());
+        return OpenAiCompatAuth.hasGrantKeyBearer(request);
     }
 
-    /**
-     * Default bearer extraction, except that on {@code /v1/**} (OpenAI-compatible surface, when
-     * enabled) a {@code vmcp_} grant key is NOT handed to the JWT decoder, which would reject it as
-     * "Malformed token" before the key filter ever ran. Every other path and token is unchanged.
-     */
     private BearerTokenResolver grantKeyAwareBearerTokenResolver() {
-        DefaultBearerTokenResolver delegate = new DefaultBearerTokenResolver();
-        return request -> {
-            if (openAiCompatEnabled
-                    && request.getRequestURI().startsWith("/v1/")
-                    && hasGrantKeyBearer(request)) {
-                return null;
-            }
-            return delegate.resolve(request);
-        };
+        return OpenAiCompatAuth.grantKeyAwareBearerTokenResolver(openAiCompatEnabled);
     }
 
-    /**
-     * Default bearer 401, except that on {@code /v1/**} (flag on) an unauthenticated or
-     * invalid-token call gets OpenAI's error envelope, which an OpenAI SDK parses into a typed
-     * AuthenticationError. Everything else is the stock {@link
-     * BearerTokenAuthenticationEntryPoint}.
-     */
     private AuthenticationEntryPoint openAiAwareEntryPoint() {
-        BearerTokenAuthenticationEntryPoint delegate = new BearerTokenAuthenticationEntryPoint();
-        return (request, response, ex) -> {
-            if (openAiCompatEnabled && request.getRequestURI().startsWith("/v1/")) {
-                response.setStatus(401);
-                response.setHeader("WWW-Authenticate", "Bearer");
-                response.setContentType("application/json");
-                response.getWriter()
-                        .write(
-                                "{\"error\":{\"message\":\"Incorrect API key provided.\","
-                                        + "\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_api_key\"}}");
-                return;
-            }
-            delegate.commence(request, response, ex);
-            writeUnauthorizedProblem(request, response);
-        };
+        return OpenAiCompatAuth.openAiAwareEntryPoint(openAiCompatEnabled);
     }
 
     /**
@@ -628,25 +615,7 @@ public class SecurityConfig {
             jakarta.servlet.http.HttpServletRequest request,
             jakarta.servlet.http.HttpServletResponse response)
             throws java.io.IOException {
-        if (response.isCommitted()) {
-            return;
-        }
-        String path =
-                request.getRequestURI() == null
-                        ? ""
-                        : request.getRequestURI().replace("\\", "").replace("\"", "");
-        response.setContentType("application/problem+json");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter()
-                .write(
-                        "{\"type\":\"urn:vegaduta:problem:unauthorized\",\"title\":\"Unauthorized\","
-                                + "\"status\":401,\"detail\":\"Authentication is required to access this resource.\","
-                                + "\"instance\":\""
-                                + path
-                                + "\",\"timestamp\":\""
-                                + java.time.Instant.now()
-                                + "\","
-                                + "\"error\":\"Authentication is required to access this resource.\"}");
+        OpenAiCompatAuth.writeUnauthorizedProblem(request, response);
     }
 
     private JwtAuthenticationConverter jwtAuthenticationConverter(

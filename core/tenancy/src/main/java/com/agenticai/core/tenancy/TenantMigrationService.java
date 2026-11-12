@@ -110,6 +110,7 @@ public class TenantMigrationService {
                         schema);
             } catch (RuntimeException e) {
                 still.add(schema);
+                failures.recordFailure(schema, e.toString());
                 log.warn(
                         "Retry migration of tenant schema {} failed again: {}",
                         schema,
@@ -205,7 +206,7 @@ public class TenantMigrationService {
             failures.recordSuccess(schema);
         } catch (RuntimeException e) {
             failedSchemas.add(schema);
-            failures.recordFailure(schema);
+            failures.recordFailure(schema, e.toString());
             log.error(
                     "Startup migration failed for tenant '{}' (schema {}) - that tenant may still"
                             + " be missing recently-added tables/columns until this is fixed and core"

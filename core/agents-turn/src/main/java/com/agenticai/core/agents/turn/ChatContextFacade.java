@@ -26,4 +26,5 @@ record ChatContextFacade(
         VisionSessionService visionSessionService,
         ObjectProvider<SandboxFileRegistry> sandboxFileRegistry,
         ObjectProvider<ModelModalitiesService> modelModalitiesService,
-        ObjectProvider<ChatContextCompaction> chatContextCompaction) {}
+        ObjectProvider<ChatContextCompaction> chatContextCompaction,
+        ObjectProvider<com.agenticai.core.agents.memory.SessionTaintStore> sessionTaintStore) {}

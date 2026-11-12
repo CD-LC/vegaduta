@@ -393,7 +393,7 @@ final class AgentIntegrationToolResolver {
         // by naming a2a_call_agent in its tool allow-list (empty allow-list = "unrestricted", which
         // is deliberately NOT an opt-in for an egress tool).
         if (a2a != null && a2a.isEnabled() && a2a.hasAllowedHosts() && agentOptedIntoA2a(agentId)) {
-            ToolCallback a2aCall = a2a.newCallAgentTool();
+            ToolCallback a2aCall = a2a.newCallAgentTool(sessionId);
             web.add(
                     guardAndLog(
                             a2aCall,
@@ -410,8 +410,7 @@ final class AgentIntegrationToolResolver {
         // Turn key: inside a delegation this is the PARENT turn's counter (ResearchTurnScope), so
         // the research session and the RunBudget are one per USER turn.
         AtomicInteger turnKey = ResearchTurnScope.turnKey(stepCounter);
-        WebToolPort.SearchTools search =
-                port.searchTools(agentId, sessionId, turnKey, userMessage);
+        WebToolPort.SearchTools search = port.searchTools(agentId, sessionId, turnKey, userMessage);
         if (search.webSearch() != null) {
             web.add(
                     guardAndLog(

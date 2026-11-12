@@ -18,7 +18,7 @@
 # added to a listed class by hand.
 com.agenticai.core.agents.turn.StreamIdleWatch | Mono.delay is the idle timer's tick and emits nothing but a signal; the scheduler is TenantAwareSchedulers.parallel() (the timeout callback carries the submitting tenant) and no tenant-schema table is touched
 com.agenticai.core.agents.turn.BufferedTurnRunner | keep-alive Flux.interval emits empty chunks only; the turn itself is hopped in bufferedTurn() under TenantScope
-com.agenticai.core.agents.a2a.A2aClientService | body-read watchdog that closes an HTTP stream; no tenant state
+com.agenticai.core.agents.a2a.A2aBoundedHttp | body-read watchdog that closes an HTTP stream; no tenant state
 com.agenticai.core.agents.a2a.A2aTaskService | store.save is Redis/in-memory keyed by the task tenant id; runAsync sets the captured TenantContext on its fresh virtual thread and clears it in finally; the terminal audit callbacks use TenantScope in run()
 com.agenticai.core.agents.agui.AgUiRunController | keep-alive heartbeat Flux.interval only; the run buffer is keyed by an explicit tenantKey captured at request time
 com.agenticai.core.agents.coding.CodingTaskExecutor | run body gets a TenantContext snapshot taken on the request thread (CodingTaskService.runWorker sets it and clears it in finally); the store is Redis keyed by tenant id

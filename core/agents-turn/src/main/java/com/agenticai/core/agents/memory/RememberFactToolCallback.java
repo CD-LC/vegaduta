@@ -5,7 +5,7 @@ import com.agenticai.core.graphmemory.GraphMemoryService;
 import com.agenticai.core.graphmemory.GraphTriple;
 import com.agenticai.core.graphmemory.MemoryWriteArbitrationService;
 import com.agenticai.core.json.JsonMappers;
-import com.agenticai.core.knowledge.KnowledgeWriteScreen;
+import com.agenticai.core.screen.ContentWriteScreen;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
@@ -72,24 +72,26 @@ public class RememberFactToolCallback implements ToolCallback {
         return ToolDefinition.builder()
                 .name("remember_fact")
                 .description(
-                        "Saves a fact, preference, or correction about the current user so you'll still know it in "
-                                + "future conversations, not just this one. Use this when the user states a durable "
-                                + "preference (\"I prefer email over WhatsApp\"), a fact about themselves or their business "
-                                + "(\"my shop is only open on weekends\"), or corrects something you got wrong. Do not use "
-                                + "this for one-off details that only matter to the current message.")
+                        "Saves a fact, preference, or correction about the current user so you'll"
+                                + " still know it in future conversations, not just this one. Use this"
+                                + " when the user states a durable preference (\"I prefer email over"
+                                + " WhatsApp\"), a fact about themselves or their business (\"my shop"
+                                + " is only open on weekends\"), or corrects something you got wrong."
+                                + " Do not use this for one-off details that only matter to the current"
+                                + " message.")
                 .inputSchema(
                         """
-                {
-                    "type": "object",
-                    "properties": {
-                        "fact": {
-                            "type": "string",
-                            "description": "The fact to remember, written as a short, self-contained statement (e.g. \\"Prefers to be contacted in the evening after 6pm\\")"
-                        }
-                    },
-                    "required": ["fact"]
-                }
-                """)
+{
+    "type": "object",
+    "properties": {
+        "fact": {
+            "type": "string",
+            "description": "The fact to remember, written as a short, self-contained statement (e.g. \\"Prefers to be contacted in the evening after 6pm\\")"
+        }
+    },
+    "required": ["fact"]
+}
+""")
                 .build();
     }
 
@@ -102,12 +104,11 @@ public class RememberFactToolCallback implements ToolCallback {
             if (factValue == null || factValue.toString().isBlank()) {
                 return "{\"error\": \"fact is required\"}";
             }
-            // Recalled facts are injected into every later turn's context
-            // unsanitized - screen the write the same way knowledge-base
-            // writes already are (stored prompt injection / pasted
-            // credentials; OWASP ASI06, LLM02).
-            java.util.Optional<String> refusal = KnowledgeWriteScreen.refusal(factValue.toString());
+            // Stored-injection / credential tripwire (ASI06, LLM04, LLM02): a remembered fact is
+            // recalled into later turns, so a directive or a key written here outlives this turn.
+            var refusal = ContentWriteScreen.refusal(factValue.toString());
             if (refusal.isPresent()) {
+                log.warn("remember_fact refused for agent {}: write screen tripped", agentId);
                 return errorJson(refusal.get());
             }
             UUID memoryId = memoryService.remember(agentId, subjectKey, factValue.toString());
@@ -148,7 +149,8 @@ public class RememberFactToolCallback implements ToolCallback {
             }
         } catch (Exception e) {
             log.warn(
-                    "Graph memory enrichment failed for remember_fact - vector memory is unaffected",
+                    "Graph memory enrichment failed for remember_fact - vector memory is"
+                            + " unaffected",
                     e);
         }
     }

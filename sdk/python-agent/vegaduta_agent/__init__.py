@@ -180,7 +180,7 @@ from .riskmap import Deduction, RiskMap, ScannedTool, risk_map
 from .stores import SqliteApprovalStore, SqliteAuditSink
 from .tool_call import ToolCall
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "AUDIT_LOGGER_NAME",

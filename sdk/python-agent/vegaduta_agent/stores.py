@@ -161,9 +161,30 @@ class SqliteApprovalStore:
         ).fetchone()
         return None if row is None else self._row_to_request(row)
 
-    def update(self, request: ApprovalRequest) -> None:
+    def update(self, request: ApprovalRequest, expected_status: ApprovalStatus | None = None) -> bool:
+        """Persists a decision. With ``expected_status`` this is a real
+        compare-and-set in SQL (``UPDATE ... WHERE id=? AND status=?``): of two
+        connections, threads or processes deciding the same request exactly one
+        affects a row, the other gets ``False``. Without it the write is
+        unconditional (``INSERT OR REPLACE``, always ``True``)."""
         with self._lock, self._conn:
-            self._insert(request)
+            if expected_status is None:
+                self._insert(request)
+                return True
+            cursor = self._conn.execute(
+                "UPDATE vegaduta_approvals SET status = ?, decided_at = ?, decided_by = ?,"
+                " decision_reason = ?, result_json = ? WHERE id = ? AND status = ?",
+                (
+                    request.status.value,
+                    _iso(request.decided_at),
+                    request.decided_by,
+                    request.decision_reason,
+                    request.result_json,
+                    str(request.id),
+                    expected_status.value,
+                ),
+            )
+            return cursor.rowcount == 1
 
     def resumption_of(self, request_id: uuid.UUID) -> Callable[[], str] | None:
         return self._resumptions.get(request_id)
