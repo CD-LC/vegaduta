@@ -52,6 +52,7 @@ Release notes on GitHub are generated from the section for each version.
   tools visible (`app.tools.search.local-always-on`, env `TOOL_SEARCH_LOCAL_ALWAYS_ON`) and lists at most
   waiting note), so that call no longer competes with the continuation on a single-slot local model.
 ### Added
+- Local model catalog: Meta's open-weight models are all listed - `muse-glimmer:30b` (Apache-2.0), `llama3.2:1b`, `llama3.2-vision:11b`, `llama3.3:70b`, `llama4:16x17b` and `llama4:128x17b` next to the existing Llama rows. The Ollama model dropdown gains Muse Glimmer, Llama 3.1 8B, Llama 3.3 70B and Llama 4 Scout; the Groq dropdown gains Muse Spark Open (`meta-models/muse-spark-open`, a Groq preview model). Tool-call grades for the new rows are `unverified` until measured.
 
 - **A2A shared-secret signing and replay protection for peers without a signed Agent Card (OWASP ASI07).** Next to the card-key signatures (`X-Vegaduta-A2A-*`), outbound A2A calls also carry `X-A2A-Timestamp`, `X-A2A-Nonce` and `X-A2A-Hop`, and for peers listed in `app.a2a.signed-peers` a detached HMAC-SHA256 `X-A2A-Signature`. Inbound, when those headers are present, the skew window (`app.a2a.replay-window`, 300 s), a per-tenant single-use nonce and `app.a2a.max-hops` are enforced, and `app.a2a.signing-secret` verifies the signature; the headers stay optional unless `app.a2a.require-replay-protection=true` or `app.a2a.require-signature=true`. Refusals use error codes -32090 to -32095. The hop sent is the one the hop registry numbers, so both layers agree.
 
