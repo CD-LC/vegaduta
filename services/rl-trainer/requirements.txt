@@ -14,7 +14,7 @@ uvicorn[standard]==0.54.0
 pydantic==2.14.2
 
 # LLM client for the prompt optimizer + constitutional judge.
-anthropic==1.16.0
+anthropic==2.3.0
 
 # httpx is pulled in transitively by both anthropic and uvicorn, but pin it
 # explicitly since the optimizer/judge depend on outbound HTTP being present.
