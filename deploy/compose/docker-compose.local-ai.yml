@@ -22,7 +22,7 @@
 services:
   ollama:
     profiles: [local-ai]
-    image: ${OLLAMA_IMAGE:-ollama/ollama:0.40.14}
+    image: ${OLLAMA_IMAGE:-ollama/ollama:0.40.15}
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true

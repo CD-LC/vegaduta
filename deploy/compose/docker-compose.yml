@@ -422,7 +422,7 @@ services:
     # S3 identity is generated from STORAGE_ACCESS_KEY/SECRET at start; core
     # creates STORAGE_BUCKET itself on boot. To use external S3 instead, set
     # STORAGE_ENDPOINT and stop this service (`docker compose stop seaweedfs`).
-    image: chrislusf/seaweedfs:4.52
+    image: chrislusf/seaweedfs:4.53
     <<: [*restart, *logging, *nnp]
     entrypoint: ["/bin/sh", "-c"]
     command:
@@ -832,7 +832,7 @@ services:
     networks: [agent-io]
 
   temporal-ui:
-    image: temporalio/ui:2.58.0
+    image: temporalio/ui:2.58.1
     profiles: ["temporal", "jobs"]
     <<: [*restart, *logging, *nnp]
     depends_on:
@@ -994,7 +994,7 @@ services:
     networks: [observability, docker-api]
 
   prometheus:
-    image: prom/prometheus:v3.15.1
+    image: prom/prometheus:v3.16.0
     profiles: ["observability"]
     <<: [*restart, *logging, *nnp]
     command:
@@ -1177,7 +1177,7 @@ services:
     networks: [observability]
 
   langfuse-s3:
-    image: chrislusf/seaweedfs:4.52
+    image: chrislusf/seaweedfs:4.53
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     entrypoint: ["/bin/sh", "-c"]
@@ -1212,7 +1212,7 @@ services:
     networks: [observability]
 
   langfuse-worker:
-    image: langfuse/langfuse-worker:4.75.0
+    image: langfuse/langfuse-worker:4.76.0
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     depends_on: &langfuse-depends-on
@@ -1268,7 +1268,7 @@ services:
     networks: [observability]
 
   langfuse-web:
-    image: langfuse/langfuse:4.75.0
+    image: langfuse/langfuse:4.76.0
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     depends_on: *langfuse-depends-on
