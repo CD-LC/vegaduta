@@ -19,7 +19,7 @@
 # =============================================================================
 services:
   caddy:
-    image: caddy:2.11.7-alpine
+    image: caddy:2.11.8-alpine
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
