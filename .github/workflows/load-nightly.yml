@@ -101,7 +101,9 @@ jobs:
           # The CNPG operand variant, exactly as release.yml builds postgres-cnpg (base digest kept in one place).
           base=$(grep -o 'BASE_IMAGE=ghcr.io/cloudnative-pg/postgresql:[^"]*' .github/workflows/release.yml | head -1 | cut -d= -f2-)
           case "$base" in *@sha256:*) ;; *) echo "::error::CNPG base image not found or not digest-pinned in release.yml"; exit 1 ;; esac
-          docker build --build-arg BASE_IMAGE="$base" --build-arg FINAL_USER=26 -t "$reg/postgres:$IMAGE_TAG" deploy/postgres
+          # Tagged 16-<tag>: CloudNativePG rejects an operand tag that does not start with the Postgres major
+          # version (release.yml uses 16-pgvector-age-<version>); gate-stage.sh defaults POSTGRES_IMAGE_TAG to this.
+          docker build --build-arg BASE_IMAGE="$base" --build-arg FINAL_USER=26 -t "$reg/postgres:16-$IMAGE_TAG" deploy/postgres
           docker builder prune -af >/dev/null || true
           docker images "$reg/*"
 
