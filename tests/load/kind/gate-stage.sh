@@ -4,12 +4,16 @@
 # values-kind.yaml + values-loadtest.yaml + values-gate.yaml. Used by .github/workflows/load-nightly.yml; then run
 # gate-provision.sh and gate.sh. Not for a laptop that already runs the kind stage: it refuses when the cluster exists.
 #
-# Required env: IMAGE_TAG   images ghcr.io/cd-lc/{core,core-jobs,web,sidecar,postgres}:$IMAGE_TAG must exist in the local
-#                           Docker daemon (the workflow builds them from the commit; nothing is pulled for them).
+# Required env: IMAGE_TAG   images ghcr.io/cd-lc/{core,core-jobs,web,sidecar}:$IMAGE_TAG and
+#                           ghcr.io/cd-lc/postgres:$POSTGRES_IMAGE_TAG must exist in the local Docker daemon (the workflow
+#                           builds them from the commit; nothing is pulled for them).
+# Optional env: POSTGRES_IMAGE_TAG=16-$IMAGE_TAG  CloudNativePG rejects an operand tag that does not start with the
+#                           Postgres major version ("invalid version tag"), so postgres cannot share the plain tag.
 # Optional env: KIND_CLUSTER=vegaduta  INGRESS_NGINX_VERSION=1.11.3  CNPG_CHART_VERSION=0.29.1  EXTRA_VALUES (more -f args)
 #               IMAGE_REGISTRY=ghcr.io/cd-lc (the chart's default registry, so no registry override is needed)
 set -euo pipefail
 : "${IMAGE_TAG:?}"
+POSTGRES_IMAGE_TAG=${POSTGRES_IMAGE_TAG:-16-$IMAGE_TAG}
 KIND_CLUSTER=${KIND_CLUSTER:-vegaduta}; CTX=kind-$KIND_CLUSTER; NS=vegaduta
 INGRESS_NGINX_VERSION=${INGRESS_NGINX_VERSION:-1.11.3}; CNPG_CHART_VERSION=${CNPG_CHART_VERSION:-0.29.1}
 IMAGE_REGISTRY=${IMAGE_REGISTRY:-ghcr.io/cd-lc}
@@ -24,9 +28,10 @@ echo ">> kind cluster $KIND_CLUSTER" >&2
 kind create cluster --name "$KIND_CLUSTER" --config deploy/kind/kind-config.yaml --wait 120s
 
 echo ">> load images (tag $IMAGE_TAG)" >&2
-for img in core core-jobs web sidecar postgres; do
+for img in core core-jobs web sidecar; do
   kind load docker-image --name "$KIND_CLUSTER" "$IMAGE_REGISTRY/$img:$IMAGE_TAG"
 done
+kind load docker-image --name "$KIND_CLUSTER" "$IMAGE_REGISTRY/postgres:$POSTGRES_IMAGE_TAG"
 
 echo ">> ingress-nginx v$INGRESS_NGINX_VERSION (kind provider: binds host ports 80/443)" >&2
 kubectl --context "$CTX" apply -f "https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v$INGRESS_NGINX_VERSION/deploy/static/provider/kind/deploy.yaml" >/dev/null
@@ -52,6 +57,6 @@ echo ">> helm install vegaduta" >&2
 helm --kube-context "$CTX" upgrade --install vegaduta "$CHARTS/vegaduta" -n "$NS" --create-namespace \
   -f deploy/kind/values-kind.yaml -f tests/load/kind/values-loadtest.yaml -f tests/load/kind/values-gate.yaml ${EXTRA_VALUES:-} \
   --set core.image.tag="$IMAGE_TAG" --set core-jobs.image.tag="$IMAGE_TAG" --set web.image.tag="$IMAGE_TAG" --set sidecar.image.tag="$IMAGE_TAG" \
-  --set postgres.image.tag="$IMAGE_TAG" \
+  --set postgres.image.tag="$POSTGRES_IMAGE_TAG" \
   --wait --timeout 20m
 kubectl --context "$CTX" -n "$NS" get pods -o wide >&2
