@@ -261,9 +261,10 @@ needs a bigger one, so test your own agent before relying on it.
 |---|---|
 | 8 GB laptop, CPU | `qwen3.5:2b`, `gemma4:e2b`, `granite4.2:3b`, `phi4-mini` |
 | 16 GB laptop or Apple Silicon | `qwen3.5:4b` (default), `qwen3.5:9b`, `gemma4:e4b`, `llama3.1:8b`, `deepseek-r1:8b` (reasoning) |
-| 24 GB+ GPU or 32 GB+ Apple Silicon | `gpt-oss:20b`, `qwen3.5:35b`, `gemma4:26b`, `mistral-small3.2`, `deepseek-r1:14b` / `32b` (reasoning) |
+| 24 GB+ GPU or 32 GB+ Apple Silicon | `gpt-oss:20b`, `qwen3.5:35b`, `gemma4:26b`, `muse-glimmer:30b`, `mistral-small3.2`, `deepseek-r1:14b` / `32b` (reasoning) |
 | 48 GB Apple Silicon or 32 GB GPU | `gemma4:31b` |
-| Workstation, 80 GB+ VRAM or unified memory | `gpt-oss:120b` |
+| Workstation, 48 GB+ GPU or 64 GB+ unified memory | `llama3.3:70b` |
+| Workstation, 80 GB+ VRAM or unified memory | `gpt-oss:120b`, `llama4:16x17b` |
 
 The full list, with parameters, context window, licence and what each model is
 best for, is the [model catalog](#model-catalog); the console shows all of it,
@@ -454,13 +455,18 @@ repository and a plain copy in release downloads), lists every
 open-weight model the CLI and the console offer, so the two can never disagree.
 Add a line to offer another model.
 
+Meta's open-weight models are all listed: the Llama 3.1, 3.2, 3.3 and 4 tags and
+`muse-glimmer:30b`. Muse Spark Open (816B) is too large for an Ollama tag; use it
+through Groq (`meta-models/muse-spark-open`), OpenRouter, or your own vLLM server
+(option 4).
+
 Each row is pipe-separated. The first six columns are fixed in place (readers
 index them by position); the rest were added for the console's detail card:
 
 | Column | Meaning |
 |---|---|
 | `tag` | The Ollama tag (`qwen3.5:4b`). |
-| `family` | Qwen, Gemma, Llama, Phi, Mistral, DeepSeek, gpt-oss, Granite, Hermes. |
+| `family` | Qwen, Gemma, Llama, Muse, Phi, Mistral, DeepSeek, gpt-oss, Granite, Hermes. |
 | `download GB` | Approximate size of the weights at Ollama's default quantisation. |
 | `RAM GB` | Memory the machine should have free for the model plus the rest of the stack. This is the figure the "fits" judgement uses. |
 | `tools` | How the model makes tool calls: `structured` (agents work as they are), `text` (recovered from text, slower), `chat only` (no tool use), `unverified` (not measured here yet; core measures the pool row when it is saved). See [Tool calls from small models](#tool-calls-from-small-models). |

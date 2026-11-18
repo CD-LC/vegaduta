@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 
@@ -114,5 +115,71 @@ class ProviderModelSeedCatalogTest {
         assertEquals(
                 "gemini-2.5-flash",
                 ProviderModelSeedCatalog.entriesFor(ProviderName.GEMINI).get(0).getModelId());
+    }
+
+    @Test
+    void metaOpenWeightModelsAreListedForOllamaAndGroq() {
+        Set<String> ollama = idsOf(ProviderName.OLLAMA);
+        for (String id :
+                new String[] {"llama3.1:8b", "llama3.3:70b", "llama4:16x17b", "muse-glimmer:30b"}) {
+            assertTrue(ollama.contains(id), "OLLAMA seed lost Meta model " + id);
+        }
+        assertTrue(
+                idsOf(ProviderName.GROQ).contains("meta-models/muse-spark-open"),
+                "GROQ seed lost Muse Spark Open");
+    }
+
+    @Test
+    void museGlimmerAndLlama4AcceptImagesButTheOlderLlamasDoNot() {
+        for (ProviderModelCatalogEntry e :
+                ProviderModelSeedCatalog.entriesFor(ProviderName.OLLAMA)) {
+            boolean multimodal =
+                    e.getModelId().equals("muse-glimmer:30b")
+                            || e.getModelId().equals("llama4:16x17b");
+            if (multimodal) {
+                assertTrue(e.isSupportsImageInput(), e.getModelId());
+            }
+            if (e.getModelId().equals("llama3.1:8b") || e.getModelId().equals("llama3.3:70b")) {
+                assertFalse(e.isSupportsImageInput(), e.getModelId());
+            }
+        }
+    }
+
+    @Test
+    void museSparkOpenNeverWinsHostedPoolAutoSelectionOnGroq() {
+        // The catalog comment promises that Muse Spark Open's id holds none of the hosted pool's
+        // auto-pick keywords, so adding it cannot change which Groq model auto-selection picks
+        // (the fast llama-3.1-8b-instant). Prove it against the real picker, not by inspection.
+        List<ProviderModelResponse> groq =
+                ProviderModelSeedCatalog.entriesFor(ProviderName.GROQ).stream()
+                        .map(ProviderModelResponse::from)
+                        .toList();
+        assertTrue(groq.stream().anyMatch(m -> m.modelId().equals("meta-models/muse-spark-open")));
+        assertEquals(
+                "llama-3.1-8b-instant",
+                HostedPoolRequestResolver.pickBestModel(ProviderName.GROQ, groq));
+        for (String keyword : new ProviderModelDefaultsProperties().getHostedPoolAutoKeywords()) {
+            assertFalse(
+                    "meta-models/muse-spark-open".contains(keyword.toLowerCase(Locale.ROOT)),
+                    "Muse Spark Open's id matches auto-pick keyword '" + keyword + "'");
+        }
+    }
+
+    @Test
+    void thePlatformModelApiStillOffersTheMuseSparkLineWithTheNewestFirst() {
+        List<String> meta =
+                ProviderModelSeedCatalog.entriesFor(ProviderName.META).stream()
+                        .map(ProviderModelCatalogEntry::getModelId)
+                        .toList();
+        assertEquals("muse-spark-1.3", meta.get(0));
+        assertTrue(meta.containsAll(List.of("muse-spark-1.2", "muse-spark-1.1")));
+    }
+
+    private static Set<String> idsOf(ProviderName provider) {
+        Set<String> ids = new HashSet<>();
+        for (ProviderModelCatalogEntry e : ProviderModelSeedCatalog.entriesFor(provider)) {
+            ids.add(e.getModelId());
+        }
+        return ids;
     }
 }
