@@ -57,7 +57,7 @@ class EdgeTurnTelemetryControllerTest {
         when(rateLimiter.tryAcquire(any())).thenReturn(true);
         when(recorderProvider.getIfAvailable()).thenReturn(recorder);
         controller = new EdgeTurnTelemetryController(
-            agentService, recorderProvider, edgeTurnRepository, deviceAuthResolver, rateLimiter);
+            agentService, recorderProvider, new EdgeTurnRecordService(edgeTurnRepository), deviceAuthResolver, rateLimiter);
         when(agentService.requireAccess(AGENT_ID, PermissionLevel.RUNNER)).thenReturn(mock(Agent.class));
         when(recorder.beginTurn(any(), any(), any(), any(), any())).thenReturn(UUID.randomUUID());
     }

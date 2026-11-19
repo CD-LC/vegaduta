@@ -101,18 +101,18 @@ public class EdgeTurnTelemetryController {
 
     private final AgentService agentService;
     private final ObjectProvider<RlTurnRecorder> rlTurnRecorder;
-    private final EdgeTurnRepository edgeTurnRepository;
+    private final EdgeTurnRecordService edgeTurnRecordService;
     private final DeviceAuthResolver deviceAuthResolver;
     private final EdgeTurnTelemetryRateLimiter rateLimiter;
 
     public EdgeTurnTelemetryController(
         AgentService agentService, ObjectProvider<RlTurnRecorder> rlTurnRecorder,
-        EdgeTurnRepository edgeTurnRepository, DeviceAuthResolver deviceAuthResolver,
+        EdgeTurnRecordService edgeTurnRecordService, DeviceAuthResolver deviceAuthResolver,
         EdgeTurnTelemetryRateLimiter rateLimiter
     ) {
         this.agentService = agentService;
         this.rlTurnRecorder = rlTurnRecorder;
-        this.edgeTurnRepository = edgeTurnRepository;
+        this.edgeTurnRecordService = edgeTurnRecordService;
         this.deviceAuthResolver = deviceAuthResolver;
         this.rateLimiter = rateLimiter;
     }
@@ -233,15 +233,10 @@ public class EdgeTurnTelemetryController {
 
     /** Bounded at write time (truncation, never rejection) - see {@link EdgeTurn}'s javadoc. */
     private void persistTurn(EdgeTurnReportRequest request) {
-        edgeTurnRepository.save(new EdgeTurn(
-            request.agentId(),
-            truncate(request.sessionKey(), 255),
-            request.tier() == null ? null : request.tier().shortValue(),
-            truncate(request.modelId(), 128),
-            truncate(request.outcome(), 16),
-            truncate(request.reason(), 512),
-            request.latencyMs()
-        ));
+        edgeTurnRecordService.record(
+            request.agentId(), request.sessionKey(), request.tier(), request.modelId(),
+            request.outcome(), request.reason(), request.latencyMs()
+        );
     }
 
     private static String truncate(String value, int max) {

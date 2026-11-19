@@ -1,12 +1,9 @@
 package com.agenticai.core.agents.job;
 
-import com.agenticai.core.agents.core.Agent;
-import com.agenticai.core.agents.core.AgentRepository;
 import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.job.dto.AgentJobProgressNoteView;
 import com.agenticai.core.agents.job.dto.AgentResultSchemaRequest;
 import com.agenticai.core.agents.job.dto.JobTraceEntry;
-import com.agenticai.core.agents.job.output.JobResultSchemaValidator;
 import com.agenticai.core.agents.job.progress.AgentJobProgressService;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareSchedulers;
@@ -81,28 +78,22 @@ public class AgentJobObservabilityController {
     private static final Duration MAX_STREAM_DURATION = Duration.ofMinutes(65);
 
     private final AgentService agentService;
-    private final AgentRepository agentRepository;
-    private final AgentJobRepository jobRepository;
+    private final AgentJobObservabilityService observabilityService;
     private final AgentJobProgressService progressService;
     private final AgentJobTraceService traceService;
-    private final JobResultSchemaValidator schemaValidator;
     private final ObjectMapper objectMapper;
 
     public AgentJobObservabilityController(
         AgentService agentService,
-        AgentRepository agentRepository,
-        AgentJobRepository jobRepository,
+        AgentJobObservabilityService observabilityService,
         AgentJobProgressService progressService,
         AgentJobTraceService traceService,
-        JobResultSchemaValidator schemaValidator,
         ObjectMapper objectMapper
     ) {
         this.agentService = agentService;
-        this.agentRepository = agentRepository;
-        this.jobRepository = jobRepository;
+        this.observabilityService = observabilityService;
         this.progressService = progressService;
         this.traceService = traceService;
-        this.schemaValidator = schemaValidator;
         this.objectMapper = objectMapper;
     }
 
@@ -207,9 +198,7 @@ public class AgentJobObservabilityController {
                     emit(sink, entry);
                 }
             }
-            boolean finished = jobRepository.findById(jobId)
-                .map(job -> job.getStatus().isTerminal())
-                .orElse(true);
+            boolean finished = observabilityService.isJobFinished(jobId);
             if (finished) {
                 sink.tryEmitComplete();
             }
@@ -240,34 +229,23 @@ public class AgentJobObservabilityController {
      * minutes in, pointing at the agent instead of at the configuration that
      * actually broke.
      *
-     * <p>Saved through {@link AgentRepository} rather than an {@code AgentService}
-     * update method on purpose: those methods call {@code
-     * AgentSchemaService#refresh}, which regenerates {@code output_schema_json}
-     * and bumps {@code schema_version}. Neither has anything to do with a
-     * tenant-authored RESULT schema, and triggering them here would make an
-     * unrelated column churn on every save of this one.
+     * <p>Saved through {@link AgentJobObservabilityService}, which deliberately
+     * bypasses {@code AgentService}'s update methods (see its javadoc).
      */
     @PutMapping("/api/agents/{agentId}/result-schema")
     public ResultSchemaResponse setResultSchema(
         @PathVariable UUID agentId,
         @Valid @RequestBody AgentResultSchemaRequest request
     ) {
-        Agent agent = agentService.requireAccess(agentId, PermissionLevel.EDITOR);
-        schemaValidator.requireUsableSchema(request.schemaJson());
-        agent.setResultSchemaJson(request.schemaJson());
-        agentRepository.save(agent);
-        return new ResultSchemaResponse(agent.getResultSchemaJson());
+        return new ResultSchemaResponse(observabilityService.setResultSchema(agentId, request.schemaJson()));
     }
 
     /** 404 when this agent has no result schema - "unset" is an absence, not an empty string. */
     @GetMapping("/api/agents/{agentId}/result-schema")
     public ResponseEntity<ResultSchemaResponse> getResultSchema(@PathVariable UUID agentId) {
-        Agent agent = agentService.requireAccess(agentId, PermissionLevel.VIEWER);
-        String schemaJson = agent.getResultSchemaJson();
-        if (schemaJson == null || schemaJson.isBlank()) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(new ResultSchemaResponse(schemaJson));
+        return observabilityService.getResultSchema(agentId)
+            .map(schemaJson -> ResponseEntity.ok(new ResultSchemaResponse(schemaJson)))
+            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     /**
@@ -282,11 +260,7 @@ public class AgentJobObservabilityController {
      */
     @DeleteMapping("/api/agents/{agentId}/result-schema")
     public ResponseEntity<Void> clearResultSchema(@PathVariable UUID agentId) {
-        Agent agent = agentService.requireAccess(agentId, PermissionLevel.EDITOR);
-        if (agent.getResultSchemaJson() != null) {
-            agent.setResultSchemaJson(null);
-            agentRepository.save(agent);
-        }
+        observabilityService.clearResultSchema(agentId);
         return ResponseEntity.noContent().build();
     }
 
@@ -305,8 +279,7 @@ public class AgentJobObservabilityController {
      * it is here for the 404, which must fire before any progress or trace data
      * is read for a job that belongs to a different agent.
      */
-    private AgentJob requireJob(UUID agentId, UUID jobId) {
-        return jobRepository.findByIdAndAgentId(jobId, agentId)
-            .orElseThrow(() -> new AgentJobNotFoundException(jobId));
+    private void requireJob(UUID agentId, UUID jobId) {
+        observabilityService.requireJob(agentId, jobId);
     }
 }
