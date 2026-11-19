@@ -3,11 +3,10 @@ package com.agenticai.core.platform.ops;
 import com.agenticai.core.admin.AdminUserNotFoundException;
 import com.agenticai.core.admin.identity.IdentityUserAdminPort;
 import com.agenticai.core.admin.keycloak.KeycloakUserRepresentation;
+import com.agenticai.core.platform.PlatformTenantLookupService;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
-import com.agenticai.core.tenancy.Tenant;
-import com.agenticai.core.tenancy.TenantRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -49,15 +48,15 @@ public class PlatformSessionController {
     private static final String PLATFORM_ADMIN_ROLE = "platform-admin";
 
     private final IdentityUserAdminPort keycloak;
-    private final TenantRepository tenantRepository;
+    private final PlatformTenantLookupService tenantLookup;
     private final PlatformTenantAuditor auditor;
 
     public PlatformSessionController(
             IdentityUserAdminPort keycloak,
-            TenantRepository tenantRepository,
+            PlatformTenantLookupService tenantLookup,
             PlatformTenantAuditor auditor) {
         this.keycloak = keycloak;
-        this.tenantRepository = tenantRepository;
+        this.tenantLookup = tenantLookup;
         this.auditor = auditor;
     }
 
@@ -132,17 +131,15 @@ public class PlatformSessionController {
         String value = tenantId == null ? "" : tenantId.trim();
         try {
             UUID id = UUID.fromString(value);
-            return tenantRepository
-                    .findById(id)
-                    .map(Tenant::getSchemaName)
+            return tenantLookup
+                    .findSchemaNameById(id)
                     .orElseThrow(
                             () ->
                                     new ResponseStatusException(
                                             HttpStatus.NOT_FOUND, "Unknown tenant."));
         } catch (IllegalArgumentException notAUuid) {
-            return tenantRepository
-                    .findBySchemaName(value)
-                    .map(Tenant::getSchemaName)
+            return tenantLookup
+                    .findSchemaNameBySchemaName(value)
                     .orElseThrow(
                             () ->
                                     new ResponseStatusException(

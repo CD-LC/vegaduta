@@ -25,7 +25,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 class PlatformBillingServiceTest {
 
     private final JdbcTemplate jdbc = mock(JdbcTemplate.class);
-    private final PlatformBillingService service = new PlatformBillingService(jdbc);
+    private final PlatformBillingService service = new PlatformBillingService(new PlatformBillingJdbcRepository(jdbc));
 
     private static Map<String, Object> tenant(
             String id,

@@ -20,11 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class SharedWithMeController {
 
-    private final ResourceAccessService accessService;
+    private final ResourceGrantService grantService;
     private final ShareRateLimiter rateLimiter;
 
-    public SharedWithMeController(ResourceAccessService accessService, ShareRateLimiter rateLimiter) {
-        this.accessService = accessService;
+    public SharedWithMeController(ResourceGrantService grantService, ShareRateLimiter rateLimiter) {
+        this.grantService = grantService;
         this.rateLimiter = rateLimiter;
     }
 
@@ -46,9 +46,9 @@ public class SharedWithMeController {
         @RequestParam(required = false) Long offset
     ) {
         rateLimiter.assertGrantReadAllowed();
-        List<SharedResourceResponse> all = accessService.listSharedWithMe().stream()
+        List<SharedResourceResponse> all = grantService.listSharedWithMe().stream()
             .map(g -> new SharedResourceResponse(
-                g.getId(), g.getResourceType(), g.getResourceId(), g.getPermissionLevel(), g.getGrantedBy(), g.getGrantedAt()
+                g.id(), g.resourceType(), g.resourceId(), g.permissionLevel(), g.grantedBy(), g.grantedAt()
             ))
             .toList();
         long total = all.size();

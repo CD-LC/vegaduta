@@ -7,7 +7,6 @@ import com.agenticai.core.tenancy.TenantDataErasureService;
 import com.agenticai.core.tenancy.TenantNotFoundByIdException;
 import com.agenticai.core.tenancy.TenantRepository;
 import com.agenticai.core.tenancy.demo.DemoSandboxDataPurger;
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -17,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 /**
@@ -54,11 +52,7 @@ public class DemoSandboxReclaimService {
 
     static final String CONFIRM_WORD = "RECLAIM";
 
-    private static final String RECLAIMABLE_WHERE =
-            " FROM control_plane.tenant t WHERE t.is_demo AND t.status <> 'ERASED' AND"
-                    + " t.schema_name <> ?";
-
-    private final JdbcTemplate jdbc;
+    private final DemoSandboxReclaimJdbcRepository repository;
     private final TenantRepository tenantRepository;
     private final TenantDataErasureService erasureService;
     private final PlatformTenantDeletionOrchestrationService orchestrationService;
@@ -66,13 +60,13 @@ public class DemoSandboxReclaimService {
     private final String sharedDemoSchema;
 
     public DemoSandboxReclaimService(
-            JdbcTemplate jdbc,
+            DemoSandboxReclaimJdbcRepository repository,
             TenantRepository tenantRepository,
             TenantDataErasureService erasureService,
             PlatformTenantDeletionOrchestrationService orchestrationService,
             DemoSandboxDataPurger demoDataPurger,
             @Value("${app.demo.shared-schema:demo_shared}") String sharedDemoSchema) {
-        this.jdbc = jdbc;
+        this.repository = repository;
         this.tenantRepository = tenantRepository;
         this.erasureService = erasureService;
         this.orchestrationService = orchestrationService;
@@ -102,43 +96,14 @@ public class DemoSandboxReclaimService {
     // ------------------------------------------------------------------ reads
 
     public SandboxListing list() {
-        List<SharedSandbox> shared =
-                jdbc.query(
-                        "SELECT id, name, schema_name FROM control_plane.tenant WHERE schema_name ="
-                                + " ?",
-                        (rs, i) ->
-                                new SharedSandbox(
-                                        rs.getObject("id", UUID.class),
-                                        rs.getString("name"),
-                                        rs.getString("schema_name")),
-                        sharedDemoSchema);
-        List<ReclaimableSandbox> rows =
-                jdbc.query(
-                        "SELECT t.id, t.name, t.schema_name, t.status, t.created_at, s.last_at FROM"
-                                + " control_plane.tenant t LEFT JOIN (SELECT tenant_id,"
-                                + " MAX(last_activity_at) AS last_at FROM control_plane.demo_session"
-                                + " GROUP BY tenant_id) s ON s.tenant_id = t.id WHERE t.is_demo AND"
-                                + " t.status <> 'ERASED' AND t.schema_name <> ? ORDER BY t.created_at"
-                                + " LIMIT "
-                                + MAX_LISTED,
-                        (rs, i) ->
-                                new ReclaimableSandbox(
-                                        rs.getObject("id", UUID.class),
-                                        rs.getString("name"),
-                                        rs.getString("schema_name"),
-                                        rs.getString("status"),
-                                        instant(rs.getTimestamp("created_at")),
-                                        instant(rs.getTimestamp("last_at"))),
-                        sharedDemoSchema);
+        List<SharedSandbox> shared = repository.findShared(sharedDemoSchema);
+        List<ReclaimableSandbox> rows = repository.listReclaimable(sharedDemoSchema, MAX_LISTED);
         return new SandboxListing(
                 shared.isEmpty() ? null : shared.get(0), rows, countReclaimable());
     }
 
     long countReclaimable() {
-        Long count =
-                jdbc.queryForObject(
-                        "SELECT COUNT(*)" + RECLAIMABLE_WHERE, Long.class, sharedDemoSchema);
-        return count == null ? 0L : count;
+        return repository.countReclaimable(sharedDemoSchema);
     }
 
     // -------------------------------------------------------------- mutation
@@ -192,14 +157,7 @@ public class DemoSandboxReclaimService {
 
     private List<Tenant> resolveTargets(List<UUID> requestedIds) {
         if (requestedIds == null || requestedIds.isEmpty()) {
-            List<UUID> oldest =
-                    jdbc.queryForList(
-                            "SELECT t.id"
-                                    + RECLAIMABLE_WHERE
-                                    + " ORDER BY t.created_at LIMIT "
-                                    + MAX_PER_CALL,
-                            UUID.class,
-                            sharedDemoSchema);
+            List<UUID> oldest = repository.oldestReclaimableIds(sharedDemoSchema, MAX_PER_CALL);
             List<Tenant> tenants = new ArrayList<>();
             for (UUID id : oldest) {
                 tenantRepository.findById(id).ifPresent(tenants::add);
@@ -227,9 +185,5 @@ public class DemoSandboxReclaimService {
             tenants.add(tenant);
         }
         return tenants;
-    }
-
-    private static Instant instant(Timestamp ts) {
-        return ts == null ? null : ts.toInstant();
     }
 }

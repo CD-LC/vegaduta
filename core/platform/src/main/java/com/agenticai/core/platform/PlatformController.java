@@ -13,7 +13,6 @@ import com.agenticai.core.tenancy.PlatformSettingsService;
 import com.agenticai.core.tenancy.SiteWidePromoResult;
 import com.agenticai.core.tenancy.SiteWidePromoService;
 import com.agenticai.core.tenancy.TenantEmergencyControlService;
-import com.agenticai.core.tenancy.TenantRepository;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -79,7 +78,7 @@ public class PlatformController extends PlatformLlmControlEndpoints {
     // Master Roadmap 2026 item #22 (GDPR/data-residency basics, §G).
     private final PlatformTenantDataResidencyService platformTenantDataResidencyService;
     private final SiteWidePromoService siteWidePromoService;
-    private final TenantRepository tenantRepository;
+    private final PlatformTenantLookupService tenantLookupService;
 
     public PlatformController(
             PlatformLlmTaskService platformLlmTaskService,
@@ -99,7 +98,7 @@ public class PlatformController extends PlatformLlmControlEndpoints {
             PlatformFeatureBudgetService smartAiBudgetService,
             FreeTierUsageLimiterService freeTierUsageLimiterService,
             SiteWidePromoService siteWidePromoService,
-            TenantRepository tenantRepository) {
+            PlatformTenantLookupService tenantLookupService) {
         super(
                 platformLlmTaskService,
                 platformHostedLlmProviderService,
@@ -118,7 +117,7 @@ public class PlatformController extends PlatformLlmControlEndpoints {
         this.featureFlagService = featureFlagService;
         this.platformTenantDataResidencyService = platformTenantDataResidencyService;
         this.siteWidePromoService = siteWidePromoService;
-        this.tenantRepository = tenantRepository;
+        this.tenantLookupService = tenantLookupService;
     }
 
     /**
@@ -506,10 +505,7 @@ public class PlatformController extends PlatformLlmControlEndpoints {
         // tenant's schema name (Keycloak's tenant_id attribute) - NOT the control_plane UUID
         // in this URL. Resetting by UUID deleted a key nothing ever wrote or read.
         String counterKey =
-                tenantRepository
-                        .findById(tenantId)
-                        .orElseThrow(() -> new PlatformTenantNotFoundException(tenantId))
-                        .getSchemaName();
+        tenantLookupService.requireSchemaName(tenantId);
         freeTierUsageLimiterService.resetTenantUsage(counterKey);
     }
 }

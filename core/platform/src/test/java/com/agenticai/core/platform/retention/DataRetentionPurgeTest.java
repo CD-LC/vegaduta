@@ -36,12 +36,12 @@ class DataRetentionPurgeTest {
     private final PgAdvisoryJobLock lock = mock(PgAdvisoryJobLock.class);
 
     private DataRetentionPurge job(boolean enabled, List<DataRetentionPurge.Target> targets, int batch, int maxBatches) {
-        return new DataRetentionPurge(jdbc, iterator, lock, clock, ms -> { }, enabled, false, batch, maxBatches, 1, 120,
+        return new DataRetentionPurge(new DataRetentionJdbcRepository(jdbc), iterator, lock, clock, ms -> { }, enabled, false, batch, maxBatches, 1, 120,
             targets);
     }
 
     private DataRetentionPurge dryRunJob(List<DataRetentionPurge.Target> targets) {
-        return new DataRetentionPurge(jdbc, iterator, lock, clock, ms -> { }, true, true, 100, 5, 1, 120, targets);
+        return new DataRetentionPurge(new DataRetentionJdbcRepository(jdbc), iterator, lock, clock, ms -> { }, true, true, 100, 5, 1, 120, targets);
     }
 
     /** Clock that advances 1 minute on every read, to exercise the tick budget. */
@@ -147,7 +147,7 @@ class DataRetentionPurgeTest {
         when(jdbc.update(anyString(), any(Object.class))).thenReturn(0);
         var targets = List.of(DataRetentionPurge.targets(7, 30, 90, false, 90).get(0));
         // advancing clock: deadline (120s) is passed after ~2 reads, so only the first tenant is reached per tick
-        var j = new DataRetentionPurge(jdbc, iterator, lock, advancing(), ms -> { }, true, false, 100, 5, 1, 120, targets);
+        var j = new DataRetentionPurge(new DataRetentionJdbcRepository(jdbc), iterator, lock, advancing(), ms -> { }, true, false, 100, 5, 1, 120, targets);
         j.purgeExclusively();
         verify(jdbc).update(contains("\"t_a\""), any(Object.class));
         verify(jdbc, never()).update(contains("\"t_b\""), any(Object.class));

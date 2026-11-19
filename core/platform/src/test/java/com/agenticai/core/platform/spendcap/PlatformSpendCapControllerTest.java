@@ -30,7 +30,11 @@ class PlatformSpendCapControllerTest {
     private final SpendCapService caps = mock(SpendCapService.class);
     private final TenantRepository tenants = mock(TenantRepository.class);
     private final PlatformTenantAuditor auditor = mock(PlatformTenantAuditor.class);
-    private final PlatformSpendCapController controller = new PlatformSpendCapController(caps, tenants, auditor, "mk");
+    private final PlatformSpendCapController controller = new PlatformSpendCapController(
+                    caps,
+                    new com.agenticai.core.platform.PlatformTenantLookupService(tenants),
+                    auditor,
+                    "mk");
     private final UUID id = UUID.randomUUID();
 
     private CapStatus status(String cap) {

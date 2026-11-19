@@ -24,8 +24,8 @@ class ScimProvisioningConditionTest {
     @Import(ScimProvisioningController.class)
     static class Wiring {
         @Bean
-        TenantScimTokenRepository tokenRepository() {
-            return mock(TenantScimTokenRepository.class);
+        TenantScimTokenService tokenService() {
+            return mock(TenantScimTokenService.class);
         }
 
         @Bean

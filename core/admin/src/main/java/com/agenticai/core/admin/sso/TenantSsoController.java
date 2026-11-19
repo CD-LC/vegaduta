@@ -1,12 +1,11 @@
 package com.agenticai.core.admin.sso;
 
+import com.agenticai.core.admin.sso.TenantScimTokenService.MintedToken;
+import com.agenticai.core.admin.sso.TenantScimTokenService.ScimTokenView;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.security.TenantLimits;
 import jakarta.validation.Valid;
-import java.security.SecureRandom;
-import java.time.Instant;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -44,16 +43,14 @@ import org.springframework.web.bind.annotation.RestController;
 @ConditionalOnProperty(name = "app.identity.provider", havingValue = "keycloak", matchIfMissing = true)
 public class TenantSsoController {
 
-    private static final SecureRandom RANDOM = new SecureRandom();
-
     private final TenantSsoService ssoService;
-    private final TenantScimTokenRepository tokenRepository;
+    private final TenantScimTokenService tokenService;
     private final TenantLimits tenantLimits;
 
-    public TenantSsoController(TenantSsoService ssoService, TenantScimTokenRepository tokenRepository,
+    public TenantSsoController(TenantSsoService ssoService, TenantScimTokenService tokenService,
         TenantLimits tenantLimits) {
         this.ssoService = ssoService;
-        this.tokenRepository = tokenRepository;
+        this.tokenService = tokenService;
         this.tenantLimits = tenantLimits;
     }
 
@@ -83,14 +80,9 @@ public class TenantSsoController {
 
     // --------------------------- SCIM tokens --------------------------------
 
-    public record ScimTokenView(
-        java.util.UUID id, String label, Instant createdAt, Instant lastUsedAt) {}
-
     @GetMapping("/scim-tokens")
     public List<ScimTokenView> listTokens() {
-        return tokenRepository.findByTenantSchemaAndRevokedAtIsNull(tenantSchema()).stream()
-            .map(t -> new ScimTokenView(t.getId(), t.getLabel(), t.getCreatedAt(), t.getLastUsedAt()))
-            .toList();
+        return tokenService.list(tenantSchema());
     }
 
     /** Returns the plaintext token exactly once - only the SHA-256 hash is stored. */
@@ -105,30 +97,16 @@ public class TenantSsoController {
                 "Your plan does not include SCIM provisioning - upgrade your plan to mint provisioning tokens.");
         }
         String label = body == null ? null : body.get("label");
-        byte[] raw = new byte[32];
-        RANDOM.nextBytes(raw);
-        String token = "vdscim_" + Base64.getUrlEncoder().withoutPadding().encodeToString(raw);
-
-        TenantScimToken row = new TenantScimToken();
-        row.setTenantSchema(tenantSchema());
-        row.setTokenHash(ScimProvisioningController.sha256Hex(token));
-        row.setLabel(label == null || label.isBlank() ? "SCIM token" : label.trim());
-        row.setCreatedBy(subject());
-        tokenRepository.save(row);
+        MintedToken minted = tokenService.mint(tenantSchema(), label, subject());
         return Map.of(
-            "id", row.getId().toString(),
-            "token", token,
-            "label", row.getLabel());
+            "id", minted.id().toString(),
+            "token", minted.token(),
+            "label", minted.label());
     }
 
     @DeleteMapping("/scim-tokens/{id}")
     public ResponseEntity<Void> revokeToken(@PathVariable java.util.UUID id) {
-        tokenRepository.findById(id)
-            .filter(t -> t.getTenantSchema().equals(tenantSchema())) // same-tenant check - no cross-tenant revoke by id
-            .ifPresent(t -> {
-                t.setRevokedAt(Instant.now());
-                tokenRepository.save(t);
-            });
+        tokenService.revoke(id, tenantSchema()); // same-tenant check inside - no cross-tenant revoke by id
         return ResponseEntity.noContent().build();
     }
 

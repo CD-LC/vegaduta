@@ -47,12 +47,13 @@ class ScimProvisioningControllerTest {
         // Plan gate's default posture in these tests: the tenant HAS the
         // scim entitlement; the gate-specific tests below flip it off.
         when(tenantLimits.scimAllowed(TENANT)).thenReturn(true);
-        controller = new ScimProvisioningController(tokenRepository, keycloak, tenantLimits);
+        controller = new ScimProvisioningController(
+                new TenantScimTokenService(tokenRepository), keycloak, tenantLimits);
 
         TenantScimToken row = new TenantScimToken();
         row.setTenantSchema(TENANT);
-        row.setTokenHash(ScimProvisioningController.sha256Hex(TOKEN));
-        when(tokenRepository.findByTokenHashAndRevokedAtIsNull(ScimProvisioningController.sha256Hex(TOKEN)))
+        row.setTokenHash(TenantScimTokenService.sha256Hex(TOKEN));
+        when(tokenRepository.findByTokenHashAndRevokedAtIsNull(TenantScimTokenService.sha256Hex(TOKEN)))
             .thenReturn(Optional.of(row));
     }
 

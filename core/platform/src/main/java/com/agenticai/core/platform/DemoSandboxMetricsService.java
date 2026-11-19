@@ -2,8 +2,6 @@ package com.agenticai.core.platform;
 
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -13,7 +11,6 @@ import java.util.Map;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 /**
@@ -24,8 +21,8 @@ import org.springframework.stereotype.Service;
  *
  * There is no rollup table and no counter to drift out of sync: every figure is a live aggregate
  * over {@code control_plane.demo_session} (V126), which already records creation, expiry, message
- * count and - the one that matters - {@code converted_tenant_id}/{@code converted_at}. Raw {@link
- * JdbcTemplate} rather than JPA for the same reason {@code NewsletterService} does it: these are
+ * count and - the one that matters - {@code converted_tenant_id}/{@code converted_at}. Raw JDBC (in {@link
+ * DemoSandboxMetricsJdbcRepository}) rather than JPA for the same reason {@code NewsletterService} does it: these are
  * cross-tenant control-plane reads over columns owned by other workstreams, and a raw column read
  * does not couple this feature's compile-time correctness to whether some other module ever maps
  * them.
@@ -56,71 +53,10 @@ public class DemoSandboxMetricsService {
     private static final String DEMO_SESSION_TABLE = "control_plane.demo_session";
     private static final String CHANNEL_LINK_TABLE = "control_plane.demo_channel_link";
 
-    /**
-     * One pass over the table for every scalar on the page.
-     *
-     * <p>The conversion counters are COHORT counters - {@code created_at >= ?} paired with {@code
-     * converted_tenant_id IS NOT NULL} - so the rate's numerator and denominator describe the same
-     * set of sandboxes. See {@link DemoMetricsWindow}'s javadoc for why that is the only definition
-     * worth putting in front of an owner.
-     *
-     * <p>{@code converted_tenant_id IS NOT NULL} rather than {@code converted_at IS NOT NULL}: V126
-     * writes both together, but the tenant id is the column that carries the actual conversion
-     * evidence (which real tenant this sandbox became), so it is the one to test.
-     */
-    private static final String SUMMARY_SQL =
-            """
-        SELECT
-            COUNT(*)                                                                          AS created_all,
-            COUNT(*) FILTER (WHERE s.created_at >= ?)                                         AS created_today,
-            COUNT(*) FILTER (WHERE s.created_at >= ?)                                         AS created_7d,
-            COUNT(*) FILTER (WHERE s.created_at >= ?)                                         AS created_30d,
-            COUNT(*) FILTER (WHERE s.converted_tenant_id IS NOT NULL)                         AS converted_all,
-            COUNT(*) FILTER (WHERE s.converted_tenant_id IS NOT NULL AND s.created_at >= ?)   AS converted_today,
-            COUNT(*) FILTER (WHERE s.converted_tenant_id IS NOT NULL AND s.created_at >= ?)   AS converted_7d,
-            COUNT(*) FILTER (WHERE s.converted_tenant_id IS NOT NULL AND s.created_at >= ?)   AS converted_30d,
-            COUNT(*) FILTER (WHERE s.expired_at IS NULL AND s.expires_at > ?)                 AS live_count,
-            COALESCE(SUM(s.message_count), 0)                                                 AS total_messages,
-            COUNT(*) FILTER (WHERE s.message_count > 0)                                       AS engaged_count
-        FROM control_plane.demo_session s
-        """;
+    private final DemoSandboxMetricsJdbcRepository repository;
 
-    /**
-     * A date spine {@code LEFT JOIN}ed twice, so a day on which nothing happened is still a point
-     * on the chart rather than a missing x value. Bounds come in as {@code timestamptz} parameters
-     * (see the class javadoc's note on time) and each bucket is a half-open UTC day.
-     */
-    private static final String DAILY_SQL =
-            """
-        WITH spine AS (
-            SELECT generate_series(?::timestamptz, ?::timestamptz, interval '1 day') AS bucket
-        )
-        SELECT
-            spine.bucket AS bucket,
-            (SELECT COUNT(*) FROM control_plane.demo_session s
-              WHERE s.created_at >= spine.bucket AND s.created_at < spine.bucket + interval '1 day') AS created,
-            (SELECT COUNT(*) FROM control_plane.demo_session s
-              WHERE s.converted_at >= spine.bucket AND s.converted_at < spine.bucket + interval '1 day') AS converted
-        FROM spine
-        ORDER BY spine.bucket
-        """;
-
-    private static final String RECENT_SQL =
-            """
-        SELECT
-            s.id, s.tenant_id, s.tenant_schema, t.name AS tenant_name, s.email,
-            s.created_at, s.expires_at, s.expired_at,
-            s.converted_tenant_id, s.converted_at, s.message_count
-        FROM control_plane.demo_session s
-        LEFT JOIN control_plane.tenant t ON t.id = s.tenant_id
-        ORDER BY s.created_at DESC
-        LIMIT ?
-        """;
-
-    private final JdbcTemplate jdbcTemplate;
-
-    public DemoSandboxMetricsService(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public DemoSandboxMetricsService(DemoSandboxMetricsJdbcRepository repository) {
+        this.repository = repository;
     }
 
     /**
@@ -142,15 +78,7 @@ public class DemoSandboxMetricsService {
         OffsetDateTime nowOffset = now.atOffset(ZoneOffset.UTC);
 
         Map<String, Object> summary =
-                jdbcTemplate.queryForMap(
-                        SUMMARY_SQL,
-                        todayStart,
-                        sevenStart,
-                        thirtyStart,
-                        todayStart,
-                        sevenStart,
-                        thirtyStart,
-                        nowOffset);
+                repository.summary(todayStart, sevenStart, thirtyStart, nowOffset);
 
         long createdAll = asLong(summary.get("created_all"));
         long liveCount = asLong(summary.get("live_count"));
@@ -225,16 +153,7 @@ public class DemoSandboxMetricsService {
                     "Share/lab funnel columns (migration V131) absent - reporting those figures as unavailable");
             return ShareAndLabMetrics.unavailable();
         }
-        Map<String, Object> row =
-                jdbcTemplate.queryForMap(
-                        """
-            SELECT COUNT(*) FILTER (WHERE s.share_id IS NOT NULL)      AS shares_created,
-                   COALESCE(SUM(s.share_view_count), 0)                AS share_views,
-                   COALESCE(SUM(s.share_viewer_count), 0)              AS share_viewers,
-                   COUNT(*) FILTER (WHERE s.lab_started_at IS NOT NULL)   AS lab_started,
-                   COUNT(*) FILTER (WHERE s.lab_completed_at IS NOT NULL) AS lab_completed
-            FROM control_plane.demo_session s
-            """);
+        Map<String, Object> row = repository.shareAndLabRow();
         return new ShareAndLabMetrics(
                 asLong(row.get("shares_created")),
                 asLong(row.get("share_views")),
@@ -247,42 +166,31 @@ public class DemoSandboxMetricsService {
 
     private List<DemoDailyPoint> dailySeries(OffsetDateTime todayStart, int days) {
         OffsetDateTime from = todayStart.minusDays(days - 1L);
-        return jdbcTemplate.query(
-                DAILY_SQL,
-                (ResultSet rs, int rowNum) ->
-                        new DemoDailyPoint(
-                                rs.getObject("bucket", OffsetDateTime.class)
-                                        .withOffsetSameInstant(ZoneOffset.UTC)
-                                        .toLocalDate(),
-                                rs.getLong("created"),
-                                rs.getLong("converted")),
-                from,
-                todayStart);
+        return repository.dailySeries(from, todayStart);
     }
 
     private List<DemoRecentSandbox> recent(int limit, Instant now) {
-        return jdbcTemplate.query(
-                RECENT_SQL,
-                (ResultSet rs, int rowNum) -> {
-                    Instant expiresAt = instant(rs, "expires_at");
-                    Instant expiredAt = instant(rs, "expired_at");
-                    Instant convertedAt = instant(rs, "converted_at");
-                    UUID convertedTenantId = rs.getObject("converted_tenant_id", UUID.class);
-                    return new DemoRecentSandbox(
-                            rs.getObject("id", UUID.class),
-                            rs.getObject("tenant_id", UUID.class),
-                            rs.getString("tenant_name"),
-                            rs.getString("tenant_schema"),
-                            rs.getString("email"),
-                            instant(rs, "created_at"),
-                            expiresAt,
-                            expiredAt,
-                            convertedTenantId,
-                            convertedAt,
-                            rs.getInt("message_count"),
-                            status(convertedTenantId, expiredAt, expiresAt, now));
-                },
-                limit);
+        return repository.recent(limit).stream()
+                .map(
+                        r ->
+                                new DemoRecentSandbox(
+                                        r.id(),
+                                        r.tenantId(),
+                                        r.tenantName(),
+                                        r.tenantSchema(),
+                                        r.email(),
+                                        r.createdAt(),
+                                        r.expiresAt(),
+                                        r.expiredAt(),
+                                        r.convertedTenantId(),
+                                        r.convertedAt(),
+                                        r.messageCount(),
+                                        status(
+                                                r.convertedTenantId(),
+                                                r.expiredAt(),
+                                                r.expiresAt(),
+                                                now)))
+                .toList();
     }
 
     /** Derived, never stored - see {@link DemoRecentSandbox#status()}. */
@@ -310,13 +218,7 @@ public class DemoSandboxMetricsService {
                     "Image usage is not tracked in this deployment - control_plane.demo_session.image_count "
                             + "(migration V127) has not been applied.");
         }
-        Map<String, Object> row =
-                jdbcTemplate.queryForMap(
-                        """
-            SELECT COALESCE(SUM(s.image_count), 0)             AS images_generated,
-                   COUNT(*) FILTER (WHERE s.image_count > 0)   AS sandboxes_with_images
-            FROM control_plane.demo_session s
-            """);
+        Map<String, Object> row = repository.imageRow();
         return base.withImages(
                 asLong(row.get("images_generated")),
                 asLong(row.get("sandboxes_with_images")),
@@ -341,14 +243,7 @@ public class DemoSandboxMetricsService {
                     "Channel linking is not tracked in this deployment - control_plane.demo_channel_link "
                             + "(migration V128) is absent or has an unexpected shape.");
         }
-        Map<String, Object> row =
-                jdbcTemplate.queryForMap(
-                        """
-            SELECT COUNT(*)                                        AS links,
-                   COUNT(*) FILTER (WHERE l.state = 'LINKED')      AS linked,
-                   COUNT(DISTINCT l.demo_session_id)               AS sandboxes_with_link
-            FROM control_plane.demo_channel_link l
-            """);
+        Map<String, Object> row = repository.channelRow();
         return base.withChannels(
                 asLong(row.get("links")),
                 asLong(row.get("linked")),
@@ -359,22 +254,11 @@ public class DemoSandboxMetricsService {
     // --- catalog probes ---------------------------------------------------
 
     private boolean relationExists(String qualifiedName) {
-        Boolean present =
-                jdbcTemplate.queryForObject(
-                        "SELECT to_regclass(?) IS NOT NULL", Boolean.class, qualifiedName);
-        return Boolean.TRUE.equals(present);
+        return repository.relationExists(qualifiedName);
     }
 
     private boolean columnExists(String schema, String table, String column) {
-        Integer count =
-                jdbcTemplate.queryForObject(
-                        "SELECT COUNT(*) FROM information_schema.columns "
-                                + "WHERE table_schema = ? AND table_name = ? AND column_name = ?",
-                        Integer.class,
-                        schema,
-                        table,
-                        column);
-        return count != null && count > 0;
+        return repository.columnExists(schema, table, column);
     }
 
     // --- small helpers ----------------------------------------------------
@@ -382,11 +266,6 @@ public class DemoSandboxMetricsService {
     /** Midnight UTC of the day {@code instant} falls in. */
     private static OffsetDateTime startOfUtcDay(Instant instant) {
         return instant.atOffset(ZoneOffset.UTC).truncatedTo(ChronoUnit.DAYS);
-    }
-
-    private static Instant instant(ResultSet rs, String column) throws SQLException {
-        OffsetDateTime value = rs.getObject(column, OffsetDateTime.class);
-        return value == null ? null : value.toInstant();
     }
 
     /**

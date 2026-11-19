@@ -80,9 +80,9 @@ class ImpersonationServiceTest {
         when(appUsers.findByKeycloakUserId(anyString())).thenReturn(Optional.empty());
         when(keycloak.getUserById(TARGET)).thenReturn(user(TARGET, SCHEMA));
         when(keycloak.getUserRealmRoleNames(TARGET)).thenReturn(List.of("tenant-admin", "user"));
-        when(jdbc.queryForObject(eq(ImpersonationService.SQL_COUNT_ACTIVE_FOR_ADMIN), eq(Long.class), any(Object[].class)))
+        when(jdbc.queryForObject(eq(ImpersonationJdbcRepository.SQL_COUNT_ACTIVE_FOR_ADMIN), eq(Long.class), any(Object[].class)))
             .thenReturn(0L);
-        when(jdbc.update(eq(ImpersonationService.SQL_INSERT), any(Object[].class))).thenAnswer(inv -> {
+        when(jdbc.update(eq(ImpersonationJdbcRepository.SQL_INSERT), any(Object[].class))).thenAnswer(inv -> {
             inserts.add(Arrays.copyOfRange(inv.getArguments(), 1, inv.getArguments().length));
             return 1;
         });
@@ -90,7 +90,7 @@ class ImpersonationServiceTest {
     }
 
     private ImpersonationService service(String publicUrl) {
-        return new ImpersonationService(jdbc, new TransactionTemplate(mock(PlatformTransactionManager.class)),
+        return new ImpersonationService(new ImpersonationJdbcRepository(jdbc), new TransactionTemplate(mock(PlatformTransactionManager.class)),
             tenants, appUsers, keycloak, auditor, publicUrl, Clock.fixed(NOW, ZoneOffset.UTC));
     }
 
@@ -126,7 +126,7 @@ class ImpersonationServiceTest {
         assertTrue(detail.getValue().contains("ops@vegaduta.ai"));
         assertTrue(detail.getValue().contains(REASON));
         assertFalse(detail.getValue().contains(s.grant()));
-        verify(jdbc).query(eq(ImpersonationService.SQL_LOCK_ADMIN), any(ResultSetExtractor.class), eq(ADMIN));
+        verify(jdbc).query(eq(ImpersonationJdbcRepository.SQL_LOCK_ADMIN), any(ResultSetExtractor.class), eq(ADMIN));
     }
 
     @Test
@@ -176,7 +176,7 @@ class ImpersonationServiceTest {
 
     @Test
     void atMostThreeActiveSessionsPerAdmin() {
-        when(jdbc.queryForObject(eq(ImpersonationService.SQL_COUNT_ACTIVE_FOR_ADMIN), eq(Long.class), any(Object[].class)))
+        when(jdbc.queryForObject(eq(ImpersonationJdbcRepository.SQL_COUNT_ACTIVE_FOR_ADMIN), eq(Long.class), any(Object[].class)))
             .thenReturn(3L);
         assertEquals(409, status(() -> service.start(ADMIN, null, TENANT_ID, TARGET, REASON)));
         assertTrue(inserts.isEmpty());
@@ -196,15 +196,15 @@ class ImpersonationServiceTest {
     // ------------------------------------------------------------------ resolve / end
 
     @SuppressWarnings("unchecked")
-    private void stubLookup(ImpersonationService.Row row) {
-        when(jdbc.query(eq(ImpersonationService.SQL_BY_HASH), any(RowMapper.class), anyString()))
+    private void stubLookup(ImpersonationJdbcRepository.Row row) {
+        when(jdbc.query(eq(ImpersonationJdbcRepository.SQL_BY_HASH), any(RowMapper.class), anyString()))
             .thenReturn(row == null ? List.of() : List.of(row));
-        when(jdbc.query(eq(ImpersonationService.SQL_BY_ID), any(RowMapper.class), any(UUID.class)))
+        when(jdbc.query(eq(ImpersonationJdbcRepository.SQL_BY_ID), any(RowMapper.class), any(UUID.class)))
             .thenReturn(row == null ? List.of() : List.of(row));
     }
 
-    private static ImpersonationService.Row row(UUID id, String grant, Instant endedAt) {
-        return new ImpersonationService.Row(id, ADMIN, "ops@vegaduta.ai", TENANT_ID, SCHEMA, "Acme", TARGET,
+    private static ImpersonationJdbcRepository.Row row(UUID id, String grant, Instant endedAt) {
+        return new ImpersonationJdbcRepository.Row(id, ADMIN, "ops@vegaduta.ai", TENANT_ID, SCHEMA, "Acme", TARGET,
             "user@acme.co", List.of("user"), REASON, ImpersonationService.sha256Hex(grant), NOW, NOW.plusSeconds(1800),
             endedAt, 0);
     }
@@ -221,7 +221,7 @@ class ImpersonationServiceTest {
         assertEquals(id, s.id());
         assertEquals(SCHEMA, s.tenantSchema());
         assertEquals(ADMIN, s.adminKeycloakId());
-        verify(jdbc, times(1)).query(eq(ImpersonationService.SQL_BY_HASH), any(RowMapper.class),
+        verify(jdbc, times(1)).query(eq(ImpersonationJdbcRepository.SQL_BY_HASH), any(RowMapper.class),
             eq(ImpersonationService.sha256Hex("the-grant")));
         assertTrue(service.resolve("another").isEmpty(), "a row whose hash differs is never returned");
     }
@@ -239,11 +239,11 @@ class ImpersonationServiceTest {
         UUID id = UUID.randomUUID();
         stubLookup(row(id, "g1", null));
         service.resolve("g1");
-        when(jdbc.update(eq(ImpersonationService.SQL_END), any(Object[].class))).thenReturn(1, 0);
+        when(jdbc.update(eq(ImpersonationJdbcRepository.SQL_END), any(Object[].class))).thenReturn(1, 0);
 
         service.end(id, ADMIN, "ops@vegaduta.ai");
         service.resolve("g1");
-        verify(jdbc, times(2)).query(eq(ImpersonationService.SQL_BY_HASH), any(RowMapper.class), anyString());
+        verify(jdbc, times(2)).query(eq(ImpersonationJdbcRepository.SQL_BY_HASH), any(RowMapper.class), anyString());
         verify(auditor).record(eq(SCHEMA), eq(ADMIN), eq("platform.impersonation.end"), eq("user"), eq(TARGET),
             contains(REASON));
 
@@ -263,29 +263,29 @@ class ImpersonationServiceTest {
         for (int i = 0; i < 50; i++) {
             service.recordRequest(id);
         }
-        verify(jdbc, never()).update(eq(ImpersonationService.SQL_FLUSH_REQUESTS), any(Object[].class));
+        verify(jdbc, never()).update(eq(ImpersonationJdbcRepository.SQL_FLUSH_REQUESTS), any(Object[].class));
         service.flushRequestCounts();
-        verify(jdbc, times(1)).update(ImpersonationService.SQL_FLUSH_REQUESTS, 50L, Timestamp.from(NOW),
+        verify(jdbc, times(1)).update(ImpersonationJdbcRepository.SQL_FLUSH_REQUESTS, 50L, Timestamp.from(NOW),
             Timestamp.from(NOW), id);
         service.flushRequestCounts();
-        verify(jdbc, times(1)).update(eq(ImpersonationService.SQL_FLUSH_REQUESTS), any(Object[].class));
+        verify(jdbc, times(1)).update(eq(ImpersonationJdbcRepository.SQL_FLUSH_REQUESTS), any(Object[].class));
     }
 
     @Test
     @SuppressWarnings("unchecked")
     void listIsOneBasedWithDefaultLimit() {
-        when(jdbc.query(eq(ImpersonationService.SQL_LIST_ACTIVE), any(RowMapper.class), any(Object[].class)))
+        when(jdbc.query(eq(ImpersonationJdbcRepository.SQL_LIST_ACTIVE), any(RowMapper.class), any(Object[].class)))
             .thenReturn(List.of(row(UUID.randomUUID(), "g", null)));
-        when(jdbc.queryForObject(eq(ImpersonationService.SQL_COUNT_ACTIVE), eq(Long.class), any(Object[].class)))
+        when(jdbc.queryForObject(eq(ImpersonationJdbcRepository.SQL_COUNT_ACTIVE), eq(Long.class), any(Object[].class)))
             .thenReturn(1L);
         ImpersonationService.SessionPage page = service.list(true, null, null);
         assertEquals(1, page.total());
         assertEquals("user@acme.co", page.items().get(0).userEmail());
         assertEquals("ops@vegaduta.ai", page.items().get(0).adminEmail());
-        verify(jdbc).query(eq(ImpersonationService.SQL_LIST_ACTIVE), any(RowMapper.class),
+        verify(jdbc).query(eq(ImpersonationJdbcRepository.SQL_LIST_ACTIVE), any(RowMapper.class),
             eq(Timestamp.from(NOW)), eq(25), eq(0));
         service.list(true, 3, 10);
-        verify(jdbc).query(eq(ImpersonationService.SQL_LIST_ACTIVE), any(RowMapper.class),
+        verify(jdbc).query(eq(ImpersonationJdbcRepository.SQL_LIST_ACTIVE), any(RowMapper.class),
             eq(Timestamp.from(NOW)), eq(10), eq(20));
     }
 

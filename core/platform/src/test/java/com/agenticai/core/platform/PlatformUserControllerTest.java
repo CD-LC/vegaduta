@@ -41,7 +41,8 @@ class PlatformUserControllerTest {
     private final TenantRepository tenants = mock(TenantRepository.class);
     private final AppUserRepository appUsers = mock(AppUserRepository.class);
     private final PlatformUserController controller =
-            new PlatformUserController(keycloak, perms, authority, audit, tenants, appUsers);
+            new PlatformUserController(keycloak, perms, authority, audit,
+                    new PlatformUserDirectoryService(tenants, appUsers));
 
     @BeforeEach
     void operator() {

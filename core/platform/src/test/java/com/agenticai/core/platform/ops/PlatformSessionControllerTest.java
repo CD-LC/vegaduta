@@ -33,7 +33,10 @@ class PlatformSessionControllerTest {
     private final KeycloakAdminClient keycloak = mock(KeycloakAdminClient.class);
     private final TenantRepository tenants = mock(TenantRepository.class);
     private final PlatformTenantAuditor auditor = mock(PlatformTenantAuditor.class);
-    private final PlatformSessionController controller = new PlatformSessionController(keycloak, tenants, auditor);
+    private final PlatformSessionController controller = new PlatformSessionController(
+                    keycloak,
+                    new com.agenticai.core.platform.PlatformTenantLookupService(tenants),
+                    auditor);
 
     @BeforeEach
     void operator() {

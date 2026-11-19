@@ -15,7 +15,7 @@ class SharedWithMeControllerPagingTest {
 
     private final ResourceAccessService access = mock(ResourceAccessService.class);
     private final SharedWithMeController controller =
-            new SharedWithMeController(access, mock(ShareRateLimiter.class));
+            new SharedWithMeController(new ResourceGrantService(access), mock(ShareRateLimiter.class));
 
     private void grants(int n) {
         List<ResourceGrant> list = new ArrayList<>();
