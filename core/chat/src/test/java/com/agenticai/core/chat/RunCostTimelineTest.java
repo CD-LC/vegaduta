@@ -127,7 +127,10 @@ class RunCostTimelineTest {
 
     private AgentSessionLlmUsageController controller(TenantPlan plan, List<LlmCallLog> rows) {
         LlmCallLogService service = mock(LlmCallLogService.class);
-        when(service.forTask("s1")).thenReturn(rows);
+        when(service.forTaskAndAgent(org.mockito.ArgumentMatchers.eq("s1"), org.mockito.ArgumentMatchers.any()))
+                .thenAnswer(inv -> rows.stream()
+                        .filter(log -> ((UUID) inv.getArgument(1)).equals(log.getAgentId()))
+                        .toList());
         TenantLimits limits = mock(TenantLimits.class);
         when(limits.plan("t1")).thenReturn(plan);
         TenantContext.set(TenantContext.of("t1", "u1", Set.of()));
