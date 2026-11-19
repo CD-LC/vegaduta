@@ -1,6 +1,6 @@
 package com.agenticai.core.omnichannel.contact;
 
-import com.agenticai.core.agents.core.AgentRepository;
+import com.agenticai.core.agents.core.AgentLookupService;
 import com.agenticai.core.omnichannel.contact.ChannelContactController.ContactResponse;
 import com.agenticai.core.omnichannel.contact.ChannelContactController.GroupResponse;
 import com.agenticai.core.omnichannel.session.ChannelSession;
@@ -21,15 +21,15 @@ public class ChannelContactViewService {
 
     private final ChannelContactService contactService;
     private final ChannelSessionRepository sessionRepository;
-    private final AgentRepository agentRepository;
+    private final AgentLookupService agentLookup;
 
     public ChannelContactViewService(
             ChannelContactService contactService,
             ChannelSessionRepository sessionRepository,
-            AgentRepository agentRepository) {
+            AgentLookupService agentLookup) {
         this.contactService = contactService;
         this.sessionRepository = sessionRepository;
-        this.agentRepository = agentRepository;
+        this.agentLookup = agentLookup;
     }
 
     @Transactional(readOnly = true)
@@ -122,7 +122,7 @@ public class ChannelContactViewService {
 
     private String agentName(UUID agentId) {
         return agentId != null
-                ? agentRepository.findById(agentId).map(a -> a.getName()).orElse(null)
+                ? agentLookup.nameOf(agentId).orElse(null)
                 : null;
     }
 }

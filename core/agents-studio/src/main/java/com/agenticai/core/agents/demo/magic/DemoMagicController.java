@@ -67,13 +67,13 @@ public class DemoMagicController {
 
     private final DemoMagicService magicService;
     private final DemoSessionService demoSessionService;
-    private final DemoMagicSessionLookupService sessionLookup;
+    private final com.agenticai.core.tenancy.demo.DemoSessionService sessionLookup;
     private final ObjectProvider<ModerationService> moderationService;
 
     public DemoMagicController(
         DemoMagicService magicService,
         DemoSessionService demoSessionService,
-        DemoMagicSessionLookupService sessionLookup,
+        com.agenticai.core.tenancy.demo.DemoSessionService sessionLookup,
         ObjectProvider<ModerationService> moderationService
     ) {
         this.magicService = magicService;

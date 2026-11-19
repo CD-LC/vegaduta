@@ -403,6 +403,12 @@ public class LlmCallLogService {
         return rows.size() > limit ? rows.subList(0, limit) : rows;
     }
 
+    /** Start time of the most recent call, or null if there are none. */
+    @Transactional(readOnly = true)
+    public Instant latestStartedAt() {
+        return repository.findLatestStartedAt();
+    }
+
     @Transactional(readOnly = true)
     public List<LlmProviderUsageSummary> usageSummaryByProvider() {
         return repository.summarizeByProvider();

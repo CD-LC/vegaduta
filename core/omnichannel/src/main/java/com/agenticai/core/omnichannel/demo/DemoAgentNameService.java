@@ -1,7 +1,6 @@
 package com.agenticai.core.omnichannel.demo;
 
-import com.agenticai.core.agents.core.Agent;
-import com.agenticai.core.agents.core.AgentRepository;
+import com.agenticai.core.agents.core.AgentLookupService;
 import com.agenticai.core.tenancy.demo.DemoSession;
 import com.agenticai.core.tenancy.demo.DemoSessionService;
 import org.springframework.stereotype.Service;
@@ -14,11 +13,11 @@ import org.springframework.stereotype.Service;
 public class DemoAgentNameService {
 
     private final DemoSessionService demoSessionService;
-    private final AgentRepository agentRepository;
+    private final AgentLookupService agentLookup;
 
-    public DemoAgentNameService(DemoSessionService demoSessionService, AgentRepository agentRepository) {
+    public DemoAgentNameService(DemoSessionService demoSessionService, AgentLookupService agentLookup) {
         this.demoSessionService = demoSessionService;
-        this.agentRepository = agentRepository;
+        this.agentLookup = agentLookup;
     }
 
     /** Best effort, in the demo tenant's own schema; null means "don't name it". */
@@ -30,10 +29,7 @@ public class DemoAgentNameService {
             return demoSessionService.inDemoTenantContext(
                     session,
                     () ->
-                            agentRepository
-                                    .findById(session.getAgentId())
-                                    .map(Agent::getName)
-                                    .orElse(null));
+                            agentLookup.nameOf(session.getAgentId()).orElse(null));
         } catch (RuntimeException e) {
             return null;
         }

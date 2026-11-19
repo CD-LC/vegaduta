@@ -1,7 +1,7 @@
 package com.agenticai.core.platform;
 
 import com.agenticai.core.tenancy.Tenant;
-import com.agenticai.core.tenancy.TenantRepository;
+import com.agenticai.core.tenancy.TenantDirectoryService;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -14,22 +14,22 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PlatformTenantLookupService {
 
-    private final TenantRepository tenantRepository;
+    private final TenantDirectoryService tenants;
 
-    public PlatformTenantLookupService(TenantRepository tenantRepository) {
-        this.tenantRepository = tenantRepository;
+    public PlatformTenantLookupService(TenantDirectoryService tenants) {
+        this.tenants = tenants;
     }
 
     /** The schema name of the tenant with this id, if any. */
     @Transactional(readOnly = true)
     public Optional<String> findSchemaNameById(UUID tenantId) {
-        return tenantRepository.findById(tenantId).map(Tenant::getSchemaName);
+        return tenants.find(tenantId).map(Tenant::getSchemaName);
     }
 
     /** The schema name when a tenant with exactly this schema name exists. */
     @Transactional(readOnly = true)
     public Optional<String> findSchemaNameBySchemaName(String schemaName) {
-        return tenantRepository.findBySchemaName(schemaName).map(Tenant::getSchemaName);
+        return tenants.findBySchemaName(schemaName).map(Tenant::getSchemaName);
     }
 
     /**

@@ -39,7 +39,7 @@ class DemoMagicControllerTest {
 
     private DemoMagicService magic;
     private DemoSessionService sessions;
-    private DemoMagicSessionLookupService repository;
+    private com.agenticai.core.tenancy.demo.DemoSessionService repository;
     private ModerationService moderation;
     private DemoMagicController controller;
     private DemoSession session;
@@ -51,7 +51,7 @@ class DemoMagicControllerTest {
     void setUp() {
         magic = mock(DemoMagicService.class);
         sessions = mock(DemoSessionService.class);
-        repository = mock(DemoMagicSessionLookupService.class);
+        repository = mock(com.agenticai.core.tenancy.demo.DemoSessionService.class);
         moderation = mock(ModerationService.class);
         ObjectProvider<ModerationService> provider = mock(ObjectProvider.class);
         when(provider.getIfAvailable()).thenReturn(moderation);

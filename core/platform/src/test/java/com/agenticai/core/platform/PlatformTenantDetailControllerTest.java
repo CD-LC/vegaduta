@@ -50,7 +50,14 @@ class PlatformTenantDetailControllerTest {
     private final PlatformTenantDetailController controller =
             new PlatformTenantDetailController(
                     new PlatformTenantDetailService(
-                            tenants, agents, workflows, keycloak, limiter, calls, appUsers, spend));
+                            new com.agenticai.core.tenancy.TenantDirectoryService(tenants),
+                            new com.agenticai.core.agents.core.AgentLookupService(agents),
+                            new com.agenticai.core.workflow.WorkflowDefinitionCountService(workflows),
+                            keycloak,
+                            limiter,
+                            new com.agenticai.core.chat.LlmCallLogService(calls, mock(com.agenticai.core.chat.LlmPricingCatalog.class)),
+                            new com.agenticai.core.tenancy.AppUserDirectoryService(appUsers),
+                            spend));
 
     @BeforeEach
     void operator() {

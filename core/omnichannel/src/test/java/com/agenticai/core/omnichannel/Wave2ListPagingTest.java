@@ -106,7 +106,7 @@ class Wave2ListPagingTest {
 
     @Test
     void routingWindowsTheFixedChannelList() throws Exception {
-        var c = new ChannelRoutingController(new ChannelRoutingViewService(mock(ChannelSessionService.class), mock(AgentRepository.class)));
+        var c = new ChannelRoutingController(new ChannelRoutingViewService(mock(ChannelSessionService.class), new com.agenticai.core.agents.core.AgentLookupService(mock(AgentRepository.class))));
         var mvc = MockMvcBuilders.standaloneSetup(c).build();
         int n = ChannelType.values().length;
         mvc.perform(get("/api/channels/routing"))

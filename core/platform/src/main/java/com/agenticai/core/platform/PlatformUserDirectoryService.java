@@ -2,9 +2,9 @@ package com.agenticai.core.platform;
 
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
-import com.agenticai.core.tenancy.AppUserRepository;
+import com.agenticai.core.tenancy.AppUserDirectoryService;
 import com.agenticai.core.tenancy.Tenant;
-import com.agenticai.core.tenancy.TenantRepository;
+import com.agenticai.core.tenancy.TenantDirectoryService;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,26 +21,26 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PlatformUserDirectoryService {
 
-    private final TenantRepository tenantRepository;
-    private final AppUserRepository appUserRepository;
+    private final TenantDirectoryService tenants;
+    private final AppUserDirectoryService appUsers;
 
     public PlatformUserDirectoryService(
-            TenantRepository tenantRepository, AppUserRepository appUserRepository) {
-        this.tenantRepository = tenantRepository;
-        this.appUserRepository = appUserRepository;
+            TenantDirectoryService tenants, AppUserDirectoryService appUsers) {
+        this.tenants = tenants;
+        this.appUsers = appUsers;
     }
 
     /** The schema name of the tenant with this id, if any. */
     @Transactional(readOnly = true)
     public Optional<String> schemaNameOf(UUID tenantId) {
-        return tenantRepository.findById(tenantId).map(Tenant::getSchemaName);
+        return tenants.find(tenantId).map(Tenant::getSchemaName);
     }
 
     /** Tenant display names keyed by schema name. */
     @Transactional(readOnly = true)
     public Map<String, String> tenantNamesBySchema() {
         Map<String, String> names = new HashMap<>();
-        for (Tenant t : tenantRepository.findAll()) {
+        for (Tenant t : tenants.all()) {
             names.put(t.getSchemaName(), t.getName());
         }
         return names;
@@ -49,10 +49,6 @@ public class PlatformUserDirectoryService {
     /** Last-seen timestamps keyed by Keycloak user id. */
     @Transactional(readOnly = true)
     public Map<String, Instant> lastSeenByKeycloakId() {
-        Map<String, Instant> lastSeen = new HashMap<>();
-        for (AppUserRepository.KeycloakUserLastSeen r : appUserRepository.findAllLastSeen()) {
-            lastSeen.put(r.getKeycloakUserId(), r.getLastSeenAt());
-        }
-        return lastSeen;
+        return appUsers.lastSeenByKeycloakId();
     }
 }

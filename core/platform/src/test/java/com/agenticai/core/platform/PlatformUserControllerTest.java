@@ -42,7 +42,9 @@ class PlatformUserControllerTest {
     private final AppUserRepository appUsers = mock(AppUserRepository.class);
     private final PlatformUserController controller =
             new PlatformUserController(keycloak, perms, authority, audit,
-                    new PlatformUserDirectoryService(tenants, appUsers));
+                    new PlatformUserDirectoryService(
+                            new com.agenticai.core.tenancy.TenantDirectoryService(tenants),
+                            new com.agenticai.core.tenancy.AppUserDirectoryService(appUsers)));
 
     @BeforeEach
     void operator() {

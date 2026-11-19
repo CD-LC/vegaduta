@@ -1,6 +1,6 @@
 package com.agenticai.core.omnichannel.contact;
 
-import com.agenticai.core.agents.core.AgentRepository;
+import com.agenticai.core.agents.core.AgentLookupService;
 import com.agenticai.core.omnichannel.contact.ChannelRoutingController.RoutingResponse;
 import com.agenticai.core.omnichannel.session.ChannelDefaultAgent;
 import com.agenticai.core.omnichannel.session.ChannelSessionService;
@@ -20,12 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class ChannelRoutingViewService {
 
     private final ChannelSessionService sessionService;
-    private final AgentRepository agentRepository;
+    private final AgentLookupService agentLookup;
 
     public ChannelRoutingViewService(
-            ChannelSessionService sessionService, AgentRepository agentRepository) {
+            ChannelSessionService sessionService, AgentLookupService agentLookup) {
         this.sessionService = sessionService;
-        this.agentRepository = agentRepository;
+        this.agentLookup = agentLookup;
     }
 
     @Transactional(readOnly = true)
@@ -47,7 +47,7 @@ public class ChannelRoutingViewService {
     }
 
     private RoutingResponse toResponse(ChannelType channel, ChannelDefaultAgent row) {
-        String agentName = agentRepository.findById(row.getAgentId()).map(a -> a.getName()).orElse(null);
+        String agentName = agentLookup.nameOf(row.getAgentId()).orElse(null);
         return new RoutingResponse(
             channel.name().toLowerCase(Locale.ROOT), row.getAgentId(), agentName,
             row.isAutoApproveNewSenders(), row.getInboundSafetyMode(),

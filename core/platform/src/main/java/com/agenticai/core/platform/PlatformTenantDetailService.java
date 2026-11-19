@@ -1,19 +1,19 @@
 package com.agenticai.core.platform;
 
 import com.agenticai.core.admin.identity.IdentityUserAdminPort;
-import com.agenticai.core.agents.core.AgentRepository;
+import com.agenticai.core.agents.core.AgentLookupService;
 import com.agenticai.core.agents.quota.FreeTierUsageLimiterService;
-import com.agenticai.core.chat.LlmCallLogRepository;
+import com.agenticai.core.chat.LlmCallLogService;
 import com.agenticai.core.security.DataResidencyRegion;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantPlan;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
-import com.agenticai.core.tenancy.AppUserRepository;
+import com.agenticai.core.tenancy.AppUserDirectoryService;
 import com.agenticai.core.tenancy.Tenant;
-import com.agenticai.core.tenancy.TenantRepository;
+import com.agenticai.core.tenancy.TenantDirectoryService;
 import com.agenticai.core.tenancy.TenantStatus;
-import com.agenticai.core.workflow.WorkflowDefinitionRepository;
+import com.agenticai.core.workflow.WorkflowDefinitionCountService;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -57,31 +57,31 @@ public class PlatformTenantDetailService {
     private static final Logger log = LoggerFactory.getLogger(PlatformTenantDetailService.class);
     private static final String SYSTEM_ACTOR = "system:platform-tenant-detail";
 
-    private final TenantRepository tenantRepository;
-    private final AgentRepository agentRepository;
-    private final WorkflowDefinitionRepository workflowRepository;
+    private final TenantDirectoryService tenants;
+    private final AgentLookupService agentLookup;
+    private final WorkflowDefinitionCountService workflowCounts;
     private final IdentityUserAdminPort keycloak;
     private final FreeTierUsageLimiterService usageLimiter;
-    private final LlmCallLogRepository llmCallLogRepository;
-    private final AppUserRepository appUserRepository;
+    private final LlmCallLogService llmCallLogs;
+    private final AppUserDirectoryService appUsers;
     private final PlatformSpendService spendService;
 
     public PlatformTenantDetailService(
-            TenantRepository tenantRepository,
-            AgentRepository agentRepository,
-            WorkflowDefinitionRepository workflowRepository,
+            TenantDirectoryService tenants,
+            AgentLookupService agentLookup,
+            WorkflowDefinitionCountService workflowCounts,
             IdentityUserAdminPort keycloak,
             FreeTierUsageLimiterService usageLimiter,
-            LlmCallLogRepository llmCallLogRepository,
-            AppUserRepository appUserRepository,
+            LlmCallLogService llmCallLogs,
+            AppUserDirectoryService appUsers,
             PlatformSpendService spendService) {
-        this.tenantRepository = tenantRepository;
-        this.agentRepository = agentRepository;
-        this.workflowRepository = workflowRepository;
+        this.tenants = tenants;
+        this.agentLookup = agentLookup;
+        this.workflowCounts = workflowCounts;
         this.keycloak = keycloak;
         this.usageLimiter = usageLimiter;
-        this.llmCallLogRepository = llmCallLogRepository;
-        this.appUserRepository = appUserRepository;
+        this.llmCallLogs = llmCallLogs;
+        this.appUsers = appUsers;
         this.spendService = spendService;
     }
 
@@ -93,7 +93,7 @@ public class PlatformTenantDetailService {
     public List<TenantRef> list() {
         // One demo-excluding query (2026-10-09): the per-status findByStatus
         // calls this replaced included every SUSPENDED legacy /try sandbox.
-        return tenantRepository.findRosterExcludingDemo().stream()
+        return tenants.rosterExcludingDemo().stream()
                 .sorted(
                         Comparator.comparing(
                                 (Tenant t) -> String.valueOf(t.getName()).toLowerCase(Locale.ROOT)))
@@ -109,8 +109,8 @@ public class PlatformTenantDetailService {
 
     public TenantDetail get(UUID tenantId) {
         Tenant t =
-                tenantRepository
-                        .findById(tenantId)
+                tenants
+                        .find(tenantId)
                         .orElseThrow(() -> new PlatformTenantNotFoundException(tenantId));
         String schema = t.getSchemaName();
         List<String> unavailable = new ArrayList<>();
@@ -123,16 +123,16 @@ public class PlatformTenantDetailService {
         boolean lastCallKnown = false;
         BigDecimal spend30d = null;
         if (active) {
-            agents = metric("agents", unavailable, () -> asTenant(schema, agentRepository::count));
+            agents = metric("agents", unavailable, () -> asTenant(schema, agentLookup::count));
             workflows =
                     metric(
                             "workflows",
                             unavailable,
-                            () -> asTenant(schema, workflowRepository::count));
+                            () -> asTenant(schema, workflowCounts::count));
             try {
                 // One MAX() aggregate - this used to load 200 full llm_call_log rows to read one
                 // timestamp.
-                lastLlmCall = asTenant(schema, llmCallLogRepository::findLatestStartedAt);
+                lastLlmCall = asTenant(schema, llmCallLogs::latestStartedAt);
                 lastCallKnown = true;
             } catch (RuntimeException e) {
                 unavailable.add("lastLlmCall");
@@ -154,7 +154,7 @@ public class PlatformTenantDetailService {
         Instant lastSeen = null;
         boolean lastSeenKnown = false;
         try {
-            lastSeen = appUserRepository.findLatestSeenForTenant(t.getId());
+            lastSeen = appUsers.latestSeenForTenant(t.getId());
             lastSeenKnown = true;
         } catch (RuntimeException e) {
             unavailable.add("lastSeen");

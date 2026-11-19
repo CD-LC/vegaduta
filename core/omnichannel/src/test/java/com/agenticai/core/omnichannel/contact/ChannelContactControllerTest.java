@@ -52,7 +52,7 @@ class ChannelContactControllerTest {
         service = mock(ChannelContactService.class);
         sessions = mock(ChannelSessionRepository.class);
         agents = mock(AgentRepository.class);
-        controller = new ChannelContactController(service, new ChannelContactViewService(service, sessions, agents));
+        controller = new ChannelContactController(service, new ChannelContactViewService(service, sessions, new com.agenticai.core.agents.core.AgentLookupService(agents)));
         when(service.importRows(any(), any(), any())).thenReturn(new ImportResult(0, 0, List.of()));
     }
 

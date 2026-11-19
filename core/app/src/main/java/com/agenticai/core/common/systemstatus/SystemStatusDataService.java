@@ -1,8 +1,7 @@
 package com.agenticai.core.common.systemstatus;
 
 import com.agenticai.core.common.systemstatus.SystemStatusResponse.DatabaseStatus;
-import com.agenticai.core.eventbus.WorkflowEventOutboxRelay;
-import com.agenticai.core.eventbus.WorkflowEventOutboxRepository;
+import com.agenticai.core.eventbus.WorkflowEventOutboxStatsService;
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.HikariPoolMXBean;
 import java.sql.Connection;
@@ -23,11 +22,11 @@ import org.springframework.stereotype.Service;
 public class SystemStatusDataService {
 
     private final DataSource dataSource;
-    private final WorkflowEventOutboxRepository outboxRepository;
+    private final WorkflowEventOutboxStatsService outboxStats;
 
-    public SystemStatusDataService(DataSource dataSource, WorkflowEventOutboxRepository outboxRepository) {
+    public SystemStatusDataService(DataSource dataSource, WorkflowEventOutboxStatsService outboxStats) {
         this.dataSource = dataSource;
-        this.outboxRepository = outboxRepository;
+        this.outboxStats = outboxStats;
     }
 
     public DatabaseStatus databaseStatus(String status) {
@@ -64,10 +63,10 @@ public class SystemStatusDataService {
     }
 
     public long outboxPendingCount() {
-        return outboxRepository.countByPublishedAtIsNullAndRetryCountLessThan(WorkflowEventOutboxRelay.MAX_RETRIES);
+        return outboxStats.pendingCount();
     }
 
     public long outboxDeadLetteredCount() {
-        return outboxRepository.countByPublishedAtIsNullAndRetryCountGreaterThanEqual(WorkflowEventOutboxRelay.MAX_RETRIES);
+        return outboxStats.deadLetteredCount();
     }
 }
