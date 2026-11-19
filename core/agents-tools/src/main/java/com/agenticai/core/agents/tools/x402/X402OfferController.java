@@ -2,7 +2,6 @@ package com.agenticai.core.agents.tools.x402;
 
 import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agentspi.AgentWalletLedger;
-import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.tenancy.ListPaging;
 import jakarta.validation.Valid;
@@ -14,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The tenant-facing management surface for x402 offers - an agent "publishes a paid endpoint" here.
@@ -38,20 +37,25 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/agents/{agentId}/x402/offers")
 public class X402OfferController {
 
-    private final X402OfferRepository offerRepository;
-    private final AgentWalletLedger walletService;
+    private final X402OfferService offerService;
     private final AgentService agentService;
 
+    @Autowired
+    public X402OfferController(X402OfferService offerService, AgentService agentService) {
+        this.offerService = offerService;
+        this.agentService = agentService;
+    }
+
+    /**
+     * Legacy wiring kept for callers outside this module (agents-studio test); delete once they
+     * build the service themselves.
+     */
+    @Deprecated
     public X402OfferController(
             X402OfferRepository offerRepository,
             ObjectProvider<AgentWalletLedger> walletLedger,
             AgentService agentService) {
-        this.offerRepository = offerRepository;
-        // Absent when the payments module is not wired (BILLING_PAYMENTS off): offers needing a
-        // wallet
-        // then answer a "payments disabled" refusal instead of the application failing to start.
-        this.walletService = PaymentsDisabledAgentWalletLedger.orDisabled(walletLedger);
-        this.agentService = agentService;
+        this(new X402OfferService(offerRepository, walletLedger), agentService);
     }
 
     public record CreateOfferRequest(
@@ -80,67 +84,24 @@ public class X402OfferController {
     public ResponseEntity<Map<String, Object>> create(
             @PathVariable UUID agentId, @Valid @RequestBody CreateOfferRequest body) {
         agentService.requireAccess(agentId, PermissionLevel.EDITOR);
-        String tenant =
-                TenantContext.current()
-                        .map(TenantContext::getTenantId)
-                        .orElseThrow(
-                                () ->
-                                        new ResponseStatusException(
-                                                HttpStatus.UNAUTHORIZED, "no tenant context"));
-        if (offerRepository.findBySlug(body.slug()).isPresent()) {
-            // Disabled slugs stay taken too - re-using a retired URL invites
-            // confusion with the old listing's payments.
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "slug is taken");
-        }
-        AgentWalletLedger.WalletRef wallet =
-                body.walletId() != null
-                        ? walletService
-                                .findById(body.walletId())
-                                .filter(w -> w.agentId().equals(agentId))
-                                .orElseThrow(
-                                        () ->
-                                                new ResponseStatusException(
-                                                        HttpStatus.UNPROCESSABLE_ENTITY,
-                                                        "walletId is not a wallet of this agent"))
-                        : walletService.getOrCreate(agentId, body.currency());
-        if (!wallet.currency().equalsIgnoreCase(body.currency())) {
-            throw new ResponseStatusException(
-                    HttpStatus.UNPROCESSABLE_ENTITY,
-                    "wallet currency "
-                            + wallet.currency()
-                            + " != offer currency "
-                            + body.currency());
-        }
-        boolean evmAllOrNothing = body.evmPriceAtomic() != null;
-        if (evmAllOrNothing
-                && (body.evmAsset() == null
-                        || body.evmNetwork() == null
-                        || body.evmAssetName() == null
-                        || body.evmAssetVersion() == null
-                        || body.payTo() == null)) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "EVM offers need evmPriceAtomic + evmAsset + evmNetwork + evmAssetName + evmAssetVersion + payTo");
-        }
-        X402Offer offer = new X402Offer();
-        offer.setId(UUID.randomUUID());
-        offer.setSlug(body.slug());
-        offer.setTenantId(tenant);
-        offer.setAgentId(agentId);
-        offer.setWalletId(wallet.id());
-        offer.setTitle(body.title());
-        offer.setDescription(body.description());
-        offer.setPriceMinor(body.priceMinor());
-        offer.setCurrency(body.currency().toUpperCase(java.util.Locale.ROOT));
-        offer.setEvmPriceAtomic(body.evmPriceAtomic());
-        offer.setEvmAsset(body.evmAsset());
-        offer.setEvmNetwork(body.evmNetwork());
-        offer.setEvmAssetName(body.evmAssetName());
-        offer.setEvmAssetVersion(body.evmAssetVersion());
-        offer.setPayTo(body.payTo());
-        offer.setResourcePayload(body.resourcePayload());
-        X402Offer saved = offerRepository.save(offer);
-        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(saved));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(
+                        offerService.create(
+                                agentId,
+                                new X402OfferService.OfferCommand(
+                                        body.slug(),
+                                        body.title(),
+                                        body.description(),
+                                        body.priceMinor(),
+                                        body.currency(),
+                                        body.walletId(),
+                                        body.evmPriceAtomic(),
+                                        body.evmAsset(),
+                                        body.evmNetwork(),
+                                        body.evmAssetName(),
+                                        body.evmAssetVersion(),
+                                        body.payTo(),
+                                        body.resourcePayload())));
     }
 
     @GetMapping
@@ -149,44 +110,12 @@ public class X402OfferController {
             @RequestParam(required = false) Integer limit,
             @RequestParam(required = false) Long offset) {
         agentService.requireAccess(agentId, PermissionLevel.VIEWER);
-        return ListPaging.window(
-                offerRepository.findByAgentIdOrderByCreatedAtDesc(agentId).stream()
-                        .map(this::toResponse)
-                        .toList(),
-                limit,
-                offset,
-                50,
-                500);
+        return ListPaging.window(offerService.list(agentId), limit, offset, 50, 500);
     }
 
     @PostMapping("/{offerId}/disable")
     public Map<String, Object> disable(@PathVariable UUID agentId, @PathVariable UUID offerId) {
         agentService.requireAccess(agentId, PermissionLevel.EDITOR);
-        X402Offer offer =
-                offerRepository
-                        .findById(offerId)
-                        .filter(o -> o.getAgentId().equals(agentId))
-                        .orElseThrow(
-                                () ->
-                                        new ResponseStatusException(
-                                                HttpStatus.NOT_FOUND, "no such offer"));
-        offer.setStatus(X402Offer.Status.DISABLED);
-        return toResponse(offerRepository.save(offer));
-    }
-
-    private Map<String, Object> toResponse(X402Offer o) {
-        Map<String, Object> m = new java.util.LinkedHashMap<>();
-        m.put("id", o.getId().toString());
-        m.put("slug", o.getSlug());
-        m.put("url", "/x402/" + o.getSlug());
-        m.put("agentId", o.getAgentId().toString());
-        m.put("walletId", o.getWalletId().toString());
-        m.put("title", o.getTitle());
-        m.put("priceMinor", o.getPriceMinor());
-        m.put("currency", o.getCurrency());
-        m.put("evm", o.hasEvmRequirement());
-        m.put("status", o.getStatus().name());
-        m.put("createdAt", o.getCreatedAt().toString());
-        return m;
+        return offerService.disable(agentId, offerId);
     }
 }
