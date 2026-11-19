@@ -9,7 +9,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.agenticai.core.agents.core.AgentRepository;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
@@ -116,7 +115,7 @@ class DemoChatShareTurnContextTest {
         ObjectProvider<ModerationService> noModeration = mock(ObjectProvider.class);
         DemoShareController controller =
                 new DemoShareController(
-                        shares, sessions, limiter, chat, mock(AgentRepository.class), noModeration);
+                        shares, sessions, limiter, chat, mock(DemoShareAgentLookupService.class), noModeration);
 
         controller.chat(
                 "share-1",

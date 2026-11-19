@@ -1,6 +1,5 @@
 package com.agenticai.core.agents.demo;
 
-import com.agenticai.core.agents.core.AgentRepository;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
@@ -81,7 +80,7 @@ public class DemoShareController {
     private final DemoSessionService demoSessionService;
     private final DemoSessionRateLimiter rateLimiter;
     private final AgentChatService agentChatService;
-    private final AgentRepository agentRepository;
+    private final DemoShareAgentLookupService agentLookup;
     // ObjectProvider, matching AgentChatService's own moderation wiring: the
     // subsystem is optional-by-config and this surface must fail open on its
     // absence, not refuse to boot.
@@ -92,13 +91,13 @@ public class DemoShareController {
             DemoSessionService demoSessionService,
             DemoSessionRateLimiter rateLimiter,
             AgentChatService agentChatService,
-            AgentRepository agentRepository,
+            DemoShareAgentLookupService agentLookup,
             ObjectProvider<ModerationService> moderationService) {
         this.demoShareService = demoShareService;
         this.demoSessionService = demoSessionService;
         this.rateLimiter = rateLimiter;
         this.agentChatService = agentChatService;
-        this.agentRepository = agentRepository;
+        this.agentLookup = agentLookup;
         this.moderationService = moderationService;
     }
 
@@ -360,10 +359,7 @@ public class DemoShareController {
                         demoSessionService.inDemoTenantContext(
                                 session,
                                 () ->
-                                        agentRepository
-                                                .findById(agentId)
-                                                .map(a -> a.getName())
-                                                .orElse(null));
+                                        agentLookup.findAgentName(agentId).orElse(null));
                 if (name != null && !name.isBlank()) {
                     return name;
                 }

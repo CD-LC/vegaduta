@@ -69,7 +69,7 @@ public class AgentDirectoryController {
             HttpServletRequest request) {
         Agent agent = agentService.requireAccess(agentId, PermissionLevel.EDITOR);
         String base = cardService.resolvePublicBaseUrl(request);
-        AgentDirectoryEntry entry =
+        AgentDirectoryView entry =
                 directoryService.publish(
                         agent,
                         body == null ? null : body.displayName(),
@@ -116,7 +116,7 @@ public class AgentDirectoryController {
             @RequestParam(defaultValue = "50") int limit,
             @RequestParam(required = false) Long offset) {
         long skip = Math.min(Math.max(offset == null ? 0L : offset, 0L), 1_000_000_000L);
-        List<AgentDirectoryEntry> rows = directoryService.listPublished(q, limit, skip);
+        List<AgentDirectoryView> rows = directoryService.listPublished(q, limit, skip);
         List<Map<String, Object>> entries = rows.stream().map(e -> toResponse(e, false)).toList();
         int size = Math.max(1, Math.min(limit, AgentDirectoryService.MAX_LIST_LIMIT));
         long seen = skip + entries.size();
@@ -143,7 +143,7 @@ public class AgentDirectoryController {
      */
     @GetMapping("/api/directory/agents/{agentId}")
     public Map<String, Object> get(@PathVariable UUID agentId) {
-        AgentDirectoryEntry entry =
+        AgentDirectoryView entry =
                 directoryService
                         .findPublished(agentId)
                         .orElseThrow(
@@ -155,19 +155,19 @@ public class AgentDirectoryController {
 
     // ---------------------------------------------------------------- internals
 
-    private Map<String, Object> toResponse(AgentDirectoryEntry e, boolean includeSnapshots) {
+    private Map<String, Object> toResponse(AgentDirectoryView e, boolean includeSnapshots) {
         Map<String, Object> out = new LinkedHashMap<>();
-        out.put("agentId", e.getAgentId().toString());
-        out.put("displayName", e.getDisplayName());
-        out.put("description", e.getDescription());
-        out.put("capabilities", readJsonArray(e.getCapabilities()));
-        out.put("homepageUrl", e.getHomepageUrl());
-        out.put("status", e.getStatus().name());
-        out.put("publishedAt", e.getPublishedAt());
-        out.put("updatedAt", e.getUpdatedAt());
+        out.put("agentId", e.agentId().toString());
+        out.put("displayName", e.displayName());
+        out.put("description", e.description());
+        out.put("capabilities", readJsonArray(e.capabilities()));
+        out.put("homepageUrl", e.homepageUrl());
+        out.put("status", e.status());
+        out.put("publishedAt", e.publishedAt());
+        out.put("updatedAt", e.updatedAt());
         if (includeSnapshots) {
-            out.put("card", readJsonObject(e.getCardSnapshot()));
-            out.put("manifest", readJsonObject(e.getManifestSnapshot()));
+            out.put("card", readJsonObject(e.cardSnapshot()));
+            out.put("manifest", readJsonObject(e.manifestSnapshot()));
         }
         return out;
     }

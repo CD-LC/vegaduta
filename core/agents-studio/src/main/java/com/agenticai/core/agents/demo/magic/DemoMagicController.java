@@ -5,7 +5,6 @@ import com.agenticai.core.guardrails.moderation.ModerationOutcome;
 import com.agenticai.core.guardrails.moderation.ModerationService;
 import com.agenticai.core.tenancy.demo.DemoMagicWorkflow;
 import com.agenticai.core.tenancy.demo.DemoSession;
-import com.agenticai.core.tenancy.demo.DemoSessionRepository;
 import com.agenticai.core.tenancy.demo.DemoSessionService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -68,18 +67,18 @@ public class DemoMagicController {
 
     private final DemoMagicService magicService;
     private final DemoSessionService demoSessionService;
-    private final DemoSessionRepository demoSessionRepository;
+    private final DemoMagicSessionLookupService sessionLookup;
     private final ObjectProvider<ModerationService> moderationService;
 
     public DemoMagicController(
         DemoMagicService magicService,
         DemoSessionService demoSessionService,
-        DemoSessionRepository demoSessionRepository,
+        DemoMagicSessionLookupService sessionLookup,
         ObjectProvider<ModerationService> moderationService
     ) {
         this.magicService = magicService;
         this.demoSessionService = demoSessionService;
-        this.demoSessionRepository = demoSessionRepository;
+        this.sessionLookup = sessionLookup;
         this.moderationService = moderationService;
     }
 
@@ -240,7 +239,7 @@ public class DemoMagicController {
         if (workflow.isExpired(now) || workflow.isRevoked()) {
             return ResponseEntity.status(HttpStatus.GONE).body(Map.of("error", "expired"));
         }
-        Optional<DemoSession> session = demoSessionRepository.findById(workflow.getSessionId());
+        Optional<DemoSession> session = sessionLookup.findById(workflow.getSessionId());
         if (session.isEmpty() || session.get().isExpired(now)) {
             return ResponseEntity.status(HttpStatus.GONE).body(Map.of("error", "expired"));
         }

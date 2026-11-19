@@ -71,7 +71,7 @@ class SpendCapServiceTest {
             .thenAnswer(inv -> row == null ? List.of() : List.of(row));
         when(jdbc.query(anyString(), any(RowMapper.class), anyString())).thenAnswer(inv -> row == null ? List.of() : List.of(row));
         when(jdbc.query(anyString(), any(RowMapper.class), any(UUID.class))).thenAnswer(inv -> row == null ? List.of() : List.of(row));
-        service = new SpendCapService(jdbc, redis, rollup, sinks, new DelegatingClock(clock), Runnable::run);
+        service = new SpendCapService(new SpendCapJdbcRepository(jdbc), redis, rollup, sinks, new DelegatingClock(clock), Runnable::run);
     }
 
     @SuppressWarnings("unchecked")

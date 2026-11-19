@@ -41,10 +41,11 @@ public class AgentSpecialtyService {
     }
 
     @Transactional(readOnly = true)
-    public List<AgentSpecialization> list(UUID agentId) {
+    public List<Specialty> list(UUID agentId) {
         agentService.requireAccess(agentId, PermissionLevel.VIEWER);
         return registry.findByAgent(agentId).stream()
             .sorted((a, b) -> a.getCapabilityTag().compareTo(b.getCapabilityTag()))
+            .map(r -> new Specialty(r.getCapabilityTag(), r.getDescription()))
             .toList();
     }
 
@@ -56,7 +57,7 @@ public class AgentSpecialtyService {
 
     /** Replaces the agent's whole set of specialties with {@code requested}. Idempotent. Throws IllegalArgumentException (HTTP 400) on invalid input. */
     @Transactional
-    public List<AgentSpecialization> replaceForAgent(UUID agentId, List<Specialty> requested) {
+    public List<Specialty> replaceForAgent(UUID agentId, List<Specialty> requested) {
         agentService.requireAccess(agentId, PermissionLevel.EDITOR);
         Map<String, String> desired = validate(requested);
 
@@ -71,7 +72,9 @@ public class AgentSpecialtyService {
             result.add(registry.register(agentId, e.getKey(), e.getValue()));
         }
         result.sort((a, b) -> a.getCapabilityTag().compareTo(b.getCapabilityTag()));
-        return result;
+        return result.stream()
+            .map(r -> new Specialty(r.getCapabilityTag(), r.getDescription()))
+            .toList();
     }
 
     /** Normalizes + validates; returns tag -> description in request order. Package-private for tests. */

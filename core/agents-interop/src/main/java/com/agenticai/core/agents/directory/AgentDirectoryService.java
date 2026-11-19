@@ -63,7 +63,7 @@ public class AgentDirectoryService {
      * card/manifest builders see the right schema; the entry itself lands in {@code control_plane}.
      */
     @Transactional
-    public AgentDirectoryEntry publish(
+    public AgentDirectoryView publish(
             Agent agent,
             String displayName,
             String description,
@@ -105,7 +105,7 @@ public class AgentDirectoryService {
                 agent.getId().toString(),
                 AuditOutcome.APPROVED,
                 "tenant=" + tenant);
-        return saved;
+        return AgentDirectoryView.of(saved);
     }
 
     @Transactional
@@ -128,16 +128,18 @@ public class AgentDirectoryService {
 
     /** Public listing - published entries only. Runs without a TenantContext. */
     @Transactional(readOnly = true)
-    public List<AgentDirectoryEntry> listPublished(String query, int limit) {
+    public List<AgentDirectoryView> listPublished(String query, int limit) {
         return listPublished(query, limit, 0L);
     }
 
     /** Offset variant; newest first with the agent id as tiebreaker so pages never overlap. */
     @Transactional(readOnly = true)
-    public List<AgentDirectoryEntry> listPublished(String query, int limit, long offset) {
+    public List<AgentDirectoryView> listPublished(String query, int limit, long offset) {
         int capped = Math.max(1, Math.min(limit, MAX_LIST_LIMIT));
         long skip = Math.min(Math.max(offset, 0L), 1_000_000_000L);
-        return repository.listPublished(pattern(query), new OffsetLimitRequest(skip, capped));
+        return repository.listPublished(pattern(query), new OffsetLimitRequest(skip, capped)).stream()
+                .map(AgentDirectoryView::of)
+                .toList();
     }
 
     /** Published entries matching {@code query}, ignoring paging. */
@@ -151,24 +153,26 @@ public class AgentDirectoryService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<AgentDirectoryEntry> findPublished(UUID agentId) {
+    public Optional<AgentDirectoryView> findPublished(UUID agentId) {
         return repository
                 .findById(agentId)
-                .filter(e -> e.getStatus() == AgentDirectoryEntry.Status.PUBLISHED);
+                .filter(e -> e.getStatus() == AgentDirectoryEntry.Status.PUBLISHED)
+                .map(AgentDirectoryView::of);
     }
 
     /** The owning tenant's view of its own entries (any status). */
     @Transactional(readOnly = true)
-    public List<AgentDirectoryEntry> listForTenant() {
+    public List<AgentDirectoryView> listForTenant() {
         return TenantContext.current()
                 .map(TenantContext::getTenantId)
                 .map(repository::findByTenantIdOrderByUpdatedAtDesc)
+                .map(rows -> rows.stream().map(AgentDirectoryView::of).toList())
                 .orElse(List.of());
     }
 
     @Transactional(readOnly = true)
-    public Optional<AgentDirectoryEntry> findAny(UUID agentId) {
-        return repository.findById(agentId);
+    public Optional<AgentDirectoryView> findAny(UUID agentId) {
+        return repository.findById(agentId).map(AgentDirectoryView::of);
     }
 
     private void audit(String action, String targetId, AuditOutcome outcome, String detail) {

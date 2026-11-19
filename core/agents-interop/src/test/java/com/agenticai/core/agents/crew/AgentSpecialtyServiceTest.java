@@ -43,7 +43,7 @@ class AgentSpecialtyServiceTest {
             new AgentSpecialization(agentId, "legacy", null),
             new AgentSpecialization(agentId, "billing", "old")));
 
-        List<AgentSpecialization> result = service.replaceForAgent(agentId, List.of(
+        List<Specialty> result = service.replaceForAgent(agentId, List.of(
             new Specialty("  Billing ", " refunds "), new Specialty("tax-advice", "  ")));
 
         verify(agentService).requireAccess(agentId, PermissionLevel.EDITOR);
@@ -51,7 +51,7 @@ class AgentSpecialtyServiceTest {
         verify(registry, never()).deregister(agentId, "billing");
         verify(registry).register(agentId, "billing", "refunds");
         verify(registry).register(agentId, "tax-advice", null);
-        assertEquals(List.of("billing", "tax-advice"), result.stream().map(AgentSpecialization::getCapabilityTag).toList());
+        assertEquals(List.of("billing", "tax-advice"), result.stream().map(Specialty::capabilityTag).toList());
     }
 
     @Test

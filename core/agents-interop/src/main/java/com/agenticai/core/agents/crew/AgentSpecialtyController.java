@@ -58,8 +58,8 @@ public class AgentSpecialtyController {
         return service.listTenantTags();
     }
 
-    private static SpecialtiesResponse toResponse(UUID agentId, List<AgentSpecialization> rows) {
+    private static SpecialtiesResponse toResponse(UUID agentId, List<AgentSpecialtyService.Specialty> rows) {
         return new SpecialtiesResponse(agentId,
-            rows.stream().map(r -> new SpecialtyDto(r.getCapabilityTag(), r.getDescription())).toList());
+            rows.stream().map(r -> new SpecialtyDto(r.capabilityTag(), r.description())).toList());
     }
 }

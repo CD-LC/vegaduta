@@ -17,7 +17,7 @@ import com.agenticai.core.guardrails.moderation.ModerationOutcome;
 import com.agenticai.core.guardrails.moderation.ModerationService;
 import com.agenticai.core.tenancy.demo.DemoMagicWorkflow;
 import com.agenticai.core.tenancy.demo.DemoSession;
-import com.agenticai.core.tenancy.demo.DemoSessionRepository;
+
 import com.agenticai.core.tenancy.demo.DemoSessionService;
 import java.time.Instant;
 import java.util.List;
@@ -39,7 +39,7 @@ class DemoMagicControllerTest {
 
     private DemoMagicService magic;
     private DemoSessionService sessions;
-    private DemoSessionRepository repository;
+    private DemoMagicSessionLookupService repository;
     private ModerationService moderation;
     private DemoMagicController controller;
     private DemoSession session;
@@ -51,7 +51,7 @@ class DemoMagicControllerTest {
     void setUp() {
         magic = mock(DemoMagicService.class);
         sessions = mock(DemoSessionService.class);
-        repository = mock(DemoSessionRepository.class);
+        repository = mock(DemoMagicSessionLookupService.class);
         moderation = mock(ModerationService.class);
         ObjectProvider<ModerationService> provider = mock(ObjectProvider.class);
         when(provider.getIfAvailable()).thenReturn(moderation);

@@ -46,7 +46,7 @@ class FaceEnrollmentServiceTest {
         jdbc = mock(JdbcTemplate.class);
         agents = mock(AgentService.class);
         collections = mock(KnowledgeCollectionService.class);
-        service = new FaceEnrollmentService(jdbc, agents, collections);
+        service = new FaceEnrollmentService(new FaceEnrollmentJdbcRepository(jdbc), agents, collections);
         when(agents.isBiometricConsentEnabled(AGENT)).thenReturn(true);
         TenantContext.set(TenantContext.of("acme", "u1", Set.of()));
     }
