@@ -483,7 +483,7 @@ services:
 
   keycloak:
     # Same Keycloak release as deploy/helm/charts/keycloak (one version line).
-    image: quay.io/keycloak/keycloak:26.8.2
+    image: quay.io/keycloak/keycloak:26.7.5
     <<: [*restart, *logging, *nnp]
     # Production mode (`start`) against keycloak-db, HTTP only inside the
     # compose network / on the loopback port; TLS is terminated by Caddy in
@@ -550,7 +550,7 @@ services:
   # Idempotent; shares keycloak's network namespace so the script's
   # localhost:8080 is this realm's Keycloak.
   keycloak-reconcile:
-    image: quay.io/keycloak/keycloak:26.8.2
+    image: quay.io/keycloak/keycloak:26.7.5
     <<: [*logging, *nnp]
     restart: "no"
     network_mode: "service:keycloak"
