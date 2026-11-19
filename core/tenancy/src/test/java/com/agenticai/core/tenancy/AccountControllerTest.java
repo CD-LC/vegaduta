@@ -43,7 +43,7 @@ class AccountControllerTest {
     void setUp() {
         appUserRepository = mock(AppUserRepository.class);
         fileStorageService = mock(FileStorageService.class);
-        controller = new AccountController(appUserRepository, fileStorageService);
+        controller = new AccountController(new AccountService(appUserRepository), fileStorageService);
         principal = () -> "keycloak-user-1";
     }
 

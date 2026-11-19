@@ -137,27 +137,24 @@ public class TenantBrandingLogoController {
      */
     private static final String PUBLIC_PATH_TEMPLATE = "/api/share/branding/%s/logo.%s";
 
-    private final TenantRepository tenantRepository;
+    private final TenantSettingsService settingsService;
     private final TenantLimits tenantLimits;
     private final FileStorageService fileStorageService;
-    private final FreeModeService freeModeService;
     private final String configuredPublicBaseUrl;
 
     public TenantBrandingLogoController(
-        TenantRepository tenantRepository,
+        TenantSettingsService settingsService,
         TenantLimits tenantLimits,
         FileStorageService fileStorageService,
-        FreeModeService freeModeService,
         // Same override-or-derive shape as app.a2a.public-base-url: normally
         // empty, because server.forward-headers-strategy=native already makes
         // the request's own origin the public one behind Caddy/Container
         // Apps. Set it for any deployment where that is not true.
         @Value("${app.branding.public-base-url:}") String configuredPublicBaseUrl
     ) {
-        this.tenantRepository = tenantRepository;
+        this.settingsService = settingsService;
         this.tenantLimits = tenantLimits;
         this.fileStorageService = fileStorageService;
-        this.freeModeService = freeModeService;
         this.configuredPublicBaseUrl = configuredPublicBaseUrl;
     }
 
@@ -176,7 +173,7 @@ public class TenantBrandingLogoController {
     public TenantSettingsResponse upload(HttpServletRequest request, @RequestParam("file") MultipartFile file) {
         String tenantId = tenantId();
         requireWhiteLabel(tenantId);
-        Tenant tenant = requireTenant(tenantId);
+        String previousLogoUrl = settingsService.requireBrandLogoUrl(tenantId);
 
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("No logo file was uploaded.");
@@ -199,7 +196,7 @@ public class TenantBrandingLogoController {
         String publicUrl = publicLogoUrl(request, tenantId, extension);
 
         String objectKey = objectKey(extension);
-        String previousObjectKey = objectKeyFor(tenant.getBrandLogoUrl(), tenantId);
+        String previousObjectKey = objectKeyFor(previousLogoUrl, tenantId);
         fileStorageService.put(objectKey, content, file.getContentType());
         // Only fires when the FORMAT changed (png -> webp, say); re-uploading
         // the same format overwrites objectKey above and this is skipped, so
@@ -207,9 +204,8 @@ public class TenantBrandingLogoController {
         if (previousObjectKey != null && !previousObjectKey.equals(objectKey)) {
             deleteQuietly(previousObjectKey);
         }
-        tenant.updateBranding(tenant.getBrandDisplayName(), publicUrl);
-        tenantRepository.save(tenant);
-        return settings(tenantId);
+        settingsService.updateBrandLogoUrl(tenantId, publicUrl);
+        return settingsService.get(tenantId);
     }
 
     /**
@@ -228,14 +224,12 @@ public class TenantBrandingLogoController {
     public TenantSettingsResponse remove() {
         String tenantId = tenantId();
         requireWhiteLabel(tenantId);
-        Tenant tenant = requireTenant(tenantId);
-        String objectKey = objectKeyFor(tenant.getBrandLogoUrl(), tenantId);
+        String objectKey = objectKeyFor(settingsService.requireBrandLogoUrl(tenantId), tenantId);
         if (objectKey != null) {
             deleteQuietly(objectKey);
         }
-        tenant.updateBranding(tenant.getBrandDisplayName(), null);
-        tenantRepository.save(tenant);
-        return settings(tenantId);
+        settingsService.updateBrandLogoUrl(tenantId, null);
+        return settingsService.get(tenantId);
     }
 
     /**
@@ -273,16 +267,16 @@ public class TenantBrandingLogoController {
         if (contentType == null) {
             return ResponseEntity.notFound().build();
         }
-        Tenant tenant = tenantRepository.findBySchemaName(tenantId).orElse(null);
-        if (tenant == null || !tenantLimits.whiteLabel(tenantId)) {
+        // Empty = no tenant row or no logo set: both are the same 404.
+        String stored = settingsService.findBrandLogoUrl(tenantId).orElse(null);
+        if (stored == null || !tenantLimits.whiteLabel(tenantId)) {
             return ResponseEntity.notFound().build();
         }
         // The tenant's CURRENT brand URL must be exactly the one being asked
         // for - this is what makes the key below trusted rather than
         // path-derived.
         String expected = String.format(PUBLIC_PATH_TEMPLATE, tenantId, extension);
-        String stored = tenant.getBrandLogoUrl();
-        if (stored == null || !stored.endsWith(expected)) {
+        if (!stored.endsWith(expected)) {
             return ResponseEntity.notFound().build();
         }
 
@@ -418,41 +412,6 @@ public class TenantBrandingLogoController {
                     + "VegaDuta branding with your own on shared agent pages."
             );
         }
-    }
-
-    private Tenant requireTenant(String tenantId) {
-        return tenantRepository.findBySchemaName(tenantId)
-            .orElseThrow(() -> new IllegalStateException("No Tenant row for schema '" + tenantId + "'"));
-    }
-
-    /** Mirrors {@code TenantSettingsController#get} so a branding write returns the same settings shape the caller already holds. */
-    private TenantSettingsResponse settings(String tenantId) {
-        Tenant tenant = tenantRepository.findBySchemaName(tenantId).orElse(null);
-        return new TenantSettingsResponse(
-            tenant != null ? tenant.getId() : null,
-            tenantLimits.accountType(tenantId),
-            tenantLimits.experienceMode(tenantId),
-            tenantLimits.maxUsers(tenantId),
-            tenantLimits.maxAgents(tenantId).orElse(null),
-            tenant != null ? tenant.getName() : null,
-            tenantLimits.plan(tenantId),
-            tenantLimits.maxWorkflows(tenantId).orElse(null),
-            tenantLimits.usePlatformLlm(tenantId),
-            tenantLimits.byokAllowed(tenantId),
-            tenantLimits.whatsappAllowed(tenantId),
-            tenantLimits.whiteLabel(tenantId),
-            tenantLimits.maxKbCollections(tenantId).orElse(null),
-            tenantLimits.liveVisionAllowed(tenantId),
-            tenant != null ? tenant.getBrandDisplayName() : null,
-            tenant != null ? tenant.getBrandLogoUrl() : null,
-            freeModeService.isEnabled(),
-            tenantLimits.externalChannelsAllowed(tenantId),
-            tenantLimits.developerApiAllowed(tenantId),
-            tenantLimits.ssoAllowed(tenantId),
-            tenantLimits.scimAllowed(tenantId),
-            tenantLimits.workflowExportAllowed(tenantId),
-            tenantLimits.automationAllowed(tenantId)
-        );
     }
 
     private String tenantId() {

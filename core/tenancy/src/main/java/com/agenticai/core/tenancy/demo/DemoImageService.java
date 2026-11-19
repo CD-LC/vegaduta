@@ -234,6 +234,12 @@ public class DemoImageService {
         return id == null ? Optional.empty() : imageRepository.findById(id);
     }
 
+    /** Capability-URL resolution plus bytes in one step: empty when the id is unknown or storage cannot produce the bytes. */
+    public Optional<DemoServedMedia> readServed(UUID id) {
+        return find(id).flatMap(image ->
+                readBytes(image).map(bytes -> new DemoServedMedia(image.getContentType(), bytes)));
+    }
+
     /** @return the stored bytes, or empty if object storage cannot produce them (a serving failure, not a generation one). */
     public Optional<byte[]> readBytes(DemoGeneratedImage image) {
         try (var in = fileStorageService.get(image.getObjectKey())) {

@@ -127,9 +127,9 @@ public class GoogleOAuthController {
      */
     @GetMapping("/api/channels/google/status")
     public ResponseEntity<GoogleConnectionResponse> status() {
-        Optional<GoogleCredential> credential = oauthService.status();
-        return credential
-                .map(c -> ResponseEntity.ok(GoogleConnectionResponse.from(c)))
+        return oauthService
+                .statusResponse()
+                .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
@@ -231,10 +231,10 @@ public class GoogleOAuthController {
         // spoofed by) whatever subject happens to be on the thread.
         TenantContext.set(TenantContext.of(decoded.schema(), REQUESTED_BY, Set.of()));
         try {
-            GoogleCredential credential =
-                    oauthService.connect(
+            GoogleOAuthService.ConnectOutcome credential =
+                    oauthService.connectOutcome(
                             code, decoded.subjectKey(), decoded.purpose(), decoded.nonce());
-            if (decoded.purpose() == null && !credential.hasScope(GoogleScopes.YOUTUBE_READONLY)) {
+            if (decoded.purpose() == null && !credential.youtubeReadonlyGranted()) {
                 // Base connect succeeded - chain straight into the
                 // youtube.readonly incremental consent instead of landing back
                 // on the console. Google forbids drive.file+youtube.readonly
@@ -247,7 +247,7 @@ public class GoogleOAuthController {
                         oauthService.chainedYoutubeReadonlyAuthorizeRedirect(
                                 decoded.schema(),
                                 decoded.subjectKey(),
-                                credential.getConnectedEmail());
+                                credential.connectedEmail());
                 return ResponseEntity.status(302)
                         .location(URI.create(chained.url()))
                         .header(HttpHeaders.SET_COOKIE, chained.bindingCookie().toString())

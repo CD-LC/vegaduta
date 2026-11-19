@@ -1,5 +1,6 @@
 package com.agenticai.core.elevenlabs;
 
+import com.agenticai.core.elevenlabs.dto.ElevenLabsVoiceResponse;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
 import java.util.List;
@@ -32,6 +33,17 @@ public class ElevenLabsVoiceService {
             String name, byte[] sampleBytes, String contentType, String filename) {
         String voiceId = client.cloneVoice(name, sampleBytes, contentType, filename);
         return repository.save(ElevenLabsVoice.create(voiceId, name));
+    }
+
+    @Transactional
+    public ElevenLabsVoiceResponse cloneVoiceResponse(
+            String name, byte[] sampleBytes, String contentType, String filename) {
+        return ElevenLabsVoiceResponse.from(cloneVoice(name, sampleBytes, contentType, filename));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ElevenLabsVoiceResponse> listResponses() {
+        return list().stream().map(ElevenLabsVoiceResponse::from).toList();
     }
 
     @Transactional(readOnly = true)

@@ -57,9 +57,7 @@ public class SecretVaultController {
     /** Everything the caller may see: all shared secrets plus their own personal ones. */
     @GetMapping
     public List<SecretResponse> list(Authentication authentication) {
-        return vaultService.listVisibleTo(userId(authentication)).stream()
-            .map(SecretResponse::from)
-            .toList();
+        return vaultService.listVisibleResponses(userId(authentication));
     }
 
     /**
@@ -75,10 +73,9 @@ public class SecretVaultController {
     ) {
         String actor = userId(authentication);
         requireCanWriteScope(request.scope(), authentication);
-        TenantSecret stored = vaultService.store(
+        SecretResponse stored = vaultService.storeAsResponse(
             request.name(),
             request.scope(),
-            null,
             request.kind(),
             request.description(),
             request.value(),
@@ -86,7 +83,7 @@ public class SecretVaultController {
             Boolean.TRUE.equals(request.codeToolAccess()),
             request.allowedHosts(),
             actor);
-        return ResponseEntity.status(HttpStatus.CREATED).body(SecretResponse.from(stored));
+        return ResponseEntity.status(HttpStatus.CREATED).body(stored);
     }
 
     /** Body of {@code PUT /api/secrets/{id}/allowed-hosts}. */
@@ -103,10 +100,9 @@ public class SecretVaultController {
         @Valid @RequestBody AllowedHostsRequest request,
         Authentication authentication
     ) {
-        TenantSecret updated = vaultService.updateAllowedHosts(
+        return vaultService.updateAllowedHostsAsResponse(
             id, request.allowedHosts() == null ? List.of() : request.allowedHosts(),
             userId(authentication), isWorkspaceAdmin(authentication));
-        return SecretResponse.from(updated);
     }
 
     /**

@@ -65,7 +65,8 @@ class TenantBrandingLogoControllerTest {
         fileStorageService = mock(FileStorageService.class);
         freeModeService = mock(FreeModeService.class);
         controller = new TenantBrandingLogoController(
-            tenantRepository, tenantLimits, fileStorageService, freeModeService, PUBLIC_BASE);
+            new TenantSettingsService(tenantRepository, tenantLimits, freeModeService),
+            tenantLimits, fileStorageService, PUBLIC_BASE);
 
         tenant = new Tenant(
             "Acme", TenantPlan.UNLIMITED, TENANT_ID, "agentic-ai", AccountType.B2C, ExperienceMode.SIMPLE);
@@ -180,7 +181,8 @@ class TenantBrandingLogoControllerTest {
         // proxy, or a local run) would otherwise bake a permanently broken,
         // mixed-content URL into a column that public pages render.
         TenantBrandingLogoController local = new TenantBrandingLogoController(
-            tenantRepository, tenantLimits, fileStorageService, freeModeService, "http://localhost:8080");
+            new TenantSettingsService(tenantRepository, tenantLimits, freeModeService),
+            tenantLimits, fileStorageService, "http://localhost:8080");
         when(tenantLimits.whiteLabel(TENANT_ID)).thenReturn(true);
 
         ResponseStatusException e = assertThrows(ResponseStatusException.class,

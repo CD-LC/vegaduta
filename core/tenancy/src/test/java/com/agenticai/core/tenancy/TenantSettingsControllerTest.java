@@ -52,7 +52,8 @@ class TenantSettingsControllerTest {
         tenantRepository = mock(TenantRepository.class);
         tenantLimits = mock(TenantLimits.class);
         freeModeService = mock(FreeModeService.class);
-        controller = new TenantSettingsController(tenantRepository, tenantLimits, freeModeService);
+        controller = new TenantSettingsController(
+            new TenantSettingsService(tenantRepository, tenantLimits, freeModeService));
 
         tenant = new Tenant(
             "Acme", TenantPlan.UNLIMITED, TENANT_ID, "agentic-ai", AccountType.B2C, ExperienceMode.SIMPLE);

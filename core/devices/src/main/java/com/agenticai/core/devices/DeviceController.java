@@ -37,17 +37,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class DeviceController {
 
     private final DevicePairingService pairingService;
-    private final DeviceCommandService commandService;
-    private final MobileDeviceRepository deviceRepository;
+    private final DeviceAdminService adminService;
 
     public DeviceController(
         DevicePairingService pairingService,
-        DeviceCommandService commandService,
-        MobileDeviceRepository deviceRepository
+        DeviceAdminService adminService
     ) {
         this.pairingService = pairingService;
-        this.commandService = commandService;
-        this.deviceRepository = deviceRepository;
+        this.adminService = adminService;
     }
 
     @PostMapping("/pairing-code")
@@ -73,30 +70,26 @@ public class DeviceController {
     @GetMapping
     public ResponseEntity<List<DeviceResponse>> list(@RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
         return ListPaging.window(
-            deviceRepository.findByOrderByCreatedAtDesc().stream().map(DeviceResponse::from).toList(),
+            adminService.listDevices(),
             limit, offset, 50, 500);
     }
 
     @DeleteMapping("/{deviceId}")
     public ResponseEntity<Void> revoke(@PathVariable UUID deviceId) {
-        MobileDevice device = deviceRepository.findById(deviceId)
-            .orElseThrow(() -> new DeviceException("Unknown device: " + deviceId));
-        device.revoke();
-        deviceRepository.save(device);
+        adminService.revoke(deviceId);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{deviceId}/commands")
     public ResponseEntity<List<CommandResponse>> commandHistory(@PathVariable UUID deviceId, @RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
         return ListPaging.window(
-            commandService.history(deviceId).stream().map(CommandResponse::from).toList(),
+            adminService.commandHistory(deviceId),
             limit, offset, 50, 500);
     }
 
     /** Send a device a command directly, without a workflow run involved. */
     @PostMapping("/{deviceId}/commands")
     public CommandResponse enqueue(@PathVariable UUID deviceId, @Valid @RequestBody EnqueueCommandRequest request) {
-        DeviceCommand command = commandService.enqueue(deviceId, request.commandType(), request.payload(), null);
-        return CommandResponse.from(command);
+        return adminService.enqueue(deviceId, request.commandType(), request.payload());
     }
 }

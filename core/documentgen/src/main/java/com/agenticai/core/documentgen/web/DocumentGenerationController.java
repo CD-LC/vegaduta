@@ -1,7 +1,7 @@
 package com.agenticai.core.documentgen.web;
 
 import com.agenticai.core.documentgen.DocumentGenerationQuotaExceededException;
-import com.agenticai.core.documentgen.entity.DocumentGenerationJob;
+import com.agenticai.core.documentgen.model.DocumentDownloadInfo;
 import com.agenticai.core.documentgen.model.DocumentGenerationJobResponse;
 import com.agenticai.core.documentgen.model.DocumentGenerationRequest;
 import com.agenticai.core.documentgen.model.DocumentGenerationStatus;
@@ -87,23 +87,23 @@ public class DocumentGenerationController {
 
     @GetMapping("/{id}")
     public ResponseEntity<StreamingResponseBody> download(@PathVariable UUID id) {
-        Optional<DocumentGenerationJob> jobOpt = service.findJob(id, currentTenantId());
+        Optional<DocumentDownloadInfo> jobOpt = service.findDownload(id, currentTenantId());
         if (jobOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        DocumentGenerationJob job = jobOpt.get();
-        if (job.getStatus() != DocumentGenerationStatus.COMPLETE || job.getStorageKey() == null) {
+        DocumentDownloadInfo job = jobOpt.get();
+        if (job.status() != DocumentGenerationStatus.COMPLETE || job.storageKey() == null) {
             // 409: the job exists but isn't ready yet (or failed) - distinct
             // from 404 (no such job at all / belongs to another tenant).
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
 
-        MediaType contentType = MediaType.parseMediaType(job.getType().mimeType());
-        String storageKey = job.getStorageKey();
+        MediaType contentType = MediaType.parseMediaType(job.mimeType());
+        String storageKey = job.storageKey();
         return ResponseEntity.ok()
             .contentType(contentType)
             .header(HttpHeaders.CONTENT_DISPOSITION,
-                ContentDisposition.attachment().filename(job.getFilename()).build().toString())
+                ContentDisposition.attachment().filename(job.filename()).build().toString())
             .body(streamBody(storageKey));
     }
 

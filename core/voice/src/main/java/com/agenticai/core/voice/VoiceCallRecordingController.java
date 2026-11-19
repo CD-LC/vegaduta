@@ -4,16 +4,11 @@ import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
-import com.agenticai.core.security.logging.LogSafe;
-import com.agenticai.core.voice.dto.VoiceCallRecordingResponse;
 import java.security.Principal;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -42,30 +37,22 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/voice/agents/{agentId}/calls/{roomName}/recording")
 public class VoiceCallRecordingController {
 
-    private static final Logger log = LoggerFactory.getLogger(VoiceCallRecordingController.class);
-
     private static final Pattern CALL_ROOM =
             Pattern.compile("^(?:voice|sight)-([0-9a-fA-F-]{36})-[0-9a-fA-F]{8}$");
 
-    private static final List<VoiceCallRecordingStatus> IN_FLIGHT_STATUSES =
-            List.of(
-                    VoiceCallRecordingStatus.STARTING,
-                    VoiceCallRecordingStatus.ACTIVE,
-                    VoiceCallRecordingStatus.STOPPING);
-
     private final AgentService agentService;
     private final LiveKitEgressService egressService;
-    private final VoiceCallRecordingRepository recordingRepository;
+    private final VoiceCallRecordingService recordingService;
     private final VoiceCallRoomRegistry roomRegistry;
 
     public VoiceCallRecordingController(
             AgentService agentService,
             LiveKitEgressService egressService,
-            VoiceCallRecordingRepository recordingRepository,
+            VoiceCallRecordingService recordingService,
             VoiceCallRoomRegistry roomRegistry) {
         this.agentService = agentService;
         this.egressService = egressService;
-        this.recordingRepository = recordingRepository;
+        this.recordingService = recordingService;
         this.roomRegistry = roomRegistry;
     }
 
@@ -86,41 +73,12 @@ public class VoiceCallRecordingController {
                     .body(Map.of("error", "Call recording is not enabled on this deployment."));
         }
 
-        var existing =
-                recordingRepository.findFirstByRoomNameAndStatusInOrderByCreatedAtDesc(
-                        roomName, IN_FLIGHT_STATUSES);
+        var existing = recordingService.findInFlight(roomName);
         if (existing.isPresent()) {
-            return ResponseEntity.ok(toResponse(existing.get()));
+            return ResponseEntity.ok(existing.get());
         }
 
-        LiveKitEgressService.EgressStartResult result;
-        VoiceCallRecording recording;
-        try {
-            result = egressService.startRoomRecording(tenantId(), roomName);
-            recording =
-                    new VoiceCallRecording(
-                            agentId, roomName, result.egressId(), result.objectKey());
-            recording.markActive();
-        } catch (LiveKitEgressException e) {
-            log.warn(
-                    "Failed to start LiveKit egress for agent {} room {}: {}",
-                    agentId,
-                    LogSafe.clean(roomName),
-                    e.getMessage());
-            // Persist the failure too, so "never started" is distinguishable from a missing row.
-            // Re-thrown: a genuine infra failure (LiveKit or the egress worker down) is a 500.
-            recording = new VoiceCallRecording(agentId, roomName, null, "");
-            recording.markFailed();
-            recordingRepository.save(recording);
-            throw e;
-        }
-        recordingRepository.save(recording);
-        log.info(
-                "Started call recording agent={} room={} egressId={}",
-                agentId,
-                LogSafe.clean(roomName),
-                recording.getEgressId());
-        return ResponseEntity.ok(toResponse(recording));
+        return ResponseEntity.ok(recordingService.start(agentId, roomName, tenantId()));
     }
 
     /** Stops whatever recording of this agent's room is in flight, if any. */
@@ -131,35 +89,12 @@ public class VoiceCallRecordingController {
         if (!isCallersRoom(agentId, roomName, principal)) {
             return noSuchCall();
         }
-        var recordingOpt =
-                recordingRepository
-                        .findFirstByRoomNameAndStatusInOrderByCreatedAtDesc(
-                                roomName, IN_FLIGHT_STATUSES)
-                        .filter(r -> agentId.equals(r.getAgentId()));
-        if (recordingOpt.isEmpty()) {
+        var stopped = recordingService.stop(agentId, roomName);
+        if (stopped.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", "No in-progress recording for room " + roomName));
         }
-        VoiceCallRecording recording = recordingOpt.get();
-        recording.markStopping();
-        try {
-            egressService.stopRecording(recording.getEgressId());
-            recording.markCompleted();
-        } catch (LiveKitEgressException e) {
-            log.warn(
-                    "Failed to stop LiveKit egress {} for room {}: {}",
-                    recording.getEgressId(),
-                    LogSafe.clean(roomName),
-                    e.getMessage());
-            recording.markFailed();
-        }
-        recordingRepository.save(recording);
-        log.info(
-                "Stopped call recording agent={} room={} status={}",
-                agentId,
-                LogSafe.clean(roomName),
-                recording.getStatus());
-        return ResponseEntity.ok(toResponse(recording));
+        return ResponseEntity.ok(stopped.get());
     }
 
     /** The room is this agent's call room and was issued to this caller in this tenant. */
@@ -181,14 +116,5 @@ public class VoiceCallRecordingController {
 
     private static ResponseEntity<Map<String, String>> noSuchCall() {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "No such call"));
-    }
-
-    private static VoiceCallRecordingResponse toResponse(VoiceCallRecording recording) {
-        return new VoiceCallRecordingResponse(
-                recording.getId(),
-                recording.getRoomName(),
-                recording.getStatus().name(),
-                recording.getStartedAt(),
-                recording.getEndedAt());
     }
 }

@@ -59,9 +59,7 @@ public class SarvamGeneratedAudioController {
         int size = ListPaging.limit(limit, 50, 200);
         long skip = ListPaging.offset(offset);
         return ListPaging.respond(
-                service.listPage(skip, size).stream()
-                        .map(SarvamGeneratedAudioResponse::from)
-                        .toList(),
+                service.listPageResponses(skip, size),
                 size,
                 skip,
                 service::countAll);
@@ -69,29 +67,29 @@ public class SarvamGeneratedAudioController {
 
     @GetMapping("/{id}")
     public ResponseEntity<byte[]> download(@PathVariable UUID id) {
-        return service.find(id)
+        return service.findFileRef(id)
                 .map(
                         audio ->
                                 ResponseEntity.ok()
                                         .contentType(
-                                                MediaType.parseMediaType(audio.getContentType()))
+                                                MediaType.parseMediaType(audio.contentType()))
                                         .header(
                                                 HttpHeaders.CONTENT_DISPOSITION,
                                                 AttachmentDisposition.attachment(
-                                                        audio.getFilename()))
+                                                        audio.filename()))
                                         .body(resolveBytes(audio)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    private byte[] resolveBytes(SarvamGeneratedAudio audio) {
-        if (audio.getObjectKey() != null) {
-            try (InputStream in = fileStorageService.get(audio.getObjectKey())) {
+    private byte[] resolveBytes(SarvamAudioFileRef audio) {
+        if (audio.objectKey() != null) {
+            try (InputStream in = fileStorageService.get(audio.objectKey())) {
                 return in.readAllBytes();
             } catch (IOException e) {
                 throw new com.agenticai.core.storage.FileStorageException(
-                        "Could not read object '" + audio.getObjectKey() + "'", e);
+                        "Could not read object '" + audio.objectKey() + "'", e);
             }
         }
-        return Base64.getDecoder().decode(audio.getAudioDataBase64());
+        return Base64.getDecoder().decode(audio.audioDataBase64());
     }
 }

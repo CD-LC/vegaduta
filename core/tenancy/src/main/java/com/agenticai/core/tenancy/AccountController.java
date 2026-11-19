@@ -10,9 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import com.agenticai.core.security.TenantContext;
 import java.security.Principal;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +41,7 @@ import org.springframework.web.multipart.MultipartFile;
  * {@code SystemStatusController}: it works identically whether "security" is
  * active or not (falls through to {@code anyRequest().authenticated()} when
  * it is; {@code NoSecurityConfig}'s {@code permitAll()} when it isn't). With
- * security off there's no {@link Principal}, so {@link #currentUser}
+ * security off there's no {@link Principal}, so {@code currentUser}
  * resolves nothing and throws - equivalent to every other authenticated
  * endpoint's behavior in that mode.
  *
@@ -77,36 +75,22 @@ public class AccountController {
     private static final String AVATAR_STREAM_CLEANUP_ATTRIBUTE =
         AccountController.class.getName() + ".avatarStream";
 
-    private final AppUserRepository appUserRepository;
+    private final AccountService accountService;
     private final FileStorageService fileStorageService;
 
-    private final AppUserProvisioningService provisioningService;
-
-    public AccountController(AppUserRepository appUserRepository, FileStorageService fileStorageService) {
-        this(appUserRepository, fileStorageService, null);
-    }
-
-    @Autowired
-    public AccountController(
-        AppUserRepository appUserRepository, FileStorageService fileStorageService,
-        AppUserProvisioningService provisioningService
-    ) {
-        this.provisioningService = provisioningService;
-        this.appUserRepository = appUserRepository;
+    public AccountController(AccountService accountService, FileStorageService fileStorageService) {
+        this.accountService = accountService;
         this.fileStorageService = fileStorageService;
     }
 
     @GetMapping
     public AccountResponse get(Principal principal) {
-        return toResponse(currentUser(principal));
+        return accountService.get(caller(principal));
     }
 
     @PutMapping("/phone")
     public AccountResponse setPhoneNumber(Principal principal, @Valid @RequestBody UpdatePhoneNumberRequest request) {
-        AppUser user = currentUser(principal);
-        user.setPhoneNumber(request.phoneNumber());
-        appUserRepository.save(user);
-        return toResponse(user);
+        return accountService.setPhoneNumber(caller(principal), request.phoneNumber());
     }
 
     /**
@@ -121,7 +105,8 @@ public class AccountController {
      */
     @PostMapping("/avatar")
     public AccountResponse uploadAvatar(Principal principal, @RequestParam("file") MultipartFile file) {
-        AppUser user = currentUser(principal);
+        AccountService.Caller caller = caller(principal);
+        AccountService.AvatarTarget avatar = accountService.avatarTarget(caller);
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("Uploaded avatar file is empty.");
         }
@@ -148,8 +133,8 @@ public class AccountController {
         // only place the original content type is recorded - getAvatar below
         // reads it back off the key rather than needing its own DB column.
         String extension = contentType.contains("png") ? ".png" : ".jpg";
-        String objectKey = "avatars/" + user.getId() + extension;
-        String previousObjectKey = user.getAvatarUrl();
+        String objectKey = "avatars/" + avatar.userId() + extension;
+        String previousObjectKey = avatar.currentObjectKey();
         fileStorageService.put(objectKey, content, contentType);
         // Only reachable if a PREVIOUS upload used the other extension (e.g.
         // switched from a .jpg avatar to a .png one) - the common case
@@ -159,9 +144,7 @@ public class AccountController {
         if (previousObjectKey != null && !previousObjectKey.equals(objectKey)) {
             fileStorageService.delete(previousObjectKey);
         }
-        user.setAvatarUrl(objectKey);
-        appUserRepository.save(user);
-        return toResponse(user);
+        return accountService.setAvatarObjectKey(caller, objectKey);
     }
 
     /**
@@ -203,8 +186,7 @@ public class AccountController {
      */
     @GetMapping("/avatar")
     public ResponseEntity<InputStreamResource> getAvatar(Principal principal) {
-        AppUser user = currentUser(principal);
-        String objectKey = user.getAvatarUrl();
+        String objectKey = accountService.avatarObjectKey(caller(principal));
         if (objectKey == null) {
             return ResponseEntity.notFound().build();
         }
@@ -254,30 +236,14 @@ public class AccountController {
         return guarded;
     }
 
-    private AccountResponse toResponse(AppUser user) {
-        String avatarUrl = user.getAvatarUrl() != null ? "/api/account/avatar" : null;
-        return new AccountResponse(user.getEmail(), user.getPhoneNumber(), avatarUrl);
-    }
-
-    private AppUser currentUser(Principal principal) {
+    private AccountService.Caller caller(Principal principal) {
         if (principal == null || !StringUtils.hasText(principal.getName())) {
             throw new IllegalStateException("No authenticated principal for an /api/account request.");
-        }
-        Optional<AppUser> existing = appUserRepository.findByKeycloakUserId(principal.getName());
-        if (existing.isPresent()) {
-            return existing.get();
-        }
-        // B10: members created through POST /api/admin/users (or before that path created the row)
-        // have no app_user row. Provision it from the verified JWT claims instead of failing every
-        // page load with a 500. Idempotent and race-safe - see AppUserProvisioningService.
-        if (provisioningService == null) {
-            throw new IllegalStateException(
-                "No AppUser row for authenticated principal '" + principal.getName() + "'.");
         }
         String email = principal instanceof JwtAuthenticationToken jwt
             ? jwt.getToken().getClaimAsString("email") : null;
         String schema = TenantContext.current().map(TenantContext::getTenantId).orElse(null);
         boolean tenantAdmin = TenantContext.current().map(c -> c.hasRole("ROLE_tenant-admin")).orElse(false);
-        return provisioningService.ensure(schema, principal.getName(), email, tenantAdmin);
+        return new AccountService.Caller(principal.getName(), email, schema, tenantAdmin);
     }
 }

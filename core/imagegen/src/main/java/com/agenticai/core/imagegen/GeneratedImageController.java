@@ -60,17 +60,17 @@ public class GeneratedImageController {
         int size = ListPaging.limit(limit, 50, 200);
         long skip = ListPaging.offset(offset);
         return ListPaging.respond(
-            service.listPage(skip, size).stream().map(GeneratedImageResponse::from).toList(),
+            service.listPageResponses(skip, size),
             size, skip, service::countAll);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<StreamingResponseBody> download(@PathVariable UUID id) {
-        return service.find(id)
+        return service.findFileRef(id)
             .map(image -> ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(image.getContentType()))
+                .contentType(MediaType.parseMediaType(image.contentType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION,
-                    AttachmentDisposition.attachment(image.getFilename()))
+                    AttachmentDisposition.attachment(image.filename()))
                 .body(streamBody(image)))
             .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -96,11 +96,11 @@ public class GeneratedImageController {
      * the context on the correct thread here, then re-populate it for the
      * async callback's duration.
      */
-    private StreamingResponseBody streamBody(GeneratedImage image) {
+    private StreamingResponseBody streamBody(GeneratedImageFileRef image) {
         TenantContext capturedContext = TenantContext.current().orElse(null);
         return outputStream -> {
             TenantContext.set(capturedContext);
-            try (InputStream in = fileStorageService.get(image.getObjectKey())) {
+            try (InputStream in = fileStorageService.get(image.objectKey())) {
                 in.transferTo(outputStream);
             } finally {
                 TenantContext.clear();

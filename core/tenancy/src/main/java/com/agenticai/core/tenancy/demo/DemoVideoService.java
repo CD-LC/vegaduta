@@ -141,6 +141,12 @@ public class DemoVideoService {
         return id == null ? Optional.empty() : videoRepository.findById(id);
     }
 
+    /** Resolution plus bytes in one step: empty when the id is unknown or storage cannot produce the bytes. */
+    public Optional<DemoServedMedia> readServed(UUID id) {
+        return find(id).flatMap(video ->
+                readBytes(video).map(bytes -> new DemoServedMedia(video.getContentType(), bytes)));
+    }
+
     public Optional<byte[]> readBytes(DemoGeneratedVideo video) {
         try (var in = fileStorageService.get(video.getObjectKey())) {
             return Optional.of(in.readAllBytes());

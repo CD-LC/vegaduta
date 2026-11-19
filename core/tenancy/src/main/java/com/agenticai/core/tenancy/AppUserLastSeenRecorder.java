@@ -14,7 +14,6 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 /**
@@ -50,22 +49,18 @@ public class AppUserLastSeenRecorder implements UserActivityRecorder {
     static final int MAX_TRACKED = 50_000;
     private static final int QUEUE_CAPACITY = 1_000;
 
-    static final String UPDATE_SQL =
-            "UPDATE control_plane.app_user SET last_seen_at = now() WHERE keycloak_user_id = ? AND"
-                    + " (last_seen_at IS NULL OR last_seen_at < now() - interval '5 minutes')";
-
-    private final JdbcTemplate jdbcTemplate;
+    private final AppUserLastSeenJdbcRepository repository;
     private final Executor executor;
     private final Clock clock;
     private final Map<String, Long> lastStampedMillis = new ConcurrentHashMap<>();
 
     @Autowired
-    public AppUserLastSeenRecorder(JdbcTemplate jdbcTemplate) {
-        this(jdbcTemplate, boundedSingleThreadExecutor(), Clock.systemUTC());
+    public AppUserLastSeenRecorder(AppUserLastSeenJdbcRepository repository) {
+        this(repository, boundedSingleThreadExecutor(), Clock.systemUTC());
     }
 
-    AppUserLastSeenRecorder(JdbcTemplate jdbcTemplate, Executor executor, Clock clock) {
-        this.jdbcTemplate = jdbcTemplate;
+    AppUserLastSeenRecorder(AppUserLastSeenJdbcRepository repository, Executor executor, Clock clock) {
+        this.repository = repository;
         this.executor = executor;
         this.clock = clock;
     }
@@ -95,7 +90,7 @@ public class AppUserLastSeenRecorder implements UserActivityRecorder {
 
     private void stamp(String subject) {
         try {
-            jdbcTemplate.update(UPDATE_SQL, subject);
+            repository.stampLastSeen(subject);
         } catch (RuntimeException e) {
             lastStampedMillis.remove(subject);
             log.debug(

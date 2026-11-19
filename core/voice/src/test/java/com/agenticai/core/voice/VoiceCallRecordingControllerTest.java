@@ -36,7 +36,10 @@ class VoiceCallRecordingControllerTest {
         rooms = mock(VoiceCallRoomRegistry.class);
         controller =
                 new VoiceCallRecordingController(
-                        mock(AgentService.class), egress, recordings, rooms);
+                        mock(AgentService.class),
+                        egress,
+                        new VoiceCallRecordingService(egress, recordings),
+                        rooms);
         when(egress.isEnabled()).thenReturn(true);
         when(recordings.findFirstByRoomNameAndStatusInOrderByCreatedAtDesc(any(), any()))
                 .thenReturn(Optional.empty());

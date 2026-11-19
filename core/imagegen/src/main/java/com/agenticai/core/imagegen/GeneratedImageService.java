@@ -1,5 +1,6 @@
 package com.agenticai.core.imagegen;
 
+import com.agenticai.core.imagegen.dto.GeneratedImageResponse;
 import com.agenticai.core.tenancy.OffsetLimitRequest;
 import com.agenticai.core.storage.FileStorageService;
 import java.util.List;
@@ -44,6 +45,19 @@ public class GeneratedImageService {
     @Transactional(readOnly = true)
     public Optional<GeneratedImage> find(UUID id) {
         return repository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<GeneratedImageFileRef> findFileRef(UUID id) {
+        return repository
+            .findById(id)
+            .map(i -> new GeneratedImageFileRef(i.getContentType(), i.getFilename(), i.getObjectKey()));
+    }
+
+    /** One newest-first window of the paged listing, as response DTOs. */
+    @Transactional(readOnly = true)
+    public List<GeneratedImageResponse> listPageResponses(long offset, int limit) {
+        return listPage(offset, limit).stream().map(GeneratedImageResponse::from).toList();
     }
 
     /** Backs the Files page's "Generated images" listing, newest first. */

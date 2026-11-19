@@ -4,6 +4,7 @@ import com.agenticai.core.documentgen.DocumentGenerationJobNotFoundException;
 import com.agenticai.core.documentgen.entity.DocumentGenerationJob;
 import com.agenticai.core.documentgen.event.DocumentGenerationRequestedEvent;
 import com.agenticai.core.documentgen.model.DocumentContent;
+import com.agenticai.core.documentgen.model.DocumentDownloadInfo;
 import com.agenticai.core.documentgen.model.DocumentGenerationJobResponse;
 import com.agenticai.core.documentgen.model.DocumentGenerationRequest;
 import com.agenticai.core.documentgen.repository.DocumentGenerationJobRepository;
@@ -81,6 +82,14 @@ public class DocumentGenerationService {
     @Transactional(readOnly = true)
     public DocumentGenerationJobResponse getStatus(UUID jobId, String tenantId) {
         return DocumentGenerationJobResponse.from(requireJob(jobId, tenantId));
+    }
+
+    /** Tenant-scoped lookup for the download endpoint, as a DTO so the controller never sees the entity. */
+    @Transactional(readOnly = true)
+    public Optional<DocumentDownloadInfo> findDownload(UUID jobId, String tenantId) {
+        return jobRepository.findByIdAndTenantId(jobId, tenantId)
+            .map(job -> new DocumentDownloadInfo(
+                job.getStatus(), job.getStorageKey(), job.getType().mimeType(), job.getFilename()));
     }
 
     /** Tenant-scoped entity lookup for the download endpoint, which needs {@code storageKey}/{@code type} beyond what {@link DocumentGenerationJobResponse} exposes. */

@@ -1,6 +1,7 @@
 package com.agenticai.core.google;
 
 import com.agenticai.core.crypto.EncryptionService;
+import com.agenticai.core.google.dto.GoogleConnectionResponse;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.oauth.OAuthStateBinding;
 import com.agenticai.core.security.oauth.OAuthStateBindingException;
@@ -575,6 +576,22 @@ public class GoogleOAuthService {
      * otherwise unconnected tenant now correctly gets the tools, and tool
      * availability is per-viewer, which is intended.
      */
+    @Transactional(readOnly = true)
+    public Optional<GoogleConnectionResponse> statusResponse() {
+        return status().map(GoogleConnectionResponse::from);
+    }
+
+    /** What the callback needs from a completed connect: whether youtube.readonly is already granted, and the account email. */
+    public record ConnectOutcome(boolean youtubeReadonlyGranted, String connectedEmail) {}
+
+    /** {@link #connect(String, String, String, String)} reduced to what the OAuth callback inspects. */
+    @Transactional
+    public ConnectOutcome connectOutcome(String code, String subjectKey, String purpose, String nonce) {
+        GoogleCredential credential = connect(code, subjectKey, purpose, nonce);
+        return new ConnectOutcome(
+            credential.hasScope(GoogleScopes.YOUTUBE_READONLY), credential.getConnectedEmail());
+    }
+
     @Transactional(readOnly = true)
     public Optional<GoogleCredential> status() {
         return effectiveActiveCredentialFor(currentSubjectOrNull());

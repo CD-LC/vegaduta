@@ -3,6 +3,7 @@ package com.agenticai.core.secrets;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.crypto.EncryptionService;
+import com.agenticai.core.secrets.dto.SecretResponse;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -362,6 +363,36 @@ public class SecretVaultService {
         secret.markUsed();
         audit(null, "SECRET_ACCESSED_BY_CODE", secret, AuditOutcome.SUCCESS, "tool=" + toolName);
         return Optional.of(plaintext);
+    }
+
+    /** {@link #store} (with allow-list) rendered as the API response DTO, so controllers never see the entity. */
+    @Transactional
+    public SecretResponse storeAsResponse(
+        String name,
+        SecretScope scope,
+        SecretKind kind,
+        String description,
+        String plaintextValue,
+        Instant expiresAt,
+        boolean codeToolAccess,
+        List<String> allowedHosts,
+        String actorUserId
+    ) {
+        return SecretResponse.from(store(name, scope, null, kind, description, plaintextValue, expiresAt,
+            codeToolAccess, allowedHosts, actorUserId));
+    }
+
+    /** {@link #listVisibleTo} rendered as API response DTOs. */
+    @Transactional(readOnly = true)
+    public List<SecretResponse> listVisibleResponses(String userId) {
+        return listVisibleTo(userId).stream().map(SecretResponse::from).toList();
+    }
+
+    /** {@link #updateAllowedHosts} rendered as the API response DTO. */
+    @Transactional
+    public SecretResponse updateAllowedHostsAsResponse(
+        UUID id, List<String> allowedHosts, String actorUserId, boolean actorIsWorkspaceAdmin) {
+        return SecretResponse.from(updateAllowedHosts(id, allowedHosts, actorUserId, actorIsWorkspaceAdmin));
     }
 
     /**

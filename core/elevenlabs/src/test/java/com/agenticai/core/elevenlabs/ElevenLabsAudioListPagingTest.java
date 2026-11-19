@@ -26,7 +26,7 @@ class ElevenLabsAudioListPagingTest {
 
     @Test
     void noParamsReadsTheCompleteListFromTheStart() throws Exception {
-        when(service.listPage(0L, Integer.MAX_VALUE)).thenReturn(List.of());
+        when(service.listPageResponses(0L, Integer.MAX_VALUE)).thenReturn(List.of());
         mvc.perform(get("/api/elevenlabs/audio"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"))
@@ -37,7 +37,7 @@ class ElevenLabsAudioListPagingTest {
 
     @Test
     void pagedPastTheEndReportsTheRealTotal() throws Exception {
-        when(service.listPage(40L, 20)).thenReturn(List.of());
+        when(service.listPageResponses(40L, 20)).thenReturn(List.of());
         when(service.countAll()).thenReturn(33L);
         mvc.perform(get("/api/elevenlabs/audio").param("limit", "20").param("offset", "40"))
                 .andExpect(status().isOk())
@@ -47,10 +47,10 @@ class ElevenLabsAudioListPagingTest {
 
     @Test
     void limitIsClampedAndNegativeOffsetIsZero() throws Exception {
-        when(service.listPage(anyLong(), anyInt())).thenReturn(List.of());
+        when(service.listPageResponses(anyLong(), anyInt())).thenReturn(List.of());
         when(service.countAll()).thenReturn(0L);
         mvc.perform(get("/api/elevenlabs/audio").param("limit", "99999").param("offset", "-5"))
                 .andExpect(status().isOk());
-        verify(service).listPage(0L, 200);
+        verify(service).listPageResponses(0L, 200);
     }
 }

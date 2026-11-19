@@ -128,7 +128,8 @@ class AppUserProvisioningServiceTest {
         Jwt jwt = new Jwt("t", Instant.now(), Instant.now().plusSeconds(60),
             Map.of("alg", "none"), Map.of("sub", KC_ID, "email", "m@example.com"));
         Principal principal = new JwtAuthenticationToken(jwt);
-        AccountController controller = new AccountController(users, mock(FileStorageService.class), service);
+        AccountController controller = new AccountController(
+            new AccountService(users, service), mock(FileStorageService.class));
 
         AccountResponse response = controller.get(principal);
 
@@ -139,7 +140,8 @@ class AppUserProvisioningServiceTest {
     @Test
     void accountEndpointWithoutProvisionerKeepsTheOldFailure() {
         when(users.findByKeycloakUserId(KC_ID)).thenReturn(Optional.empty());
-        AccountController controller = new AccountController(users, mock(FileStorageService.class));
+        AccountController controller = new AccountController(
+            new AccountService(users), mock(FileStorageService.class));
         assertThrows(IllegalStateException.class, () -> controller.get(() -> KC_ID));
     }
 }

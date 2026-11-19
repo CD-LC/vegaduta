@@ -36,7 +36,7 @@ class GeneratedMusicListPagingTest {
     @Test
     void tracksAreWindowedAndHeadered() throws Exception {
         var service = mock(GeneratedMusicService.class);
-        when(service.listAll()).thenReturn(List.of());
+        when(service.listResponses()).thenReturn(List.of());
         var mvc = MockMvcBuilders.standaloneSetup(new GeneratedMusicController(service, mock(com.agenticai.core.storage.FileStorageService.class))).build();
         assertHttpEmptyPage(mvc, "/api/musicgen/tracks");
     }

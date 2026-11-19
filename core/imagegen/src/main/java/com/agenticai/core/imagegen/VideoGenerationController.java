@@ -101,10 +101,8 @@ public class VideoGenerationController {
 
     @PostMapping("/generate")
     public VideoGenerationJobResponse generate(@Valid @RequestBody VideoGenerationRequest request) {
-        VideoGenerationJob job =
-                jobService.enqueue(
-                        request.prompt().trim(), request.durationSeconds(), toSourceImage(request));
-        return VideoGenerationJobResponse.from(job);
+        return jobService.enqueueResponse(
+                request.prompt().trim(), request.durationSeconds(), toSourceImage(request));
     }
 
     private static VideoGenerationClient.SourceImage toSourceImage(VideoGenerationRequest request) {
@@ -120,7 +118,7 @@ public class VideoGenerationController {
 
     @GetMapping("/jobs/{id}")
     public VideoGenerationJobResponse getJob(@PathVariable UUID id) {
-        return VideoGenerationJobResponse.from(jobService.get(id));
+        return jobService.getResponse(id);
     }
 
     /**
@@ -136,9 +134,7 @@ public class VideoGenerationController {
         int size = ListPaging.limit(limit, 50, 200);
         long skip = ListPaging.offset(offset);
         return ListPaging.respond(
-                jobService.listPage(skip, size).stream()
-                        .map(VideoGenerationJobResponse::from)
-                        .toList(),
+                jobService.listPageResponses(skip, size),
                 size,
                 skip,
                 jobService::countAll);
@@ -148,14 +144,13 @@ public class VideoGenerationController {
     public ResponseEntity<StreamingResponseBody> getVideo(
             @PathVariable UUID id,
             @RequestHeader(value = HttpHeaders.RANGE, required = false) String rangeHeader) {
-        VideoGenerationJob job = jobService.get(id);
-        if (job.getStatus() != VideoGenerationJobStatus.COMPLETE
-                || job.getResultObjectKey() == null) {
+        var video = jobService.findCompletedVideo(id);
+        if (video.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        String objectKey = job.getResultObjectKey();
-        MediaType contentType = MediaType.parseMediaType(job.getResultContentType());
+        String objectKey = video.get().objectKey();
+        MediaType contentType = MediaType.parseMediaType(video.get().contentType());
         // TenantContext is a plain ThreadLocal set by the security filter on
         // THIS (original request) thread. Spring dispatches the
         // StreamingResponseBody callbacks below asynchronously on a separate

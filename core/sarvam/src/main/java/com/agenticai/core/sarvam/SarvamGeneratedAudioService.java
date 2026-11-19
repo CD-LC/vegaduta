@@ -2,6 +2,7 @@ package com.agenticai.core.sarvam;
 
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.sarvam.dto.SarvamGeneratedAudioResponse;
 import com.agenticai.core.storage.FileStorageService;
 import com.agenticai.core.tenancy.OffsetLimitRequest;
 import java.util.List;
@@ -61,6 +62,25 @@ public class SarvamGeneratedAudioService {
     @Transactional(readOnly = true)
     public long countSince(java.time.Instant since) {
         return repository.countByCreatedAtAfter(since);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<SarvamAudioFileRef> findFileRef(UUID id) {
+        return repository
+                .findById(id)
+                .map(
+                        a ->
+                                new SarvamAudioFileRef(
+                                        a.getContentType(),
+                                        a.getFilename(),
+                                        a.getObjectKey(),
+                                        a.getAudioDataBase64()));
+    }
+
+    /** One newest-first window of the paged listing, as response DTOs. */
+    @Transactional(readOnly = true)
+    public List<SarvamGeneratedAudioResponse> listPageResponses(long offset, int limit) {
+        return listPage(offset, limit).stream().map(SarvamGeneratedAudioResponse::from).toList();
     }
 
     /** Backs the Files page's "Generated speech (Sarvam)" listing, newest first. */

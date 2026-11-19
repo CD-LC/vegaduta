@@ -38,9 +38,7 @@ public class AiContentReportController {
 
     @PostMapping("/api/ai-reports")
     public ResponseEntity<Map<String, Object>> submit(@RequestBody AiContentReportRequest request) {
-        AiContentReport saved = service.submit(request);
-        return ResponseEntity.status(HttpStatus.ACCEPTED)
-            .body(Map.of("id", saved.getId(), "status", saved.getStatus()));
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(service.submitAck(request));
     }
 
     @GetMapping("/api/platform/ai-reports")
@@ -50,18 +48,17 @@ public class AiContentReportController {
         @RequestParam(required = false) Long offset
     ) {
         long skip = ListPaging.offset(offset);
-        List<AiContentReport> rows = service.list(status, limit, skip);
-        List<Map<String, Object>> reports = rows.stream().map(AiContentReportService::toView).toList();
+        List<Map<String, Object>> reports = service.listViews(status, limit, skip);
         int size = limit == null
             ? AiContentReportService.DEFAULT_LIMIT
             : Math.max(1, Math.min(AiContentReportService.MAX_LIMIT, limit));
         // Reuse ListPaging's header logic (count only runs when the page could hide rows).
-        var headers = ListPaging.respond(rows, size, skip, () -> service.count(status)).getHeaders();
+        var headers = ListPaging.respond(reports, size, skip, () -> service.count(status)).getHeaders();
         return ResponseEntity.ok().headers(headers).body(Map.of("reports", reports));
     }
 
     @PatchMapping("/api/platform/ai-reports/{id}")
     public Map<String, Object> review(@PathVariable UUID id, @RequestBody AiContentReportReviewRequest request) {
-        return AiContentReportService.toView(service.review(id, request));
+        return service.reviewView(id, request);
     }
 }

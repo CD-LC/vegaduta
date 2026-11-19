@@ -184,6 +184,22 @@ public class AiContentReportService {
         return saved;
     }
 
+    /** Submits a report and returns the {@code {"id","status"}} acknowledgement the API responds with. */
+    public Map<String, Object> submitAck(AiContentReportRequest request) {
+        AiContentReport saved = submit(request);
+        return Map.of("id", saved.getId(), "status", saved.getStatus());
+    }
+
+    /** {@link #list(String, Integer, long)} rendered as the API's JSON view maps. */
+    public List<Map<String, Object>> listViews(String status, Integer limit, long offset) {
+        return list(status, limit, offset).stream().map(AiContentReportService::toView).toList();
+    }
+
+    /** {@link #review} rendered as the API's JSON view map. */
+    public Map<String, Object> reviewView(UUID id, AiContentReportReviewRequest request) {
+        return toView(review(id, request));
+    }
+
     /** JSON shape shared by list/patch responses (contract section 1). */
     public static Map<String, Object> toView(AiContentReport r) {
         Map<String, Object> view = new LinkedHashMap<>();

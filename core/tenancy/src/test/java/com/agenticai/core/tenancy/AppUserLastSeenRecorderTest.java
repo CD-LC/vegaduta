@@ -28,7 +28,7 @@ class AppUserLastSeenRecorderTest {
     private final Executor direct = Runnable::run;
     private final MutableClock clock = new MutableClock(Instant.parse("2026-10-09T10:00:00Z"));
     private final AppUserLastSeenRecorder recorder =
-            new AppUserLastSeenRecorder(jdbc, direct, clock);
+            new AppUserLastSeenRecorder(new AppUserLastSeenJdbcRepository(jdbc), direct, clock);
 
     @Test
     void firstRequestStampsAndRepeatsInsideTheWindowDoNot() {
@@ -37,7 +37,7 @@ class AppUserLastSeenRecorderTest {
         clock.advanceSeconds(299);
         recorder.recordSeen("acme", "kc-1");
 
-        verify(jdbc, times(1)).update(AppUserLastSeenRecorder.UPDATE_SQL, "kc-1");
+        verify(jdbc, times(1)).update(AppUserLastSeenJdbcRepository.UPDATE_SQL, "kc-1");
     }
 
     @Test
@@ -47,17 +47,17 @@ class AppUserLastSeenRecorderTest {
         clock.advanceSeconds(301);
         recorder.recordSeen("acme", "kc-1");
 
-        verify(jdbc, times(2)).update(AppUserLastSeenRecorder.UPDATE_SQL, "kc-1");
-        verify(jdbc, times(1)).update(AppUserLastSeenRecorder.UPDATE_SQL, "kc-2");
+        verify(jdbc, times(2)).update(AppUserLastSeenJdbcRepository.UPDATE_SQL, "kc-1");
+        verify(jdbc, times(1)).update(AppUserLastSeenJdbcRepository.UPDATE_SQL, "kc-2");
     }
 
     @Test
     void theUpdateItselfIsConditionalSoReplicasCannotWriteMoreOftenThanTheWindow() {
         org.junit.jupiter.api.Assertions.assertTrue(
-                AppUserLastSeenRecorder.UPDATE_SQL.contains(
+                AppUserLastSeenJdbcRepository.UPDATE_SQL.contains(
                         "last_seen_at IS NULL OR last_seen_at < now() - interval '5 minutes'"));
         org.junit.jupiter.api.Assertions.assertTrue(
-                AppUserLastSeenRecorder.UPDATE_SQL.contains("control_plane.app_user"));
+                AppUserLastSeenJdbcRepository.UPDATE_SQL.contains("control_plane.app_user"));
     }
 
     @Test
@@ -68,7 +68,7 @@ class AppUserLastSeenRecorderTest {
         assertDoesNotThrow(() -> recorder.recordSeen("acme", "kc-1"));
 
         // The failed stamp released the guard, so the second request tried again.
-        verify(jdbc, times(2)).update(AppUserLastSeenRecorder.UPDATE_SQL, "kc-1");
+        verify(jdbc, times(2)).update(AppUserLastSeenJdbcRepository.UPDATE_SQL, "kc-1");
     }
 
     @Test
@@ -77,7 +77,7 @@ class AppUserLastSeenRecorderTest {
                 command -> {
                     throw new RejectedExecutionException("queue full");
                 };
-        AppUserLastSeenRecorder saturated = new AppUserLastSeenRecorder(jdbc, full, clock);
+        AppUserLastSeenRecorder saturated = new AppUserLastSeenRecorder(new AppUserLastSeenJdbcRepository(jdbc), full, clock);
 
         assertDoesNotThrow(() -> saturated.recordSeen("acme", "kc-1"));
         verify(jdbc, never()).update(anyString(), anyString());

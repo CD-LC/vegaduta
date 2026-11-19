@@ -43,7 +43,7 @@ public class GeneratedMusicController {
             @RequestParam(required = false) Integer limit,
             @RequestParam(required = false) Long offset) {
         return ListPaging.window(
-                service.listAll().stream().map(GeneratedMusicResponse::from).toList(),
+                service.listResponses(),
                 limit,
                 offset,
                 50,
@@ -52,26 +52,26 @@ public class GeneratedMusicController {
 
     @GetMapping("/{id}")
     public ResponseEntity<byte[]> download(@PathVariable UUID id) {
-        return service.find(id)
+        return service.findFileRef(id)
                 .map(
                         track ->
                                 ResponseEntity.ok()
                                         .contentType(
-                                                MediaType.parseMediaType(track.getContentType()))
+                                                MediaType.parseMediaType(track.contentType()))
                                         .header(
                                                 HttpHeaders.CONTENT_DISPOSITION,
                                                 AttachmentDisposition.attachment(
-                                                        track.getFilename()))
+                                                        track.filename()))
                                         .body(resolveBytes(track)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    private byte[] resolveBytes(GeneratedMusic track) {
-        try (InputStream in = fileStorageService.get(track.getObjectKey())) {
+    private byte[] resolveBytes(GeneratedFileRef track) {
+        try (InputStream in = fileStorageService.get(track.objectKey())) {
             return in.readAllBytes();
         } catch (IOException e) {
             throw new FileStorageException(
-                    "Could not read object '" + track.getObjectKey() + "'", e);
+                    "Could not read object '" + track.objectKey() + "'", e);
         }
     }
 }
