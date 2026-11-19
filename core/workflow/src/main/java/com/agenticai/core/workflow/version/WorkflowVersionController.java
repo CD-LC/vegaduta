@@ -4,9 +4,7 @@ import com.agenticai.core.agents.version.VersionRollbackException;
 import com.agenticai.core.tenancy.ListPaging;
 import com.agenticai.core.workflow.WorkflowDefinition;
 import com.agenticai.core.workflow.WorkflowNotFoundException;
-import com.agenticai.core.workflow.WorkflowRun;
 import com.agenticai.core.workflow.WorkflowRunNotFoundException;
-import com.agenticai.core.workflow.WorkflowRunRepository;
 import com.agenticai.core.workflow.WorkflowService;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import java.util.List;
@@ -41,16 +39,16 @@ public class WorkflowVersionController {
 
     private final WorkflowService workflowService;
     private final WorkflowVersionService versionService;
-    private final WorkflowRunRepository runRepository;
+    private final WorkflowRunDiffService runDiffService;
 
     public WorkflowVersionController(
         WorkflowService workflowService,
         WorkflowVersionService versionService,
-        WorkflowRunRepository runRepository
+        WorkflowRunDiffService runDiffService
     ) {
         this.workflowService = workflowService;
         this.versionService = versionService;
-        this.runRepository = runRepository;
+        this.runDiffService = runDiffService;
     }
 
     @GetMapping("/versions")
@@ -149,23 +147,7 @@ public class WorkflowVersionController {
         @PathVariable UUID workflowId, @PathVariable UUID runId, @PathVariable UUID otherRunId
     ) {
         workflowService.requireViewerAccess(workflowId);
-        WorkflowRun a = runRepository.findById(runId)
-            .filter(run -> workflowId.equals(run.getWorkflowId()))
-            .orElseThrow(() -> new WorkflowRunNotFoundException(runId));
-        WorkflowRun b = runRepository.findById(otherRunId)
-            .filter(run -> workflowId.equals(run.getWorkflowId()))
-            .orElseThrow(() -> new WorkflowRunNotFoundException(otherRunId));
-        WorkflowVersion versionA = resolveVersion(workflowId, a.getWorkflowVersion());
-        WorkflowVersion versionB = resolveVersion(workflowId, b.getWorkflowVersion());
-        return versionService.diffRuns(a, b, versionA, versionB);
-    }
-
-    /** Stamped version -> its snapshot row, or null (unstamped run, or a snapshot deleted with an older workflow id). */
-    private WorkflowVersion resolveVersion(UUID workflowId, Integer versionNumber) {
-        if (versionNumber == null) {
-            return null;
-        }
-        return versionService.getOptional(workflowId, versionNumber).orElse(null);
+        return runDiffService.diffRuns(workflowId, runId, otherRunId);
     }
 
     @ExceptionHandler(WorkflowVersionNotFoundException.class)

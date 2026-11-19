@@ -53,7 +53,7 @@ class WorkflowWebhookControllerFormGuardTest {
         @SuppressWarnings("unchecked")
         ObjectProvider<JwtDecoder> jwt = mock(ObjectProvider.class);
         controller = new WorkflowWebhookController(
-            tenantResolutionService, definitionRepository, triggerNodes, workflowService, new ObjectMapper(), jwt, dedup);
+            tenantResolutionService, new WorkflowWebhookTargetService(definitionRepository), triggerNodes, workflowService, new ObjectMapper(), jwt, dedup);
 
         when(tenantResolutionService.resolveTenantSchema(ExternalAccountProvider.WORKFLOW_WEBHOOK,
             WebhookTokenHasher.sha256Hex(TOKEN))).thenReturn(Optional.of("tenant_schema"));

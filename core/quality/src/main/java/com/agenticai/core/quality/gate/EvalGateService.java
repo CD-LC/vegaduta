@@ -127,6 +127,31 @@ public class EvalGateService {
             agentId, dataset.getId(), enabled, maxRunAgeHours, requireSimulation, maxSimulationAgeHours, actor));
     }
 
+    /** The gate as its API view (dataset name resolved), or empty - keeps controllers off the entity. */
+    @Transactional(readOnly = true)
+    public Optional<EvalGateDtos.GateResponse> findGateResponse(UUID agentId) {
+        return gateRepository.findByAgentId(agentId).map(this::toGateResponse);
+    }
+
+    /** {@link #upsertGate} returning the API view. */
+    @Transactional
+    public EvalGateDtos.GateResponse upsertGateResponse(UUID agentId, UUID datasetId, boolean enabled,
+                                                        Integer maxRunAgeHours, boolean requireSimulation,
+                                                        Integer maxSimulationAgeHours) {
+        return toGateResponse(upsertGate(
+            agentId, datasetId, enabled, maxRunAgeHours, requireSimulation, maxSimulationAgeHours));
+    }
+
+    private EvalGateDtos.GateResponse toGateResponse(AgentEvalGate gate) {
+        EvalDataset dataset = datasetService.findDataset(gate.getDatasetId()).orElse(null);
+        return new EvalGateDtos.GateResponse(
+            gate.getId(), gate.getAgentId(), gate.getDatasetId(),
+            dataset != null ? dataset.getName() : null,
+            gate.isEnabled(), gate.getMaxRunAgeHours(),
+            gate.isRequireSimulation(), gate.getMaxSimulationAgeHours(),
+            gate.getUpdatedBy(), gate.getUpdatedAt());
+    }
+
     /** Removes the gate entirely. Returns false when none existed. */
     @Transactional
     public boolean deleteGate(UUID agentId) {

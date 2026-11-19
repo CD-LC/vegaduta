@@ -28,7 +28,7 @@ class WebhookListPagingTest {
 
     private final WebhookSubscriptionService service = mock(WebhookSubscriptionService.class);
     private final WebhookDeliveryRepository deliveries = mock(WebhookDeliveryRepository.class);
-    private final WebhookSubscriptionController controller = new WebhookSubscriptionController(service, deliveries);
+    private final WebhookSubscriptionController controller = new WebhookSubscriptionController(service, new WebhookDeliveryQueryService(service, deliveries));
 
     @Test
     void subscriptionsPageAndNoParamsKeepEverything() {

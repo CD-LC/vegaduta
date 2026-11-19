@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.eventbus.webhook.WebhookSubscriptionController.CreateRequest;
-import com.agenticai.core.eventbus.webhook.WebhookSubscriptionController.DeliveryView;
+import com.agenticai.core.eventbus.webhook.WebhookDeliveryQueryService.DeliveryView;
 import com.agenticai.core.eventbus.webhook.WebhookSubscriptionController.UpdateRequest;
 import com.agenticai.core.eventbus.webhook.WebhookSubscriptionService.SubscriptionView;
 import java.time.Instant;
@@ -31,7 +31,7 @@ class WebhookSubscriptionControllerTest {
     private final WebhookSubscriptionService service = mock(WebhookSubscriptionService.class);
     private final WebhookDeliveryRepository deliveries = mock(WebhookDeliveryRepository.class);
     private final WebhookSubscriptionController controller =
-            new WebhookSubscriptionController(service, deliveries);
+            new WebhookSubscriptionController(service, new WebhookDeliveryQueryService(service, deliveries));
 
     private static SubscriptionView view(UUID id) {
         return new SubscriptionView(

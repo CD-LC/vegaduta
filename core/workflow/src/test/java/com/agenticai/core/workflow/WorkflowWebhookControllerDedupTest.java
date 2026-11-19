@@ -65,7 +65,7 @@ class WorkflowWebhookControllerDedupTest {
 
         controller = new WorkflowWebhookController(
             tenantResolutionService,
-            definitionRepository,
+            new WorkflowWebhookTargetService(definitionRepository),
             workflowTriggerNodeService,
             workflowService,
             new ObjectMapper(),

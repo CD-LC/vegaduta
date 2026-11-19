@@ -68,7 +68,7 @@ class WorkflowSubListPagingTest {
     void versionsAreWindowedAndHeadered() throws Exception {
         var versions = mock(WorkflowVersionService.class);
         when(versions.list(org.mockito.ArgumentMatchers.any())).thenReturn(List.of());
-        var controller = new WorkflowVersionController(mock(WorkflowService.class), versions, mock(WorkflowRunRepository.class));
+        var controller = new WorkflowVersionController(mock(WorkflowService.class), versions, mock(com.agenticai.core.workflow.version.WorkflowRunDiffService.class));
         assertHttpEmptyPage(MockMvcBuilders.standaloneSetup(controller).build(), "/api/workflows/" + wf + "/versions");
     }
 

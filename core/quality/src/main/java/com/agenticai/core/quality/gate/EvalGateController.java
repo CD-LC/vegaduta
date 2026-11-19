@@ -1,8 +1,6 @@
 package com.agenticai.core.quality.gate;
 
 import com.agenticai.core.quality.dataset.AgentHeadVersionLookup;
-import com.agenticai.core.quality.dataset.EvalDataset;
-import com.agenticai.core.quality.dataset.EvalDatasetRepository;
 import com.agenticai.core.quality.gate.EvalGateDtos.GateEvaluationResponse;
 import com.agenticai.core.quality.gate.EvalGateDtos.GateResponse;
 import com.agenticai.core.quality.gate.EvalGateDtos.GateStatusResponse;
@@ -49,18 +47,15 @@ public class EvalGateController {
 
     private final EvalGateService gateService;
     private final AgentHeadVersionLookup headVersionLookup;
-    private final EvalDatasetRepository datasetRepository;
     private final TenantLimits tenantLimits;
 
     public EvalGateController(
         EvalGateService gateService,
         AgentHeadVersionLookup headVersionLookup,
-        EvalDatasetRepository datasetRepository,
         TenantLimits tenantLimits
     ) {
         this.gateService = gateService;
         this.headVersionLookup = headVersionLookup;
-        this.datasetRepository = datasetRepository;
         this.tenantLimits = tenantLimits;
     }
 
@@ -80,13 +75,13 @@ public class EvalGateController {
     /** GET / - the configured gate plus a live evaluation of the head version. */
     @GetMapping
     public ResponseEntity<GateStatusResponse> getGate(@PathVariable UUID agentId) {
-        AgentEvalGate gate = gateService.findGate(agentId).orElse(null);
+        GateResponse gate = gateService.findGateResponse(agentId).orElse(null);
         UUID headVersionId = headVersionLookup.findHeadVersionId(agentId).orElse(null);
         GateEvaluationResponse headEvaluation = headVersionId != null
             ? GateEvaluationResponse.of(gateService.evaluate(agentId, headVersionId))
             : null;
         return ResponseEntity.ok(new GateStatusResponse(
-            gate != null ? toResponse(gate) : null, headVersionId, headEvaluation));
+            gate, headVersionId, headEvaluation));
     }
 
     /**
@@ -106,13 +101,13 @@ public class EvalGateController {
         if (request.datasetId() == null) {
             throw new IllegalArgumentException("datasetId is required - the gate needs a dataset to consult.");
         }
-        AgentEvalGate gate = gateService.upsertGate(
+        GateResponse gate = gateService.upsertGateResponse(
             agentId, request.datasetId(),
             request.enabled() == null || request.enabled(),
             request.maxRunAgeHours(),
             request.requireSimulation() != null && request.requireSimulation(),
             request.maxSimulationAgeHours());
-        return ResponseEntity.ok(toResponse(gate));
+        return ResponseEntity.ok(gate);
     }
 
     /** DELETE / - remove the gate. Any plan: deleting a gate is the escape hatch. */
@@ -129,15 +124,5 @@ public class EvalGateController {
         @RequestParam UUID versionId
     ) {
         return ResponseEntity.ok(GateEvaluationResponse.of(gateService.evaluate(agentId, versionId)));
-    }
-
-    private GateResponse toResponse(AgentEvalGate gate) {
-        EvalDataset dataset = datasetRepository.findById(gate.getDatasetId()).orElse(null);
-        return new GateResponse(
-            gate.getId(), gate.getAgentId(), gate.getDatasetId(),
-            dataset != null ? dataset.getName() : null,
-            gate.isEnabled(), gate.getMaxRunAgeHours(),
-            gate.isRequireSimulation(), gate.getMaxSimulationAgeHours(),
-            gate.getUpdatedBy(), gate.getUpdatedAt());
     }
 }

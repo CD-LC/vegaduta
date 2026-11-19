@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import org.springframework.data.domain.PageRequest;
+import com.agenticai.core.eventbus.webhook.WebhookDeliveryQueryService.DeliveryView;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -37,12 +37,12 @@ import java.util.UUID;
 public class WebhookSubscriptionController {
 
     private final WebhookSubscriptionService service;
-    private final WebhookDeliveryRepository deliveryRepository;
+    private final WebhookDeliveryQueryService deliveryQueryService;
 
     public WebhookSubscriptionController(
-            WebhookSubscriptionService service, WebhookDeliveryRepository deliveryRepository) {
+            WebhookSubscriptionService service, WebhookDeliveryQueryService deliveryQueryService) {
         this.service = service;
-        this.deliveryRepository = deliveryRepository;
+        this.deliveryQueryService = deliveryQueryService;
     }
 
     public record CreateRequest(
@@ -55,18 +55,6 @@ public class WebhookSubscriptionController {
             @Size(max = 2048) String url,
             Set<String> eventTypes,
             Boolean enabled) {}
-
-    public record DeliveryView(
-            UUID id,
-            String eventType,
-            String runId,
-            String status,
-            int attemptCount,
-            Integer responseCode,
-            String lastError,
-            java.time.Instant createdAt,
-            java.time.Instant deliveredAt,
-            Integer durationMs) {}
 
     @GetMapping
     public ResponseEntity<List<WebhookSubscriptionService.SubscriptionView>> list(@RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
@@ -118,25 +106,7 @@ public class WebhookSubscriptionController {
     /** Delivery history for one subscription - newest first, capped at 100. */
     @GetMapping("/{id}/deliveries")
     public ResponseEntity<List<DeliveryView>> deliveries(@PathVariable UUID id, @RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
-        service.get(id); // 404 if the subscription isn't this tenant's / doesn't exist
-        List<DeliveryView> all =
-                deliveryRepository
-                .findBySubscriptionIdOrderByCreatedAtDesc(id, PageRequest.of(0, 100))
-                .stream()
-                .map(
-                        d ->
-                                new DeliveryView(
-                                        d.getId(),
-                                        d.getEventType(),
-                                        d.getRunId(),
-                                        d.getStatus(),
-                                        d.getAttemptCount(),
-                                        d.getResponseCode(),
-                                        d.getLastError(),
-                                        d.getCreatedAt(),
-                                        d.getDeliveredAt(),
-                                        d.getDurationMs()))
-                .toList();
+        List<DeliveryView> all = deliveryQueryService.recentDeliveries(id);
         return ListPaging.window(all, limit, offset, 50, 100);
     }
 }
