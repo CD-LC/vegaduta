@@ -33,23 +33,24 @@ import org.springframework.web.bind.annotation.RestController;
 public class ChannelPairingController {
 
     private final ChannelSessionService channelSessionService;
+    private final ChannelPairingService pairingService;
 
-    public ChannelPairingController(ChannelSessionService channelSessionService) {
+    public ChannelPairingController(
+        ChannelSessionService channelSessionService, ChannelPairingService pairingService) {
         this.channelSessionService = channelSessionService;
+        this.pairingService = pairingService;
     }
 
     @GetMapping("/pending")
     public ResponseEntity<List<PendingPairingResponse>> pending(@RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
         return ListPaging.window(
-            channelSessionService.listPendingPairings().stream()
-            .map(PendingPairingResponse::from)
-            .toList(),
+            pairingService.listPending(),
             limit, offset, 50, 500);
     }
 
     @PostMapping("/{sessionId}/approve")
     public PendingPairingResponse approve(@PathVariable UUID sessionId) {
-        return PendingPairingResponse.from(channelSessionService.approvePairing(sessionId));
+        return pairingService.approve(sessionId);
     }
 
     @DeleteMapping("/{sessionId}")
@@ -67,7 +68,7 @@ public class ChannelPairingController {
      */
     @PostMapping("/{sessionId}/unpair")
     public PendingPairingResponse unpair(@PathVariable UUID sessionId) {
-        return PendingPairingResponse.from(channelSessionService.unpairSession(sessionId));
+        return pairingService.unpair(sessionId);
     }
 
     /**
@@ -124,21 +125,5 @@ public class ChannelPairingController {
         String pairingCode,
         Instant createdAt
     ) {
-        static PendingPairingResponse from(ChannelSession session) {
-            return new PendingPairingResponse(
-                session.getId(),
-                session.getChannel(),
-                mask(session.getExternalId()),
-                session.getPairingCode(),
-                session.getCreatedAt()
-            );
-        }
-
-        private static String mask(String value) {
-            if (value == null || value.length() < 4) {
-                return "***";
-            }
-            return "***" + value.substring(value.length() - 4);
-        }
     }
 }

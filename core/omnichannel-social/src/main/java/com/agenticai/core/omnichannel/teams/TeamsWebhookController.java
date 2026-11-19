@@ -72,7 +72,6 @@ public class TeamsWebhookController {
     private static final String AUDIT_ACTOR = "system:teams-inbound";
 
     private final TenantResolutionService tenantResolutionService;
-    private final TeamsCredentialRepository credentialRepository;
     private final TeamsCredentialService credentialService;
     private final TeamsBotFrameworkJwtValidator jwtValidator;
     private final ChannelSessionService channelSessionService;
@@ -87,7 +86,6 @@ public class TeamsWebhookController {
 
     public TeamsWebhookController(
             TenantResolutionService tenantResolutionService,
-            TeamsCredentialRepository credentialRepository,
             TeamsCredentialService credentialService,
             TeamsBotFrameworkJwtValidator jwtValidator,
             ChannelSessionService channelSessionService,
@@ -100,7 +98,6 @@ public class TeamsWebhookController {
             WorkflowTriggerPort workflowTriggerPort,
             AsyncInboundReply asyncReplies) {
         this.tenantResolutionService = tenantResolutionService;
-        this.credentialRepository = credentialRepository;
         this.credentialService = credentialService;
         this.jwtValidator = jwtValidator;
         this.channelSessionService = channelSessionService;
@@ -133,9 +130,8 @@ public class TeamsWebhookController {
         TenantContext.set(
                 TenantContext.of(tenantSchema.get(), REQUESTED_BY_PREFIX + appId, Set.of()));
         try {
-            Optional<TeamsCredential> credential =
-                    credentialRepository.findFirstByOrderByCreatedAtAsc();
-            if (credential.isEmpty() || !credential.get().getAppId().equals(appId)) {
+            Optional<String> connectedAppId = credentialService.connectedAppId();
+            if (connectedAppId.isEmpty() || !connectedAppId.get().equals(appId)) {
                 log.warn(
                         "Rejected Teams inbound: appId ***{} does not match the connected"
                                 + " credential",

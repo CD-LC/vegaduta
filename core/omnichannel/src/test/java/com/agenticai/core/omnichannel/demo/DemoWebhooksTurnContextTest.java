@@ -147,7 +147,7 @@ class DemoWebhooksTurnContextTest {
                         limiter,
                         phoneGuard,
                         chat,
-                        mock(AgentRepository.class),
+                        mock(DemoAgentNameService.class),
                         dedup,
                         60,
                         3,

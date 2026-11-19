@@ -3,8 +3,6 @@ package com.agenticai.core.omnichannel.handoff;
 import com.agenticai.core.tenancy.ListPaging;
 import com.agenticai.core.omnichannel.session.ChannelMessageDirection;
 import com.agenticai.core.tenancy.ListPaging;
-import com.agenticai.core.omnichannel.session.ChannelMessageLog;
-import com.agenticai.core.omnichannel.session.ChannelSession;
 import com.agenticai.core.omnichannel.session.ChannelType;
 import com.agenticai.core.omnichannel.session.HandoffState;
 import com.agenticai.core.security.TenantContext;
@@ -14,8 +12,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -96,19 +92,17 @@ public class OperatorInboxController {
     private static final String OPERATOR_AUTHORITY = "PERM_MANAGE_CHANNELS";
     private static final String PLATFORM_ADMIN_AUTHORITY = "ROLE_platform-admin";
 
-    private final OperatorInboxService inboxService;
-    private final HandoffEscalationService escalationService;
+    private final OperatorInboxViewService inboxService;
 
-    public OperatorInboxController(OperatorInboxService inboxService, HandoffEscalationService escalationService) {
+    public OperatorInboxController(OperatorInboxViewService inboxService) {
         this.inboxService = inboxService;
-        this.escalationService = escalationService;
     }
 
     /** The queue: every conversation in AWAITING_HUMAN or HUMAN, newest activity first. Open to any authenticated member (see class javadoc's read-tier note). */
     @GetMapping("/inbox")
     public ResponseEntity<List<InboxSessionResponse>> inbox(@RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
         return ListPaging.window(
-            inboxService.listNeedingAttention().stream().map(InboxSessionResponse::from).toList(),
+            inboxService.listNeedingAttention(),
             limit, offset, 50, 500);
     }
 
@@ -149,14 +143,7 @@ public class OperatorInboxController {
             default -> null;
         };
         String query = q == null || q.isBlank() ? null : q.trim();
-        Page<ChannelSession> result = inboxService.searchConversations(
-            channel, state, paired, query,
-            PageRequest.of(Math.max(0, page), Math.min(Math.max(size, 1), 100))
-        );
-        return new ConversationPageResponse(
-            result.getContent().stream().map(ConversationSummary::from).toList(),
-            result.getTotalElements(), result.getNumber(), result.getTotalPages()
-        );
+        return inboxService.searchConversations(channel, state, paired, query, page, size);
     }
 
     /** The stats strip above the conversation list - waiting / held / pending-pairing / agent-handled / total. Same member read-tier as {@link #conversations}. */
@@ -174,8 +161,7 @@ public class OperatorInboxController {
         if (!isTenantAdmin(authentication)) {
             return forbidden();
         }
-        List<TranscriptMessageResponse> messages =
-            inboxService.transcript(sessionId).stream().map(TranscriptMessageResponse::from).toList();
+        List<TranscriptMessageResponse> messages = inboxService.transcript(sessionId);
         return ResponseEntity.ok(messages);
     }
 
@@ -194,8 +180,7 @@ public class OperatorInboxController {
         if (!isTenantAdmin(authentication)) {
             return forbidden();
         }
-        return ResponseEntity.ok(InboxSessionResponse.from(
-            escalationService.escalate(sessionId, request.reason(), callerSubject(authentication))));
+        return ResponseEntity.ok(inboxService.escalate(sessionId, request.reason(), callerSubject(authentication)));
     }
 
     /** Claim the conversation - the agent (and channel workflow trigger) go silent until release. Admin-only. */
@@ -204,8 +189,7 @@ public class OperatorInboxController {
         if (!isTenantAdmin(authentication)) {
             return forbidden();
         }
-        return ResponseEntity.ok(InboxSessionResponse.from(
-            inboxService.takeOver(sessionId, callerSubject(authentication))));
+        return ResponseEntity.ok(inboxService.takeOver(sessionId, callerSubject(authentication)));
     }
 
     /** Send one operator-authored message through the channel's existing gated send chain. Admin-only; requires the conversation to be held (see {@code OperatorInboxService#reply}). */
@@ -216,8 +200,7 @@ public class OperatorInboxController {
         if (!isTenantAdmin(authentication)) {
             return forbidden();
         }
-        return ResponseEntity.ok(InboxSessionResponse.from(
-            inboxService.reply(sessionId, request.body(), callerSubject(authentication))));
+        return ResponseEntity.ok(inboxService.reply(sessionId, request.body(), callerSubject(authentication)));
     }
 
     /** Hand the conversation back to the agent. Admin-only; idempotent. */
@@ -226,8 +209,7 @@ public class OperatorInboxController {
         if (!isTenantAdmin(authentication)) {
             return forbidden();
         }
-        return ResponseEntity.ok(InboxSessionResponse.from(
-            inboxService.release(sessionId, callerSubject(authentication))));
+        return ResponseEntity.ok(inboxService.release(sessionId, callerSubject(authentication)));
     }
 
     public record EscalateRequest(@NotBlank String reason) {
@@ -258,22 +240,6 @@ public class OperatorInboxController {
         Instant lastMessageAt,
         Instant createdAt
     ) {
-        static InboxSessionResponse from(ChannelSession session) {
-            return new InboxSessionResponse(
-                session.getId(),
-                session.getChannel(),
-                mask(session.getExternalId()),
-                session.getAgentId(),
-                session.getHandoffState(),
-                session.getEscalationReason(),
-                session.getEscalatedAt(),
-                session.getTakenOverBy(),
-                session.getTakenOverAt(),
-                session.getLastMessagePreview(),
-                session.getLastMessageAt(),
-                session.getCreatedAt()
-            );
-        }
     }
 
     /**
@@ -302,25 +268,6 @@ public class OperatorInboxController {
         Instant lastMessageAt,
         Instant createdAt
     ) {
-        static ConversationSummary from(ChannelSession session) {
-            return new ConversationSummary(
-                session.getId(),
-                session.getChannel(),
-                mask(session.getExternalId()),
-                mask(session.getResolvedPhoneNumber()),
-                session.isPaired(),
-                session.isPaired() ? null : session.getPairingCode(),
-                session.getAgentId(),
-                session.getHandoffState(),
-                session.getEscalationReason(),
-                session.getEscalatedAt(),
-                session.getTakenOverBy(),
-                session.getTakenOverAt(),
-                session.getLastMessagePreview(),
-                session.getLastMessageAt(),
-                session.getCreatedAt()
-            );
-        }
     }
 
     /** Paged wrapper - Spring's {@code Page} serializes a deep, unstable shape; the client only needs these four fields. */
@@ -336,10 +283,6 @@ public class OperatorInboxController {
         String body,
         Instant createdAt
     ) {
-        static TranscriptMessageResponse from(ChannelMessageLog log) {
-            return new TranscriptMessageResponse(
-                log.getId(), log.getDirection(), log.getAuthor(), log.getBody(), log.getCreatedAt());
-        }
     }
 
     private static boolean isTenantAdmin(Authentication authentication) {
@@ -365,12 +308,5 @@ public class OperatorInboxController {
     private static ResponseEntity<Map<String, Object>> forbidden() {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
             .body(Map.of("error", "Only a tenant-admin can act on a live conversation handoff."));
-    }
-
-    private static String mask(String value) {
-        if (value == null || value.length() < 4) {
-            return "***";
-        }
-        return "***" + value.substring(value.length() - 4);
     }
 }

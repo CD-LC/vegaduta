@@ -23,23 +23,18 @@ public class EmailMessageController {
         String threadKey, String status, String error, Instant sentAt, Instant repliedAt, String replyKind,
         boolean replied
     ) {
-        static EmailMessageResponse of(EmailMessage m) {
-            return new EmailMessageResponse(m.getId(), m.getRunId(), m.getNodeId(), m.getRecipient(), m.getSubject(),
-                m.getMessageId(), m.getThreadKey(), m.getStatus(), m.getError(), m.getSentAt(), m.getRepliedAt(),
-                m.getReplyKind(), m.getRepliedAt() != null);
-        }
     }
 
-    private final EmailMessageRepository repository;
+    private final EmailMessageService service;
 
-    public EmailMessageController(EmailMessageRepository repository) {
-        this.repository = repository;
+    public EmailMessageController(EmailMessageService service) {
+        this.service = service;
     }
 
     @GetMapping
     public ResponseEntity<List<EmailMessageResponse>> list(@RequestParam("runId") String runId, @RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
         return ListPaging.window(
-            repository.findByRunIdOrderByCreatedAtAsc(runId).stream().map(EmailMessageResponse::of).toList(),
+            service.listByRun(runId),
             limit, offset, 50, 500);
     }
 }

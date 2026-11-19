@@ -37,7 +37,7 @@ class EmailMessageListPagingTest {
     void messagesAreWindowedAndHeadered() throws Exception {
         var repo = mock(EmailMessageRepository.class);
         when(repo.findByRunIdOrderByCreatedAtAsc("r1")).thenReturn(List.of());
-        var mvc = MockMvcBuilders.standaloneSetup(new EmailMessageController(repo)).build();
+        var mvc = MockMvcBuilders.standaloneSetup(new EmailMessageController(new EmailMessageService(repo))).build();
         mvc.perform(get("/api/email/messages").param("runId", "r1").param("limit", "5"))
                 .andExpect(status().isOk())
                 .andExpect(header().string("X-Total-Count", "0"));

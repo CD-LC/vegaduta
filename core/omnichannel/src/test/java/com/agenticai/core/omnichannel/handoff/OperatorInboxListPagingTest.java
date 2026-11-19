@@ -37,7 +37,7 @@ class OperatorInboxListPagingTest {
     void inboxIsWindowedAndHeadered() throws Exception {
         var inbox = mock(OperatorInboxService.class);
         when(inbox.listNeedingAttention()).thenReturn(List.of());
-        var mvc = MockMvcBuilders.standaloneSetup(new OperatorInboxController(inbox, mock(HandoffEscalationService.class))).build();
+        var mvc = MockMvcBuilders.standaloneSetup(new OperatorInboxController(new OperatorInboxViewService(inbox, mock(HandoffEscalationService.class)))).build();
         assertHttpEmptyPage(mvc, "/api/handoff/inbox");
     }
 

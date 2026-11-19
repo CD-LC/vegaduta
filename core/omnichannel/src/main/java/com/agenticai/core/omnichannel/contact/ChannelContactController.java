@@ -1,8 +1,5 @@
 package com.agenticai.core.omnichannel.contact;
 
-import com.agenticai.core.agents.core.AgentRepository;
-import com.agenticai.core.omnichannel.session.ChannelSession;
-import com.agenticai.core.omnichannel.session.ChannelSessionRepository;
 import com.agenticai.core.omnichannel.session.ChannelType;
 import com.agenticai.core.tenancy.ListPaging;
 import jakarta.validation.Valid;
@@ -59,16 +56,12 @@ public class ChannelContactController {
     private static final Pattern CSV_SPLIT = Pattern.compile("[,;\\t]");
 
     private final ChannelContactService contactService;
-    private final ChannelSessionRepository sessionRepository;
-    private final AgentRepository agentRepository;
+    private final ChannelContactViewService viewService;
 
     public ChannelContactController(
-            ChannelContactService contactService,
-            ChannelSessionRepository sessionRepository,
-            AgentRepository agentRepository) {
+            ChannelContactService contactService, ChannelContactViewService viewService) {
         this.contactService = contactService;
-        this.sessionRepository = sessionRepository;
-        this.agentRepository = agentRepository;
+        this.viewService = viewService;
     }
 
     // ------------------------------------------------------------------
@@ -85,12 +78,12 @@ public class ChannelContactController {
         // every channel by default); parseChannel's "channel is required" is
         // for create/update only - throwing it here 500'd the Contacts page.
         ChannelType filter = (channel == null || channel.isBlank()) ? null : parseChannel(channel);
-        List<ChannelContact> rows = contactService.list(filter, groupId, limit, offset);
+        List<ContactResponse> rows = viewService.listContacts(filter, groupId, limit, offset);
         // Truncation must be visible: X-Total-Count is the real count (only
         // queried when the page is full or paged-in), X-Has-More flags older
         // contacts beyond this page - reach them with ?offset=.
         return ListPaging.respond(
-                rows.stream().map(this::toResponse).toList(),
+                rows,
                 ListPaging.limit(
                         limit,
                         ChannelContactService.LIST_DEFAULT_LIMIT,
@@ -101,22 +94,19 @@ public class ChannelContactController {
 
     @PostMapping("/contacts")
     public ContactResponse create(@Valid @RequestBody ContactRequest request) {
-        return toResponse(
-                contactService.upsert(
-                        parseChannel(request.channel()),
-                        request.identifier(),
-                        request.displayName(),
-                        request.groupId(),
-                        request.agentId(),
-                        "IMPORT"));
+        return viewService.createContact(
+                parseChannel(request.channel()),
+                request.identifier(),
+                request.displayName(),
+                request.groupId(),
+                request.agentId());
     }
 
     @PutMapping("/contacts/{id}")
     public ContactResponse update(
             @PathVariable UUID id, @RequestBody ContactUpdateRequest request) {
-        return toResponse(
-                contactService.update(
-                        id, request.displayName(), request.groupId(), request.agentId()));
+        return viewService.updateContact(
+                id, request.displayName(), request.groupId(), request.agentId());
     }
 
     @DeleteMapping("/contacts/{id}")
@@ -131,47 +121,19 @@ public class ChannelContactController {
     @GetMapping("/contact-groups")
     public ResponseEntity<List<GroupResponse>> listGroups(@RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
         return ListPaging.window(
-            contactService.listGroups().stream()
-                .map(
-                        g ->
-                                new GroupResponse(
-                                        g.getId(),
-                                        g.getName(),
-                                        g.getDescription(),
-                                        g.getAgentId(),
-                                        agentName(g.getAgentId()),
-                                        contactService.memberCount(g.getId())))
-                .toList(),
+            viewService.listGroups(),
             limit, offset, 50, 500);
     }
 
     @PostMapping("/contact-groups")
     public GroupResponse createGroup(@Valid @RequestBody GroupRequest request) {
-        ContactGroup g =
-                contactService.createGroup(
-                        request.name(), request.description(), request.agentId());
-        return new GroupResponse(
-                g.getId(),
-                g.getName(),
-                g.getDescription(),
-                g.getAgentId(),
-                agentName(g.getAgentId()),
-                0);
+        return viewService.createGroup(request.name(), request.description(), request.agentId());
     }
 
     @PutMapping("/contact-groups/{id}")
     public GroupResponse updateGroup(
             @PathVariable UUID id, @Valid @RequestBody GroupRequest request) {
-        ContactGroup g =
-                contactService.updateGroup(
-                        id, request.name(), request.description(), request.agentId());
-        return new GroupResponse(
-                g.getId(),
-                g.getName(),
-                g.getDescription(),
-                g.getAgentId(),
-                agentName(g.getAgentId()),
-                contactService.memberCount(id));
+        return viewService.updateGroup(id, request.name(), request.description(), request.agentId());
     }
 
     @DeleteMapping("/contact-groups/{id}")
@@ -336,36 +298,6 @@ public class ChannelContactController {
     }
 
     // ------------------------------------------------------------------
-
-    private ContactResponse toResponse(ChannelContact c) {
-        ChannelSession session =
-                c.getSessionId() != null
-                        ? sessionRepository.findById(c.getSessionId()).orElse(null)
-                        : null;
-        String groupName =
-                contactService.findGroup(c.getGroupId()).map(ContactGroup::getName).orElse(null);
-        return new ContactResponse(
-                c.getId(),
-                c.getChannel(),
-                c.getIdentifier(),
-                c.getDisplayName(),
-                c.getGroupId(),
-                groupName,
-                c.getAgentId(),
-                agentName(c.getAgentId()),
-                c.getSource(),
-                c.getSessionId(),
-                session != null && session.isPaired(),
-                session != null ? session.getLastMessageAt() : null,
-                c.getLastSeenAt(),
-                c.getCreatedAt());
-    }
-
-    private String agentName(UUID agentId) {
-        return agentId != null
-                ? agentRepository.findById(agentId).map(a -> a.getName()).orElse(null)
-                : null;
-    }
 
     static ChannelType parseChannel(String channel) {
         if (channel == null || channel.isBlank()) {

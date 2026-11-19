@@ -58,8 +58,7 @@ class TeamsWebhookControllerTurnContextTest {
         controller =
                 new TeamsWebhookController(
                         tenants,
-                        credentialRepository,
-                        mock(TeamsCredentialService.class),
+                        TeamsWebhookControllerAuthTest.credentialService(credentialRepository),
                         jwt,
                         sessions,
                         chat,

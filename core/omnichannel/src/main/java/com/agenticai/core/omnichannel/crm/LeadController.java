@@ -7,9 +7,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -38,9 +35,9 @@ public class LeadController {
     static final int MAX_PAGE_SIZE = 200;
     private static final long MAX_IMPORT_BYTES = 5L * 1024 * 1024;
 
-    private final LeadService service;
+    private final LeadApiService service;
 
-    public LeadController(LeadService service) {
+    public LeadController(LeadApiService service) {
         this.service = service;
     }
 
@@ -56,30 +53,23 @@ public class LeadController {
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "50") int size
     ) {
-        Page<Lead> result = service.list(
-            parseStage(stage), source, q,
-            PageRequest.of(Math.max(0, page), Math.max(1, Math.min(size, MAX_PAGE_SIZE)), Sort.by(Sort.Direction.DESC, "createdAt"))
-        );
-        return new PageResponse(
-            result.getContent().stream().map(LeadResponse::from).toList(),
-            result.getTotalElements(), result.getNumber(), result.getSize()
-        );
+        return service.list(parseStage(stage), source, q, page, size);
     }
 
     @PostMapping
     @org.springframework.web.bind.annotation.ResponseStatus(HttpStatus.CREATED)
     public LeadResponse create(@RequestBody LeadRequest request) {
-        return LeadResponse.from(service.create(toInput(request)));
+        return service.create(toInput(request));
     }
 
     @GetMapping("/{id}")
     public LeadResponse get(@PathVariable UUID id) {
-        return LeadResponse.from(service.get(id));
+        return service.get(id);
     }
 
     @PutMapping("/{id}")
     public LeadResponse update(@PathVariable UUID id, @RequestBody LeadRequest request) {
-        return LeadResponse.from(service.update(id, toInput(request)));
+        return service.update(id, toInput(request));
     }
 
     @DeleteMapping("/{id}")
@@ -94,7 +84,7 @@ public class LeadController {
     @PostMapping("/{id}/stage")
     public LeadResponse stage(@PathVariable UUID id, @RequestBody StageRequest request) {
         LeadStage stage = parseStage(request.stage());
-        return LeadResponse.from(service.changeStage(id, stage, request.note()));
+        return service.changeStage(id, stage, request.note());
     }
 
     @PostMapping("/{id}/activities")
@@ -106,12 +96,12 @@ public class LeadController {
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown activity type: " + request.type());
         }
-        return ActivityResponse.from(service.addActivity(id, type, request.body(), request.meta()));
+        return service.addActivity(id, type, request.body(), request.meta());
     }
 
     @GetMapping("/{id}/activities")
     public ResponseEntity<List<ActivityResponse>> activities(@PathVariable UUID id, @RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
-        return ListPaging.window(service.activities(id).stream().map(ActivityResponse::from).toList(), limit, offset, 50, 200);
+        return ListPaging.window(service.activities(id), limit, offset, 50, 200);
     }
 
     // ------------------------------------------------------------------
@@ -143,7 +133,7 @@ public class LeadController {
 
     @GetMapping(value = "/export.csv", produces = "text/csv")
     public ResponseEntity<byte[]> export() {
-        byte[] body = LeadCsv.export(service.exportAll()).getBytes(StandardCharsets.UTF_8);
+        byte[] body = service.exportCsv().getBytes(StandardCharsets.UTF_8);
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"leads.csv\"")
             .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
@@ -188,19 +178,9 @@ public class LeadController {
         int score, String owner, BigDecimal value, List<String> tags, String notes, Instant lastContactedAt,
         Instant lastRepliedAt, Instant createdAt, Instant updatedAt
     ) {
-        static LeadResponse from(Lead l) {
-            return new LeadResponse(
-                l.getId(), l.getName(), l.getEmail(), l.getPhone(), l.getCompany(), l.getTitle(), l.getSource(),
-                l.getStage(), l.getScore(), l.getOwner(), l.getValue(), l.tagList(), l.getNotes(),
-                l.getLastContactedAt(), l.getLastRepliedAt(), l.getCreatedAt(), l.getUpdatedAt()
-            );
-        }
     }
 
     public record ActivityResponse(UUID id, UUID leadId, LeadActivityType type, String body, Map<String, Object> meta, Instant createdAt) {
-        static ActivityResponse from(LeadActivity a) {
-            return new ActivityResponse(a.getId(), a.getLeadId(), a.getType(), a.getBody(), a.getMeta(), a.getCreatedAt());
-        }
     }
 
     public record PageResponse(List<LeadResponse> items, long total, int page, int size) {

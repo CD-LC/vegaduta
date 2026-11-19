@@ -35,7 +35,7 @@ class ChannelContactControllerListHeadersTest {
     @BeforeEach
     void setUp() {
         service = mock(ChannelContactService.class);
-        controller = new ChannelContactController(service, mock(ChannelSessionRepository.class), mock(AgentRepository.class));
+        controller = new ChannelContactController(service, new ChannelContactViewService(service, mock(ChannelSessionRepository.class), mock(AgentRepository.class)));
     }
 
     @Test

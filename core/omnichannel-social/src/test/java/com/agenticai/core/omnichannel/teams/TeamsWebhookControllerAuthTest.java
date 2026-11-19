@@ -44,6 +44,17 @@ class TeamsWebhookControllerAuthTest {
             "{\"type\":\"message\",\"id\":\"act-1\",\"text\":\"hello\",\"serviceUrl\":\"https://smba.example/\","
                     + "\"from\":{\"id\":\"user-1\"},\"conversation\":{\"id\":\"conv-1\"}}";
 
+    /** A mock service whose connected appId follows the stubbed repository's first credential. */
+    static TeamsCredentialService credentialService(TeamsCredentialRepository repo) {
+        TeamsCredentialService service = mock(TeamsCredentialService.class);
+        when(service.connectedAppId())
+                .thenAnswer(
+                        inv ->
+                                repo.findFirstByOrderByCreatedAtAsc()
+                                        .map(TeamsCredential::getAppId));
+        return service;
+    }
+
     private TeamsCredentialRepository credentials;
     private TeamsBotFrameworkJwtValidator jwt;
     private ChannelSessionService sessions;
@@ -61,8 +72,7 @@ class TeamsWebhookControllerAuthTest {
         controller =
                 new TeamsWebhookController(
                         tenants,
-                        credentials,
-                        mock(TeamsCredentialService.class),
+                        credentialService(credentials),
                         jwt,
                         sessions,
                         mock(AgentChatService.class),

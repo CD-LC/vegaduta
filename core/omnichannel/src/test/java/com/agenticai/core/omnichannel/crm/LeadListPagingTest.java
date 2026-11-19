@@ -35,7 +35,7 @@ class LeadListPagingTest {
     }
 
     private final LeadService service = mock(LeadService.class);
-    private final LeadController controller = new LeadController(service);
+    private final LeadController controller = new LeadController(new LeadApiService(service));
 
     @Test
     void pipelinePages() {

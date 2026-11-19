@@ -31,6 +31,7 @@ import com.agenticai.core.omnichannel.session.InboundMessageDedupService;
 import com.agenticai.core.omnichannel.telegram.TelegramApiClient;
 import com.agenticai.core.omnichannel.telegram.TelegramCredential;
 import com.agenticai.core.omnichannel.telegram.TelegramCredentialRepository;
+import com.agenticai.core.omnichannel.telegram.TelegramCredentialService;
 import com.agenticai.core.omnichannel.telegram.TelegramUpdateService;
 import com.agenticai.core.omnichannel.telegram.TelegramWebhookController;
 import com.agenticai.core.omnichannel.telegram.TelegramWebhookSecret;
@@ -376,7 +377,7 @@ class InboundWebhookOverloadTest {
         return new Tg(
                 new TelegramWebhookController(
                         tenants,
-                        repo,
+                        new TelegramCredentialService(repo, null, null, null, null, "", null),
                         enc,
                         new TelegramUpdateService(
                                 sessions,

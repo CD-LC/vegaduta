@@ -73,7 +73,7 @@ class TelegramWebhookControllerTriggerAndAgentEventBothFireTest {
         controller =
                 new TelegramWebhookController(
                         tenantResolutionService,
-                        credentialRepository,
+                        new TelegramCredentialService(credentialRepository, null, null, null, null, "", null),
                         encryptionService,
                         new TelegramUpdateService(
                                 channelSessionService,

@@ -170,5 +170,11 @@ public class TeamsCredentialService {
         return routeRepository.findById(conversationId).map(TeamsConversationRoute::getServiceUrl);
     }
 
+    /** The connected bot's appId, used by the webhook to confirm an inbound call targets it. */
+    @Transactional(readOnly = true)
+    public Optional<String> connectedAppId() {
+        return repository.findFirstByOrderByCreatedAtAsc().map(TeamsCredential::getAppId);
+    }
+
     public record DecryptedCredential(String appId, String appPassword, String aadTenantId) {}
 }

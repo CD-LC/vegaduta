@@ -31,7 +31,7 @@ class LeadControllerTest {
     @BeforeEach
     void setUp() {
         service = mock(LeadService.class);
-        controller = new LeadController(service);
+        controller = new LeadController(new LeadApiService(service));
     }
 
     @Test
