@@ -20,7 +20,7 @@ class BillingEmailEditionTest {
 
     private BillingEmailService service(boolean billingEdition) {
         return new BillingEmailService(
-                mailSender, templates, jdbc, "a@x", "b@x", "c@x", "d@x", "http://app", "", billingEdition);
+                mailSender, templates, new BillingRecipientJdbcRepository(jdbc), "a@x", "b@x", "c@x", "d@x", "http://app", "", billingEdition);
     }
 
     @Test

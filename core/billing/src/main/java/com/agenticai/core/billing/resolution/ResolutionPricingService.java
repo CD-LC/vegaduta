@@ -1,11 +1,9 @@
 package com.agenticai.core.billing.resolution;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 /**
@@ -43,20 +41,20 @@ public class ResolutionPricingService {
     /** Point-in-time price/config read, snapshotted onto each recorded event. */
     public record PricingSnapshot(long unitPriceMinor, String currency, boolean billIdleClose, long idleCloseHours) {}
 
-    private final JdbcTemplate jdbcTemplate;
+    private final PlatformSettingJdbcRepository settings;
     private final long cacheMs;
     private final AtomicReference<Cached> cache = new AtomicReference<>();
 
     // Two constructors -> Spring needs an explicit pick; without this the context fails with
     // "No default constructor found" (prod boot failure 2026-09-23 on image a461e5db).
     @Autowired
-    public ResolutionPricingService(JdbcTemplate jdbcTemplate) {
-        this(jdbcTemplate, 30_000L);
+    public ResolutionPricingService(PlatformSettingJdbcRepository settings) {
+        this(settings, 30_000L);
     }
 
     /** Test seam: explicit cache window. */
-    ResolutionPricingService(JdbcTemplate jdbcTemplate, long cacheMs) {
-        this.jdbcTemplate = jdbcTemplate;
+    ResolutionPricingService(PlatformSettingJdbcRepository settings, long cacheMs) {
+        this.settings = settings;
         this.cacheMs = cacheMs;
     }
 
@@ -76,10 +74,7 @@ public class ResolutionPricingService {
     }
 
     private String readSetting(String key) {
-        List<String> rows = jdbcTemplate.query(
-            "SELECT value FROM control_plane.platform_setting WHERE key = ?",
-            (rs, rowNum) -> rs.getString(1), key);
-        return rows.stream().findFirst().orElse(null);
+        return settings.readSetting(key);
     }
 
     private String getString(String key, String defaultIfMissing) {

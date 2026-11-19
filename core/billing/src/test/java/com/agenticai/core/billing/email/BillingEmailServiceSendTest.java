@@ -57,7 +57,7 @@ class BillingEmailServiceSendTest {
         return new BillingEmailService(
                 provider,
                 templates,
-                jdbc,
+                new BillingRecipientJdbcRepository(jdbc),
                 "receipt@x",
                 "failed@x",
                 "dunning@x",

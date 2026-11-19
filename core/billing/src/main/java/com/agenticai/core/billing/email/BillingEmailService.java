@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -33,7 +32,7 @@ public class BillingEmailService {
 
     private final ObjectProvider<JavaMailSender> mailSenderProvider;
     private final BillingEmailTemplateService templateService;
-    private final JdbcTemplate jdbcTemplate;
+    private final BillingRecipientJdbcRepository recipients;
     private final String receiptFromAddress;
     private final String paymentFailedFromAddress;
     private final String dunningFromAddress;
@@ -72,7 +71,7 @@ public class BillingEmailService {
     public BillingEmailService(
             ObjectProvider<JavaMailSender> mailSenderProvider,
             BillingEmailTemplateService templateService,
-            JdbcTemplate jdbcTemplate,
+            BillingRecipientJdbcRepository recipients,
             @Value("${billing.email.receipt-from:billing@example.com}") String receiptFromAddress,
             @Value("${billing.email.payment-failed-from:billing@example.com}")
                     String paymentFailedFromAddress,
@@ -86,7 +85,7 @@ public class BillingEmailService {
         this.appPublicUrl = appPublicUrl.replaceAll("/+$", "");
         this.mailSenderProvider = mailSenderProvider;
         this.templateService = templateService;
-        this.jdbcTemplate = jdbcTemplate;
+        this.recipients = recipients;
         this.receiptFromAddress = receiptFromAddress;
         this.paymentFailedFromAddress = paymentFailedFromAddress;
         this.dunningFromAddress = dunningFromAddress;
@@ -288,12 +287,7 @@ public class BillingEmailService {
 
     private java.util.List<String> getAdminEmails(UUID tenantId) {
         try {
-            return jdbcTemplate.queryForList(
-                    "SELECT DISTINCT email FROM control_plane.app_user WHERE tenant_id = ? AND role"
-                            + " = ? AND email IS NOT NULL",
-                    String.class,
-                    tenantId,
-                    "TENANT_ADMIN");
+            return recipients.findAdminEmails(tenantId);
         } catch (Exception e) {
             log.warn("Could not list admin emails for tenant {}: {}", tenantId, e.getMessage());
             return java.util.List.of();
@@ -304,12 +298,7 @@ public class BillingEmailService {
         // Find the first TENANT_ADMIN user's email for this tenant, mirroring
         // NewsletterService's pattern. Returns null if no admin found yet (early signup).
         try {
-            return jdbcTemplate.queryForObject(
-                    "SELECT email FROM control_plane.app_user WHERE tenant_id = ? AND role = ?"
-                            + " ORDER BY created_at ASC LIMIT 1",
-                    String.class,
-                    tenantId,
-                    "TENANT_ADMIN");
+            return recipients.findFirstAdminEmail(tenantId);
         } catch (Exception e) {
             return null; // No admin found (early signup) or query failed
         }
@@ -318,8 +307,7 @@ public class BillingEmailService {
     private String getPlanFromDb(UUID tenantId) {
         // Fetch the tenant's current plan (PREMIUM, UNLIMITED, FREE, etc.)
         try {
-            return jdbcTemplate.queryForObject(
-                    "SELECT plan FROM control_plane.tenant WHERE id = ?", String.class, tenantId);
+            return recipients.findPlan(tenantId);
         } catch (Exception e) {
             return "Premium"; // Fallback (shouldn't happen if tenantId was valid)
         }

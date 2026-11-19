@@ -51,7 +51,8 @@ class SubscriptionChargedHandlerTest {
     void setUp() {
         jdbcTemplate = mock(JdbcTemplate.class);
         emailService = mock(BillingEmailService.class);
-        handler = new SubscriptionChargedHandler(jdbcTemplate, emailService);
+        handler = new SubscriptionChargedHandler(
+                new TenantSubscriptionJdbcRepository(jdbcTemplate), emailService);
     }
 
     private BillingEvent chargedEvent(String subscriptionId) {

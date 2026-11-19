@@ -87,6 +87,18 @@ public class AuditLogService {
     }
 
     /**
+     * {@link #search(String, String, String, String, Instant, Instant, long, int)} mapped to the
+     * response DTO, so the controller never handles {@link AuditLogEntry} entities.
+     */
+    public Page<AuditLogEntryResponse> searchPage(
+        String actionType, String targetType, String actor, String q,
+        Instant from, Instant to, long offset, int limit
+    ) {
+        return search(actionType, targetType, actor, q, from, to, offset, limit)
+            .map(AuditLogEntryResponse::from);
+    }
+
+    /**
      * Keyset page: the same filters, rows strictly after {@code after} (null = from the newest), at
      * most {@code limit + 1} rows so the caller can tell whether another page exists without a count.
      */

@@ -32,7 +32,7 @@ class ResolutionMeteringServiceTest {
 
     private final JdbcTemplate jdbc = mock(JdbcTemplate.class);
     private final ResolutionEventRepository repository = new ResolutionEventRepository(jdbc);
-    private final ResolutionPricingService pricing = new ResolutionPricingService(jdbc, 0L);
+    private final ResolutionPricingService pricing = new ResolutionPricingService(new PlatformSettingJdbcRepository(jdbc), 0L);
     private final ResolutionMeteringService metering = new ResolutionMeteringService(repository, pricing);
 
     /** Bind args of every successful insert, captured via the mock's Answer (varargs-safe). */

@@ -52,8 +52,8 @@ public class AuditLogController {
             ? AuditLogService.LEGACY_LIST_CAP
             : AuditPaging.clampLimit(limit, DEFAULT_LIMIT, MAX_LIMIT);
         long skip = AuditPaging.clampOffset(offset);
-        Page<AuditLogEntry> page = auditLogService.search(actionType, targetType, actor, q, from, to, skip, size);
-        List<AuditLogEntryResponse> rows = page.getContent().stream().map(AuditLogEntryResponse::from).toList();
+        Page<AuditLogEntryResponse> page = auditLogService.searchPage(actionType, targetType, actor, q, from, to, skip, size);
+        List<AuditLogEntryResponse> rows = page.getContent();
         ResponseEntity<List<AuditLogEntryResponse>> response =
             AuditPaging.respondWithTotal(rows, skip, page.getTotalElements());
         String next = limit != null && skip + rows.size() < page.getTotalElements() ? nextCursor(rows) : null;

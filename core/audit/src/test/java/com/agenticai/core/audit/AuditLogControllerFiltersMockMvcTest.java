@@ -27,7 +27,7 @@ class AuditLogControllerFiltersMockMvcTest {
 
     @Test
     void actorAndQAreForwardedAlongsideTheExistingFilters() throws Exception {
-        when(service.search(any(), any(), any(), any(), any(), any(), anyLong(), anyInt()))
+        when(service.searchPage(any(), any(), any(), any(), any(), any(), anyLong(), anyInt()))
             .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 20), 45));
 
         mvc.perform(get("/api/audit-log")
@@ -37,17 +37,17 @@ class AuditLogControllerFiltersMockMvcTest {
             .andExpect(header().string("X-Total-Count", "45"))
             .andExpect(header().string("X-Has-More", "true"));
 
-        verify(service).search(eq("agent.created"), isNull(), eq("user-7"), eq("50%_off"), isNull(), isNull(),
+        verify(service).searchPage(eq("agent.created"), isNull(), eq("user-7"), eq("50%_off"), isNull(), isNull(),
             eq(20L), eq(20));
     }
 
     @Test
     void withoutActorOrQTheRequestBehavesAsBefore() throws Exception {
-        when(service.search(any(), any(), any(), any(), any(), any(), anyLong(), anyInt()))
+        when(service.searchPage(any(), any(), any(), any(), any(), any(), anyLong(), anyInt()))
             .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 200), 0));
 
         mvc.perform(get("/api/audit-log")).andExpect(status().isOk());
 
-        verify(service).search(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), eq(0L), eq(200));
+        verify(service).searchPage(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), eq(0L), eq(200));
     }
 }

@@ -25,7 +25,9 @@ class PaymentControllerPagingTest {
     private final PaymentMandateService mandates = mock(PaymentMandateService.class);
     private final PaymentTransactionRepository txns = mock(PaymentTransactionRepository.class);
     private final PaymentController controller =
-            new PaymentController(mandates, txns, mock(MandateCanonicalizer.class));
+            new PaymentController(
+                    mandates,
+                    new PaymentApiService(mandates, txns, mock(MandateCanonicalizer.class)));
 
     @Test
     void agentTransactionsPassTheOffsetAndReportTotals() {

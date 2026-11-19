@@ -68,11 +68,12 @@ class ApprovalControllerTest {
         policyService = mock(ApprovalPolicyService.class);
         controller =
                 new ApprovalController(
-                        gateService,
-                        requestRepository,
-                        policyService,
-                        new ObjectMapper(),
-                        List.of(workflowRule));
+                        new ApprovalApiService(
+                                gateService,
+                                requestRepository,
+                                new ObjectMapper(),
+                                List.of(workflowRule)),
+                        policyService);
     }
 
     @AfterEach

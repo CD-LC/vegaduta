@@ -35,9 +35,9 @@ import org.springframework.web.server.ResponseStatusException;
 @ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class WalletController {
 
-    private final AgentWalletService walletService;
+    private final WalletApiService walletService;
 
-    public WalletController(AgentWalletService walletService) {
+    public WalletController(WalletApiService walletService) {
         this.walletService = walletService;
     }
 
@@ -45,9 +45,7 @@ public class WalletController {
     public ResponseEntity<WalletResponse> open(@Valid @RequestBody OpenWalletRequest body) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(
-                            WalletDtos.toResponse(
-                                    walletService.getOrCreate(body.agentId(), body.currency())));
+                    .body(walletService.open(body.agentId(), body.currency()));
         } catch (WalletException e) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, e.getCode() + ": " + e.getMessage());
@@ -56,18 +54,15 @@ public class WalletController {
 
     @GetMapping
     public List<WalletResponse> list(@RequestParam UUID agentId) {
-        return walletService.listForAgent(agentId).stream().map(WalletDtos::toResponse).toList();
+        return walletService.listForAgent(agentId);
     }
 
     @GetMapping("/{walletId}")
     public WalletResponse get(@PathVariable UUID walletId) {
-        return WalletDtos.toResponse(
-                walletService
-                        .findById(walletId)
-                        .orElseThrow(
-                                () ->
-                                        new ResponseStatusException(
-                                                HttpStatus.NOT_FOUND, "no such wallet")));
+        return walletService
+                .find(walletId)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "no such wallet"));
     }
 
     /** Operator top-up - credits are how an agent wallet gets funded. */
@@ -75,15 +70,10 @@ public class WalletController {
     public ResponseEntity<LedgerEntryResponse> credit(
             @PathVariable UUID walletId, @Valid @RequestBody CreditRequest body) {
         try {
-            WalletLedgerEntry entry =
+            LedgerEntryResponse entry =
                     walletService.credit(
-                            walletId,
-                            body.amountMinor(),
-                            body.idempotencyKey(),
-                            "operator_topup",
-                            null,
-                            body.note());
-            return ResponseEntity.status(HttpStatus.CREATED).body(WalletDtos.toResponse(entry));
+                            walletId, body.amountMinor(), body.idempotencyKey(), body.note());
+            return ResponseEntity.status(HttpStatus.CREATED).body(entry);
         } catch (WalletException e) {
             HttpStatus status =
                     "WALLET_NOT_FOUND".equals(e.getCode())
@@ -103,16 +93,12 @@ public class WalletController {
             @PathVariable UUID walletId,
             @RequestParam(defaultValue = "50") int limit,
             @RequestParam(required = false) Long offset) {
-        walletService
-                .findById(walletId)
-                .orElseThrow(
-                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "no such wallet"));
+        if (!walletService.exists(walletId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "no such wallet");
+        }
         int capped = Math.max(1, Math.min(limit, 200));
         long skip = ListPaging.offset(offset);
-        List<LedgerEntryResponse> rows =
-                walletService.ledger(walletId, capped, skip).stream()
-                        .map(WalletDtos::toResponse)
-                        .toList();
+        List<LedgerEntryResponse> rows = walletService.ledger(walletId, capped, skip);
         return ListPaging.respond(rows, capped, skip, () -> walletService.ledgerCount(walletId));
     }
 }

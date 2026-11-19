@@ -3,20 +3,13 @@ package com.agenticai.core.billing.resolution;
 import com.agenticai.core.billing.resolution.ResolutionDtos.DisputeRequest;
 import com.agenticai.core.billing.resolution.ResolutionDtos.RecordResolutionRequest;
 import com.agenticai.core.billing.resolution.ResolutionDtos.ResolutionActionResponse;
-import com.agenticai.core.billing.resolution.ResolutionDtos.ResolutionEventResponse;
 import com.agenticai.core.billing.resolution.ResolutionDtos.ResolutionListResponse;
 import com.agenticai.core.billing.resolution.ResolutionDtos.ResolutionSummaryResponse;
 import com.agenticai.core.security.TenantContext;
-import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,65 +44,33 @@ import org.springframework.web.server.ResponseStatusException;
 @Profile("security")
 public class ResolutionController {
 
-    private static final int MAX_LIMIT = 500;
-
-    private final ResolutionEventRepository repository;
+    private final ResolutionQueryService queries;
     private final ResolutionMeteringService metering;
-    private final ResolutionPricingService pricing;
 
     public ResolutionController(
-        ResolutionEventRepository repository,
-        ResolutionMeteringService metering,
-        ResolutionPricingService pricing
+        ResolutionQueryService queries,
+        ResolutionMeteringService metering
     ) {
-        this.repository = repository;
+        this.queries = queries;
         this.metering = metering;
-        this.pricing = pricing;
     }
 
-    // Both reads are @Transactional(readOnly) for two reasons. The repository is a plain JdbcTemplate
-    // over a tenant table with unqualified names: outside a Spring transaction it borrows a pooled
-    // connection that is still on the default schema, so the query silently misses the tenant's
-    // rows. And summary() runs two queries that must see one snapshot.
     @GetMapping("/api/tenant/resolutions/summary")
-    @Transactional(readOnly = true)
     public ResolutionSummaryResponse summary(
         @RequestParam(value = "from", required = false) Instant from,
         @RequestParam(value = "to", required = false) Instant to
     ) {
-        Instant end = to != null ? to : Instant.now();
-        Instant start = from != null ? from : end.minus(30, ChronoUnit.DAYS);
-        List<ResolutionEventRepository.OutcomeCount> counts = repository.countByOutcome(start, end);
-        Map<String, Long> byOutcome = new LinkedHashMap<>();
-        long total = 0;
-        for (ResolutionEventRepository.OutcomeCount c : counts) {
-            byOutcome.put(c.outcome().name(), c.count());
-            total += c.count();
-        }
-        ResolutionEventRepository.BillableTotals billable = repository.billableTotals(start, end);
-        ResolutionPricingService.PricingSnapshot price = pricing.snapshot();
-        return new ResolutionSummaryResponse(
-            start, end, total, byOutcome,
-            billable.billableCount(), billable.totalMinor(),
-            billable.currency() != null ? billable.currency() : price.currency(),
-            price.unitPriceMinor(),
-            price.unitPriceMinor() == 0);
+        return queries.summary(from, to);
     }
 
     @GetMapping("/api/tenant/resolutions")
-    @Transactional(readOnly = true)
     public ResolutionListResponse list(
         @RequestParam(value = "from", required = false) Instant from,
         @RequestParam(value = "to", required = false) Instant to,
         @RequestParam(value = "limit", defaultValue = "100") int limit,
         @RequestParam(value = "offset", defaultValue = "0") int offset
     ) {
-        Instant end = to != null ? to : Instant.now();
-        Instant start = from != null ? from : end.minus(30, ChronoUnit.DAYS);
-        int capped = Math.min(Math.max(limit, 1), MAX_LIMIT);
-        List<ResolutionEventResponse> events = repository.listPage(start, end, capped, Math.max(offset, 0))
-            .stream().map(ResolutionEventResponse::from).toList();
-        return new ResolutionListResponse(events, capped, Math.max(offset, 0));
+        return queries.list(from, to, limit, offset);
     }
 
     @PostMapping("/api/tenant/resolutions")

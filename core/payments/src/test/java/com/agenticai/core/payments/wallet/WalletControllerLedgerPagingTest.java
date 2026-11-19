@@ -18,7 +18,7 @@ import org.springframework.http.ResponseEntity;
 class WalletControllerLedgerPagingTest {
 
     private final AgentWalletService service = mock(AgentWalletService.class);
-    private final WalletController controller = new WalletController(service);
+    private final WalletController controller = new WalletController(new WalletApiService(service));
 
     @Test
     void passesOffsetAndReportsTotals() {

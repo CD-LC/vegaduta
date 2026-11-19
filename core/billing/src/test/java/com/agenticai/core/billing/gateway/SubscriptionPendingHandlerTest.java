@@ -54,7 +54,11 @@ class SubscriptionPendingHandlerTest {
         jdbcTemplate = mock(JdbcTemplate.class);
         emailService = mock(BillingEmailService.class);
         eventPublisher = mock(ApplicationEventPublisher.class);
-        handler = new SubscriptionPendingHandler(jdbcTemplate, emailService, eventPublisher, MAX_FAILED_ATTEMPTS);
+        handler = new SubscriptionPendingHandler(
+                new TenantSubscriptionJdbcRepository(jdbcTemplate),
+                emailService,
+                eventPublisher,
+                MAX_FAILED_ATTEMPTS);
     }
 
     private BillingEvent pendingEvent(String subscriptionId) {
