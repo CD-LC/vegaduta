@@ -238,6 +238,13 @@ updates:
     labels: [dependencies, area/deploy]
     commit-message:
       prefix: "build(deps)"
+    ignore:
+      # Keycloak 26.8.x rejects core's admin API calls (HTTP 401) on compose; 26.7.5 works.
+      # Hold here until the cause is known (see the PR that pinned this), then remove.
+      - dependency-name: "keycloak/keycloak"
+        versions: ["26.8.x"]
+      - dependency-name: "quay.io/keycloak/keycloak"
+        versions: ["26.8.x"]
     # The Python service images must run the interpreter their hashed lock files
     # were compiled for and CI tests (services/lock-requirements.sh, PY_VERSION).
     # A 3.14 -> 3.15 bump (#340) made the sidecar image unbuildable: the locked
@@ -263,6 +270,13 @@ updates:
     labels: [dependencies, area/deploy]
     commit-message:
       prefix: "build(deps)"
+    ignore:
+      # Keycloak 26.8.x rejects core's admin API calls (HTTP 401) on compose; 26.7.5 works.
+      # Hold here until the cause is known (see the PR that pinned this), then remove.
+      - dependency-name: "keycloak/keycloak"
+        versions: ["26.8.x"]
+      - dependency-name: "quay.io/keycloak/keycloak"
+        versions: ["26.8.x"]
     groups:
       compose-images:
         update-types: [minor, patch]
