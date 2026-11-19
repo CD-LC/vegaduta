@@ -9,7 +9,6 @@ import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
@@ -41,19 +40,19 @@ public class ConsentGateService implements ConversationConsentGate {
     public static final String WITHDRAWN_AND_ERASED =
             WITHDRAWN + " Your data held for this conversation has been erased.";
 
-    private final JdbcTemplate jdbc;
+    private final ConsentGateJdbcRepository repository;
     private final ConsentPolicyService policies;
     private final ConsentLedger ledger;
     private final ContactPrivacyService contacts;
     private final AuditLogService audit;
 
     public ConsentGateService(
-            JdbcTemplate jdbc,
+            ConsentGateJdbcRepository repository,
             ConsentPolicyService policies,
             ConsentLedger ledger,
             ContactPrivacyService contacts,
             AuditLogService audit) {
-        this.jdbc = jdbc;
+        this.repository = repository;
         this.policies = policies;
         this.ledger = ledger;
         this.contacts = contacts;
@@ -212,12 +211,6 @@ public class ConsentGateService implements ConversationConsentGate {
         if (sessionId == null) {
             return Optional.empty();
         }
-        return jdbc
-                .query(
-                        "SELECT channel, external_id FROM channel_session WHERE session_id = ?",
-                        (rs, n) -> new Contact(rs.getString(1), rs.getString(2)),
-                        sessionId)
-                .stream()
-                .findFirst();
+        return repository.contactForSession(sessionId);
     }
 }

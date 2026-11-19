@@ -15,7 +15,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -34,16 +33,11 @@ public class AuditExportService {
     public static final Duration MAX_RANGE = Duration.ofDays(366);
     private static final ObjectMapper MAPPER = JsonMappers.withJavaTime();
 
-    private static final String QUERY =
-            "SELECT id, created_at, actor_id, action_type, target_type, target_id, outcome, detail"
-                    + " FROM audit_log_entry WHERE created_at >= ? AND created_at < ?"
-                    + " ORDER BY created_at, id";
-
-    private final JdbcTemplate jdbc;
+    private final AuditExportJdbcRepository repository;
     private final AuditLogService audit;
 
-    public AuditExportService(JdbcTemplate jdbc, AuditLogService audit) {
-        this.jdbc = jdbc;
+    public AuditExportService(AuditExportJdbcRepository repository, AuditLogService audit) {
+        this.repository = repository;
         this.audit = audit;
     }
 
@@ -63,8 +57,9 @@ public class AuditExportService {
         AtomicLong rows = new AtomicLong();
         Writer w = new OutputStreamWriter(out, StandardCharsets.UTF_8);
         w.write("id,created_at,actor_id,action_type,target_type,target_id,outcome,detail\r\n");
-        jdbc.query(
-                QUERY,
+        repository.streamEntries(
+                from,
+                to,
                 rs -> {
                     try {
                         for (int c = 1; c <= 8; c++) {
@@ -78,9 +73,7 @@ public class AuditExportService {
                     } catch (IOException e) {
                         throw new java.io.UncheckedIOException(e);
                     }
-                },
-                Timestamp.from(from),
-                Timestamp.from(to));
+                });
         w.flush();
         recordExport(actor, from, to, rows.get(), "csv");
         return rows.get();
@@ -96,8 +89,9 @@ public class AuditExportService {
             g.writeStringField("to", to.toString());
             g.writeStringField("generatedAt", Instant.now().toString());
             g.writeArrayFieldStart("entries");
-            jdbc.query(
-                    QUERY,
+            repository.streamEntries(
+                    from,
+                    to,
                     rs -> {
                         try {
                             g.writeStartObject();
@@ -114,15 +108,12 @@ public class AuditExportService {
                         } catch (IOException e) {
                             throw new java.io.UncheckedIOException(e);
                         }
-                    },
-                    Timestamp.from(from),
-                    Timestamp.from(to));
+                    });
             g.writeEndArray();
             g.writeArrayFieldStart("seals");
-            jdbc.query(
-                    "SELECT seq, first_row_at, last_row_at, row_count, seal_hash, prev_seal_hash,"
-                            + " algorithm, key_id, signature FROM audit_seal"
-                            + " WHERE last_row_at >= ? AND first_row_at < ? ORDER BY seq",
+            repository.streamSeals(
+                    from,
+                    to,
                     rs -> {
                         try {
                             g.writeStartObject();
@@ -139,9 +130,7 @@ public class AuditExportService {
                         } catch (IOException e) {
                             throw new java.io.UncheckedIOException(e);
                         }
-                    },
-                    Timestamp.from(from),
-                    Timestamp.from(to));
+                    });
             g.writeEndArray();
             g.writeNumberField("entryCount", rows.get());
             g.writeEndObject();

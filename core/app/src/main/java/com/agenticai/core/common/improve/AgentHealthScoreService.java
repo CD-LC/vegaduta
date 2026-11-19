@@ -65,6 +65,11 @@ public class AgentHealthScoreService {
         this.suggestionRepository = suggestionRepository;
     }
 
+    /** DTO view of {@link #getForAgent} for the controller layer. */
+    public Optional<ImprovementDtos.HealthScoreResponse> getViewForAgent(UUID agentId) {
+        return getForAgent(agentId).map(ImprovementDtos.HealthScoreResponse::from);
+    }
+
     public Optional<AgentHealthScore> getForAgent(UUID agentId) {
         return healthScoreRepository.findByAgentId(agentId);
     }

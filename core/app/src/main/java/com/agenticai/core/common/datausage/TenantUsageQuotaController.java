@@ -4,19 +4,12 @@ import com.agenticai.core.agents.hosted.FreeTierChatClientService;
 import com.agenticai.core.agents.quota.FreeTierUsageLimiterService;
 import com.agenticai.core.agents.tools.ToolRelevanceSelector;
 import com.agenticai.core.approval.ApprovalPolicyService;
-import com.agenticai.core.chat.LlmCallLogRepository;
-import com.agenticai.core.chat.LlmCallLogService;
-import com.agenticai.core.chat.ProviderCachingRegistry;
-import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,8 +52,7 @@ public class TenantUsageQuotaController {
 
     private final TenantLimits tenantLimits;
     private final FreeTierUsageLimiterService usageLimiterService;
-    private final ProviderCachingRegistry providerCachingRegistry;
-    private final LlmCallLogService llmCallLogService;
+    private final SpendProtectionCachingService spendProtectionCachingService;
     private final FreeTierChatClientService freeTierChatClientService;
     private final ToolRelevanceSelector toolRelevanceSelector;
     private final ApprovalPolicyService approvalPolicyService;
@@ -72,15 +64,13 @@ public class TenantUsageQuotaController {
     public TenantUsageQuotaController(
             TenantLimits tenantLimits,
             FreeTierUsageLimiterService usageLimiterService,
-            ProviderCachingRegistry providerCachingRegistry,
-            LlmCallLogService llmCallLogService,
+            SpendProtectionCachingService spendProtectionCachingService,
             FreeTierChatClientService freeTierChatClientService,
             ToolRelevanceSelector toolRelevanceSelector,
             ApprovalPolicyService approvalPolicyService) {
         this.tenantLimits = tenantLimits;
         this.usageLimiterService = usageLimiterService;
-        this.providerCachingRegistry = providerCachingRegistry;
-        this.llmCallLogService = llmCallLogService;
+        this.spendProtectionCachingService = spendProtectionCachingService;
         this.freeTierChatClientService = freeTierChatClientService;
         this.toolRelevanceSelector = toolRelevanceSelector;
         this.approvalPolicyService = approvalPolicyService;
@@ -112,7 +102,7 @@ public class TenantUsageQuotaController {
 
     /**
      * "What's protecting your spend" transparency panel (additive to {@link #usageQuota()}, not a
-     * replacement). No {@link TenantContext} scoping needed beyond what {@link #llmCallLogService}
+     * replacement). No {@link TenantContext} scoping needed beyond what {@link SpendProtectionCachingService}
      * already applies: {@code LlmCallLogService}/{@code LlmCallLogRepository} run against
      * Hibernate's tenant-schema multi-tenancy the same way every other query on that repository
      * does (see {@code LlmCallLogRepository}'s own javadoc), so the cache-effectiveness numbers
@@ -124,50 +114,8 @@ public class TenantUsageQuotaController {
         Instant now = Instant.now();
         Instant windowStart = now.minus(CACHE_WINDOW_DAYS, ChronoUnit.DAYS);
 
-        // Source of truth for "which providers have caching active" - the
-        // shared registry every ProviderCachingStrategy bean registers into
-        // automatically, never a hardcoded provider list (Anthropic/OpenAI
-        // today, Gemini and others as their strategies land).
-        Map<String, LlmCallLogRepository.CacheEffectivenessRow> effectivenessByProvider =
-                llmCallLogService.cacheEffectivenessSince(windowStart).stream()
-                        .collect(
-                                Collectors.toMap(
-                                        LlmCallLogRepository.CacheEffectivenessRow::getProviderName,
-                                        row -> row));
-
         List<SpendProtectionResponse.CachingProviderStatus> caching =
-                providerCachingRegistry.activeProviders().stream()
-                        .sorted(Comparator.comparing(ProviderName::name))
-                        .map(
-                                provider -> {
-                                    LlmCallLogRepository.CacheEffectivenessRow row =
-                                            effectivenessByProvider.get(provider.name());
-                                    if (row == null || row.getTotalCalls() == 0) {
-                                        // No calls to this provider in the window yet - real
-                                        // absence of data, not a fabricated 0% metric.
-                                        return new SpendProtectionResponse.CachingProviderStatus(
-                                                provider.name(), true, 0, null, null);
-                                    }
-                                    long totalInputTokens =
-                                            row.getPromptTokens()
-                                                    + row.getCacheCreationTokens()
-                                                    + row.getCacheReadTokens();
-                                    Double cacheReadTokenShare =
-                                            totalInputTokens > 0
-                                                    ? row.getCacheReadTokens()
-                                                            / (double) totalInputTokens
-                                                    : null;
-                                    Double callsWithCacheHitShare =
-                                            row.getCallsWithCacheHit()
-                                                    / (double) row.getTotalCalls();
-                                    return new SpendProtectionResponse.CachingProviderStatus(
-                                            provider.name(),
-                                            true,
-                                            row.getTotalCalls(),
-                                            cacheReadTokenShare,
-                                            callsWithCacheHitShare);
-                                })
-                        .toList();
+                spendProtectionCachingService.cachingStatus(windowStart);
 
         SpendProtectionResponse.CostMechanismStatus costAwareRouting =
                 new SpendProtectionResponse.CostMechanismStatus(

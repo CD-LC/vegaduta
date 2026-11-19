@@ -7,7 +7,6 @@ import com.agenticai.core.billing.resolution.ResolutionPricingService;
 import com.agenticai.core.tenancy.PgAdvisoryJobLock;
 import com.agenticai.core.tenancy.TenantSchemaIterator;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -15,7 +14,6 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -93,24 +91,11 @@ public class ChannelSessionResolutionSweep {
     private static final Logger log = LoggerFactory.getLogger(ChannelSessionResolutionSweep.class);
 
     private static final String JOB_LOCK_NAME = "channel-session-resolution-sweep";
-    private static final int BATCH_LIMIT = 200;
-
-    private static final String IDLE_SESSIONS_SQL =
-        "SELECT cs.id, cs.channel, cs.session_id, cs.agent_id, cs.handoff_state, cs.last_message_at"
-            + " FROM channel_session cs"
-            + " WHERE cs.paired AND cs.last_message_at < ?"
-            + " AND NOT EXISTS (SELECT 1 FROM resolution_event re"
-            + "   WHERE re.dedupe_key = 'cs:' || cs.id::text || ':' ||"
-            + "     (extract(epoch FROM cs.last_message_at) * 1000)::bigint::text)"
-            + " ORDER BY cs.last_message_at ASC LIMIT " + BATCH_LIMIT;
-
-    private static final String LATEST_FEEDBACK_SQL =
-        "SELECT signal FROM turn_feedback WHERE session_id = ? ORDER BY created_at DESC LIMIT 1";
 
     private record IdleSession(
         UUID id, String channel, String sessionId, UUID agentId, String handoffState, Instant lastMessageAt) {}
 
-    private final JdbcTemplate jdbcTemplate;
+    private final ChannelSessionResolutionJdbcRepository repository;
     private final TenantSchemaIterator tenantSchemaIterator;
     private final PgAdvisoryJobLock jobLock;
     private final ResolutionMeteringService metering;
@@ -119,7 +104,7 @@ public class ChannelSessionResolutionSweep {
     private final boolean enabled;
 
     public ChannelSessionResolutionSweep(
-        JdbcTemplate jdbcTemplate,
+        ChannelSessionResolutionJdbcRepository repository,
         TenantSchemaIterator tenantSchemaIterator,
         PgAdvisoryJobLock jobLock,
         ResolutionMeteringService metering,
@@ -127,7 +112,7 @@ public class ChannelSessionResolutionSweep {
         PlatformTransactionManager transactionManager,
         @Value("${resolution.sweep.enabled:true}") boolean enabled
     ) {
-        this.jdbcTemplate = jdbcTemplate;
+        this.repository = repository;
         this.tenantSchemaIterator = tenantSchemaIterator;
         this.jobLock = jobLock;
         this.metering = metering;
@@ -164,15 +149,14 @@ public class ChannelSessionResolutionSweep {
 
     int sweepTenant() {
         Instant cutoff = Instant.now().minus(pricing.snapshot().idleCloseHours(), ChronoUnit.HOURS);
-        List<IdleSession> sessions = jdbcTemplate.query(IDLE_SESSIONS_SQL,
+        List<IdleSession> sessions = repository.idleSessions(cutoff,
             (rs, n) -> new IdleSession(
                 rs.getObject("id", UUID.class),
                 rs.getString("channel"),
                 rs.getString("session_id"),
                 rs.getObject("agent_id", UUID.class),
                 rs.getString("handoff_state"),
-                rs.getTimestamp("last_message_at").toInstant()),
-            Timestamp.from(cutoff));
+                rs.getTimestamp("last_message_at").toInstant()));
         int recorded = 0;
         for (IdleSession s : sessions) {
             if (recordSession(s).isPresent()) {
@@ -215,9 +199,7 @@ public class ChannelSessionResolutionSweep {
     }
 
     private String latestFeedbackSignal(String sessionId) {
-        List<String> rows = jdbcTemplate.query(LATEST_FEEDBACK_SQL,
-            (rs, n) -> rs.getString(1), sessionId);
-        return rows.stream().findFirst().orElse(null);
+        return repository.latestFeedbackSignal(sessionId).orElse(null);
     }
 
 }

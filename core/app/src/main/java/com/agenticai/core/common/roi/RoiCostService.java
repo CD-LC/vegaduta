@@ -15,7 +15,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -65,11 +64,11 @@ public class RoiCostService {
         }
     }
 
-    private final JdbcTemplate jdbc;
+    private final RoiJdbcRepository repository;
     private final RoiPriceService prices;
 
-    public RoiCostService(JdbcTemplate jdbc, RoiPriceService prices) {
-        this.jdbc = jdbc;
+    public RoiCostService(RoiJdbcRepository repository, RoiPriceService prices) {
+        this.repository = repository;
         this.prices = prices;
     }
 
@@ -89,21 +88,9 @@ public class RoiCostService {
     List<Grain> grains(LocalDate from, LocalDate to) {
         List<RoiCostModel.Rate> rates = prices.rates();
         List<Grain> out = new ArrayList<>();
-        jdbc.query(
-                "SELECT (l.started_at AT TIME ZONE 'UTC')::date AS day, l.agent_id, wr.workflow_id, cs.channel,"
-                        + " a.created_by AS owner, l.provider_name, l.model, count(*) AS calls,"
-                        + " count(*) FILTER (WHERE NOT l.success) AS failed,"
-                        + " count(*) FILTER (WHERE l.success AND (l.prompt_tokens IS NULL OR l.completion_tokens IS NULL)) AS no_usage,"
-                        + " COALESCE(sum(l.prompt_tokens),0) AS p, COALESCE(sum(l.completion_tokens),0) AS c,"
-                        + " COALESCE(sum(l.cache_creation_tokens),0) AS cc, COALESCE(sum(l.cache_read_tokens),0) AS cr,"
-                        + " COALESCE(sum(l.reasoning_tokens),0) AS r"
-                        + " FROM llm_call_log l"
-                        + " LEFT JOIN agent a ON a.id = l.agent_id"
-                        + " LEFT JOIN workflow_run wr ON wr.id = CASE WHEN l.session_id ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'"
-                        + "   THEN l.session_id::uuid END"
-                        + " LEFT JOIN LATERAL (SELECT channel FROM channel_session WHERE session_id = l.session_id LIMIT 1) cs ON true"
-                        + " WHERE l.started_at >= ? AND l.started_at < ?"
-                        + " GROUP BY 1,2,3,4,5,6,7",
+        repository.queryGrains(
+                Timestamp.from(from.atStartOfDay(ZoneOffset.UTC).toInstant()),
+                Timestamp.from(to.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant()),
                 rs -> {
                     LocalDate day = rs.getObject("day", LocalDate.class);
                     String provider = rs.getString("provider_name");
@@ -130,9 +117,7 @@ public class RoiCostService {
                                     rs.getLong("no_usage"),
                                     usage,
                                     RoiCostModel.price(rate, usage)));
-                },
-                Timestamp.from(from.atStartOfDay(ZoneOffset.UTC).toInstant()),
-                Timestamp.from(to.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant()));
+                });
         return out;
     }
 
@@ -172,18 +157,18 @@ public class RoiCostService {
     public record Charges(long minor, String currency) {}
 
     public Charges platformCharges(LocalDate from, LocalDate to) {
-        return jdbc.query(
-                "SELECT COALESCE(SUM(unit_price_minor),0) AS minor, MAX(currency) AS currency, count(DISTINCT currency) AS n"
-                        + " FROM resolution_event WHERE billable AND disputed_at IS NULL AND resolved_at >= ? AND resolved_at < ?",
-                rs -> {
-                    rs.next();
-                    // More than one currency in a window cannot be summed honestly: report none.
-                    return rs.getInt("n") > 1
-                            ? new Charges(0, null)
-                            : new Charges(rs.getLong("minor"), rs.getString("currency"));
-                },
+        Charges[] result = new Charges[1];
+        repository.queryPlatformCharges(
                 Timestamp.from(from.atStartOfDay(ZoneOffset.UTC).toInstant()),
-                Timestamp.from(to.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant()));
+                Timestamp.from(to.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant()),
+                rs -> {
+                    // More than one currency in a window cannot be summed honestly: report none.
+                    result[0] =
+                            rs.getInt("n") > 1
+                                    ? new Charges(0, null)
+                                    : new Charges(rs.getLong("minor"), rs.getString("currency"));
+                });
+        return result[0];
     }
 
     /** Models with calls in the window that have no applicable price. */
@@ -259,19 +244,11 @@ public class RoiCostService {
     private Map<String, String> labels(String dim) {
         Map<String, String> m = new HashMap<>();
         m.put("null", "unattributed");
-        String sql =
-                switch (dim) {
-                    case "agent" -> "SELECT id::text, name FROM agent";
-                    case "workflow" -> "SELECT id::text, name FROM workflow_definition";
-                    default -> null;
-                };
-        if (sql != null) {
-            jdbc.query(
-                    sql,
-                    rs -> {
-                        m.put(rs.getString(1), rs.getString(2));
-                    });
-        }
+        repository.queryDimensionLabels(
+                dim,
+                rs -> {
+                    m.put(rs.getString(1), rs.getString(2));
+                });
         return m;
     }
 }

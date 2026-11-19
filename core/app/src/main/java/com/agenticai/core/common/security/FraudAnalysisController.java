@@ -40,9 +40,6 @@ public class FraudAnalysisController {
             "hasAnyAuthority('ROLE_tenant-admin', 'ROLE_platform-admin')";
 
     private final AbuseDetectionService abuseDetectionService;
-    private final ChallengeNonceRepository challengeNonceRepo;
-    private final IpBlacklistRepository ipBlacklistRepo;
-    private final UserBlacklistRepository userBlacklistRepo;
     private final HCaptchaClient hCaptchaClient;
 
     /**
@@ -69,10 +66,7 @@ public class FraudAnalysisController {
 
         try {
             // Find and validate the challenge nonce
-            ChallengeNonce nonce =
-                    challengeNonceRepo.findValidNonce(req.getNonce(), tenantId).orElse(null);
-
-            if (nonce == null) {
+            if (!abuseDetectionService.hasValidChallengeNonce(req.getNonce(), tenantId)) {
                 log.warn("Invalid or expired challenge nonce");
                 return ResponseEntity.status(400)
                         .body(Map.of("error", "Invalid or expired challenge. Please try again."));
@@ -94,14 +88,17 @@ public class FraudAnalysisController {
             }
 
             // Mark nonce as verified
-            nonce.setVerifiedAt(Instant.now());
-            nonce.setVerifiedByIp(clientAddr);
-            challengeNonceRepo.save(nonce);
+            if (!abuseDetectionService.markChallengeNonceVerified(
+                    req.getNonce(), tenantId, clientAddr)) {
+                log.warn("Invalid or expired challenge nonce");
+                return ResponseEntity.status(400)
+                        .body(Map.of("error", "Invalid or expired challenge. Please try again."));
+            }
 
             // Signed, short-lived, single-use pass bound to tenant + client IP + nonce; the
             // interceptor redeems it.
             String passToken =
-                    abuseDetectionService.issueChallengePass(tenantId, clientAddr, nonce.getId());
+                    abuseDetectionService.issueChallengePass(tenantId, clientAddr, req.getNonce());
             if (passToken == null) {
                 log.error("Challenge pass not issued: app.encryption.key is not configured");
                 return ResponseEntity.status(503)
@@ -148,8 +145,8 @@ public class FraudAnalysisController {
                         "client_ip", clientIp,
                         "ip_blacklisted",
                                 abuseDetectionService.isIpBlacklisted(tenantId, parseIp(clientIp)),
-                        "active_ip_blocks", ipBlacklistRepo.countActive(tenantId),
-                        "active_user_blocks", userBlacklistRepo.countActive(tenantId),
+                        "active_ip_blocks", abuseDetectionService.activeIpBlockCount(tenantId),
+                        "active_user_blocks", abuseDetectionService.activeUserBlockCount(tenantId),
                         "timestamp", Instant.now().toString()));
     }
 

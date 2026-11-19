@@ -60,9 +60,7 @@ public class AgentImprovementController {
     public ResponseEntity<List<ImprovementDtos.SuggestionResponse>> list(@PathVariable UUID agentId, @RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
         agentService.requireAccess(agentId, PermissionLevel.VIEWER);
         return ListPaging.window(
-            improvementService.listForAgent(agentId).stream()
-                .map(ImprovementDtos.SuggestionResponse::from)
-                .toList(),
+            improvementService.listSuggestionsForAgent(agentId),
             limit, offset, 50, 500);
     }
 
@@ -70,21 +68,20 @@ public class AgentImprovementController {
     public List<ImprovementDtos.SuggestionResponse> generate(@PathVariable UUID agentId) {
         // Before any work: generating spends LLM budget on this agent.
         agentService.requireAccess(agentId, PermissionLevel.EDITOR);
-        List<AgentImprovementSuggestion> created = improvementService.generateForAgent(agentId);
+        List<ImprovementDtos.SuggestionResponse> created = improvementService.generateSuggestionsForAgent(agentId);
         // Keep the manual "scan now" button and the scheduled sweep on the same
         // contract: a generate call also refreshes the health snapshot, so an
         // admin who scans by hand sees an up-to-date score without waiting for
         // the next AgentSupervisorSweep tick.
         healthScoreService.recompute(agentId, currentTenantId());
-        return created.stream().map(ImprovementDtos.SuggestionResponse::from).toList();
+        return created;
     }
 
     @GetMapping("/health")
     public ResponseEntity<ImprovementDtos.HealthScoreResponse> health(@PathVariable UUID agentId) {
         agentService.requireAccess(agentId, PermissionLevel.VIEWER);
         return healthScoreService
-                .getForAgent(agentId)
-                .map(ImprovementDtos.HealthScoreResponse::from)
+                .getViewForAgent(agentId)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -95,9 +92,7 @@ public class AgentImprovementController {
             @PathVariable UUID suggestionId,
             Authentication authentication) {
         agentService.requireAccess(agentId, PermissionLevel.EDITOR);
-        AgentImprovementSuggestion suggestion = getForAgent(agentId, suggestionId);
-        return ImprovementDtos.SuggestionResponse.from(
-                improvementService.accept(suggestion.getId(), actor(authentication)));
+        return improvementService.acceptForAgent(agentId, suggestionId, actor(authentication));
     }
 
     @PostMapping("/{suggestionId}/dismiss")
@@ -106,19 +101,7 @@ public class AgentImprovementController {
             @PathVariable UUID suggestionId,
             Authentication authentication) {
         agentService.requireAccess(agentId, PermissionLevel.EDITOR);
-        AgentImprovementSuggestion suggestion = getForAgent(agentId, suggestionId);
-        return ImprovementDtos.SuggestionResponse.from(
-                improvementService.dismiss(suggestion.getId(), actor(authentication)));
-    }
-
-    private AgentImprovementSuggestion getForAgent(UUID agentId, UUID suggestionId) {
-        return improvementService.listForAgent(agentId).stream()
-                .filter(s -> s.getId().equals(suggestionId))
-                .findFirst()
-                .orElseThrow(
-                        () ->
-                                new ImprovementNotFoundException(
-                                        "No suggestion " + suggestionId + " for agent " + agentId));
+        return improvementService.dismissForAgent(agentId, suggestionId, actor(authentication));
     }
 
     private static String actor(Authentication authentication) {

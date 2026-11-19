@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -89,7 +88,7 @@ public class ContactPrivacyService {
 
     private static final int MIN_DIGITS_FOR_PHONE_MATCH = 7;
 
-    private final JdbcTemplate jdbc;
+    private final ContactPrivacyJdbcRepository repository;
     private final AuditLogService audit;
     private final ConsentLedger ledger;
     private final ObjectProvider<AgentMemoryService> agentMemory;
@@ -99,7 +98,7 @@ public class ContactPrivacyService {
     private final ObjectProvider<SubjectDataEraser> otherStores;
 
     public ContactPrivacyService(
-            JdbcTemplate jdbc,
+            ContactPrivacyJdbcRepository repository,
             AuditLogService audit,
             ConsentLedger ledger,
             ObjectProvider<AgentMemoryService> agentMemory,
@@ -107,7 +106,7 @@ public class ContactPrivacyService {
             ObjectProvider<GraphMemoryService> graphMemory,
             ObjectProvider<SessionMemoryService> sessionMemory,
             ObjectProvider<SubjectDataEraser> otherStores) {
-        this.jdbc = jdbc;
+        this.repository = repository;
         this.audit = audit;
         this.ledger = ledger;
         this.agentMemory = agentMemory;
@@ -130,20 +129,10 @@ public class ContactPrivacyService {
         session.ifPresent(s -> data.put("session", s));
         data.put(
                 "messages",
-                jdbc.queryForList(
-                        "SELECT created_at, direction, author, body FROM channel_message_log"
-                                + " WHERE channel = ? AND external_id = ? ORDER BY created_at",
-                        channel,
-                        externalId));
+                repository.messages(channel, externalId));
         data.put(
                 "contactRecord",
-                jdbc.queryForList(
-                        "SELECT identifier, display_name, source, created_at, last_seen_at"
-                                + " FROM channel_contact WHERE channel = ? AND (identifier = ?"
-                                + " OR (identifier_digits IS NOT NULL AND identifier_digits = ?))",
-                        channel,
-                        externalId,
-                        phoneDigits(externalId)));
+                repository.contactRecord(channel, externalId, phoneDigits(externalId)));
         data.put("consentHistory", ledger.history(channel, externalId));
 
         AgentMemoryService agent = agentMemory.getIfAvailable();
@@ -191,9 +180,7 @@ public class ContactPrivacyService {
         if (session.isPresent()) {
             data.put(
                     "derivedKnowledgeChunks",
-                    jdbc.queryForList(
-                            "SELECT id, collection_id, source, content, trust FROM knowledge_chunks"
-                                    + " WHERE source LIKE ?",
+                    repository.derivedKnowledgeChunks(
                             derivedChunkPattern(String.valueOf(session.get().get("session_id")))));
         }
         if (includeLeads) {
@@ -227,12 +214,7 @@ public class ContactPrivacyService {
                 "messages",
                 erased,
                 failures,
-                () ->
-                        (long)
-                                jdbc.update(
-                                        "DELETE FROM channel_message_log WHERE channel = ? AND external_id = ?",
-                                        channel,
-                                        externalId));
+                () -> (long) repository.deleteMessages(channel, externalId));
         if (sessionKey != null) {
             step(
                     "derivedKnowledgeChunks",
@@ -240,8 +222,7 @@ public class ContactPrivacyService {
                     failures,
                     () ->
                             (long)
-                                    jdbc.update(
-                                            "DELETE FROM knowledge_chunks WHERE source LIKE ?",
+                                    repository.deleteDerivedKnowledgeChunks(
                                             derivedChunkPattern(sessionKey)));
             SessionMemoryService history = sessionMemory.getIfAvailable();
             if (history != null) {
@@ -288,22 +269,14 @@ public class ContactPrivacyService {
                 failures,
                 () ->
                         (long)
-                                jdbc.update(
-                                        "DELETE FROM channel_contact WHERE channel = ? AND (identifier = ?"
-                                                + " OR (identifier_digits IS NOT NULL AND identifier_digits = ?))",
-                                        channel,
-                                        externalId,
-                                        phoneDigits(externalId)));
+                                repository.deleteContactRecords(
+                                        channel, externalId, phoneDigits(externalId)));
         if (ChannelType.EMAIL.name().equals(channel)) {
             step(
                     "emailSendRecords",
                     erased,
                     failures,
-                    () ->
-                            (long)
-                                    jdbc.update(
-                                            "DELETE FROM email_message WHERE lower(recipient) = lower(?)",
-                                            externalId));
+                    () -> (long) repository.deleteEmailSendRecords(externalId));
         }
         if (options.includeLeads()) {
             step("crmLeads", erased, failures, () -> deleteLeads(channel, externalId));
@@ -322,12 +295,7 @@ public class ContactPrivacyService {
                     "sessions",
                     erased,
                     failures,
-                    () ->
-                            (long)
-                                    jdbc.update(
-                                            "DELETE FROM channel_session WHERE channel = ? AND external_id = ?",
-                                            channel,
-                                            externalId));
+                    () -> (long) repository.deleteSession(channel, externalId));
         }
 
         boolean complete = failures.isEmpty();
@@ -372,44 +340,29 @@ public class ContactPrivacyService {
     }
 
     private Optional<Map<String, Object>> session(String channel, String externalId) {
-        return jdbc
-                .queryForList(
-                        "SELECT id, session_id, agent_id, created_at, last_message_at, paired,"
-                                + " resolved_phone_number FROM channel_session"
-                                + " WHERE channel = ? AND external_id = ?",
-                        channel,
-                        externalId)
-                .stream()
-                .findFirst();
+        return repository.session(channel, externalId);
     }
 
     private List<Map<String, Object>> leadsFor(String channel, String externalId) {
         if (externalId.contains("@")) {
-            return jdbc.queryForList(
-                    "SELECT id, name, email, phone, company, notes, created_at FROM lead"
-                            + " WHERE lower(email) = lower(?)",
-                    externalId);
+            return repository.leadsByEmail(externalId);
         }
         String digits = phoneDigits(externalId);
         if (digits == null) {
             return List.of();
         }
-        return jdbc.queryForList(
-                "SELECT id, name, email, phone, company, notes, created_at FROM lead"
-                        + " WHERE regexp_replace(phone, '\\D', '', 'g') = ?",
-                digits);
+        return repository.leadsByPhoneDigits(digits);
     }
 
     private long deleteLeads(String channel, String externalId) {
         if (externalId.contains("@")) {
-            return jdbc.update("DELETE FROM lead WHERE lower(email) = lower(?)", externalId);
+            return repository.deleteLeadsByEmail(externalId);
         }
         String digits = phoneDigits(externalId);
         if (digits == null) {
             return 0;
         }
-        return jdbc.update(
-                "DELETE FROM lead WHERE regexp_replace(phone, '\\D', '', 'g') = ?", digits);
+        return repository.deleteLeadsByPhoneDigits(digits);
     }
 
     /**

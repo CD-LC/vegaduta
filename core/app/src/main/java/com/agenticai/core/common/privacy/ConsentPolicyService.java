@@ -1,10 +1,5 @@
 package com.agenticai.core.common.privacy;
 
-import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -13,7 +8,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -25,9 +19,6 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class ConsentPolicyService {
 
-    private static final ObjectMapper MAPPER = JsonMappers.plain();
-    private static final TypeReference<Map<String, String>> STRING_MAP = new TypeReference<>() {};
-    private static final TypeReference<Map<String, List<String>>> LIST_MAP = new TypeReference<>() {};
     static final Pattern LANGUAGE_TAG = Pattern.compile("[a-z]{2,3}(-[a-z0-9]{2,8})?");
     static final Pattern PURPOSE = Pattern.compile("[a-z0-9][a-z0-9_-]{0,63}");
     private static final int MAX_NOTICE_CHARS = 3000;
@@ -63,34 +54,14 @@ public class ConsentPolicyService {
         }
     }
 
-    private final JdbcTemplate jdbc;
+    private final ConsentPolicyJdbcRepository repository;
 
-    public ConsentPolicyService(JdbcTemplate jdbc) {
-        this.jdbc = jdbc;
+    public ConsentPolicyService(ConsentPolicyJdbcRepository repository) {
+        this.repository = repository;
     }
 
     public Optional<Policy> find(UUID agentId) {
-        List<Policy> rows =
-                jdbc.query(
-                        "SELECT agent_id, enabled, purpose, notice_version, default_language,"
-                                + " notices::text, instructions::text, keywords::text,"
-                                + " erase_on_withdrawal, updated_by, updated_at"
-                                + " FROM privacy_consent_policy WHERE agent_id = ?",
-                        (rs, n) ->
-                                new Policy(
-                                        rs.getObject(1, UUID.class),
-                                        rs.getBoolean(2),
-                                        rs.getString(3),
-                                        rs.getInt(4),
-                                        rs.getString(5),
-                                        readStrings(rs.getString(6)),
-                                        readStrings(rs.getString(7)),
-                                        readLists(rs.getString(8)),
-                                        rs.getBoolean(9),
-                                        rs.getString(10),
-                                        rs.getTimestamp(11).toInstant()),
-                        agentId);
-        return rows.stream().findFirst();
+        return repository.find(agentId);
     }
 
     /**
@@ -98,9 +69,7 @@ public class ConsentPolicyService {
      * text differs from what was stored, so contacts who agreed to the old words are asked again.
      */
     public Policy put(UUID agentId, Request req, String actor) {
-        Integer agentExists =
-                jdbc.queryForObject("SELECT count(*) FROM agent WHERE id = ?", Integer.class, agentId);
-        if (agentExists == null || agentExists == 0) {
+        if (!repository.agentExists(agentId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such agent");
         }
         String purpose = req.purpose() == null ? "support" : req.purpose().trim().toLowerCase();
@@ -117,29 +86,9 @@ public class ConsentPolicyService {
                 existing.map(p -> p.notices().equals(notices) ? p.noticeVersion() : p.noticeVersion() + 1)
                         .orElse(1);
         boolean erase = req.eraseOnWithdrawal() == null || req.eraseOnWithdrawal();
-        jdbc.update(
-                "INSERT INTO privacy_consent_policy (agent_id, enabled, purpose, notice_version,"
-                        + " default_language, notices, instructions, keywords, erase_on_withdrawal,"
-                        + " updated_by, updated_at)"
-                        + " VALUES (?, ?, ?, ?, ?, ?::jsonb, ?::jsonb, ?::jsonb, ?, ?, ?)"
-                        + " ON CONFLICT (agent_id) DO UPDATE SET enabled = EXCLUDED.enabled,"
-                        + " purpose = EXCLUDED.purpose, notice_version = EXCLUDED.notice_version,"
-                        + " default_language = EXCLUDED.default_language,"
-                        + " notices = EXCLUDED.notices, instructions = EXCLUDED.instructions,"
-                        + " keywords = EXCLUDED.keywords,"
-                        + " erase_on_withdrawal = EXCLUDED.erase_on_withdrawal,"
-                        + " updated_by = EXCLUDED.updated_by, updated_at = EXCLUDED.updated_at",
-                agentId,
-                req.enabled(),
-                purpose,
-                version,
-                defaultLanguage,
-                json(notices),
-                json(instructions),
-                json(keywords),
-                erase,
-                actor,
-                Timestamp.from(Instant.now()));
+        repository.upsert(
+                agentId, req.enabled(), purpose, version, defaultLanguage, notices, instructions,
+                keywords, erase, actor);
         return find(agentId).orElseThrow();
     }
 
@@ -190,29 +139,5 @@ public class ConsentPolicyService {
 
     private static ResponseStatusException bad(String message) {
         return new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
-    }
-
-    private static String json(Object o) {
-        try {
-            return MAPPER.writeValueAsString(o);
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    private static Map<String, String> readStrings(String json) {
-        try {
-            return MAPPER.readValue(json, STRING_MAP);
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Unreadable consent policy JSON", e);
-        }
-    }
-
-    private static Map<String, List<String>> readLists(String json) {
-        try {
-            return MAPPER.readValue(json, LIST_MAP);
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Unreadable consent policy JSON", e);
-        }
     }
 }

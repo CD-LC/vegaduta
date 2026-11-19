@@ -15,7 +15,6 @@ import com.agenticai.core.common.systemstatus.SystemStatusResponse.McpServerSumm
 import com.agenticai.core.common.systemstatus.SystemStatusResponse.McpStatus;
 import com.agenticai.core.eventbus.WorkflowEventLogger;
 import com.agenticai.core.eventbus.WorkflowEventOutboxRelay;
-import com.agenticai.core.eventbus.WorkflowEventOutboxRepository;
 import com.agenticai.core.eventbus.WorkflowKafkaConfig;
 import com.agenticai.core.mcp.McpRegistryService;
 import com.agenticai.core.mcp.dto.McpServerRegistrationResponse;
@@ -24,20 +23,15 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantScope;
 import com.agenticai.core.security.TtlCache;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
-import com.zaxxer.hikari.HikariDataSource;
-import com.zaxxer.hikari.HikariPoolMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.lang.management.RuntimeMXBean;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import javax.sql.DataSource;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.OffsetSpec;
 import org.apache.kafka.clients.admin.TopicDescription;
@@ -85,7 +79,7 @@ public class SystemStatusController {
 
     private static final Logger log = LoggerFactory.getLogger(SystemStatusController.class);
 
-    private final DataSource dataSource;
+    private final SystemStatusDataService systemStatusDataService;
     private final HealthContributorRegistry healthContributorRegistry;
     private final McpRegistryService mcpRegistryService;
     private final LlmCallLogService llmCallLogService;
@@ -101,7 +95,6 @@ public class SystemStatusController {
     // unconditionally, independent of whether the "workflow" Spring profile
     // or app.workflow-events.enabled happen to be on - queries against it
     // just return zero rows when the feature is unused.
-    private final WorkflowEventOutboxRepository outboxRepository;
     /**
      * Whole-response cache for {@link #get()} (2026-09-24 scale work): the
      * admin console hits this endpoint from three components on mount and
@@ -130,7 +123,7 @@ public class SystemStatusController {
     private final RestClient healthProbeClient;
 
     public SystemStatusController(
-        DataSource dataSource,
+        SystemStatusDataService systemStatusDataService,
         HealthContributorRegistry healthContributorRegistry,
         McpRegistryService mcpRegistryService,
         LlmCallLogService llmCallLogService,
@@ -138,17 +131,15 @@ public class SystemStatusController {
         @Value("#{'${app.sidecar.enabled:true}'.equalsIgnoreCase('false') ? '' : '${app.sidecar.base-url:}'}") String sidecarBaseUrl,
         @Value("${app.workflow-events.enabled:false}") boolean workflowEventsEnabled,
         @Value("${app.system.status-cache-ttl:10s}") Duration statusCacheTtl,
-        ObjectProvider<KafkaAdmin> kafkaAdmin,
-        WorkflowEventOutboxRepository outboxRepository
+        ObjectProvider<KafkaAdmin> kafkaAdmin
     ) {
-        this.dataSource = dataSource;
+        this.systemStatusDataService = systemStatusDataService;
         this.healthContributorRegistry = healthContributorRegistry;
         this.mcpRegistryService = mcpRegistryService;
         this.llmCallLogService = llmCallLogService;
         this.sidecarBaseUrl = sidecarBaseUrl;
         this.workflowEventsEnabled = workflowEventsEnabled;
         this.kafkaAdmin = kafkaAdmin;
-        this.outboxRepository = outboxRepository;
         this.statusCache = new TtlCache<>(HotpathCaches.SYSTEM_STATUS, statusCacheTtl, 4);
 
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
@@ -285,47 +276,11 @@ public class SystemStatusController {
     }
 
     /**
-     * "UP" from the actuator health contributor, enriched with Hikari's own
-     * live pool counters when the pool is a {@link HikariDataSource} (it
-     * always is here - Spring Boot's default, and nothing in this project's
-     * pom overrides it - but this stays defensive rather than assuming a
-     * concrete class unconditionally). The product/version string comes
-     * from a real JDBC {@code DatabaseMetaData} call on a connection Hikari
-     * hands back from its existing pool (not a new physical connection),
-     * released immediately in the try-with-resources below.
+     * "UP" from the actuator health contributor, enriched with the pool counters and product
+     * string that {@link SystemStatusDataService} reads (JDBC handling lives there).
      */
     private DatabaseStatus databaseStatus() {
-        String status = contributorStatusCode("db");
-        String product = null;
-        try (Connection connection = dataSource.getConnection()) {
-            var meta = connection.getMetaData();
-            product = meta.getDatabaseProductName() + " " + meta.getDatabaseProductVersion();
-        } catch (SQLException e) {
-            // Leave product null - the status code above already reflects
-            // a DB problem in this case; no need to fabricate a name.
-        }
-
-        Integer active = null;
-        Integer idle = null;
-        Integer total = null;
-        Integer maxPool = null;
-        Integer awaiting = null;
-        if (dataSource instanceof HikariDataSource hikari) {
-            maxPool = hikari.getMaximumPoolSize();
-            HikariPoolMXBean pool = hikari.getHikariPoolMXBean();
-            // Null until the pool has lazily initialized (e.g. immediately
-            // after startup, before the first real query) - left null
-            // rather than reported as zero, which would misleadingly read
-            // as "confirmed empty" instead of "not yet known".
-            if (pool != null) {
-                active = pool.getActiveConnections();
-                idle = pool.getIdleConnections();
-                total = pool.getTotalConnections();
-                awaiting = pool.getThreadsAwaitingConnection();
-            }
-        }
-
-        return new DatabaseStatus(status, product, active, idle, total, maxPool, awaiting);
+        return systemStatusDataService.databaseStatus(contributorStatusCode("db"));
     }
 
     private ComponentStatus componentStatus(String contributorName) {
@@ -487,8 +442,8 @@ public class SystemStatusController {
      * section.
      */
     private KafkaQueue kafkaQueue() {
-        long pending = safe(() -> outboxRepository.countByPublishedAtIsNullAndRetryCountLessThan(WorkflowEventOutboxRelay.MAX_RETRIES), 0L);
-        long deadLettered = safe(() -> outboxRepository.countByPublishedAtIsNullAndRetryCountGreaterThanEqual(WorkflowEventOutboxRelay.MAX_RETRIES), 0L);
+        long pending = safe(() -> systemStatusDataService.outboxPendingCount(), 0L);
+        long deadLettered = safe(() -> systemStatusDataService.outboxDeadLetteredCount(), 0L);
         return new KafkaQueue(pending, deadLettered);
     }
 

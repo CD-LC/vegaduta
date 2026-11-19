@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -30,30 +29,14 @@ public class RoiPriceService {
     private static final BigDecimal MAX_RATE =
             new BigDecimal("100000"); // USD per million tokens, sanity bound
 
-    private final JdbcTemplate jdbc;
+    private final RoiJdbcRepository repository;
 
-    public RoiPriceService(JdbcTemplate jdbc) {
-        this.jdbc = jdbc;
+    public RoiPriceService(RoiJdbcRepository repository) {
+        this.repository = repository;
     }
 
     public List<PriceResponse> list() {
-        return jdbc.query(
-                "SELECT id, provider_name, model_prefix, input_per_million, output_per_million,"
-                        + " cache_write_per_million, cache_read_per_million, effective_from, set_at, set_by, note"
-                        + " FROM llm_price ORDER BY provider_name, model_prefix, effective_from DESC",
-                (rs, n) ->
-                        new PriceResponse(
-                                rs.getObject("id", UUID.class),
-                                rs.getString("provider_name"),
-                                rs.getString("model_prefix"),
-                                rs.getBigDecimal("input_per_million"),
-                                rs.getBigDecimal("output_per_million"),
-                                rs.getBigDecimal("cache_write_per_million"),
-                                rs.getBigDecimal("cache_read_per_million"),
-                                rs.getObject("effective_from", LocalDate.class),
-                                rs.getTimestamp("set_at").toInstant(),
-                                rs.getString("set_by"),
-                                rs.getString("note")));
+        return repository.listPrices();
     }
 
     List<RoiCostModel.Rate> rates() {
@@ -101,16 +84,7 @@ public class RoiPriceService {
                 req.effectiveFrom() != null ? req.effectiveFrom() : LocalDate.now(ZoneOffset.UTC);
         String provider = req.providerName().trim().toUpperCase(Locale.ROOT);
         String prefix = req.modelPrefix().trim();
-        jdbc.update(
-                "INSERT INTO llm_price (id, provider_name, model_prefix, input_per_million, output_per_million,"
-                        + " cache_write_per_million, cache_read_per_million, effective_from, set_by, note)"
-                        + " VALUES (?,?,?,?,?,?,?,?,?,?)"
-                        + " ON CONFLICT (provider_name, model_prefix, effective_from) DO UPDATE SET"
-                        + " input_per_million = EXCLUDED.input_per_million,"
-                        + " output_per_million = EXCLUDED.output_per_million,"
-                        + " cache_write_per_million = EXCLUDED.cache_write_per_million,"
-                        + " cache_read_per_million = EXCLUDED.cache_read_per_million,"
-                        + " set_by = EXCLUDED.set_by, set_at = now(), note = EXCLUDED.note",
+        repository.upsertPrice(
                 UUID.randomUUID(),
                 provider,
                 prefix,
@@ -133,7 +107,7 @@ public class RoiPriceService {
 
     @Transactional
     public boolean delete(UUID id) {
-        return jdbc.update("DELETE FROM llm_price WHERE id = ?", id) > 0;
+        return repository.deletePrice(id);
     }
 
     private static boolean blank(String s) {

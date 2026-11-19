@@ -139,6 +139,36 @@ public class AgentImprovementService {
         return suggestionRepository.findTop100ByAgentIdOrderByCreatedAtDesc(agentId);
     }
 
+    /** DTO view of {@link #listForAgent} for the controller layer. */
+    public List<ImprovementDtos.SuggestionResponse> listSuggestionsForAgent(UUID agentId) {
+        return listForAgent(agentId).stream().map(ImprovementDtos.SuggestionResponse::from).toList();
+    }
+
+    /** DTO view of {@link #generateForAgent(UUID)} for the controller layer. */
+    public List<ImprovementDtos.SuggestionResponse> generateSuggestionsForAgent(UUID agentId) {
+        return generateForAgent(agentId).stream().map(ImprovementDtos.SuggestionResponse::from).toList();
+    }
+
+    /** Accepts a suggestion that belongs to {@code agentId}; unknown for that agent is not found. */
+    public ImprovementDtos.SuggestionResponse acceptForAgent(UUID agentId, UUID suggestionId, String actorId) {
+        AgentImprovementSuggestion suggestion = requireForAgent(agentId, suggestionId);
+        return ImprovementDtos.SuggestionResponse.from(accept(suggestion.getId(), actorId));
+    }
+
+    /** Dismisses a suggestion that belongs to {@code agentId}; unknown for that agent is not found. */
+    public ImprovementDtos.SuggestionResponse dismissForAgent(UUID agentId, UUID suggestionId, String actorId) {
+        AgentImprovementSuggestion suggestion = requireForAgent(agentId, suggestionId);
+        return ImprovementDtos.SuggestionResponse.from(dismiss(suggestion.getId(), actorId));
+    }
+
+    private AgentImprovementSuggestion requireForAgent(UUID agentId, UUID suggestionId) {
+        return listForAgent(agentId).stream()
+            .filter(s -> s.getId().equals(suggestionId))
+            .findFirst()
+            .orElseThrow(() -> new ImprovementNotFoundException(
+                "No suggestion " + suggestionId + " for agent " + agentId));
+    }
+
     /**
      * Scan this agent's OPEN recurring issue clusters and distil each new
      * one into a PENDING suggestion. Returns the suggestions created this

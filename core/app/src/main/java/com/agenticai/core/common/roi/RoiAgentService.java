@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -42,53 +41,11 @@ public class RoiAgentService {
     private static final Pattern CURRENCY = Pattern.compile("^[A-Za-z]{3}$");
     private static final BigDecimal MAX_VALUE = new BigDecimal("1000000000");
 
-    private static final String OUTCOMES_SQL =
-            """
-        WITH latest AS (
-          SELECT DISTINCT ON (conversation_key) conversation_key, agent_id, outcome, evidence
-          FROM resolution_event WHERE resolved_at >= ? AND resolved_at < ?
-          ORDER BY conversation_key, resolved_at DESC, created_at DESC
-        ), conv AS (
-          SELECT l.*, cs.session_id AS cs_session
-          FROM latest l LEFT JOIN channel_session cs ON l.conversation_key = 'cs:' || cs.id::text
-        )
-        SELECT agent_id,
-          count(*) AS conversations,
-          count(*) FILTER (WHERE outcome = 'RESOLVED_AI' AND evidence <> 'NO_ESCALATION_IDLE') AS confirmed,
-          count(*) FILTER (WHERE outcome = 'RESOLVED_AI' AND evidence = 'NO_ESCALATION_IDLE') AS assumed,
-          count(*) FILTER (WHERE outcome = 'RESOLVED_HUMAN') AS by_human,
-          count(*) FILTER (WHERE outcome = 'ESCALATED') AS handed,
-          count(*) FILTER (WHERE outcome = 'ABANDONED') AS abandoned,
-          count(*) FILTER (WHERE outcome = 'UNRESOLVED') AS unresolved,
-          count(*) FILTER (WHERE EXISTS (SELECT 1 FROM conversation_correction cc WHERE cc.conversation_key = conv.conversation_key)
-                              OR EXISTS (SELECT 1 FROM turn_feedback tf WHERE tf.signal = 'EDIT'
-                                         AND tf.session_id IN (conv.conversation_key, COALESCE(conv.cs_session, conv.conversation_key)))) AS corrected
-        FROM conv GROUP BY agent_id
-        """;
-
-    private static final String APPROVALS_SQL =
-            """
-        SELECT substring(requested_by FROM '^agent:([0-9a-fA-F-]{36}):')::uuid AS agent_id,
-               count(*) FILTER (WHERE status <> 'PENDING') AS decided,
-               count(*) FILTER (WHERE status = 'REJECTED') AS denied
-        FROM approval_request
-        WHERE requested_by ~ '^agent:[0-9a-fA-F-]{36}:' AND created_at >= ? AND created_at < ?
-        GROUP BY 1
-        """;
-
-    private static final String CHARGES_SQL =
-            """
-        SELECT agent_id, COALESCE(SUM(unit_price_minor),0) AS minor, MAX(currency) AS currency, count(DISTINCT currency) AS n
-        FROM resolution_event
-        WHERE billable AND disputed_at IS NULL AND resolved_at >= ? AND resolved_at < ?
-        GROUP BY agent_id
-        """;
-
-    private final JdbcTemplate jdbc;
+    private final RoiJdbcRepository repository;
     private final RoiCostService costs;
 
-    public RoiAgentService(JdbcTemplate jdbc, RoiCostService costs) {
-        this.jdbc = jdbc;
+    public RoiAgentService(RoiJdbcRepository repository, RoiCostService costs) {
+        this.repository = repository;
         this.costs = costs;
     }
 
@@ -111,8 +68,9 @@ public class RoiAgentService {
         Timestamp end = Timestamp.from(to.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant());
 
         Map<UUID, Outcomes> outcomes = new HashMap<>();
-        jdbc.query(
-                OUTCOMES_SQL,
+        repository.queryOutcomes(
+                start,
+                end,
                 rs -> {
                     outcomes.put(
                             rs.getObject("agent_id", UUID.class),
@@ -125,24 +83,22 @@ public class RoiAgentService {
                                     rs.getLong("abandoned"),
                                     rs.getLong("unresolved"),
                                     rs.getLong("corrected")));
-                },
-                start,
-                end);
+                });
 
         Map<UUID, Approvals> approvals = new HashMap<>();
-        jdbc.query(
-                APPROVALS_SQL,
+        repository.queryApprovals(
+                start,
+                end,
                 rs -> {
                     approvals.put(
                             rs.getObject("agent_id", UUID.class),
                             new Approvals(rs.getLong("decided"), rs.getLong("denied")));
-                },
-                start,
-                end);
+                });
 
         Map<UUID, Charge> charges = new HashMap<>();
-        jdbc.query(
-                CHARGES_SQL,
+        repository.queryCharges(
+                start,
+                end,
                 rs -> {
                     // Mixed currencies for one agent cannot be summed honestly: report none rather
                     // than a wrong total.
@@ -151,9 +107,7 @@ public class RoiAgentService {
                             rs.getInt("n") > 1
                                     ? new Charge(0, null)
                                     : new Charge(rs.getLong("minor"), rs.getString("currency")));
-                },
-                start,
-                end);
+                });
 
         Map<UUID, List<RoiCostService.Grain>> grainsByAgent = new HashMap<>();
         for (RoiCostService.Grain g : costs.grains(from, to)) {
@@ -167,8 +121,7 @@ public class RoiAgentService {
         }
 
         List<AgentRoiRow> rows = new ArrayList<>();
-        jdbc.query(
-                "SELECT id, name FROM agent ORDER BY name",
+        repository.queryAgentIdsAndNames(
                 rs -> {
                     UUID id = rs.getObject("id", UUID.class);
                     rows.add(
@@ -252,16 +205,7 @@ public class RoiAgentService {
     // ---- assumptions ------------------------------------------------------------------------
 
     public List<AssumptionResponse> assumptions() {
-        return jdbc.query(
-                "SELECT agent_id, value_per_resolution, value_currency, minutes_saved_per_resolution, updated_at"
-                        + " FROM agent_value_assumption",
-                (rs, n) ->
-                        new AssumptionResponse(
-                                rs.getObject("agent_id", UUID.class),
-                                        rs.getBigDecimal("value_per_resolution"),
-                                rs.getString("value_currency"),
-                                        rs.getBigDecimal("minutes_saved_per_resolution"),
-                                rs.getTimestamp("updated_at").toInstant(), RoiMetrics.ROI_BASIS));
+        return repository.assumptions();
     }
 
     public AssumptionResponse assumption(UUID agentId) {
@@ -288,7 +232,7 @@ public class RoiAgentService {
                         ? null
                         : req.valueCurrency().trim().toUpperCase();
         if (value == null && minutes == null) {
-            jdbc.update("DELETE FROM agent_value_assumption WHERE agent_id = ?", agentId);
+            repository.deleteAssumption(agentId);
             return assumption(agentId);
         }
         if ((value != null && value.signum() < 0)
@@ -304,26 +248,12 @@ public class RoiAgentService {
                     HttpStatus.BAD_REQUEST,
                     "valueCurrency (ISO 4217, e.g. USD) is required with valuePerResolution");
         }
-        jdbc.update(
-                "INSERT INTO agent_value_assumption (agent_id, value_per_resolution, value_currency,"
-                        + " minutes_saved_per_resolution, updated_by) VALUES (?,?,?,?,?)"
-                        + " ON CONFLICT (agent_id) DO UPDATE SET value_per_resolution = EXCLUDED.value_per_resolution,"
-                        + " value_currency = EXCLUDED.value_currency,"
-                        + " minutes_saved_per_resolution = EXCLUDED.minutes_saved_per_resolution,"
-                        + " updated_by = EXCLUDED.updated_by, updated_at = now()",
-                agentId,
-                value,
-                value == null ? null : currency,
-                minutes,
-                subject);
+        repository.upsertAssumption(agentId, value, value == null ? null : currency, minutes, subject);
         return assumption(agentId);
     }
 
     private void requireAgent(UUID agentId) {
-        Integer n =
-                jdbc.queryForObject(
-                        "SELECT count(*) FROM agent WHERE id = ?", Integer.class, agentId);
-        if (n == null || n == 0) {
+        if (!repository.agentExists(agentId)) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "No such agent for this tenant");
         }
