@@ -5,11 +5,6 @@ com.agenticai.core.agents.skills.SkillDistillationService (area agents) depends 
 com.agenticai.core.agents.tools.AgentToolCallApprovalExecutor (area agents) depends on repository com.agenticai.core.approval.ApprovalRequestRepository
 com.agenticai.core.brief.ServiceProofData (area brief) depends on repository com.agenticai.core.rl.repo.TurnFeedbackRepository
 com.agenticai.core.codeintel.RunCodeWorkspaceApprovalExecutor (area codeintel) depends on repository com.agenticai.core.approval.ApprovalRequestRepository
-com.agenticai.core.common.ambient.AmbientDigestController (area common) depends on repository com.agenticai.core.agents.core.AgentRepository
-com.agenticai.core.common.ambient.AmbientDigestController (area common) depends on repository com.agenticai.core.agents.job.AgentJobRepository
-com.agenticai.core.common.ambient.AmbientDigestController (area common) depends on repository com.agenticai.core.agents.job.schedule.AgentScheduleRepository
-com.agenticai.core.common.ambient.AmbientDigestController (area common) depends on repository com.agenticai.core.agents.job.schedule.AgentScheduleRunRepository
-com.agenticai.core.common.ambient.AmbientDigestController (area common) depends on repository com.agenticai.core.approval.ApprovalRequestRepository
 com.agenticai.core.common.datausage.TenantDataUsageService (area common) depends on repository com.agenticai.core.eventbus.WorkflowEventOutboxRepository
 com.agenticai.core.common.datausage.TenantDataUsageService (area common) depends on repository com.agenticai.core.tenancy.TenantRepository
 com.agenticai.core.common.improve.AgentHealthScoreService (area common) depends on repository com.agenticai.core.audit.PlatformIssueRepository
@@ -17,7 +12,6 @@ com.agenticai.core.common.improve.AgentImprovementService (area common) depends 
 com.agenticai.core.common.improve.AgentImprovementService (area common) depends on repository com.agenticai.core.audit.PlatformIssueRepository
 com.agenticai.core.common.improve.AgentSupervisorSweep (area common) depends on repository com.agenticai.core.agents.core.AgentRepository
 com.agenticai.core.common.quicktask.QuickTaskService (area common) depends on repository com.agenticai.core.tenancy.AppUserRepository
-com.agenticai.core.common.systemstatus.SystemStatusController (area common) depends on repository com.agenticai.core.eventbus.WorkflowEventOutboxRepository
 com.agenticai.core.imagegen.ImageGenerationOrchestratorService (area imagegen) depends on repository com.agenticai.core.providers.LlmProviderCredentialRepository
 com.agenticai.core.imagegen.agenttools.VideoGenerationToolSource (area imagegen) depends on repository com.agenticai.core.providers.LlmProviderCredentialRepository
 com.agenticai.core.mcpserver.expose.McpExposedToolInvoker (area mcpserver) depends on repository com.agenticai.core.approval.ApprovalRequestRepository

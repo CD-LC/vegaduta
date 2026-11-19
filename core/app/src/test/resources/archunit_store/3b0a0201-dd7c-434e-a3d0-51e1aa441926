@@ -2,11 +2,6 @@ com.agenticai.core.admin.sso.ScimProvisioningController depends on JPA entity co
 com.agenticai.core.admin.sso.ScimProvisioningController depends on repository com.agenticai.core.admin.sso.TenantScimTokenRepository
 com.agenticai.core.admin.sso.TenantSsoController depends on JPA entity com.agenticai.core.admin.sso.TenantScimToken
 com.agenticai.core.admin.sso.TenantSsoController depends on repository com.agenticai.core.admin.sso.TenantScimTokenRepository
-com.agenticai.core.agents.guardrail.AgentGuardrailController depends on JPA entity com.agenticai.core.agents.core.Agent
-com.agenticai.core.agents.edge.EdgeToolExecutionController depends on JPA entity com.agenticai.core.agents.core.Agent
-com.agenticai.core.agents.edge.EdgeToolExecutionController depends on JPA entity com.agenticai.core.devices.MobileDevice
-com.agenticai.core.agents.edge.EdgeTurnTelemetryController depends on JPA entity com.agenticai.core.agents.edge.EdgeTurn
-com.agenticai.core.agents.edge.EdgeTurnTelemetryController depends on repository com.agenticai.core.agents.edge.EdgeTurnRepository
 com.agenticai.core.agents.crew.AgentSpecialtyController depends on JPA entity com.agenticai.core.agents.crew.AgentSpecialization
 com.agenticai.core.agents.decision.JevController depends on JPA entity com.agenticai.core.providers.capability.CapabilityPolicy
 com.agenticai.core.agents.demo.DemoChatController depends on JPA entity com.agenticai.core.tenancy.demo.DemoSession
@@ -24,6 +19,11 @@ com.agenticai.core.agents.demo.studio.DemoStudioController depends on JPA entity
 com.agenticai.core.agents.demo.studio.DemoStudioController depends on repository com.agenticai.core.agents.demo.studio.DemoStudioRunRepository
 com.agenticai.core.agents.demo.studio.DemoStudioController depends on repository com.agenticai.core.agents.demo.studio.DemoStudioWorkflowRepository
 com.agenticai.core.agents.directory.AgentDirectoryController depends on JPA entity com.agenticai.core.agents.directory.AgentDirectoryEntry
+com.agenticai.core.agents.edge.EdgeToolExecutionController depends on JPA entity com.agenticai.core.agents.core.Agent
+com.agenticai.core.agents.edge.EdgeToolExecutionController depends on JPA entity com.agenticai.core.devices.MobileDevice
+com.agenticai.core.agents.edge.EdgeTurnTelemetryController depends on JPA entity com.agenticai.core.agents.edge.EdgeTurn
+com.agenticai.core.agents.edge.EdgeTurnTelemetryController depends on repository com.agenticai.core.agents.edge.EdgeTurnRepository
+com.agenticai.core.agents.guardrail.AgentGuardrailController depends on JPA entity com.agenticai.core.agents.core.Agent
 com.agenticai.core.agents.job.AgentJobObservabilityController depends on JPA entity com.agenticai.core.agents.core.Agent
 com.agenticai.core.agents.job.AgentJobObservabilityController depends on JPA entity com.agenticai.core.agents.job.AgentJob
 com.agenticai.core.agents.job.AgentJobObservabilityController depends on repository com.agenticai.core.agents.core.AgentRepository
@@ -43,22 +43,8 @@ com.agenticai.core.agents.trust.DelegationController depends on JPA entity com.a
 com.agenticai.core.approval.ApprovalController depends on JPA entity com.agenticai.core.approval.ApprovalRequest
 com.agenticai.core.approval.ApprovalController depends on repository com.agenticai.core.approval.ApprovalRequestRepository
 com.agenticai.core.chat.AgentSessionLlmUsageController depends on JPA entity com.agenticai.core.chat.LlmCallLog
-com.agenticai.core.common.ambient.AmbientDigestController depends on JPA entity com.agenticai.core.agents.core.Agent
-com.agenticai.core.common.ambient.AmbientDigestController depends on JPA entity com.agenticai.core.agents.job.AgentJob
-com.agenticai.core.common.ambient.AmbientDigestController depends on JPA entity com.agenticai.core.agents.job.schedule.AgentSchedule
-com.agenticai.core.common.ambient.AmbientDigestController depends on JPA entity com.agenticai.core.agents.job.schedule.AgentScheduleRun
 com.agenticai.core.common.ambient.AmbientDigestController depends on JPA entity com.agenticai.core.audit.Notification
-com.agenticai.core.common.ambient.AmbientDigestController depends on repository com.agenticai.core.agents.core.AgentRepository
-com.agenticai.core.common.ambient.AmbientDigestController depends on repository com.agenticai.core.agents.job.AgentJobRepository
-com.agenticai.core.common.ambient.AmbientDigestController depends on repository com.agenticai.core.agents.job.schedule.AgentScheduleRepository
-com.agenticai.core.common.ambient.AmbientDigestController depends on repository com.agenticai.core.agents.job.schedule.AgentScheduleRunRepository
-com.agenticai.core.common.ambient.AmbientDigestController depends on repository com.agenticai.core.approval.ApprovalRequestRepository
-com.agenticai.core.common.improve.AgentImprovementController depends on JPA entity com.agenticai.core.common.improve.AgentImprovementSuggestion
 com.agenticai.core.common.quicktask.QuickTaskController depends on JPA entity com.agenticai.core.common.quicktask.QuickTaskRun
-com.agenticai.core.common.security.FraudAnalysisController depends on JPA entity com.agenticai.core.common.security.ChallengeNonce
-com.agenticai.core.common.security.FraudAnalysisController depends on repository com.agenticai.core.common.security.ChallengeNonceRepository
-com.agenticai.core.common.security.FraudAnalysisController depends on repository com.agenticai.core.common.security.IpBlacklistRepository
-com.agenticai.core.common.security.FraudAnalysisController depends on repository com.agenticai.core.common.security.UserBlacklistRepository
 com.agenticai.core.common.studioapp.StudioAppDomainController depends on JPA entity com.agenticai.core.common.studioapp.StudioAppDomain
 com.agenticai.core.common.studioapp.StudioAppOwnerController depends on JPA entity com.agenticai.core.common.studioapp.StudioApp
 com.agenticai.core.common.studioapp.StudioAppPublicController depends on JPA entity com.agenticai.core.common.studioapp.StudioApp
@@ -67,7 +53,6 @@ com.agenticai.core.common.studioapp.StudioCollabController depends on JPA entity
 com.agenticai.core.common.studioapp.StudioCollabController depends on JPA entity com.agenticai.core.common.studioapp.StudioProjectMember
 com.agenticai.core.common.studioapp.StudioProjectController depends on JPA entity com.agenticai.core.common.studioapp.StudioProject
 com.agenticai.core.common.studioapp.StudioProjectController depends on JPA entity com.agenticai.core.common.studioapp.StudioProjectVersion
-com.agenticai.core.common.systemstatus.SystemStatusController depends on repository com.agenticai.core.eventbus.WorkflowEventOutboxRepository
 com.agenticai.core.devices.DeviceController depends on JPA entity com.agenticai.core.devices.MobileDevice
 com.agenticai.core.devices.DeviceController depends on repository com.agenticai.core.devices.MobileDeviceRepository
 com.agenticai.core.documentgen.web.DocumentGenerationController depends on JPA entity com.agenticai.core.documentgen.entity.DocumentGenerationJob
