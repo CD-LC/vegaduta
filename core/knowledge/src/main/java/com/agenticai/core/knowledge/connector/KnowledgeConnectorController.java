@@ -56,9 +56,7 @@ public class KnowledgeConnectorController {
     @GetMapping
     public ResponseEntity<List<ConnectorResponse>> list(@RequestParam UUID collectionId, @RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
         return ListPaging.window(
-            service.list(collectionId).stream()
-            .map(c -> ConnectorResponse.from(c, service.redactedConfig(c)))
-            .toList(),
+            service.listResponses(collectionId),
             limit, offset, 50, 500);
     }
 
@@ -70,15 +68,13 @@ public class KnowledgeConnectorController {
                 "Unknown connector type '" + request.type()
                     + "' - expected notion, google_drive, confluence, sharepoint, or web_crawl");
         }
-        KnowledgeConnector c = service.create(
+        return service.createResponse(
             request.collectionId(), type, request.name(), request.config(), subject());
-        return ConnectorResponse.from(c, service.redactedConfig(c));
     }
 
     @PutMapping("/{id}")
     public ConnectorResponse update(@PathVariable UUID id, @Valid @RequestBody ConnectorUpdateRequest request) {
-        KnowledgeConnector c = service.update(id, request.name(), request.enabled(), request.config());
-        return ConnectorResponse.from(c, service.redactedConfig(c));
+        return service.updateResponse(id, request.name(), request.enabled(), request.config());
     }
 
     @DeleteMapping("/{id}")

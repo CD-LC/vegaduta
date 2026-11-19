@@ -48,23 +48,11 @@ public class LlmGatewayContentPolicyController {
         boolean piiRedactCreditCard,
         boolean injectionScreeningEnabled,
         String injectionScreeningAction
-    ) {
-        static ContentPolicyResponse from(LlmGatewayContentPolicy policy) {
-            return new ContentPolicyResponse(
-                policy.isPiiRedactionEnabled(),
-                policy.isPiiRedactEmail(),
-                policy.isPiiRedactPhone(),
-                policy.isPiiRedactGovernmentId(),
-                policy.isPiiRedactCreditCard(),
-                policy.isInjectionScreeningEnabled(),
-                policy.getInjectionScreeningAction().name()
-            );
-        }
-    }
+    ) {}
 
     @GetMapping
     public ContentPolicyResponse get() {
-        return ContentPolicyResponse.from(service.resolve(tenantId()));
+        return LlmGatewayContentPolicyMapper.toResponse(service.resolve(tenantId()));
     }
 
     @PutMapping
@@ -72,7 +60,7 @@ public class LlmGatewayContentPolicyController {
         String tenantId = tenantId();
         LlmGatewayContentPolicyService.PolicyUpdate update = toUpdate(request);
         String actor = TenantContext.current().map(TenantContext::getSubject).orElse(null);
-        return ContentPolicyResponse.from(service.upsert(tenantId, update, actor));
+        return LlmGatewayContentPolicyMapper.toResponse(service.upsert(tenantId, update, actor));
     }
 
     static LlmGatewayContentPolicyService.PolicyUpdate toUpdate(ContentPolicyRequest request) {

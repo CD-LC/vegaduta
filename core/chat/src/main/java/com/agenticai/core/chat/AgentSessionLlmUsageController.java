@@ -72,9 +72,8 @@ public class AgentSessionLlmUsageController {
     @GetMapping
     public List<SessionLlmCallEntry> calls(@PathVariable UUID agentId, @PathVariable String sessionId) {
         assertPremiumPlan();
-        return llmCallLogService.forTask(sessionId).stream()
-            .filter(log -> agentId.equals(log.getAgentId()))
-            .map(SessionLlmCallEntry::from)
+        return llmCallLogService.forTaskAndAgent(sessionId, agentId).stream()
+            .map(LlmCallLogViewMapper::toSessionEntry)
             .toList();
     }
 
@@ -87,10 +86,7 @@ public class AgentSessionLlmUsageController {
     @GetMapping("/summary")
     public RunCostTimeline.Summary summary(@PathVariable UUID agentId, @PathVariable String sessionId) {
         assertPremiumPlan();
-        List<LlmCallLog> rows = llmCallLogService.forTask(sessionId).stream()
-            .filter(log -> agentId.equals(log.getAgentId()))
-            .toList();
-        return RunCostTimeline.of(sessionId, agentId, rows);
+        return RunCostTimeline.of(sessionId, agentId, llmCallLogService.forTaskAndAgent(sessionId, agentId));
     }
 
     /**
@@ -110,19 +106,5 @@ public class AgentSessionLlmUsageController {
         long latencyMs,
         Instant startedAt
     ) {
-        static SessionLlmCallEntry from(LlmCallLog log) {
-            return new SessionLlmCallEntry(
-                log.getId(),
-                log.getProviderName(),
-                log.getModel(),
-                log.getPromptTokens(),
-                log.getCompletionTokens(),
-                log.getTotalTokens(),
-                log.getEstimatedCostUsd(),
-                log.isSuccess(),
-                log.getLatencyMs(),
-                log.getStartedAt()
-            );
-        }
     }
 }

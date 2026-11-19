@@ -97,6 +97,26 @@ public class KnowledgeConnectorService {
         this.access = access;
     }
 
+    /** API view of {@link #list}: connectors with their secret config masked. */
+    public List<ConnectorResponse> listResponses(UUID collectionId) {
+        return list(collectionId).stream().map(this::toResponse).toList();
+    }
+
+    /** API view of {@link #create}. */
+    public ConnectorResponse createResponse(
+            UUID collectionId, ConnectorType type, String name, Map<String, String> config, String subject) {
+        return toResponse(create(collectionId, type, name, config, subject));
+    }
+
+    /** API view of {@link #update}. */
+    public ConnectorResponse updateResponse(UUID id, String name, Boolean enabled, Map<String, String> config) {
+        return toResponse(update(id, name, enabled, config));
+    }
+
+    private ConnectorResponse toResponse(KnowledgeConnector c) {
+        return ConnectorResponse.from(c, redactedConfig(c));
+    }
+
     public List<KnowledgeConnector> list(UUID collectionId) {
         if (access != null) {
             access.requireRead(collectionId);

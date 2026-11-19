@@ -79,14 +79,14 @@ public class LlmCallLogController {
             default -> null;
         };
         int bounded = Math.max(1, Math.min(limit, 200));
-        return llmCallLogService.recent(bounded, successFilter).stream().map(LlmCallLogEntry::from).toList();
+        return llmCallLogService.recent(bounded, successFilter).stream().map(LlmCallLogViewMapper::toAdminEntry).toList();
     }
 
     /** Every call sharing one task/session id, in order - "cost per task." */
     @GetMapping("/tasks/{sessionId}")
     public List<LlmCallLogEntry> callsForTask(@org.springframework.web.bind.annotation.PathVariable String sessionId) {
         assertPremiumPlan();
-        return llmCallLogService.forTask(sessionId).stream().map(LlmCallLogEntry::from).toList();
+        return llmCallLogService.forTask(sessionId).stream().map(LlmCallLogViewMapper::toAdminEntry).toList();
     }
 
     /** One row per provider actually used - "outstanding balance of activated llm" (an ESTIMATE, see {@link LlmPricingCatalog}'s javadoc). */
@@ -122,13 +122,6 @@ public class LlmCallLogController {
         Long promptTokens, Long completionTokens, Long totalTokens, BigDecimal estimatedCostUsd,
         boolean success, String errorMessage, long latencyMs, Instant startedAt
     ) {
-        static LlmCallLogEntry from(LlmCallLog log) {
-            return new LlmCallLogEntry(
-                log.getId(), log.getAgentId(), log.getSessionId(), log.getProviderName(), log.getModel(),
-                log.getPromptTokens(), log.getCompletionTokens(), log.getTotalTokens(), log.getEstimatedCostUsd(),
-                log.isSuccess(), log.getErrorMessage(), log.getLatencyMs(), log.getStartedAt()
-            );
-        }
     }
 
     public record LlmCallDiagnosisEntry(

@@ -233,14 +233,10 @@ public class KnowledgeController {
         // for why reject-not-replace).
         String contentHash = KnowledgeDocumentService.sha256Hex(content);
         documentService.requireNoDuplicate(resolvedCollectionId, contentHash);
-        KnowledgeDocument document =
-                documentService.create(
-                        resolvedCollectionId,
-                        filename,
-                        file.getSize(),
-                        KnowledgeDocumentStatus.UPLOADED,
-                        contentHash);
-        storeOriginalFile(document, filename, content, file.getContentType());
+        UUID documentId =
+                documentService.createUploaded(
+                        resolvedCollectionId, filename, file.getSize(), contentHash);
+        storeOriginalFile(documentId, filename, content, file.getContentType());
         try {
             return ingestionService.ingestFile(
                     filename,
@@ -248,9 +244,9 @@ public class KnowledgeController {
                     chunking.chunkSize(),
                     chunking.chunkOverlap(),
                     resolvedCollectionId,
-                    document.getId());
+                    documentId);
         } catch (RuntimeException e) {
-            documentService.markFailed(document.getId(), e.getMessage());
+            documentService.markFailed(documentId, e.getMessage());
             throw e;
         }
     }
@@ -393,26 +389,26 @@ public class KnowledgeController {
     public ResponseEntity<byte[]> downloadOriginalFile(@PathVariable UUID documentId) {
         // VIEWER on the document's collection (404 otherwise, like a missing document).
         access.requireReadDocument(documentId);
-        KnowledgeDocument document = documentService.getEntity(documentId);
-        if (document.getObjectKey() == null) {
+        KnowledgeDocumentService.OriginalFileRef document = documentService.originalFileRef(documentId);
+        if (document.objectKey() == null) {
             return ResponseEntity.notFound().build();
         }
         byte[] content;
-        try (InputStream in = fileStorageService.get(document.getObjectKey())) {
+        try (InputStream in = fileStorageService.get(document.objectKey())) {
             content = in.readAllBytes();
         } catch (IOException e) {
             throw new FileStorageException(
-                    "Could not read object '" + document.getObjectKey() + "'", e);
+                    "Could not read object '" + document.objectKey() + "'", e);
         }
         String contentType =
-                document.getContentType() != null
-                        ? document.getContentType()
+                document.contentType() != null
+                        ? document.contentType()
                         : "application/octet-stream";
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
                 .header(
                         HttpHeaders.CONTENT_DISPOSITION,
-                        AttachmentDisposition.attachment(document.getFilename()))
+                        AttachmentDisposition.attachment(document.filename()))
                 .body(content);
     }
 
@@ -445,17 +441,17 @@ public class KnowledgeController {
      * so no extra tenant prefix is needed for isolation.
      */
     private void storeOriginalFile(
-            KnowledgeDocument document, String filename, byte[] content, String contentType) {
-        String objectKey = "knowledge-documents/" + document.getId() + "/" + filename;
+            UUID documentId, String filename, byte[] content, String contentType) {
+        String objectKey = "knowledge-documents/" + documentId + "/" + filename;
         String resolvedContentType = contentType != null ? contentType : "application/octet-stream";
         try {
             fileStorageService.put(objectKey, content, resolvedContentType);
-            documentService.attachOriginalFile(document.getId(), objectKey, resolvedContentType);
+            documentService.attachOriginalFile(documentId, objectKey, resolvedContentType);
         } catch (RuntimeException e) {
             log.warn(
                     "Failed to store original file for knowledge document {} ({}) - text extraction"
                             + " will proceed without it: {}",
-                    document.getId(),
+                    documentId,
                     filename,
                     e.getMessage());
         }

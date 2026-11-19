@@ -1,6 +1,5 @@
 package com.agenticai.core.mcpserver;
 
-import com.agenticai.core.agents.tools.ToolCallLog;
 import com.agenticai.core.agents.tools.ToolCallLogService;
 import com.agenticai.core.mcpserver.dto.McpServerAccessGrantCreateRequest;
 import com.agenticai.core.mcpserver.dto.McpServerAccessGrantCreatedResponse;
@@ -99,7 +98,7 @@ public class McpServerAccessController {
     @GetMapping("/{id}/tool-calls")
     public List<McpGrantToolCallView> toolCalls(@PathVariable UUID id) {
         return toolCallLogService.findByMcpGrantId(id).stream()
-                .map(McpGrantToolCallView::from)
+                .map(McpGrantToolCallViewMapper::toView)
                 .toList();
     }
 
@@ -113,17 +112,5 @@ public class McpServerAccessController {
             String errorMessage,
             Instant startedAt,
             Instant completedAt) {
-        static McpGrantToolCallView from(ToolCallLog log) {
-            return new McpGrantToolCallView(
-                    log.getId(),
-                    log.getAgentId(),
-                    log.getSessionId(),
-                    log.getToolName(),
-                    log.getToolInput(),
-                    log.getToolOutput(),
-                    log.getErrorMessage(),
-                    log.getStartedAt(),
-                    log.getCompletedAt());
-        }
     }
 }

@@ -424,6 +424,14 @@ public class LlmCallLogService {
         return repository.findBySessionIdOrderByStartedAtAsc(sessionId);
     }
 
+    /** Calls of one task/session made by one agent, oldest first. */
+    @Transactional(readOnly = true)
+    public List<LlmCallLog> forTaskAndAgent(String sessionId, UUID agentId) {
+        return repository.findBySessionIdOrderByStartedAtAsc(sessionId).stream()
+                .filter(log -> agentId.equals(log.getAgentId()))
+                .toList();
+    }
+
     /**
      * See {@link
      * LlmCallLogRepository#findBySessionIdAndAgentIdAndStartedAtBetweenOrderByStartedAtAsc}.
