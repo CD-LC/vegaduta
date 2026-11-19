@@ -392,6 +392,13 @@ jobs:
           cache: npm
           cache-dependency-path: web/package-lock.json
       - run: npm ci --no-audit --no-fund
+        env:
+          # onnxruntime-node (transitive via kokoro-js) downloads a CUDA build in
+          # its install script; the 1.21 asset it asks for 404s and the console
+          # never loads the node binding (aliased out, browser uses
+          # onnxruntime-web). Same fix as web/Dockerfile.
+          ONNXRUNTIME_NODE_INSTALL: skip
+          ONNXRUNTIME_NODE_INSTALL_CUDA: skip
       # Ratchet: only files this PR adds or modifies must match .prettierrc.json
       # (fix with `npx prettier@3.9.9 --write <file>`). Untouched files are not checked.
       - name: prettier --check (changed files)
