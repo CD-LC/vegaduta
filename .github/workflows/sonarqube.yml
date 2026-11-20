@@ -96,6 +96,11 @@ jobs:
       - name: web coverage (lcov)
         run: npm ci --no-audit --no-fund && npm run test:coverage
         working-directory: web
+        env:
+          # onnxruntime-node CUDA download 404s; never used at runtime (see
+          # web/Dockerfile and ci.yml).
+          ONNXRUNTIME_NODE_INSTALL: skip
+          ONNXRUNTIME_NODE_INSTALL_CUDA: skip
 
       - name: sidecar coverage (coverage.xml)
         run: |
