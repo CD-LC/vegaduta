@@ -1,6 +1,5 @@
 package com.agenticai.core.payments.commerce;
 
-import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.payments.commerce.CommerceDtos.CreateCartRequest;
 import com.agenticai.core.payments.commerce.CommerceDtos.CreateIntentRequest;
 import com.agenticai.core.payments.commerce.CommerceDtos.EventResponse;
@@ -9,7 +8,6 @@ import com.agenticai.core.payments.commerce.CommerceDtos.RevokeRequest;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -39,30 +37,18 @@ import org.springframework.web.server.ResponseStatusException;
 @ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class CommerceMandateController {
 
-    private final CommerceMandateService mandateService;
-    private final CommerceMandateCanonicalizer canonicalizer;
-    private final ObjectMapper objectMapper = JsonMappers.plain();
+    private final CommerceMandateApiService mandateService;
 
-    public CommerceMandateController(
-            CommerceMandateService mandateService, CommerceMandateCanonicalizer canonicalizer) {
+    public CommerceMandateController(CommerceMandateApiService mandateService) {
         this.mandateService = mandateService;
-        this.canonicalizer = canonicalizer;
     }
 
     @PostMapping("/intent")
     public ResponseEntity<MandateResponse> createIntent(
             @Valid @RequestBody CreateIntentRequest body) {
         try {
-            CommerceMandate intent =
-                    mandateService.createIntent(
-                            body.agentId(),
-                            currentSubject(),
-                            body.intentText(),
-                            body.categories(),
-                            body.maxTotalMinor(),
-                            body.currency(),
-                            body.expiresAt());
-            return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(intent));
+            MandateResponse intent = mandateService.createIntent(body, currentSubject());
+            return ResponseEntity.status(HttpStatus.CREATED).body(intent);
         } catch (CommerceMandateException e) {
             throw mandateError(e);
         }
@@ -72,10 +58,8 @@ public class CommerceMandateController {
     public ResponseEntity<MandateResponse> createCart(
             @PathVariable UUID intentId, @Valid @RequestBody CreateCartRequest body) {
         try {
-            CommerceMandate cart =
-                    mandateService.createCart(
-                            intentId, body.items(), body.payee(), body.expiresAt());
-            return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(cart));
+            MandateResponse cart = mandateService.createCart(intentId, body);
+            return ResponseEntity.status(HttpStatus.CREATED).body(cart);
         } catch (CommerceMandateException e) {
             throw mandateError(e);
         }
@@ -85,7 +69,7 @@ public class CommerceMandateController {
     @PostMapping("/{cartId}/authorize")
     public MandateResponse authorize(@PathVariable UUID cartId) {
         try {
-            return toResponse(mandateService.authorize(cartId));
+            return mandateService.authorize(cartId);
         } catch (CommerceMandateException e) {
             throw mandateError(e);
         }
@@ -95,7 +79,7 @@ public class CommerceMandateController {
     @PostMapping("/{cartId}/capture")
     public MandateResponse capture(@PathVariable UUID cartId) {
         try {
-            return toResponse(mandateService.capture(cartId));
+            return mandateService.capture(cartId);
         } catch (CommerceMandateException e) {
             throw mandateError(e);
         }
@@ -105,7 +89,7 @@ public class CommerceMandateController {
     public MandateResponse refund(
             @PathVariable UUID cartId, @Valid @RequestBody(required = false) RevokeRequest body) {
         try {
-            return toResponse(mandateService.refund(cartId, body == null ? null : body.reason()));
+            return mandateService.refund(cartId, body == null ? null : body.reason());
         } catch (CommerceMandateException e) {
             throw mandateError(e);
         }
@@ -114,85 +98,36 @@ public class CommerceMandateController {
     @PostMapping("/{id}/revoke")
     public MandateResponse revoke(
             @PathVariable UUID id, @Valid @RequestBody(required = false) RevokeRequest body) {
-        CommerceMandate m = mandateService.revoke(id, body == null ? null : body.reason());
-        if (m == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "no such mandate");
-        }
-        return toResponse(m);
+        return mandateService
+                .revoke(id, body == null ? null : body.reason())
+                .orElseThrow(CommerceMandateController::noSuchMandate);
     }
 
     @GetMapping
     public List<MandateResponse> list(@RequestParam UUID agentId) {
-        return mandateService.listForAgent(agentId).stream().map(this::toResponse).toList();
+        return mandateService.listForAgent(agentId);
     }
 
     @GetMapping("/{id}")
     public MandateResponse get(@PathVariable UUID id) {
-        CommerceMandate m = mandateService.findById(id);
-        if (m == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "no such mandate");
-        }
-        return toResponse(m);
+        return mandateService.find(id).orElseThrow(CommerceMandateController::noSuchMandate);
     }
 
     @GetMapping("/{intentId}/carts")
     public List<MandateResponse> carts(@PathVariable UUID intentId) {
-        return mandateService.cartsOf(intentId).stream().map(this::toResponse).toList();
+        return mandateService.cartsOf(intentId);
     }
 
     /** The mandate's append-only lifecycle trail - the dispute evidence. */
     @GetMapping("/{id}/events")
     public List<EventResponse> events(@PathVariable UUID id) {
-        if (mandateService.findById(id) == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "no such mandate");
-        }
-        return mandateService.events(id).stream()
-                .map(
-                        e ->
-                                new EventResponse(
-                                        e.getId(),
-                                        e.getEventType(),
-                                        e.getActor(),
-                                        e.getDetail(),
-                                        e.getCreatedAt()))
-                .toList();
+        return mandateService.events(id).orElseThrow(CommerceMandateController::noSuchMandate);
     }
 
     // ---------------------------------------------------------------- internals
 
-    private MandateResponse toResponse(CommerceMandate m) {
-        return new MandateResponse(
-                m.getId(),
-                m.getKind().name(),
-                m.getIntentMandateId(),
-                m.getAgentId(),
-                m.getBuyerUserId(),
-                m.getCurrency(),
-                m.getMaxTotalMinor(),
-                m.getCartTotalMinor(),
-                readJson(m.getItemsJson()),
-                m.getPayee(),
-                readJson(m.getCategories()),
-                m.getIntentText(),
-                m.getStatus().name(),
-                canonicalizer.canonicalHash(m.getCanonicalJson()),
-                m.getKeyId(),
-                mandateService.verifySignature(m.getId()),
-                m.getBuyerAuthJson(),
-                m.getAuthorizedAt(),
-                m.getWalletDebitRef(),
-                m.getExpiresAt(),
-                m.getCreatedAt(),
-                m.getRevokedAt(),
-                m.getRevokeReason());
-    }
-
-    private Object readJson(String json) {
-        try {
-            return json == null ? null : objectMapper.readValue(json, Object.class);
-        } catch (Exception e) {
-            return null;
-        }
+    private static ResponseStatusException noSuchMandate() {
+        return new ResponseStatusException(HttpStatus.NOT_FOUND, "no such mandate");
     }
 
     private String currentSubject() {

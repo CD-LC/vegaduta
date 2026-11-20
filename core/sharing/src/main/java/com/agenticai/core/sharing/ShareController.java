@@ -4,6 +4,7 @@ import com.agenticai.core.admin.identity.IdentityUserAdminPort;
 import com.agenticai.core.admin.keycloak.KeycloakUserRepresentation;
 import com.agenticai.core.audit.AuditPaging;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.sharing.ResourceGrantService.GrantView;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -63,17 +64,17 @@ import org.springframework.web.bind.annotation.RestController;
 })
 public class ShareController {
 
-    private final ResourceAccessService accessService;
+    private final ResourceGrantService grantService;
     private final IdentityUserAdminPort keycloakAdminClient;
     private final ShareRateLimiter rateLimiter;
     private final Map<ResourceType, ResourceOwnerLookup> ownerLookups;
 
     public ShareController(
-            ResourceAccessService accessService,
+            ResourceGrantService grantService,
             IdentityUserAdminPort keycloakAdminClient,
             ShareRateLimiter rateLimiter,
             List<ResourceOwnerLookup> ownerLookups) {
-        this.accessService = accessService;
+        this.grantService = grantService;
         this.keycloakAdminClient = keycloakAdminClient;
         this.rateLimiter = rateLimiter;
         this.ownerLookups =
@@ -132,8 +133,8 @@ public class ShareController {
                         .orElseThrow(InvalidGranteeException::new);
 
         String createdBy = resolveCreatedBy(type, resourceId);
-        ResourceGrant grant =
-                accessService.grant(
+        GrantView grant =
+                grantService.grant(
                         type, resourceId, createdBy, grantee.id(), request.permissionLevel());
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(grant, grantee.email()));
     }
@@ -151,7 +152,7 @@ public class ShareController {
         rateLimiter.assertGrantReadAllowed();
         ResourceType type = resourceTypeOf(resourceKind);
         String createdBy = resolveCreatedBy(type, resourceId);
-        List<ResourceGrant> all = accessService.listGrants(type, resourceId, createdBy);
+        List<GrantView> all = grantService.listGrants(type, resourceId, createdBy);
         // No limit/offset: the whole list, as before. Either present: a 1..500 window (default
         // 50), so only the rows on the page cost an identity lookup for the grantee's email.
         int from = 0;
@@ -162,7 +163,7 @@ public class ShareController {
         }
         List<GrantResponse> page =
                 all.subList(from, to).stream()
-                        .map(g -> toResponse(g, resolveEmailBestEffort(g.getGranteeUserId())))
+                        .map(g -> toResponse(g, resolveEmailBestEffort(g.granteeUserId())))
                         .toList();
         return AuditPaging.respondWithTotal(page, from, all.size());
     }
@@ -174,7 +175,7 @@ public class ShareController {
             @PathVariable UUID grantId) {
         ResourceType type = resourceTypeOf(resourceKind);
         String createdBy = resolveCreatedBy(type, resourceId);
-        accessService.revoke(type, resourceId, createdBy, grantId);
+        grantService.revoke(type, resourceId, createdBy, grantId);
         return ResponseEntity.noContent().build();
     }
 
@@ -224,13 +225,13 @@ public class ShareController {
                                                 + " SecurityConfig should have blocked this"));
     }
 
-    private static GrantResponse toResponse(ResourceGrant grant, String granteeEmail) {
+    private static GrantResponse toResponse(GrantView grant, String granteeEmail) {
         return new GrantResponse(
-                grant.getId(),
-                grant.getGranteeUserId(),
+                grant.id(),
+                grant.granteeUserId(),
                 granteeEmail,
-                grant.getPermissionLevel(),
-                grant.getGrantedBy(),
-                grant.getGrantedAt());
+                grant.permissionLevel(),
+                grant.grantedBy(),
+                grant.grantedAt());
     }
 }

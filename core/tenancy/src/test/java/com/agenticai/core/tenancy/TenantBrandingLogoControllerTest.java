@@ -34,16 +34,15 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Logo upload for the white-label brand mark - the half of the feature that
- * {@code TenantSettingsControllerTest} does not cover, since that one tests
- * setting {@code brandLogoUrl} to a URL the tenant already hosts.
+ * Logo upload for the white-label brand mark - the half of the feature that {@code
+ * TenantSettingsControllerTest} does not cover, since that one tests setting {@code brandLogoUrl}
+ * to a URL the tenant already hosts.
  *
- * <p>Plain unit tests calling the controller methods directly, no
- * MockMvc/web layer - the same convention as the sibling test in this module
- * (see its header note). The two behaviours worth pinning are the
- * entitlement gate (shared with the settings PUT) and, more importantly, the
- * public GET's own gate: it must refuse to serve anything the tenant is not
- * currently publishing, because that endpoint is {@code permitAll}.
+ * <p>Plain unit tests calling the controller methods directly, no MockMvc/web layer - the same
+ * convention as the sibling test in this module (see its header note). The two behaviours worth
+ * pinning are the entitlement gate (shared with the settings PUT) and, more importantly, the public
+ * GET's own gate: it must refuse to serve anything the tenant is not currently publishing, because
+ * that endpoint is {@code permitAll}.
  */
 class TenantBrandingLogoControllerTest {
 
@@ -64,11 +63,21 @@ class TenantBrandingLogoControllerTest {
         tenantLimits = mock(TenantLimits.class);
         fileStorageService = mock(FileStorageService.class);
         freeModeService = mock(FreeModeService.class);
-        controller = new TenantBrandingLogoController(
-            tenantRepository, tenantLimits, fileStorageService, freeModeService, PUBLIC_BASE);
+        controller =
+                new TenantBrandingLogoController(
+                        new TenantSettingsService(tenantRepository, tenantLimits, freeModeService),
+                        tenantLimits,
+                        fileStorageService,
+                        PUBLIC_BASE);
 
-        tenant = new Tenant(
-            "Acme", TenantPlan.UNLIMITED, TENANT_ID, "agentic-ai", AccountType.B2C, ExperienceMode.SIMPLE);
+        tenant =
+                new Tenant(
+                        "Acme",
+                        TenantPlan.UNLIMITED,
+                        TENANT_ID,
+                        "agentic-ai",
+                        AccountType.B2C,
+                        ExperienceMode.SIMPLE);
         when(tenantRepository.findBySchemaName(TENANT_ID)).thenReturn(Optional.of(tenant));
         // The settings response the write endpoints return unwraps these.
         when(tenantLimits.maxAgents(TENANT_ID)).thenReturn(Optional.empty());
@@ -94,8 +103,10 @@ class TenantBrandingLogoControllerTest {
     void uploadWithoutWhiteLabelEntitlementIs403AndStoresNothing() {
         when(tenantLimits.whiteLabel(TENANT_ID)).thenReturn(false);
 
-        ResponseStatusException e = assertThrows(ResponseStatusException.class,
-            () -> controller.upload(new MockHttpServletRequest(), png("logo.png", 64)));
+        ResponseStatusException e =
+                assertThrows(
+                        ResponseStatusException.class,
+                        () -> controller.upload(new MockHttpServletRequest(), png("logo.png", 64)));
 
         assertEquals(HttpStatus.FORBIDDEN, e.getStatusCode());
         // The gate must come BEFORE the write - a refused upload that still
@@ -130,15 +141,21 @@ class TenantBrandingLogoControllerTest {
     @Test
     void uploadRejectsSvgEvenThoughItIsAnImage() {
         when(tenantLimits.whiteLabel(TENANT_ID)).thenReturn(true);
-        MockMultipartFile svg = new MockMultipartFile(
-            "file", "logo.svg", "image/svg+xml",
-            "<svg xmlns=\"http://www.w3.org/2000/svg\"/>".getBytes(StandardCharsets.UTF_8));
+        MockMultipartFile svg =
+                new MockMultipartFile(
+                        "file",
+                        "logo.svg",
+                        "image/svg+xml",
+                        "<svg xmlns=\"http://www.w3.org/2000/svg\"/>"
+                                .getBytes(StandardCharsets.UTF_8));
 
         // Not a size or a "not an image" failure - SVG is refused on its own
         // terms, because it is served from the API origin to anonymous
         // viewers and can carry scripts.
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-            () -> controller.upload(new MockHttpServletRequest(), svg));
+        IllegalArgumentException e =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> controller.upload(new MockHttpServletRequest(), svg));
         assertTrue(e.getMessage().contains("SVG"), e.getMessage());
         verify(fileStorageService, never()).put(any(), any(), any());
     }
@@ -147,13 +164,21 @@ class TenantBrandingLogoControllerTest {
     void uploadRejectsANonImageAndAnOversizedFile() {
         when(tenantLimits.whiteLabel(TENANT_ID)).thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class, () -> controller.upload(
-            new MockHttpServletRequest(),
-            new MockMultipartFile("file", "notes.pdf", "application/pdf", new byte[16])));
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        controller.upload(
+                                new MockHttpServletRequest(),
+                                new MockMultipartFile(
+                                        "file", "notes.pdf", "application/pdf", new byte[16])));
 
         // 2MB cap + 1 byte.
-        assertThrows(IllegalArgumentException.class,
-            () -> controller.upload(new MockHttpServletRequest(), png("huge.png", 2 * 1024 * 1024 + 1)));
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        controller.upload(
+                                new MockHttpServletRequest(),
+                                png("huge.png", 2 * 1024 * 1024 + 1)));
 
         verify(fileStorageService, never()).put(any(), any(), any());
     }
@@ -168,8 +193,9 @@ class TenantBrandingLogoControllerTest {
         controller.upload(new MockHttpServletRequest(), png("logo.png", 64));
         verify(fileStorageService, never()).delete(any());
 
-        controller.upload(new MockHttpServletRequest(),
-            new MockMultipartFile("file", "logo.webp", "image/webp", new byte[64]));
+        controller.upload(
+                new MockHttpServletRequest(),
+                new MockMultipartFile("file", "logo.webp", "image/webp", new byte[64]));
         verify(fileStorageService).delete("tenant-logos/brand-logo.png");
         assertEquals(PUBLIC_BASE + "/api/share/branding/acme/logo.webp", tenant.getBrandLogoUrl());
     }
@@ -179,12 +205,18 @@ class TenantBrandingLogoControllerTest {
         // A deployment whose resolved origin is localhost (a misconfigured
         // proxy, or a local run) would otherwise bake a permanently broken,
         // mixed-content URL into a column that public pages render.
-        TenantBrandingLogoController local = new TenantBrandingLogoController(
-            tenantRepository, tenantLimits, fileStorageService, freeModeService, "http://localhost:8080");
+        TenantBrandingLogoController local =
+                new TenantBrandingLogoController(
+                        new TenantSettingsService(tenantRepository, tenantLimits, freeModeService),
+                        tenantLimits,
+                        fileStorageService,
+                        "http://localhost:8080");
         when(tenantLimits.whiteLabel(TENANT_ID)).thenReturn(true);
 
-        ResponseStatusException e = assertThrows(ResponseStatusException.class,
-            () -> local.upload(new MockHttpServletRequest(), png("logo.png", 64)));
+        ResponseStatusException e =
+                assertThrows(
+                        ResponseStatusException.class,
+                        () -> local.upload(new MockHttpServletRequest(), png("logo.png", 64)));
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatusCode());
         // And it fails BEFORE writing, so there is no orphaned object.
@@ -321,7 +353,7 @@ class TenantBrandingLogoControllerTest {
         when(tenantLimits.whiteLabel(TENANT_ID)).thenReturn(true);
         tenant.updateBranding(null, LOGO_URL);
         when(fileStorageService.get("tenant-logos/brand-logo.png"))
-            .thenThrow(new FileStorageException("gone", new java.io.IOException("missing")));
+                .thenThrow(new FileStorageException("gone", new java.io.IOException("missing")));
 
         // The share page falls back to the brand NAME, which is the correct
         // degraded state - not a 5xx on somebody's public page.

@@ -9,21 +9,20 @@ import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
 /**
  * The optional first-message notice and consent step for channel conversations. Active only for an
- * agent whose {@link Policy} is enabled, and only for turns that belong to a {@code channel_session}
- * (so the console Playground, workflows and API calls pass straight through).
+ * agent whose {@link Policy} is enabled, and only for turns that belong to a {@code
+ * channel_session} (so the console Playground, workflows and API calls pass straight through).
  *
  * <p>While the contact has no GRANTED consent for the current notice version, the turn is replaced
  * by the notice (or a short acknowledgement of their answer): no model call, no tool, no memory
- * write, and (via {@link #mayStoreContent}) no transcript row for their message. A contact's
- * answer is read from the message itself ({@link ConsentText}); anything that is not a clear
- * "agree" leaves them unconsented. Withdrawal ("STOP") after consent ends processing again and, if
- * the policy says so, erases the contact's data.
+ * write, and (via {@link #mayStoreContent}) no transcript row for their message. A contact's answer
+ * is read from the message itself ({@link ConsentText}); anything that is not a clear "agree"
+ * leaves them unconsented. Withdrawal ("STOP") after consent ends processing again and, if the
+ * policy says so, erases the contact's data.
  */
 @Component
 public class ConsentGateService implements ConversationConsentGate {
@@ -41,19 +40,19 @@ public class ConsentGateService implements ConversationConsentGate {
     public static final String WITHDRAWN_AND_ERASED =
             WITHDRAWN + " Your data held for this conversation has been erased.";
 
-    private final JdbcTemplate jdbc;
+    private final ConsentGateJdbcRepository repository;
     private final ConsentPolicyService policies;
     private final ConsentLedger ledger;
     private final ContactPrivacyService contacts;
     private final AuditLogService audit;
 
     public ConsentGateService(
-            JdbcTemplate jdbc,
+            ConsentGateJdbcRepository repository,
             ConsentPolicyService policies,
             ConsentLedger ledger,
             ContactPrivacyService contacts,
             AuditLogService audit) {
-        this.jdbc = jdbc;
+        this.repository = repository;
         this.policies = policies;
         this.ledger = ledger;
         this.contacts = contacts;
@@ -61,7 +60,8 @@ public class ConsentGateService implements ConversationConsentGate {
     }
 
     @Override
-    public Flux<String> intercept(UUID agentId, String sessionId, String subjectKey, String userMessage) {
+    public Flux<String> intercept(
+            UUID agentId, String sessionId, String subjectKey, String userMessage) {
         Optional<Policy> policy = policies.find(agentId).filter(Policy::enabled);
         if (policy.isEmpty()) {
             return null;
@@ -80,7 +80,9 @@ public class ConsentGateService implements ConversationConsentGate {
         return policy.isEmpty() || hasConsent(policy.get(), channel, externalId);
     }
 
-    /** @return the reply to send instead of running the turn, or null to let it run. */
+    /**
+     * @return the reply to send instead of running the turn, or null to let it run.
+     */
     String decide(Policy policy, Contact contact, UUID agentId, String message) {
         Optional<ConsentLedger.Entry> latest =
                 ledger.latest(contact.channel(), contact.externalId(), policy.purpose());
@@ -105,7 +107,13 @@ public class ConsentGateService implements ConversationConsentGate {
             case DECLINE:
                 {
                     String language = promptedLanguage(latest, policy);
-                    record(policy, contact, agentId, language, noticeFor(policy, language), Decision.DECLINED);
+                    record(
+                            policy,
+                            contact,
+                            agentId,
+                            language,
+                            noticeFor(policy, language),
+                            Decision.DECLINED);
                     return DECLINED;
                 }
             case WITHDRAW:
@@ -126,8 +134,15 @@ public class ConsentGateService implements ConversationConsentGate {
         }
     }
 
-    private String withdraw(Policy policy, Contact contact, UUID agentId, ConsentLedger.Entry current) {
-        record(policy, contact, agentId, current.noticeLanguage(), noticeFor(policy, current.noticeLanguage()), Decision.WITHDRAWN);
+    private String withdraw(
+            Policy policy, Contact contact, UUID agentId, ConsentLedger.Entry current) {
+        record(
+                policy,
+                contact,
+                agentId,
+                current.noticeLanguage(),
+                noticeFor(policy, current.noticeLanguage()),
+                Decision.WITHDRAWN);
         boolean erased = false;
         if (policy.eraseOnWithdrawal()) {
             ContactPrivacyService.ErasureReport report =
@@ -140,7 +155,8 @@ public class ConsentGateService implements ConversationConsentGate {
         return erased ? WITHDRAWN_AND_ERASED : WITHDRAWN;
     }
 
-    private String prompt(Policy policy, Contact contact, UUID agentId, String language, boolean force) {
+    private String prompt(
+            Policy policy, Contact contact, UUID agentId, String language, boolean force) {
         String text = noticeFor(policy, language);
         Optional<ConsentLedger.Entry> latest =
                 ledger.latest(contact.channel(), contact.externalId(), policy.purpose());
@@ -156,7 +172,12 @@ public class ConsentGateService implements ConversationConsentGate {
     }
 
     private void record(
-            Policy policy, Contact contact, UUID agentId, String language, String text, Decision decision) {
+            Policy policy,
+            Contact contact,
+            UUID agentId,
+            String language,
+            String text,
+            Decision decision) {
         ledger.record(
                 contact.channel(),
                 contact.externalId(),
@@ -212,12 +233,6 @@ public class ConsentGateService implements ConversationConsentGate {
         if (sessionId == null) {
             return Optional.empty();
         }
-        return jdbc
-                .query(
-                        "SELECT channel, external_id FROM channel_session WHERE session_id = ?",
-                        (rs, n) -> new Contact(rs.getString(1), rs.getString(2)),
-                        sessionId)
-                .stream()
-                .findFirst();
+        return repository.contactForSession(sessionId);
     }
 }

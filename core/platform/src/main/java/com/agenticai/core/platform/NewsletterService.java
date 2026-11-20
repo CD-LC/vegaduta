@@ -5,8 +5,6 @@ import com.agenticai.core.security.edition.EditionFeature;
 import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -18,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -32,10 +29,10 @@ import org.springframework.stereotype.Service;
  * is never mailed, even if its id is explicitly passed in {@code recipientTenantIds}.
  *
  * <p>Deliberately queries {@code control_plane.tenant}/{@code control_plane.app_user} with a raw
- * {@link JdbcTemplate} query rather than going through {@code Tenant}'s JPA entity - {@code
- * news_opt_in} is a column owned by a different, separately-landing workstream (see this class's
- * own callers/javadoc for that context), and a raw column read avoids coupling this feature's
- * compile-time correctness to exactly when that other migration lands or whether {@code
+ * {@link NewsletterJdbcRepository} query rather than going through {@code Tenant}'s JPA entity -
+ * {@code news_opt_in} is a column owned by a different, separately-landing workstream (see this
+ * class's own callers/javadoc for that context), and a raw column read avoids coupling this
+ * feature's compile-time correctness to exactly when that other migration lands or whether {@code
  * Tenant.java} ever grows a mapped field for it. Only {@link NewsletterRecipient#tenantId}/{@code
  * name}/{@code adminEmail}/{@code newsOptIn} are read this way - nothing here writes to {@code
  * control_plane.tenant} or {@code control_plane.app_user}.
@@ -58,30 +55,19 @@ public class NewsletterService {
 
     private static final Logger log = LoggerFactory.getLogger(NewsletterService.class);
 
-    private static final String RECIPIENTS_SQL =
-            "SELECT t.id AS tenant_id, t.name AS tenant_name, t.news_opt_in AS news_opt_in,"
-                    + " au.email AS admin_email FROM control_plane.tenant t LEFT JOIN LATERAL (  "
-                    + " SELECT email FROM control_plane.app_user   WHERE tenant_id = t.id AND role ="
-                    + " 'TENANT_ADMIN'   ORDER BY created_at ASC LIMIT 1 ) au ON true WHERE t.status ="
-                    + " 'ACTIVE' ORDER BY t.name";
-
-    private static final String INSERT_CAMPAIGN_SQL =
-            "INSERT INTO control_plane.newsletter_campaign (id, subject, sent_count, created_at,"
-                    + " created_by) VALUES (?, ?, ?, ?, ?)";
-
-    private final JdbcTemplate jdbcTemplate;
+    private final NewsletterJdbcRepository repository;
     private final ObjectProvider<JavaMailSender> mailSenderProvider;
     private final String fromAddress;
     private final String appPublicUrl;
     private final String unsubscribeMailto;
 
     public NewsletterService(
-            JdbcTemplate jdbcTemplate,
+            NewsletterJdbcRepository repository,
             ObjectProvider<JavaMailSender> mailSenderProvider,
             @Value("${spring.mail.username:no-reply@example.com}") String fromAddress,
             @Value("${app.web.public-url:}") String appPublicUrl,
             @Value("${app.newsletter.unsubscribe-mailto:}") String unsubscribeMailto) {
-        this.jdbcTemplate = jdbcTemplate;
+        this.repository = repository;
         this.mailSenderProvider = mailSenderProvider;
         this.fromAddress = fromAddress;
         this.appPublicUrl = appPublicUrl.replaceAll("/+$", "");
@@ -97,14 +83,7 @@ public class NewsletterService {
      * this class's javadoc).
      */
     public List<NewsletterRecipient> listRecipients() {
-        return jdbcTemplate.query(
-                RECIPIENTS_SQL,
-                (rs, rowNum) ->
-                        new NewsletterRecipient(
-                                UUID.fromString(rs.getString("tenant_id")),
-                                rs.getString("tenant_name"),
-                                rs.getString("admin_email"),
-                                rs.getBoolean("news_opt_in")));
+        return repository.listRecipients();
     }
 
     /**
@@ -388,12 +367,6 @@ You received this because your workspace opted in to <span style="font-family:'Y
     }
 
     private void logCampaign(String subject, int sentCount, String createdBy) {
-        jdbcTemplate.update(
-                INSERT_CAMPAIGN_SQL,
-                UUID.randomUUID(),
-                subject,
-                sentCount,
-                Timestamp.from(Instant.now()),
-                createdBy);
+        repository.insertCampaign(subject, sentCount, createdBy);
     }
 }

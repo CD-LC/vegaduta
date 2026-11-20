@@ -65,8 +65,8 @@ import org.springframework.web.multipart.MultipartFile;
  * Constraints are read from Bean Validation annotations by NAME (no compile dependency on the
  * validation API): {@code @NotNull/@NotBlank/@NotEmpty} make a property required, {@code @Size},
  * {@code @Min/@Max}, {@code @DecimalMin/@DecimalMax}, {@code @Positive...}, {@code @Pattern} and
- * {@code @Email} add the matching keywords. Primitive-typed properties are listed as required
- * (they are always present on a response) and carry their Java default as {@code default}, so SDK
+ * {@code @Email} add the matching keywords. Primitive-typed properties are listed as required (they
+ * are always present on a response) and carry their Java default as {@code default}, so SDK
  * generators can treat them as optional on input (the server fills in the default when absent).
  *
  * <p>Pure: no Spring context, no database, no static state.
@@ -74,9 +74,20 @@ import org.springframework.web.multipart.MultipartFile;
 final class OpenApiSchemaBuilder {
 
     /** Packages whose types are never walked (JDK, Spring, Jackson, Hibernate, Reactor...). */
-    private static final List<String> OPAQUE_PREFIXES = List.of(
-        "java.", "javax.", "jakarta.", "org.springframework.", "org.hibernate.", "com.fasterxml.",
-        "reactor.", "org.reactivestreams.", "kotlin.", "org.slf4j.", "io.micrometer.", "org.apache.");
+    private static final List<String> OPAQUE_PREFIXES =
+            List.of(
+                    "java.",
+                    "javax.",
+                    "jakarta.",
+                    "org.springframework.",
+                    "org.hibernate.",
+                    "com.fasterxml.",
+                    "reactor.",
+                    "org.reactivestreams.",
+                    "kotlin.",
+                    "org.slf4j.",
+                    "io.micrometer.",
+                    "org.apache.");
 
     private final Map<String, Object> components = new TreeMap<>();
     private final Map<String, String> nameByKey = new HashMap<>();
@@ -145,8 +156,10 @@ final class OpenApiSchemaBuilder {
         if (isJsonNode(raw)) {
             return any();
         }
-        if (MultipartFile.class.isAssignableFrom(raw) || Resource.class.isAssignableFrom(raw)
-            || InputStream.class.isAssignableFrom(raw) || File.class.isAssignableFrom(raw)) {
+        if (MultipartFile.class.isAssignableFrom(raw)
+                || Resource.class.isAssignableFrom(raw)
+                || InputStream.class.isAssignableFrom(raw)
+                || File.class.isAssignableFrom(raw)) {
             return typed("string", "binary");
         }
         if (raw.isEnum()) {
@@ -157,7 +170,9 @@ final class OpenApiSchemaBuilder {
             m.put("type", "object");
             ResolvableType value = type.asMap().getGeneric(1);
             Class<?> valueRaw = value.resolve();
-            m.put("additionalProperties", valueRaw == null || valueRaw == Object.class ? Boolean.TRUE : schemaFor(value));
+            m.put(
+                    "additionalProperties",
+                    valueRaw == null || valueRaw == Object.class ? Boolean.TRUE : schemaFor(value));
             return m;
         }
         if (Collection.class.isAssignableFrom(raw)) {
@@ -166,7 +181,7 @@ final class OpenApiSchemaBuilder {
         }
         String rawName = raw.getName();
         if (rawName.equals("org.springframework.data.domain.Page")
-            || rawName.equals("org.springframework.data.domain.Slice")) {
+                || rawName.equals("org.springframework.data.domain.Slice")) {
             return component(type, raw, () -> pageSchema(type));
         }
         if (Throwable.class.isAssignableFrom(raw) || isOpaque(rawName)) {
@@ -224,8 +239,13 @@ final class OpenApiSchemaBuilder {
         if (c == boolean.class || c == Boolean.class) {
             return typed("boolean", null);
         }
-        if (c == byte.class || c == Byte.class || c == short.class || c == Short.class
-            || c == int.class || c == Integer.class || c == AtomicInteger.class) {
+        if (c == byte.class
+                || c == Byte.class
+                || c == short.class
+                || c == Short.class
+                || c == int.class
+                || c == Integer.class
+                || c == AtomicInteger.class) {
             return typed("integer", "int32");
         }
         if (c == long.class || c == Long.class || c == AtomicLong.class) {
@@ -243,14 +263,20 @@ final class OpenApiSchemaBuilder {
         if (c == BigDecimal.class || c == Number.class) {
             return typed("number", null);
         }
-        if (c == char.class || c == Character.class || c == String.class || CharSequence.class.isAssignableFrom(c)) {
+        if (c == char.class
+                || c == Character.class
+                || c == String.class
+                || CharSequence.class.isAssignableFrom(c)) {
             return typed("string", null);
         }
         if (c == UUID.class) {
             return typed("string", "uuid");
         }
-        if (c == Instant.class || c == OffsetDateTime.class || c == ZonedDateTime.class
-            || c == LocalDateTime.class || Date.class.isAssignableFrom(c)) {
+        if (c == Instant.class
+                || c == OffsetDateTime.class
+                || c == ZonedDateTime.class
+                || c == LocalDateTime.class
+                || Date.class.isAssignableFrom(c)) {
             return typed("string", "date-time");
         }
         if (c == LocalDate.class) {
@@ -265,9 +291,14 @@ final class OpenApiSchemaBuilder {
         if (c == URI.class || c == URL.class) {
             return typed("string", "uri");
         }
-        if (c == Year.class || c == YearMonth.class || c == Locale.class || c == Currency.class
-            || c == Pattern.class || c == Class.class || Path.class.isAssignableFrom(c)
-            || ZoneId.class.isAssignableFrom(c)) {
+        if (c == Year.class
+                || c == YearMonth.class
+                || c == Locale.class
+                || c == Currency.class
+                || c == Pattern.class
+                || c == Class.class
+                || Path.class.isAssignableFrom(c)
+                || ZoneId.class.isAssignableFrom(c)) {
             return typed("string", null);
         }
         return null;
@@ -275,7 +306,8 @@ final class OpenApiSchemaBuilder {
 
     // ------------------------------------------------------------------ components
 
-    private Map<String, Object> component(ResolvableType type, Class<?> raw, Supplier<Map<String, Object>> build) {
+    private Map<String, Object> component(
+            ResolvableType type, Class<?> raw, Supplier<Map<String, Object>> build) {
         String key = type.toString();
         String existing = nameByKey.get(key);
         if (existing != null) {
@@ -296,10 +328,10 @@ final class OpenApiSchemaBuilder {
     }
 
     private String assignName(String key, Class<?> raw, ResolvableType type) {
-        String base = baseName(raw, type);
+        String base = OpenApiSchemaAliases.baseName(raw, type);
         String candidate = base;
         if (keyByName.containsKey(candidate)) {
-            candidate = lastPackageSegment(raw) + "_" + base;
+            candidate = OpenApiSchemaAliases.lastPackageSegment(raw) + "_" + base;
         }
         if (keyByName.containsKey(candidate)) {
             candidate = raw.getPackageName().replace('.', '_') + "_" + base;
@@ -314,35 +346,14 @@ final class OpenApiSchemaBuilder {
         return unique;
     }
 
-    private static String baseName(Class<?> raw, ResolvableType type) {
-        String simple = raw.getSimpleName();
-        for (Class<?> e = raw.getEnclosingClass(); e != null; e = e.getEnclosingClass()) {
-            simple = e.getSimpleName() + "_" + simple;
-        }
-        StringBuilder sb = new StringBuilder(simple);
-        for (ResolvableType g : type.getGenerics()) {
-            Class<?> a = g.resolve();
-            sb.append('_').append(a == null || a == Object.class ? "Any" : a.getSimpleName());
-        }
-        return sb.toString().replaceAll("[^A-Za-z0-9_.\\-]", "_");
-    }
-
-    private static String lastPackageSegment(Class<?> raw) {
-        String pkg = raw.getPackageName();
-        String seg = pkg.substring(pkg.lastIndexOf('.') + 1);
-        if (seg.isEmpty()) {
-            return "Default";
-        }
-        return Character.toUpperCase(seg.charAt(0)) + seg.substring(1);
-    }
-
     // ------------------------------------------------------------------ enums
 
     private static Map<String, Object> enumSchema(Class<?> raw) {
         Method jsonValue = null;
         for (Method m : raw.getDeclaredMethods()) {
-            if (m.isAnnotationPresent(JsonValue.class) && m.getParameterCount() == 0
-                && !Modifier.isStatic(m.getModifiers())) {
+            if (m.isAnnotationPresent(JsonValue.class)
+                    && m.getParameterCount() == 0
+                    && !Modifier.isStatic(m.getModifiers())) {
                 jsonValue = m;
                 break;
             }
@@ -393,10 +404,17 @@ final class OpenApiSchemaBuilder {
             if (accessor != null) {
                 sources.add(accessor);
             }
-            ResolvableType propType = field != null
-                ? ResolvableType.forType(field.getGenericType(), type)
-                : ResolvableType.forType(rc.getGenericType(), type);
-            addProperty(properties, required, rc.getName(), sources, propType, rc.getType().isPrimitive());
+            ResolvableType propType =
+                    field != null
+                            ? ResolvableType.forType(field.getGenericType(), type)
+                            : ResolvableType.forType(rc.getGenericType(), type);
+            addProperty(
+                    properties,
+                    required,
+                    rc.getName(),
+                    sources,
+                    propType,
+                    rc.getType().isPrimitive());
         }
         return objectSchema(properties, required);
     }
@@ -404,12 +422,15 @@ final class OpenApiSchemaBuilder {
     private Map<String, Object> pojoSchema(ResolvableType type, Class<?> raw) {
         Map<String, Object> properties = new TreeMap<>();
         List<Object> required = new ArrayList<>();
-        List<PropertyDescriptor> sorted = new ArrayList<>(List.of(BeanUtils.getPropertyDescriptors(raw)));
+        List<PropertyDescriptor> sorted =
+                new ArrayList<>(List.of(BeanUtils.getPropertyDescriptors(raw)));
         sorted.sort(Comparator.comparing(PropertyDescriptor::getName));
         List<String> seen = new ArrayList<>();
         for (PropertyDescriptor pd : sorted) {
             Method getter = pd.getReadMethod();
-            if (getter == null || "class".equals(pd.getName()) || Modifier.isStatic(getter.getModifiers())) {
+            if (getter == null
+                    || "class".equals(pd.getName())
+                    || Modifier.isStatic(getter.getModifiers())) {
                 continue;
             }
             Field field = ReflectionUtils.findField(raw, pd.getName());
@@ -420,7 +441,13 @@ final class OpenApiSchemaBuilder {
             }
             ResolvableType propType = ResolvableType.forType(getter.getGenericReturnType(), type);
             seen.add(pd.getName());
-            addProperty(properties, required, pd.getName(), sources, propType, getter.getReturnType().isPrimitive());
+            addProperty(
+                    properties,
+                    required,
+                    pd.getName(),
+                    sources,
+                    propType,
+                    getter.getReturnType().isPrimitive());
         }
         for (Field f : raw.getFields()) {
             if (Modifier.isStatic(f.getModifiers()) || seen.contains(f.getName())) {
@@ -429,12 +456,19 @@ final class OpenApiSchemaBuilder {
             ResolvableType propType = ResolvableType.forType(f.getGenericType(), type);
             List<AnnotatedElement> sources = new ArrayList<>();
             sources.add(f);
-            addProperty(properties, required, f.getName(), sources, propType, f.getType().isPrimitive());
+            addProperty(
+                    properties,
+                    required,
+                    f.getName(),
+                    sources,
+                    propType,
+                    f.getType().isPrimitive());
         }
         return objectSchema(properties, required);
     }
 
-    private static Map<String, Object> objectSchema(Map<String, Object> properties, List<Object> required) {
+    private static Map<String, Object> objectSchema(
+            Map<String, Object> properties, List<Object> required) {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("type", "object");
         if (!properties.isEmpty()) {
@@ -446,8 +480,13 @@ final class OpenApiSchemaBuilder {
         return m;
     }
 
-    private void addProperty(Map<String, Object> properties, List<Object> required, String javaName,
-                             List<AnnotatedElement> sources, ResolvableType propType, boolean primitive) {
+    private void addProperty(
+            Map<String, Object> properties,
+            List<Object> required,
+            String javaName,
+            List<AnnotatedElement> sources,
+            ResolvableType propType,
+            boolean primitive) {
         JsonIgnore ignore = firstAnnotation(sources, JsonIgnore.class);
         if (ignore != null && ignore.value()) {
             return;
@@ -464,8 +503,9 @@ final class OpenApiSchemaBuilder {
                 schema.put("writeOnly", Boolean.TRUE);
             }
         }
-        boolean isRequired = hasConstraint(sources, "NotNull", "NotBlank", "NotEmpty")
-            || (jp != null && jp.required());
+        boolean isRequired =
+                hasConstraint(sources, "NotNull", "NotBlank", "NotEmpty")
+                        || (jp != null && jp.required());
         if (primitive) {
             isRequired = true;
             Object zero = primitiveDefault(propType.resolve());
@@ -483,8 +523,12 @@ final class OpenApiSchemaBuilder {
         if (c == boolean.class) {
             return Boolean.FALSE;
         }
-        if (c == byte.class || c == short.class || c == int.class || c == long.class
-            || c == float.class || c == double.class) {
+        if (c == byte.class
+                || c == short.class
+                || c == int.class
+                || c == long.class
+                || c == float.class
+                || c == double.class) {
             return 0;
         }
         return null;
@@ -504,7 +548,8 @@ final class OpenApiSchemaBuilder {
 
     // ------------------------------------------------------------------ annotations
 
-    private static <A extends Annotation> A firstAnnotation(List<AnnotatedElement> sources, Class<A> type) {
+    private static <A extends Annotation> A firstAnnotation(
+            List<AnnotatedElement> sources, Class<A> type) {
         for (AnnotatedElement e : sources) {
             A a = e.getAnnotation(type);
             if (a != null) {
@@ -516,7 +561,8 @@ final class OpenApiSchemaBuilder {
 
     private static boolean isValidationAnnotation(Annotation a) {
         String n = a.annotationType().getName();
-        return n.startsWith("jakarta.validation.constraints.") || n.startsWith("javax.validation.constraints.");
+        return n.startsWith("jakarta.validation.constraints.")
+                || n.startsWith("javax.validation.constraints.");
     }
 
     private static boolean hasConstraint(List<AnnotatedElement> sources, String... simpleNames) {
@@ -535,11 +581,18 @@ final class OpenApiSchemaBuilder {
         return false;
     }
 
-    private static void applyConstraints(Map<String, Object> schema, List<AnnotatedElement> sources) {
+    private static void applyConstraints(
+            Map<String, Object> schema, List<AnnotatedElement> sources) {
         Object typeValue = schema.get("type");
         String type = typeValue instanceof String s ? s : "";
-        String minKey = "string".equals(type) ? "minLength" : "array".equals(type) ? "minItems" : "minProperties";
-        String maxKey = "string".equals(type) ? "maxLength" : "array".equals(type) ? "maxItems" : "maxProperties";
+        String minKey =
+                "string".equals(type)
+                        ? "minLength"
+                        : "array".equals(type) ? "minItems" : "minProperties";
+        String maxKey =
+                "string".equals(type)
+                        ? "maxLength"
+                        : "array".equals(type) ? "maxItems" : "maxProperties";
         boolean sizable = "string".equals(type) || "array".equals(type) || "object".equals(type);
         for (AnnotatedElement e : sources) {
             for (Annotation a : e.getAnnotations()) {
@@ -562,8 +615,10 @@ final class OpenApiSchemaBuilder {
                             schema.put(maxKey, i);
                         }
                     }
-                    case "Min", "DecimalMin" -> putNumber(schema, "minimum", AnnotationUtils.getValue(a, "value"));
-                    case "Max", "DecimalMax" -> putNumber(schema, "maximum", AnnotationUtils.getValue(a, "value"));
+                    case "Min", "DecimalMin" ->
+                            putNumber(schema, "minimum", AnnotationUtils.getValue(a, "value"));
+                    case "Max", "DecimalMax" ->
+                            putNumber(schema, "maximum", AnnotationUtils.getValue(a, "value"));
                     case "Positive" -> schema.put("exclusiveMinimum", 0);
                     case "PositiveOrZero" -> schema.put("minimum", 0);
                     case "Negative" -> schema.put("exclusiveMaximum", 0);

@@ -12,10 +12,7 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.security.logging.LogSafe;
-import com.agenticai.core.tenancy.AppUserRepository;
 import com.agenticai.core.tenancy.ListPaging;
-import com.agenticai.core.tenancy.Tenant;
-import com.agenticai.core.tenancy.TenantRepository;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -85,22 +82,19 @@ public class PlatformUserController {
     private final UserPermissionService userPermissionService;
     private final AdminPermissionAuthoritySource permissionAuthoritySource;
     private final AuditLogService auditLogService;
-    private final TenantRepository tenantRepository;
-    private final AppUserRepository appUserRepository;
+    private final PlatformUserDirectoryService directory;
 
     public PlatformUserController(
             IdentityUserAdminPort keycloak,
             UserPermissionService userPermissionService,
             AdminPermissionAuthoritySource permissionAuthoritySource,
             AuditLogService auditLogService,
-            TenantRepository tenantRepository,
-            AppUserRepository appUserRepository) {
+            PlatformUserDirectoryService directory) {
         this.keycloak = keycloak;
         this.userPermissionService = userPermissionService;
         this.permissionAuthoritySource = permissionAuthoritySource;
         this.auditLogService = auditLogService;
-        this.tenantRepository = tenantRepository;
-        this.appUserRepository = appUserRepository;
+        this.directory = directory;
     }
 
     // ----------------------------------------------------------------- reads
@@ -370,7 +364,7 @@ public class PlatformUserController {
         String value = tenantId.trim();
         try {
             UUID id = UUID.fromString(value);
-            return tenantRepository.findById(id).map(Tenant::getSchemaName).orElse(value);
+            return directory.schemaNameOf(id).orElse(value);
         } catch (IllegalArgumentException notAUuid) {
             return value;
         }
@@ -383,17 +377,13 @@ public class PlatformUserController {
     private RowContext rowContext() {
         Map<String, String> tenantNames = new HashMap<>();
         try {
-            for (Tenant t : tenantRepository.findAll()) {
-                tenantNames.put(t.getSchemaName(), t.getName());
-            }
+            tenantNames = directory.tenantNamesBySchema();
         } catch (RuntimeException e) {
             log.warn("Platform users: tenant name lookup failed", e);
         }
         Map<String, Instant> lastSeen = new HashMap<>();
         try {
-            for (AppUserRepository.KeycloakUserLastSeen r : appUserRepository.findAllLastSeen()) {
-                lastSeen.put(r.getKeycloakUserId(), r.getLastSeenAt());
-            }
+            lastSeen = directory.lastSeenByKeycloakId();
         } catch (RuntimeException e) {
             log.warn("Platform users: last-seen lookup failed", e);
         }

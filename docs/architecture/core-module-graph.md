@@ -26,64 +26,64 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 
 | Module | Kind | Main src files | Depends on (sibling modules) | Notes |
 |---|---|---:|---|---|
-| admin | kernel | 70 | audit, crypto, json, security |  |
-| agents | kernel | 311 | agents-budget, agentspi, approval, audit, chat, codeintel, devices, documentgen, eventbus, graphmemory, guardrails, json, knowledge, mcp, providers, rl, sdlc, secrets, security, sharing, storage, tenancy |  |
+| admin | kernel | 71 | audit, crypto, json, security |  |
+| agents | kernel | 312 | agents-budget, agentspi, approval, audit, chat, codeintel, devices, documentgen, eventbus, graphmemory, guardrails, json, knowledge, mcp, providers, rl, sdlc, secrets, security, sharing, storage, tenancy |  |
 | agents-browser | kernel | 134 | agents, agents-tools, audit, devices, json, knowledge, providers, secrets, security, sharing, tenancy |  |
-| agents-budget | kernel | 14 | audit, chat, providers, security, tenancy |  |
+| agents-budget | kernel | 15 | audit, chat, providers, security, tenancy |  |
 | agents-chatport | kernel | 21 | agents, agents-turn, audit, json, security, sharing, tenancy |  |
-| agents-interop | kernel | 79 | agents, agents-budget, agents-turn, audit, chat, json, prompts, providers, security, settings, sharing, tenancy |  |
-| agents-jobs | kernel | 198 | agents, agents-browser, agents-memory, agents-turn, approval, audit, chat, eventbus, json, providers, rl, security, settings, sharing, tenancy |  |
+| agents-interop | kernel | 80 | agents, agents-budget, agents-turn, audit, chat, json, prompts, providers, security, settings, sharing, tenancy |  |
+| agents-jobs | kernel | 200 | agents, agents-browser, agents-memory, agents-turn, approval, audit, chat, eventbus, json, providers, rl, security, settings, sharing, tenancy |  |
 | agents-memory | kernel | 53 | agents, json, security, settings, tenancy |  |
-| agents-studio | kernel | 102 | agents, agents-tools (test), agents-turn, approval, chat, guardrails, json, knowledge, mcp, providers, rl, sdlc, security, sharing, tenancy |  |
-| agents-tools | kernel | 303 | agents, agents-turn, agentspi, approval, audit, chat, codeintel, devices, documentgen, eventbus, graphmemory, guardrails, json, knowledge, mcp, prompts, providers, sdlc, secrets, security, sharing, storage, tenancy |  |
-| agents-turn | kernel | 452 | agents, agents-budget, agents-memory, approval, audit, chat, eventbus, graphmemory, guardrails, json, knowledge, prompts, providers, rl, security, settings, sharing, storage, tenancy |  |
+| agents-studio | kernel | 105 | agents, agents-tools (test), agents-turn, approval, chat, guardrails, json, knowledge, mcp, providers, rl, sdlc, security, sharing, tenancy |  |
+| agents-tools | kernel | 304 | agents, agents-turn, agentspi, approval, audit, chat, codeintel, devices, documentgen, eventbus, graphmemory, guardrails, json, knowledge, mcp, prompts, providers, sdlc, secrets, security, sharing, storage, tenancy |  |
+| agents-turn | kernel | 453 | agents, agents-budget, agents-memory, approval, audit, chat, eventbus, graphmemory, guardrails, json, knowledge, prompts, providers, rl, security, settings, sharing, storage, tenancy |  |
 | agentspi | kernel | 17 | security |  |
-| app | distribution | 202 | admin, agents, agents-browser, agents-budget, agents-chatport, agents-interop, agents-jobs, agents-memory, agents-studio, agents-tools, agents-turn, app-config, approval, audit, billing, brief, chat, crypto, crypto-kms, devices, documentgen, **elevenlabs**, eventbus, **google**, guardrails, **imagegen**, json, knowledge, mcp, mcpserver, omnichannel, omnichannel-social, **payments**, platform, prompts, providers, quality, rl, **sarvam**, sdlc, secrets, security, settings, sharing, storage, templates, tenancy, voice, workflow, workflow-portability |  |
+| app | distribution | 216 | admin, agents, agents-browser, agents-budget, agents-chatport, agents-interop, agents-jobs, agents-memory, agents-studio, agents-tools, agents-turn, app-config, approval, audit, billing, brief, chat, crypto, crypto-kms, devices, documentgen, **elevenlabs**, eventbus, **google**, guardrails, **imagegen**, json, knowledge, mcp, mcpserver, omnichannel, omnichannel-social, **payments**, platform, prompts, providers, quality, rl, **sarvam**, sdlc, secrets, security, settings, sharing, storage, templates, tenancy, voice, workflow, workflow-portability |  |
 | app-config | kernel | 8 | (none) |  |
 | app-jobs | distribution | 1 | admin, agents, agents-browser, agents-budget, agents-interop, agents-jobs, agents-memory, agents-studio, agents-tools, agents-turn, app-config, approval, audit, billing, chat, crypto, crypto-kms, devices, documentgen, **elevenlabs**, eventbus, **google**, guardrails, **imagegen**, json, knowledge, mcp, mcpserver, omnichannel, omnichannel-social, **payments**, platform, prompts, providers, quality, rl, **sarvam**, sdlc, secrets, security, settings, sharing, storage, templates, tenancy, voice, workflow, workflow-portability |  |
 | app-worker | distribution | 1 | admin, agents, agents-browser, agents-budget, agents-interop, agents-jobs, agents-memory, agents-studio, agents-tools, agents-turn, app-config, approval, audit, billing, chat, crypto, crypto-kms, devices, documentgen, **elevenlabs**, eventbus, **google**, guardrails, **imagegen**, json, knowledge, mcp, mcpserver, omnichannel, omnichannel-social, **payments**, platform, prompts, providers, quality, rl, **sarvam**, sdlc, secrets, security, settings, sharing, storage, templates, tenancy, voice, workflow, workflow-portability |  |
-| approval | kernel | 37 | audit, eventbus, rl, security, settings, tenancy |  |
+| approval | kernel | 39 | audit, eventbus, rl, security, settings, tenancy |  |
 | audit | kernel | 37 | json |  |
-| billing | kernel (hosts vendor code) | 69 | json, security | Razorpay + PhonePe gateways in billing.gateway |
+| billing | kernel (hosts vendor code) | 74 | json, security | Razorpay + PhonePe gateways in billing.gateway |
 | brief | kernel | 70 | agents, agents-tools, agents-turn, approval, audit, chat, guardrails, json, knowledge, mcp, omnichannel, providers, quality, secrets, security, tenancy, workflow |  |
-| chat | kernel (hosts vendor code) | 199 | audit, json, prompts, providers, security, settings, tenancy | 16 LLM *ChatClientFactory classes (closed ProviderName) |
+| chat | kernel (hosts vendor code) | 201 | audit, json, prompts, providers, security, settings, tenancy | 16 LLM *ChatClientFactory classes (closed ProviderName) |
 | codeintel | kernel | 23 | approval, json, security |  |
 | crypto | kernel | 7 | (none) |  |
 | crypto-kms | kernel | 4 | crypto, json, security |  |
 | dbauth | kernel | 13 | (none) |  |
-| devices | kernel | 50 | security, tenancy |  |
-| documentgen | kernel | 29 | eventbus, security, storage, tenancy |  |
-| elevenlabs | vendor | 45 | agents (test), agents-studio (test), agentspi, crypto, providers, security, speech, storage, tenancy | ElevenLabs TTS/voice clone/music |
-| eventbus | kernel | 23 | audit, crypto, mcp, security, tenancy |  |
-| google | vendor | 31 | agents (test), agentspi, crypto, guardrails, security, tenancy | Google Workspace OAuth + tools |
+| devices | kernel | 51 | security, tenancy |  |
+| documentgen | kernel | 30 | eventbus, security, storage, tenancy |  |
+| elevenlabs | vendor | 46 | agents (test), agents-studio (test), agentspi, crypto, providers, security, speech, storage, tenancy | ElevenLabs TTS/voice clone/music |
+| eventbus | kernel | 25 | audit, crypto, mcp, security, tenancy |  |
+| google | vendor | 32 | agents (test), agentspi, crypto, guardrails, security, tenancy | Google Workspace OAuth + tools |
 | graphmemory | kernel | 18 | chat, json, prompts, settings, tenancy |  |
 | guardrails | kernel | 145 | approval, audit, json, prompts, settings, tenancy |  |
-| imagegen | vendor | 39 | agents (test), agents-studio (test), agentspi, prompts, providers, security, storage, tenancy | Image/video generation backends |
+| imagegen | vendor | 40 | agents (test), agents-studio (test), agentspi, prompts, providers, security, storage, tenancy | Image/video generation backends |
 | json | kernel | 3 | (none) |  |
 | knowledge | kernel (hosts vendor code) | 144 | audit, crypto, json, prompts, security, settings, sharing, storage, tenancy | embeddings / OCR / sidecar clients |
 | mcp | kernel | 94 | crypto, json, secrets, security |  |
-| mcpserver | kernel | 45 | agents, agents-interop, agents-turn, audit, chat, json, knowledge, security, tenancy, workflow |  |
-| omnichannel | kernel (hosts vendor code) | 312 | agents, agents-turn, approval, audit, chat, crypto, devices, eventbus, guardrails, json, **sarvam** (test), security, speech, tenancy | 11 channel types + Twilio sub-packages (closed ChannelType) |
+| mcpserver | kernel | 46 | agents, agents-interop, agents-turn, audit, chat, json, knowledge, security, tenancy, workflow |  |
+| omnichannel | kernel (hosts vendor code) | 319 | agents, agents-turn, approval, audit, chat, crypto, devices, eventbus, guardrails, json, **sarvam** (test), security, speech, tenancy | 11 channel types + Twilio sub-packages (closed ChannelType) |
 | omnichannel-social | kernel | 94 | omnichannel |  |
-| payments | vendor | 55 | agents (test), agents-tools (test), agentspi, approval, audit, billing, crypto, eventbus, json, security, tenancy | UPI mandate payments |
-| platform | kernel | 153 | admin, agents, agents-turn, audit, chat, codeintel, crypto, guardrails, json, providers, security, tenancy, workflow |  |
+| payments | vendor | 58 | agents (test), agents-tools (test), agentspi, approval, audit, billing, crypto, eventbus, json, security, tenancy | UPI mandate payments |
+| platform | kernel | 165 | admin, agents, agents-turn, audit, chat, codeintel, crypto, guardrails, json, providers, security, tenancy, workflow |  |
 | prompts | kernel | 34 | audit, json, security |  |
 | providers | kernel (hosts vendor code) | 178 | crypto, json, knowledge, settings, tenancy | kernel provider registry; LLM validators + OpenAI/sidecar modality adapters |
-| quality | kernel | 173 | chat, json, prompts, providers, reliability, security, settings, sharing, tenancy |  |
+| quality | kernel | 174 | chat, json, prompts, providers, reliability, security, settings, sharing, tenancy |  |
 | reliability | kernel | 1 | (none) |  |
 | rl | kernel | 52 | chat, json, security, settings |  |
-| sarvam | vendor | 46 | agents, agentspi, crypto, providers, security, speech, storage, tenancy | Sarvam AI (LLM, STT/TTS, translate) |
+| sarvam | vendor | 47 | agents, agentspi, crypto, providers, security, speech, storage, tenancy | Sarvam AI (LLM, STT/TTS, translate) |
 | sdlc | kernel | 44 | crypto, security, tenancy |  |
 | secrets | kernel | 15 | audit, crypto |  |
 | security | kernel | 105 | json |  |
 | settings | kernel | 33 | audit, json, security |  |
-| sharing | kernel | 13 | admin, audit, security |  |
+| sharing | kernel | 14 | admin, audit, security |  |
 | speech | kernel | 11 | (none) |  |
 | storage | kernel | 9 | security |  |
 | templates | kernel | 44 | agents, agents-turn, audit, security, tenancy, workflow |  |
-| tenancy | kernel | 233 | admin, audit, billing, dbauth, security, storage |  |
-| voice | kernel | 38 | agents, agents-turn, crypto, **elevenlabs** (test), json, providers, **sarvam** (test), security, speech, storage |  |
-| workflow | kernel | 287 | admin, agents, agents-browser, agents-tools, agents-turn, approval, audit, chat, crypto, devices, documentgen, eventbus, **google** (test), guardrails, json, knowledge, omnichannel, providers, quality, security, sharing, tenancy, voice, workflow-expression |  |
+| tenancy | kernel | 242 | admin, audit, billing, dbauth, security, storage |  |
+| voice | kernel | 39 | agents, agents-turn, crypto, **elevenlabs** (test), json, providers, **sarvam** (test), security, speech, storage |  |
+| workflow | kernel | 290 | admin, agents, agents-browser, agents-tools, agents-turn, approval, audit, chat, crypto, devices, documentgen, eventbus, **google** (test), guardrails, json, knowledge, omnichannel, providers, quality, security, sharing, tenancy, voice, workflow-expression |  |
 | workflow-expression | kernel | 23 | json |  |
 | workflow-portability | kernel | 30 | agents, agents-studio, devices, json, knowledge, omnichannel, security, sharing, workflow, workflow-expression |  |
 

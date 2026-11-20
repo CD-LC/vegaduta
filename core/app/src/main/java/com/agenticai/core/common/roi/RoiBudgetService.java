@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,19 +40,19 @@ public class RoiBudgetService {
             "enforcement counter (llm_spend_month): the figure the monthly cap is checked against";
     static final List<Integer> THRESHOLDS = List.of(80, 100);
 
-    private final JdbcTemplate jdbc;
+    private final RoiJdbcRepository repository;
     private final LlmGatewayBudgetService gatewayBudget;
     private final LlmSpendReader spendReader;
     private final TenantLimits tenantLimits;
     private final NotificationService notifications;
 
     public RoiBudgetService(
-            JdbcTemplate jdbc,
+            RoiJdbcRepository repository,
             LlmGatewayBudgetService gatewayBudget,
             LlmSpendReader spendReader,
             TenantLimits tenantLimits,
             NotificationService notifications) {
-        this.jdbc = jdbc;
+        this.repository = repository;
         this.gatewayBudget = gatewayBudget;
         this.spendReader = spendReader;
         this.tenantLimits = tenantLimits;
@@ -76,11 +75,7 @@ public class RoiBudgetService {
                         ? null
                         : spent.multiply(BigDecimal.valueOf(100))
                                 .divide(capUsd, 1, RoundingMode.HALF_UP);
-        List<Integer> fired =
-                jdbc.query(
-                        "SELECT threshold FROM roi_budget_alert WHERE month_start = ? ORDER BY threshold",
-                        (rs, n) -> rs.getInt(1),
-                        java.sql.Date.valueOf(monthStart));
+        List<Integer> fired = repository.firedThresholds(monthStart);
         String plan = tenantId == null ? null : tenantLimits.plan(tenantId).name();
         return new BudgetResponse(
                 monthStart, plan, spent, capUsd, percent, capUsd != null, SPEND_BASIS, fired);
@@ -102,13 +97,8 @@ public class RoiBudgetService {
                 continue;
             }
             int inserted =
-                    jdbc.update(
-                            "INSERT INTO roi_budget_alert (month_start, threshold, spend_usd, cap_usd) VALUES (?,?,?,?)"
-                                    + " ON CONFLICT (month_start, threshold) DO NOTHING",
-                            java.sql.Date.valueOf(b.monthStart()),
-                            threshold,
-                            b.spentUsd(),
-                            b.capUsd());
+                    repository.insertBudgetAlert(
+                            b.monthStart(), threshold, b.spentUsd(), b.capUsd());
             if (inserted == 0) {
                 continue; // another replica raised it first
             }

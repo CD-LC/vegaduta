@@ -6,7 +6,6 @@ import com.agenticai.core.agents.spendcap.SpendCapService.TenantCap;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
@@ -84,24 +83,11 @@ final class SpendCapSupport {
     }
 
     Optional<TenantCap> loadBySchema(String schema) {
-        return owner.jdbc.query(SpendCapService.SQL_BY_SCHEMA, (rs, n) -> map(rs), schema).stream()
-                .findFirst();
+        return owner.repository.findBySchema(schema);
     }
 
     Optional<TenantCap> loadById(UUID tenantId) {
-        return owner.jdbc.query(SpendCapService.SQL_BY_ID, (rs, n) -> map(rs), tenantId).stream()
-                .findFirst();
-    }
-
-    static TenantCap map(java.sql.ResultSet rs) throws java.sql.SQLException {
-        Date month = rs.getDate("spend_cap_alert_month");
-        return new TenantCap(
-                rs.getObject("id", UUID.class),
-                rs.getString("schema_name"),
-                rs.getString("name"),
-                rs.getBigDecimal("spend_cap_usd"),
-                rs.getInt("spend_cap_alert_stage"),
-                month == null ? null : month.toLocalDate());
+        return owner.repository.findById(tenantId);
     }
 
     String fallbackKey(UUID tenantId) {

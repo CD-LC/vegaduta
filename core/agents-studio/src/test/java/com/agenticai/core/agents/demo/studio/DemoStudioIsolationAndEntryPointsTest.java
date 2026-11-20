@@ -67,13 +67,12 @@ class DemoStudioIsolationAndEntryPointsTest {
                         sessions,
                         studio,
                         runner,
-                        workflows,
-                        runs,
+                        new DemoStudioWorkflowService(
+                                workflows, runs, runner, new ObjectMapper(), fairUse, 10),
                         new ObjectMapper(),
                         mock(DemoStudioDocumentService.class),
                         mock(DemoStudioConnectorService.class),
-                        fairUse,
-                        10);
+                        fairUse);
 
         workflowOfB =
                 new DemoStudioWorkflow(
@@ -115,11 +114,11 @@ class DemoStudioIsolationAndEntryPointsTest {
         when(workflows.findBySessionIdInOrderByCreatedAtAsc(List.of(a.getId())))
                 .thenReturn(List.of(mine));
 
-        List<DemoStudioController.WorkflowView> views = controller.listWorkflows("tokA");
+        List<DemoStudioWorkflowService.WorkflowView> views = controller.listWorkflows("tokA");
 
         assertEquals(
                 List.of("A's flow"),
-                views.stream().map(DemoStudioController.WorkflowView::name).toList());
+                views.stream().map(DemoStudioWorkflowService.WorkflowView::name).toList());
         assertTrue(views.get(0).mine());
         verify(workflows, never()).findBySessionIdInOrderByCreatedAtAsc(List.of(b.getId()));
         verify(workflows, never())

@@ -4,15 +4,21 @@ import com.agenticai.core.agents.demo.studio.DemoStudioService.AgentUpdate;
 import com.agenticai.core.agents.demo.studio.DemoStudioService.AgentView;
 import com.agenticai.core.agents.demo.studio.DemoStudioService.Palette;
 import com.agenticai.core.agents.demo.studio.DemoStudioService.StudioException;
+import com.agenticai.core.agents.demo.studio.DemoStudioWorkflowService.RunView;
+import com.agenticai.core.agents.demo.studio.DemoStudioWorkflowService.WorkflowView;
 import com.agenticai.core.tenancy.demo.DemoSession;
 import com.agenticai.core.tenancy.demo.DemoSessionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -31,15 +37,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import reactor.core.publisher.Flux;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * HTTP surface of the /try Agent Studio - {@code /api/demo/studio/**}, unauthenticated like the
@@ -68,38 +66,30 @@ public class DemoStudioController {
     private final DemoSessionService demoSessionService;
     private final DemoStudioService studio;
     private final DemoStudioWorkflowRunner runner;
-    private final DemoStudioWorkflowRepository workflowRepository;
-    private final DemoStudioRunRepository runRepository;
+    private final DemoStudioWorkflowService workflowService;
     private final ObjectMapper objectMapper;
     private final DemoStudioDocumentService documents;
     private final DemoStudioConnectorService connectors;
     private final DemoStudioFairUse fairUse;
-    private final int maxWorkflowsPerSession;
     private final DemoStudioStreams streams;
 
     public DemoStudioController(
             DemoSessionService demoSessionService,
             DemoStudioService studio,
             DemoStudioWorkflowRunner runner,
-            DemoStudioWorkflowRepository workflowRepository,
-            DemoStudioRunRepository runRepository,
+            DemoStudioWorkflowService workflowService,
             ObjectMapper objectMapper,
             DemoStudioDocumentService documents,
             DemoStudioConnectorService connectors,
-            DemoStudioFairUse fairUse,
-            @org.springframework.beans.factory.annotation.Value(
-                            "${app.demo.studio.max-workflows-per-session:10}")
-                    int maxWorkflowsPerSession) {
+            DemoStudioFairUse fairUse) {
         this.demoSessionService = demoSessionService;
         this.studio = studio;
         this.runner = runner;
-        this.workflowRepository = workflowRepository;
-        this.runRepository = runRepository;
+        this.workflowService = workflowService;
         this.objectMapper = objectMapper;
         this.documents = documents;
         this.connectors = connectors;
         this.fairUse = fairUse;
-        this.maxWorkflowsPerSession = maxWorkflowsPerSession;
         this.streams = new DemoStudioStreams(objectMapper, fairUse);
     }
 
@@ -135,23 +125,6 @@ public class DemoStudioController {
     public record WorkflowRequest(
             @NotBlank @Size(max = 120) String name,
             DemoStudioWorkflowRunner.Definition definition) {}
-
-    public record WorkflowView(
-            UUID id,
-            String name,
-            DemoStudioWorkflowRunner.Definition definition,
-            boolean mine,
-            Instant createdAt,
-            Instant updatedAt) {}
-
-    public record RunView(
-            UUID id,
-            String status,
-            String input,
-            String output,
-            Object trace,
-            Instant startedAt,
-            Instant finishedAt) {}
 
     public record RunRequest(@Size(max = 2000) String input) {}
 
@@ -249,7 +222,7 @@ public class DemoStudioController {
                 demoSessionService.isReadOnly(session, now),
                 false,
                 studio.palette(session, null).maxAgentsPerSession(),
-                maxWorkflowsPerSession,
+                workflowService.maxWorkflowsPerSession(),
                 true,
                 DemoStudioFairUse.isPublicAddress(session.getCreatedIp())
                         ? session.getCreatedIp()
@@ -486,12 +459,7 @@ public class DemoStudioController {
     public List<WorkflowView> listWorkflows(
             @RequestHeader(value = DEMO_TOKEN_HEADER, required = false) String token) {
         DemoSession session = require(token);
-        // Own workflows only - never another sandbox's, even from the same network address.
-        return workflowRepository
-                .findBySessionIdInOrderByCreatedAtAsc(List.of(session.getId()))
-                .stream()
-                .map(w -> toView(w, session))
-                .toList();
+        return workflowService.list(session);
     }
 
     @PostMapping("/workflows")
@@ -499,30 +467,8 @@ public class DemoStudioController {
             @RequestHeader(value = DEMO_TOKEN_HEADER, required = false) String token,
             @Valid @RequestBody WorkflowRequest request) {
         DemoSession session = requireEditable(token);
-        if (workflowRepository.countBySessionId(session.getId()) >= maxWorkflowsPerSession) {
-            throw new StudioException(
-                    "workflow_cap",
-                    429,
-                    "This sandbox can hold "
-                            + maxWorkflowsPerSession
-                            + " workflows. Delete one, or create a free account for more.");
-        }
-        DemoStudioWorkflowRunner.Definition def =
-                runner.validate(
-                        session,
-                        request.definition() == null
-                                ? new DemoStudioWorkflowRunner.Definition(List.of())
-                                : request.definition());
-        runner.moderate(session, request.name(), def);
-        DemoStudioWorkflow saved =
-                workflowRepository.save(
-                        new DemoStudioWorkflow(
-                                session.getId(),
-                                session.getCreatedIp(),
-                                request.name().strip(),
-                                runner.serialize(def),
-                                Instant.now()));
-        return ResponseEntity.status(HttpStatus.CREATED).body(toView(saved, session));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(workflowService.create(session, request.name(), request.definition()));
     }
 
     @PutMapping("/workflows/{workflowId}")
@@ -531,16 +477,7 @@ public class DemoStudioController {
             @PathVariable UUID workflowId,
             @Valid @RequestBody WorkflowRequest request) {
         DemoSession session = requireEditable(token);
-        DemoStudioWorkflow workflow = requireWorkflow(session, workflowId);
-        DemoStudioWorkflowRunner.Definition def =
-                runner.validate(
-                        session,
-                        request.definition() == null
-                                ? new DemoStudioWorkflowRunner.Definition(List.of())
-                                : request.definition());
-        runner.moderate(session, request.name(), def);
-        workflow.update(request.name().strip(), runner.serialize(def), Instant.now());
-        return toView(workflowRepository.save(workflow), session);
+        return workflowService.update(session, workflowId, request.name(), request.definition());
     }
 
     @DeleteMapping("/workflows/{workflowId}")
@@ -548,7 +485,7 @@ public class DemoStudioController {
             @RequestHeader(value = DEMO_TOKEN_HEADER, required = false) String token,
             @PathVariable UUID workflowId) {
         DemoSession session = requireEditable(token);
-        workflowRepository.delete(requireWorkflow(session, workflowId));
+        workflowService.delete(session, workflowId);
         return ResponseEntity.noContent().build();
     }
 
@@ -557,10 +494,7 @@ public class DemoStudioController {
             @RequestHeader(value = DEMO_TOKEN_HEADER, required = false) String token,
             @PathVariable UUID workflowId) {
         DemoSession session = require(token);
-        requireWorkflow(session, workflowId);
-        return runRepository.findTop10ByWorkflowIdOrderByStartedAtDesc(workflowId).stream()
-                .map(this::toView)
-                .toList();
+        return workflowService.listRuns(session, workflowId);
     }
 
     @PostMapping(
@@ -571,14 +505,16 @@ public class DemoStudioController {
             @PathVariable UUID workflowId,
             @Valid @RequestBody(required = false) RunRequest request) {
         DemoSession session = requireRunnable(token);
-        DemoStudioWorkflow workflow = requireWorkflow(session, workflowId);
+        workflowService.requireOwned(session, workflowId);
         DemoStudioFairUse.Permit permit = fairUse.admit(session, "workflow");
         AtomicBoolean capped = new AtomicBoolean(false);
         Flux<String> started;
         try {
             // Moderates the input (and validates the stored definition) before anything is
             // persisted or sent to a model.
-            started = runner.run(session, workflow, request == null ? "" : request.input());
+            started =
+                    workflowService.run(
+                            session, workflowId, request == null ? "" : request.input());
         } catch (RuntimeException e) {
             permit.release();
             throw e;
@@ -590,7 +526,9 @@ public class DemoStudioController {
                         .concatWith(streams.workflowCapNotice(capped, WORKFLOW_TIMEOUT))
                         .doFinally(signal -> permit.release())
                         .onErrorResume(
-                                e -> streams.workflowFailure(e, session, workflowId, WORKFLOW_TIMEOUT));
+                                e ->
+                                        streams.workflowFailure(
+                                                e, session, workflowId, WORKFLOW_TIMEOUT));
         return ResponseEntity.ok()
                 .header(HttpHeaders.CACHE_CONTROL, "no-cache")
                 .header("X-Accel-Buffering", "no")
@@ -603,53 +541,8 @@ public class DemoStudioController {
             @PathVariable UUID runId,
             @RequestBody DecisionRequest request) {
         DemoSession session = require(token);
-        DemoStudioRun run =
-                runRepository
-                        .findById(runId)
-                        .orElseThrow(
-                                () ->
-                                        new StudioException(
-                                                "not_found",
-                                                404,
-                                                "That run isn't in your studio."));
-        if (!session.getId().equals(run.getSessionId())) {
-            throw new StudioException("not_found", 404, "That run isn't in your studio.");
-        }
+        workflowService.requireRunOwned(session, runId);
         boolean accepted = runner.decide(runId, request.approved());
         return ResponseEntity.ok(Map.of("accepted", accepted, "approved", request.approved()));
-    }
-
-    // ------------------------------------------------------------------
-    // Helpers
-    // ------------------------------------------------------------------
-
-    private DemoStudioWorkflow requireWorkflow(DemoSession session, UUID workflowId) {
-        DemoStudioWorkflow workflow =
-                workflowRepository
-                        .findById(workflowId)
-                        .orElseThrow(
-                                () ->
-                                        new StudioException(
-                                                "not_found",
-                                                404,
-                                                "That workflow isn't in your studio."));
-        if (!session.getId().equals(workflow.getSessionId())) {
-            throw new StudioException("not_found", 404, "That workflow isn't in your studio.");
-        }
-        return workflow;
-    }
-
-    private WorkflowView toView(DemoStudioWorkflow w, DemoSession session) {
-        return new WorkflowView(
-                w.getId(),
-                w.getName(),
-                runner.parse(w.getDefinitionJson()),
-                w.getSessionId().equals(session.getId()),
-                w.getCreatedAt(),
-                w.getUpdatedAt());
-    }
-
-    private RunView toView(DemoStudioRun r) {
-        return streams.toView(r);
     }
 }

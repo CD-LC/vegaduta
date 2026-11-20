@@ -31,7 +31,7 @@ class LeadControllerTest {
     @BeforeEach
     void setUp() {
         service = mock(LeadService.class);
-        controller = new LeadController(service);
+        controller = new LeadController(new LeadApiService(service));
     }
 
     @Test
@@ -55,7 +55,8 @@ class LeadControllerTest {
         for (int i = 0; i < 100; i++) {
             column.add(new Lead("Ann" + i, "a" + i + "@x.com"));
         }
-        Page<Lead> page = new PageImpl<>(column, org.springframework.data.domain.PageRequest.of(2, 100), 451);
+        Page<Lead> page =
+                new PageImpl<>(column, org.springframework.data.domain.PageRequest.of(2, 100), 451);
         when(service.list(any(), any(), any(), any(Pageable.class))).thenReturn(page);
         LeadController.PageResponse r = controller.list("won", null, null, 2, 100);
         ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
@@ -69,15 +70,22 @@ class LeadControllerTest {
 
     @Test
     void unknownStageIs400() {
-        ResponseStatusException e = assertThrows(ResponseStatusException.class,
-            () -> controller.list("nonsense", null, null, 0, 10));
+        ResponseStatusException e =
+                assertThrows(
+                        ResponseStatusException.class,
+                        () -> controller.list("nonsense", null, null, 0, 10));
         assertEquals(HttpStatus.BAD_REQUEST, e.getStatusCode());
     }
 
     @Test
     void unknownActivityTypeIs400() {
-        ResponseStatusException e = assertThrows(ResponseStatusException.class,
-            () -> controller.addActivity(UUID.randomUUID(), new LeadController.ActivityRequest("dance", "x", null)));
+        ResponseStatusException e =
+                assertThrows(
+                        ResponseStatusException.class,
+                        () ->
+                                controller.addActivity(
+                                        UUID.randomUUID(),
+                                        new LeadController.ActivityRequest("dance", "x", null)));
         assertEquals(HttpStatus.BAD_REQUEST, e.getStatusCode());
     }
 
@@ -87,18 +95,31 @@ class LeadControllerTest {
         Lead l = new Lead("Ann", "a@x.com");
         l.setStage(LeadStage.WON);
         when(service.changeStage(id, LeadStage.WON, "closed")).thenReturn(l);
-        assertEquals(LeadStage.WON, controller.stage(id, new LeadController.StageRequest("won", "closed")).stage());
+        assertEquals(
+                LeadStage.WON,
+                controller.stage(id, new LeadController.StageRequest("won", "closed")).stage());
     }
 
     @Test
     void importRejectsEmptyFileAndMapsCsvErrors() {
-        ResponseStatusException empty = assertThrows(ResponseStatusException.class,
-            () -> controller.importFile(new MockMultipartFile("file", "l.csv", "text/csv", new byte[0])));
+        ResponseStatusException empty =
+                assertThrows(
+                        ResponseStatusException.class,
+                        () ->
+                                controller.importFile(
+                                        new MockMultipartFile(
+                                                "file", "l.csv", "text/csv", new byte[0])));
         assertEquals(HttpStatus.BAD_REQUEST, empty.getStatusCode());
 
-        when(service.importRows(any())).thenReturn(new LeadService.ImportResult(1, 0, 0, List.of()));
-        LeadService.ImportResult r = controller.importFile(
-            new MockMultipartFile("file", "l.csv", "text/csv", "name,email\nA,a@x.com\n".getBytes(StandardCharsets.UTF_8)));
+        when(service.importRows(any()))
+                .thenReturn(new LeadService.ImportResult(1, 0, 0, List.of()));
+        LeadService.ImportResult r =
+                controller.importFile(
+                        new MockMultipartFile(
+                                "file",
+                                "l.csv",
+                                "text/csv",
+                                "name,email\nA,a@x.com\n".getBytes(StandardCharsets.UTF_8)));
         assertEquals(1, r.created());
     }
 

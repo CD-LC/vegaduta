@@ -15,12 +15,22 @@ class BillingEmailEditionTest {
 
     @SuppressWarnings("unchecked")
     private final ObjectProvider<JavaMailSender> mailSender = mock(ObjectProvider.class);
+
     private final JdbcTemplate jdbc = mock(JdbcTemplate.class);
     private final BillingEmailTemplateService templates = mock(BillingEmailTemplateService.class);
 
     private BillingEmailService service(boolean billingEdition) {
         return new BillingEmailService(
-                mailSender, templates, jdbc, "a@x", "b@x", "c@x", "d@x", "http://app", "", billingEdition);
+                mailSender,
+                templates,
+                new BillingRecipientJdbcRepository(jdbc),
+                "a@x",
+                "b@x",
+                "c@x",
+                "d@x",
+                "http://app",
+                "",
+                billingEdition);
     }
 
     @Test

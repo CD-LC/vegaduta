@@ -57,7 +57,7 @@ class WorkflowWebhookControllerOidcTest {
         controller =
                 new WorkflowWebhookController(
                         mock(TenantResolutionService.class),
-                        definitionRepositoryWithActiveWorkflow(),
+                        new WorkflowWebhookTargetService(definitionRepositoryWithActiveWorkflow()),
                         triggerNodeService,
                         workflowService,
                         new ObjectMapper(),

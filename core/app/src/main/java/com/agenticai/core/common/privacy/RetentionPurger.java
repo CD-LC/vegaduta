@@ -6,7 +6,6 @@ import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.common.privacy.RetentionPolicyService.Rule;
 import com.agenticai.core.storage.FileStorageService;
-import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -16,7 +15,6 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 /**
@@ -24,9 +22,9 @@ import org.springframework.stereotype.Component;
  * nightly job does that per tenant through {@code TenantSchemaIterator}); every query is
  * unqualified, so it can only see that tenant's schema.
  *
- * <p>One audit event per rule that actually removed (or failed to remove) something, so a
- * quiet night writes nothing. Deletes go in bounded batches; a run stops at {@value #MAX_BATCHES}
- * batches per rule and the next night carries on.
+ * <p>One audit event per rule that actually removed (or failed to remove) something, so a quiet
+ * night writes nothing. Deletes go in bounded batches; a run stops at {@value #MAX_BATCHES} batches
+ * per rule and the next night carries on.
  */
 @Component
 public class RetentionPurger {
@@ -44,7 +42,7 @@ public class RetentionPurger {
             long deleted,
             long failed) {}
 
-    private final JdbcTemplate jdbc;
+    private final RetentionPurgeJdbcRepository repository;
     private final RetentionPolicyService policies;
     private final AuditLogService audit;
     private final FileStorageService storage;
@@ -52,13 +50,13 @@ public class RetentionPurger {
     private final ObjectProvider<TenantMemoryService> tenantMemory;
 
     public RetentionPurger(
-            JdbcTemplate jdbc,
+            RetentionPurgeJdbcRepository repository,
             RetentionPolicyService policies,
             AuditLogService audit,
             FileStorageService storage,
             ObjectProvider<AgentMemoryService> agentMemory,
             ObjectProvider<TenantMemoryService> tenantMemory) {
-        this.jdbc = jdbc;
+        this.repository = repository;
         this.policies = policies;
         this.audit = audit;
         this.storage = storage;
@@ -72,8 +70,7 @@ public class RetentionPurger {
 
     List<Result> purgeCurrentTenant(Instant now) {
         List<Result> results = new ArrayList<>();
-        for (String channel :
-                jdbc.queryForList("SELECT DISTINCT channel FROM channel_message_log", String.class)) {
+        for (String channel : repository.transcriptChannels()) {
             policies.effective(channel, PrivacyDataClass.TRANSCRIPT)
                     .ifPresent(rule -> results.add(purgeTranscripts(channel, rule, now)));
         }
@@ -99,7 +96,9 @@ public class RetentionPurger {
                                 + r.cutoff()
                                 + ") for channel "
                                 + r.channel()
-                                + (r.failed() > 0 ? "; " + r.failed() + " failed and will be retried" : ""));
+                                + (r.failed() > 0
+                                        ? "; " + r.failed() + " failed and will be retried"
+                                        : ""));
             }
         }
         return results;
@@ -109,26 +108,17 @@ public class RetentionPurger {
         Instant cutoff = cutoff(now, rule);
         long deleted = 0;
         for (int i = 0; i < MAX_BATCHES; i++) {
-            int n =
-                    jdbc.update(
-                            "DELETE FROM channel_message_log WHERE id IN (SELECT id FROM"
-                                    + " channel_message_log WHERE channel = ? AND created_at < ?"
-                                    + " ORDER BY created_at LIMIT ?)",
-                            channel,
-                            Timestamp.from(cutoff),
-                            BATCH);
+            int n = repository.deleteTranscriptBatch(channel, cutoff, BATCH);
             deleted += n;
             if (n < BATCH) {
                 break;
             }
         }
-        // The session row keeps a short preview of the last message; it ages out with the transcript.
-        jdbc.update(
-                "UPDATE channel_session SET last_message_preview = NULL WHERE channel = ?"
-                        + " AND last_message_preview IS NOT NULL AND last_message_at < ?",
-                channel,
-                Timestamp.from(cutoff));
-        return new Result(PrivacyDataClass.TRANSCRIPT, channel, rule.retentionDays(), cutoff, deleted, 0);
+        // The session row keeps a short preview of the last message; it ages out with the
+        // transcript.
+        repository.clearSessionPreviews(channel, cutoff);
+        return new Result(
+                PrivacyDataClass.TRANSCRIPT, channel, rule.retentionDays(), cutoff, deleted, 0);
     }
 
     private Result purgeRecordings(Rule rule, Instant now) {
@@ -136,12 +126,7 @@ public class RetentionPurger {
         long deleted = 0;
         long failed = 0;
         for (int i = 0; i < MAX_BATCHES; i++) {
-            List<Map<String, Object>> rows =
-                    jdbc.queryForList(
-                            "SELECT id, object_key FROM voice_call_recording WHERE created_at < ?"
-                                    + " ORDER BY created_at LIMIT ?",
-                            Timestamp.from(cutoff),
-                            BATCH);
+            List<Map<String, Object>> rows = repository.recordingBatch(cutoff, BATCH);
             long failedThisBatch = 0;
             for (Map<String, Object> row : rows) {
                 String key = (String) row.get("object_key");
@@ -149,12 +134,14 @@ public class RetentionPurger {
                     if (key != null && !key.isBlank()) {
                         storage.delete(key);
                     }
-                    jdbc.update("DELETE FROM voice_call_recording WHERE id = ?", (UUID) row.get("id"));
+                    repository.deleteRecording((UUID) row.get("id"));
                     deleted++;
                 } catch (RuntimeException e) {
                     // Keep the row so the object is not orphaned from its record; retry tomorrow.
                     failedThisBatch++;
-                    log.warn("Retention purge could not delete a recording object: {}", e.getMessage());
+                    log.warn(
+                            "Retention purge could not delete a recording object: {}",
+                            e.getMessage());
                 }
             }
             failed += failedThisBatch;
@@ -162,7 +149,13 @@ public class RetentionPurger {
                 break;
             }
         }
-        return new Result(PrivacyDataClass.RECORDING, PrivacyDataClass.VOICE, rule.retentionDays(), cutoff, deleted, failed);
+        return new Result(
+                PrivacyDataClass.RECORDING,
+                PrivacyDataClass.VOICE,
+                rule.retentionDays(),
+                cutoff,
+                deleted,
+                failed);
     }
 
     private Result purgeExtractedFields(Rule rule, Instant now) {
@@ -177,7 +170,12 @@ public class RetentionPurger {
             deleted += drain(limit -> tenant.purgeCreatedBefore(cutoff, limit));
         }
         return new Result(
-                PrivacyDataClass.EXTRACTED_FIELDS, PrivacyDataClass.ALL_CHANNELS, rule.retentionDays(), cutoff, deleted, 0);
+                PrivacyDataClass.EXTRACTED_FIELDS,
+                PrivacyDataClass.ALL_CHANNELS,
+                rule.retentionDays(),
+                cutoff,
+                deleted,
+                0);
     }
 
     private static long drain(java.util.function.IntUnaryOperator batch) {

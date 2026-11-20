@@ -7,7 +7,6 @@ import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantRepository;
 import java.time.Instant;
 import java.util.UUID;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,26 +25,23 @@ import org.springframework.transaction.annotation.Transactional;
  * schema creation and migration - IS reused verbatim via {@code TenantSchemaMigrator}, which is the
  * public component built for exactly that.
  *
- * <p><b>{@code is_demo} is written with {@link JdbcTemplate}, not JPA.</b> Migration V126 adds
- * {@code control_plane.tenant.is_demo}, but {@code Tenant.java} deliberately gains no mapped field
- * for it in this slice - that file is shared, hot, and concurrently edited, and Hibernate is
- * perfectly happy to ignore a column it does not know about (the column is {@code NOT NULL DEFAULT
- * FALSE}, so JPA inserts still work untouched). This is the same call {@code NewsletterService}
- * already made and documented for {@code news_opt_in}. Follow-up, stated honestly: once {@code
- * Tenant.java} is quiet, map it properly and delete this one raw UPDATE.
+ * <p><b>{@code is_demo} is written with {@link DemoSessionJdbcRepository}, not JPA.</b> Migration
+ * V126 adds {@code control_plane.tenant.is_demo}, but {@code Tenant.java} deliberately gains no
+ * mapped field for it in this slice - that file is shared, hot, and concurrently edited, and
+ * Hibernate is perfectly happy to ignore a column it does not know about (the column is {@code NOT
+ * NULL DEFAULT FALSE}, so JPA inserts still work untouched). This is the same call {@code
+ * NewsletterService} already made and documented for {@code news_opt_in}. Follow-up, stated
+ * honestly: once {@code Tenant.java} is quiet, map it properly and delete this one raw UPDATE.
  */
 @Component
 class DemoSessionRecorder {
-
-    private static final String MARK_DEMO_SQL =
-            "UPDATE control_plane.tenant SET is_demo = TRUE WHERE id = ?";
 
     private final TenantRepository tenantRepository;
     private final DemoSessionRepository demoSessionRepository;
     private final DemoGeneratedImageRepository demoGeneratedImageRepository;
     private final DemoGeneratedVideoRepository demoGeneratedVideoRepository;
     private final DemoGeneratedMusicRepository demoGeneratedMusicRepository;
-    private final JdbcTemplate jdbcTemplate;
+    private final DemoSessionJdbcRepository sessionJdbcRepository;
 
     DemoSessionRecorder(
             TenantRepository tenantRepository,
@@ -53,13 +49,13 @@ class DemoSessionRecorder {
             DemoGeneratedImageRepository demoGeneratedImageRepository,
             DemoGeneratedVideoRepository demoGeneratedVideoRepository,
             DemoGeneratedMusicRepository demoGeneratedMusicRepository,
-            JdbcTemplate jdbcTemplate) {
+            DemoSessionJdbcRepository sessionJdbcRepository) {
         this.tenantRepository = tenantRepository;
         this.demoSessionRepository = demoSessionRepository;
         this.demoGeneratedImageRepository = demoGeneratedImageRepository;
         this.demoGeneratedVideoRepository = demoGeneratedVideoRepository;
         this.demoGeneratedMusicRepository = demoGeneratedMusicRepository;
-        this.jdbcTemplate = jdbcTemplate;
+        this.sessionJdbcRepository = sessionJdbcRepository;
     }
 
     /**
@@ -79,7 +75,7 @@ class DemoSessionRecorder {
                                 keycloakRealm,
                                 AccountType.B2C,
                                 ExperienceMode.SIMPLE));
-        jdbcTemplate.update(MARK_DEMO_SQL, tenant.getId());
+        sessionJdbcRepository.markTenantDemo(tenant.getId());
         return tenant;
     }
 
@@ -346,16 +342,7 @@ class DemoSessionRecorder {
      */
     @Transactional
     String assignShareIdIfAbsent(UUID sessionId, String candidateShareId, Instant at) {
-        jdbcTemplate.update(
-                "UPDATE control_plane.demo_session SET share_id = ?, share_created_at = ? "
-                        + "WHERE id = ? AND share_id IS NULL",
-                candidateShareId,
-                at.atOffset(java.time.ZoneOffset.UTC),
-                sessionId);
-        return jdbcTemplate.query(
-                "SELECT share_id FROM control_plane.demo_session WHERE id = ?",
-                rs -> rs.next() ? rs.getString(1) : null,
-                sessionId);
+        return sessionJdbcRepository.assignShareIdIfAbsent(sessionId, candidateShareId, at);
     }
 
     /** One public GET of the share meta - feeds the funnel's shareViews. */

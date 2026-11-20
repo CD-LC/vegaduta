@@ -1,5 +1,6 @@
 package com.agenticai.core.imagegen;
 
+import com.agenticai.core.imagegen.dto.VideoGenerationJobResponse;
 import com.agenticai.core.providers.ProviderCredentialResolver;
 import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.providers.ProviderNotActiveException;
@@ -158,6 +159,41 @@ public class VideoGenerationJobService {
     /** The caller is responsible for closing {@code stream}. */
     public record ResultStream(
             java.io.InputStream stream, String contentType, long contentLength) {}
+
+    /** A finished video's storage key and content type, for the streaming endpoint. */
+    public record VideoFileRef(String objectKey, String contentType) {}
+
+    /**
+     * {@link #enqueue(String, int, VideoGenerationClient.SourceImage)} rendered as the API response
+     * DTO.
+     */
+    public VideoGenerationJobResponse enqueueResponse(
+            String prompt, int durationSeconds, VideoGenerationClient.SourceImage sourceImage) {
+        return VideoGenerationJobResponse.from(enqueue(prompt, durationSeconds, sourceImage));
+    }
+
+    /** {@link #get} rendered as the API response DTO. */
+    public VideoGenerationJobResponse getResponse(UUID jobId) {
+        return VideoGenerationJobResponse.from(get(jobId));
+    }
+
+    /** One newest-first window of the paged listing, as response DTOs. */
+    public List<VideoGenerationJobResponse> listPageResponses(long offset, int limit) {
+        return listPage(offset, limit).stream().map(VideoGenerationJobResponse::from).toList();
+    }
+
+    /**
+     * The job's finished video, or empty when it is not {@code COMPLETE} yet (an unknown job still
+     * throws, as {@link #get}).
+     */
+    public Optional<VideoFileRef> findCompletedVideo(UUID jobId) {
+        VideoGenerationJob job = get(jobId);
+        if (job.getStatus() != VideoGenerationJobStatus.COMPLETE
+                || job.getResultObjectKey() == null) {
+            return Optional.empty();
+        }
+        return Optional.of(new VideoFileRef(job.getResultObjectKey(), job.getResultContentType()));
+    }
 
     /** Backs the Files page's "Generated video" listing, newest first. */
     public List<VideoGenerationJob> listAll() {

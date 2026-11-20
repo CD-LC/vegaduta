@@ -41,7 +41,14 @@ class PlatformUserControllerTest {
     private final TenantRepository tenants = mock(TenantRepository.class);
     private final AppUserRepository appUsers = mock(AppUserRepository.class);
     private final PlatformUserController controller =
-            new PlatformUserController(keycloak, perms, authority, audit, tenants, appUsers);
+            new PlatformUserController(
+                    keycloak,
+                    perms,
+                    authority,
+                    audit,
+                    new PlatformUserDirectoryService(
+                            new com.agenticai.core.tenancy.TenantDirectoryService(tenants),
+                            new com.agenticai.core.tenancy.AppUserDirectoryService(appUsers)));
 
     @BeforeEach
     void operator() {
@@ -104,7 +111,9 @@ class PlatformUserControllerTest {
         var second = controller.list(null, null, 2, 2L);
         assertEquals("3", second.getHeaders().getFirst("X-Total-Count"));
         assertEquals("false", second.getHeaders().getFirst("X-Has-More"));
-        assertEquals(List.of("carol"), second.getBody().users().stream().map(u -> u.username()).toList());
+        assertEquals(
+                List.of("carol"),
+                second.getBody().users().stream().map(u -> u.username()).toList());
 
         var past = controller.list(null, null, 2, 99_999_999_999L);
         assertEquals("3", past.getHeaders().getFirst("X-Total-Count"));

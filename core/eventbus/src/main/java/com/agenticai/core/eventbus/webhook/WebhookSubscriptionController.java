@@ -1,14 +1,16 @@
 package com.agenticai.core.eventbus.webhook;
 
-import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.http.ResponseEntity;
+import com.agenticai.core.eventbus.webhook.WebhookDeliveryQueryService.DeliveryView;
 import com.agenticai.core.tenancy.ListPaging;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
-import org.springframework.data.domain.PageRequest;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -16,12 +18,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
 /**
  * Tenant-facing webhook subscription API ({@code /api/webhooks/**}) - the outbound-event half of
@@ -37,12 +35,12 @@ import java.util.UUID;
 public class WebhookSubscriptionController {
 
     private final WebhookSubscriptionService service;
-    private final WebhookDeliveryRepository deliveryRepository;
+    private final WebhookDeliveryQueryService deliveryQueryService;
 
     public WebhookSubscriptionController(
-            WebhookSubscriptionService service, WebhookDeliveryRepository deliveryRepository) {
+            WebhookSubscriptionService service, WebhookDeliveryQueryService deliveryQueryService) {
         this.service = service;
-        this.deliveryRepository = deliveryRepository;
+        this.deliveryQueryService = deliveryQueryService;
     }
 
     public record CreateRequest(
@@ -56,26 +54,18 @@ public class WebhookSubscriptionController {
             Set<String> eventTypes,
             Boolean enabled) {}
 
-    public record DeliveryView(
-            UUID id,
-            String eventType,
-            String runId,
-            String status,
-            int attemptCount,
-            Integer responseCode,
-            String lastError,
-            java.time.Instant createdAt,
-            java.time.Instant deliveredAt,
-            Integer durationMs) {}
-
     @GetMapping
-    public ResponseEntity<List<WebhookSubscriptionService.SubscriptionView>> list(@RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
+    public ResponseEntity<List<WebhookSubscriptionService.SubscriptionView>> list(
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
         return ListPaging.window(service.list(), limit, offset, 50, 200);
     }
 
     /** Event-type catalog for the subscription form's picker. */
     @GetMapping("/event-types")
-    public ResponseEntity<List<WebhookEventCatalog.Entry>> eventTypes(@RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
+    public ResponseEntity<List<WebhookEventCatalog.Entry>> eventTypes(
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
         return ListPaging.window(WebhookEventCatalog.ENTRIES, limit, offset, 100, 500);
     }
 
@@ -117,26 +107,11 @@ public class WebhookSubscriptionController {
 
     /** Delivery history for one subscription - newest first, capped at 100. */
     @GetMapping("/{id}/deliveries")
-    public ResponseEntity<List<DeliveryView>> deliveries(@PathVariable UUID id, @RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
-        service.get(id); // 404 if the subscription isn't this tenant's / doesn't exist
-        List<DeliveryView> all =
-                deliveryRepository
-                .findBySubscriptionIdOrderByCreatedAtDesc(id, PageRequest.of(0, 100))
-                .stream()
-                .map(
-                        d ->
-                                new DeliveryView(
-                                        d.getId(),
-                                        d.getEventType(),
-                                        d.getRunId(),
-                                        d.getStatus(),
-                                        d.getAttemptCount(),
-                                        d.getResponseCode(),
-                                        d.getLastError(),
-                                        d.getCreatedAt(),
-                                        d.getDeliveredAt(),
-                                        d.getDurationMs()))
-                .toList();
+    public ResponseEntity<List<DeliveryView>> deliveries(
+            @PathVariable UUID id,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
+        List<DeliveryView> all = deliveryQueryService.recentDeliveries(id);
         return ListPaging.window(all, limit, offset, 50, 100);
     }
 }

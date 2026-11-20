@@ -5,17 +5,12 @@ import com.agenticai.core.admin.keycloak.KeycloakUserRepresentation;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -61,28 +56,17 @@ public class ScimProvisioningController {
     private static final String USER_SCHEMA = "urn:ietf:params:scim:schemas:core:2.0:User";
     private static final String ERROR_SCHEMA = "urn:ietf:params:scim:api:messages:2.0:Error";
 
-    private final TenantScimTokenRepository tokenRepository;
+    private final TenantScimTokenService tokenService;
     private final IdentityUserAdminPort keycloak;
     private final TenantLimits tenantLimits;
 
     public ScimProvisioningController(
-            TenantScimTokenRepository tokenRepository,
+            TenantScimTokenService tokenService,
             IdentityUserAdminPort keycloak,
             TenantLimits tenantLimits) {
-        this.tokenRepository = tokenRepository;
+        this.tokenService = tokenService;
         this.keycloak = keycloak;
         this.tenantLimits = tenantLimits;
-    }
-
-    static String sha256Hex(String token) {
-        try {
-            return HexFormat.of()
-                    .formatHex(
-                            MessageDigest.getInstance("SHA-256")
-                                    .digest(token.getBytes(StandardCharsets.UTF_8)));
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 unavailable", e);
-        }
     }
 
     /** Null = unauthorized. Never throws - a wrong token is a 401, not a 500. */
@@ -94,10 +78,7 @@ public class ScimProvisioningController {
         if (token.isEmpty() || token.length() > 512) {
             return null;
         }
-        Optional<TenantScimToken> row =
-                tokenRepository.findByTokenHashAndRevokedAtIsNull(sha256Hex(token));
-        row.ifPresent(t -> tokenRepository.markUsed(t.getId()));
-        return row.map(TenantScimToken::getTenantSchema).orElse(null);
+        return tokenService.authenticate(token).orElse(null);
     }
 
     private static ResponseEntity<Map<String, Object>> scimError(HttpStatus status, String detail) {
@@ -129,7 +110,6 @@ public class ScimProvisioningController {
     }
 
     @GetMapping("/Users")
-    @Transactional
     public ResponseEntity<?> listUsers(
             @RequestHeader(value = "Authorization", required = false) String auth) {
         String tenant = authorizedTenant(auth);
@@ -152,7 +132,6 @@ public class ScimProvisioningController {
     }
 
     @PostMapping("/Users")
-    @Transactional
     public ResponseEntity<?> createUser(
             @RequestHeader(value = "Authorization", required = false) String auth,
             @RequestBody Map<String, Object> body) {

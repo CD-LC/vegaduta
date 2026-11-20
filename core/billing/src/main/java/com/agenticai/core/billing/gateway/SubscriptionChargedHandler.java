@@ -8,15 +8,14 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 /**
  * Handles {@code subscription.charged} events — fired by Razorpay when a subscription payment is
  * successfully collected.
  *
- * <p>Actions: 1. Fetch tenant ID by gateway subscription ID (via JdbcTemplate) 2. Update
- * subscription status to ACTIVE in the tenant table 3. Queue receipt email send (via
+ * <p>Actions: 1. Fetch tenant ID by gateway subscription ID (via TenantSubscriptionJdbcRepository)
+ * 2. Update subscription status to ACTIVE in the tenant table 3. Queue receipt email send (via
  * BillingEmailService) 4. Log the transition
  *
  * <p>Uses JdbcTemplate to avoid importing the Tenant entity and creating a cycle dependency
@@ -32,11 +31,12 @@ public class SubscriptionChargedHandler implements BillingEventHandler {
 
     private static final Logger log = LoggerFactory.getLogger(SubscriptionChargedHandler.class);
 
-    private final JdbcTemplate jdbcTemplate;
+    private final TenantSubscriptionJdbcRepository tenants;
     private final BillingEmailService emailService;
 
-    public SubscriptionChargedHandler(JdbcTemplate jdbcTemplate, BillingEmailService emailService) {
-        this.jdbcTemplate = jdbcTemplate;
+    public SubscriptionChargedHandler(
+            TenantSubscriptionJdbcRepository tenants, BillingEmailService emailService) {
+        this.tenants = tenants;
         this.emailService = emailService;
     }
 
@@ -51,11 +51,7 @@ public class SubscriptionChargedHandler implements BillingEventHandler {
         // 1. Fetch tenant ID by gateway subscription ID
         String tenantIdStr;
         try {
-            tenantIdStr =
-                    jdbcTemplate.queryForObject(
-                            "SELECT id FROM control_plane.tenant WHERE gateway_subscription_id = ?",
-                            String.class,
-                            gatewaySubscriptionId);
+            tenantIdStr = tenants.findTenantIdByGatewaySubscriptionId(gatewaySubscriptionId);
         } catch (EmptyResultDataAccessException e) {
             log.warn(
                     "No tenant found for gateway subscription ID '{}' - webhook may be replayed",
@@ -80,13 +76,7 @@ public class SubscriptionChargedHandler implements BillingEventHandler {
 
         // 2. Update subscription status to ACTIVE (idempotent)
         try {
-            int updated =
-                    jdbcTemplate.update(
-                            "UPDATE control_plane.tenant SET subscription_status = ? WHERE id = ? AND (subscription_status = ? OR subscription_status != ?)",
-                            "ACTIVE",
-                            tenantId,
-                            "PENDING",
-                            "ACTIVE");
+            int updated = tenants.markActive(tenantId);
             if (updated > 0) {
                 log.info(
                         "Tenant {} subscription '{}' transitioned to ACTIVE",
@@ -99,11 +89,7 @@ public class SubscriptionChargedHandler implements BillingEventHandler {
                         LogSafe.clean(gatewaySubscriptionId));
             }
 
-            tenantName =
-                    jdbcTemplate.queryForObject(
-                            "SELECT name FROM control_plane.tenant WHERE id = ?",
-                            String.class,
-                            tenantId);
+            tenantName = tenants.findName(tenantId);
         } catch (Exception e) {
             // Pass the throwable, not just getMessage(): a tenant has paid and did not get
             // ACTIVE, and a bare Spring JDBC message ("could not extract ResultSet") never

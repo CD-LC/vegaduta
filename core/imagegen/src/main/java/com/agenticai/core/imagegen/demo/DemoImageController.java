@@ -3,8 +3,8 @@ package com.agenticai.core.imagegen.demo;
 import com.agenticai.core.imagegen.GeminiImageGenerationClient;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
-import com.agenticai.core.tenancy.demo.DemoGeneratedImage;
 import com.agenticai.core.tenancy.demo.DemoImageService;
+import com.agenticai.core.tenancy.demo.DemoServedMedia;
 import com.agenticai.core.tenancy.demo.DemoSession;
 import com.agenticai.core.tenancy.demo.DemoSessionRateLimiter;
 import com.agenticai.core.tenancy.demo.DemoSessionService;
@@ -255,22 +255,18 @@ public class DemoImageController {
      */
     @GetMapping("/image/{id}")
     public ResponseEntity<byte[]> serve(@PathVariable("id") UUID id) {
-        Optional<DemoGeneratedImage> image = demoImageService.find(id);
+        Optional<DemoServedMedia> image = demoImageService.readServed(id);
         if (image.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        Optional<byte[]> bytes = demoImageService.readBytes(image.get());
-        if (bytes.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(image.get().getContentType()))
+                .contentType(MediaType.parseMediaType(image.get().contentType()))
                 .header("X-Content-Type-Options", "nosniff")
                 // Immutable content behind a random id - safe to cache hard, and
                 // worth it: the /try page re-renders this <img> on every state
                 // change and a re-fetch per keystroke would be silly.
                 .cacheControl(CacheControl.maxAge(Duration.ofDays(7)).cachePrivate().immutable())
-                .body(bytes.get());
+                .body(image.get().bytes());
     }
 
     /**

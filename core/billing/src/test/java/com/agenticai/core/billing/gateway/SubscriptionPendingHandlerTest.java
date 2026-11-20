@@ -26,16 +26,14 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
- * B9-PR4 revenue-path contract - {@link SubscriptionPendingHandler}, the
- * sibling of {@link SubscriptionChargedHandler} for Razorpay's retry-engine
- * {@code subscription.pending} events. Same DB-free posture as that
- * handler's suite: JdbcTemplate mocked, so the pinned contract is the
- * decision logic plus the SQL shape - the {@code CASE WHEN past_due_since
- * IS NULL} clause ("first failure wins"), plus the D1/D5 dunning behavior:
- * the attempt counter riding on {@code subscription_status}
- * (PENDING -> PENDING:2 -> PENDING:3), which email each attempt sends, and
- * the {@link SubscriptionPaymentExhaustedEvent} published once the counter
- * reaches the configured max (3 here, matching the production default).
+ * B9-PR4 revenue-path contract - {@link SubscriptionPendingHandler}, the sibling of {@link
+ * SubscriptionChargedHandler} for Razorpay's retry-engine {@code subscription.pending} events. Same
+ * DB-free posture as that handler's suite: JdbcTemplate mocked, so the pinned contract is the
+ * decision logic plus the SQL shape - the {@code CASE WHEN past_due_since IS NULL} clause ("first
+ * failure wins"), plus the D1/D5 dunning behavior: the attempt counter riding on {@code
+ * subscription_status} (PENDING -> PENDING:2 -> PENDING:3), which email each attempt sends, and the
+ * {@link SubscriptionPaymentExhaustedEvent} published once the counter reaches the configured max
+ * (3 here, matching the production default).
  */
 class SubscriptionPendingHandlerTest {
 
@@ -54,25 +52,35 @@ class SubscriptionPendingHandlerTest {
         jdbcTemplate = mock(JdbcTemplate.class);
         emailService = mock(BillingEmailService.class);
         eventPublisher = mock(ApplicationEventPublisher.class);
-        handler = new SubscriptionPendingHandler(jdbcTemplate, emailService, eventPublisher, MAX_FAILED_ATTEMPTS);
+        handler =
+                new SubscriptionPendingHandler(
+                        new TenantSubscriptionJdbcRepository(jdbcTemplate),
+                        emailService,
+                        eventPublisher,
+                        MAX_FAILED_ATTEMPTS);
     }
 
     private BillingEvent pendingEvent(String subscriptionId) {
-        return new BillingEvent(BillingEventType.SUBSCRIPTION_PENDING, subscriptionId, "subscription.pending");
+        return new BillingEvent(
+                BillingEventType.SUBSCRIPTION_PENDING, subscriptionId, "subscription.pending");
     }
 
     private void stubTenantLookup(String plan, String previousStatus) {
         when(jdbcTemplate.queryForObject(
-            startsWith("SELECT id FROM control_plane.tenant"), eq(String.class), eq(SUB_ID)))
-            .thenReturn(TENANT_ID_STR);
+                        startsWith("SELECT id FROM control_plane.tenant"),
+                        eq(String.class),
+                        eq(SUB_ID)))
+                .thenReturn(TENANT_ID_STR);
         // Detail lookup uses ?::uuid with the STRING id, not a UUID param.
         Map<String, Object> row = new HashMap<>();
         row.put("name", "Acme");
         row.put("plan", plan);
         row.put("subscription_status", previousStatus);
         when(jdbcTemplate.queryForMap(
-            startsWith("SELECT name, plan, subscription_status FROM control_plane.tenant"), eq(TENANT_ID_STR)))
-            .thenReturn(row);
+                        startsWith(
+                                "SELECT name, plan, subscription_status FROM control_plane.tenant"),
+                        eq(TENANT_ID_STR)))
+                .thenReturn(row);
     }
 
     @Test
@@ -82,16 +90,19 @@ class SubscriptionPendingHandlerTest {
         handler.handle(pendingEvent(SUB_ID));
 
         ArgumentCaptor<String> sql = ArgumentCaptor.forClass(String.class);
-        verify(jdbcTemplate).update(sql.capture(), eq("PENDING"), any(Instant.class), eq(TENANT_ID));
+        verify(jdbcTemplate)
+                .update(sql.capture(), eq("PENDING"), any(Instant.class), eq(TENANT_ID));
         // The first-failure-wins guard lives entirely in this SQL - the
         // handler reads status only for the attempt counter, so if the CASE
         // guard were ever simplified away, every Razorpay charge retry would
         // re-stamp past_due_since and the dunning grace window would never
         // close in on a persistently failing card.
-        assertTrue(sql.getValue().contains("CASE WHEN past_due_since IS NULL"),
-            "past_due_since may only be set when currently NULL - first failure wins");
-        assertTrue(sql.getValue().contains("ELSE past_due_since"),
-            "an already-set past_due_since must be preserved verbatim");
+        assertTrue(
+                sql.getValue().contains("CASE WHEN past_due_since IS NULL"),
+                "past_due_since may only be set when currently NULL - first failure wins");
+        assertTrue(
+                sql.getValue().contains("ELSE past_due_since"),
+                "an already-set past_due_since must be preserved verbatim");
     }
 
     @Test
@@ -102,7 +113,8 @@ class SubscriptionPendingHandlerTest {
 
         // D1 - retry-CTA email on the first failure, not the dunning escalation.
         verify(emailService).sendPaymentFailedEmail(eq(TENANT_ID), eq("Acme"), any());
-        verify(emailService, never()).sendDunningEmail(any(), anyString(), org.mockito.ArgumentMatchers.anyInt());
+        verify(emailService, never())
+                .sendDunningEmail(any(), anyString(), org.mockito.ArgumentMatchers.anyInt());
         verifyNoInteractions(eventPublisher);
     }
 
@@ -112,7 +124,8 @@ class SubscriptionPendingHandlerTest {
 
         handler.handle(pendingEvent(SUB_ID));
 
-        verify(jdbcTemplate).update(anyString(), eq("PENDING:2"), any(Instant.class), eq(TENANT_ID));
+        verify(jdbcTemplate)
+                .update(anyString(), eq("PENDING:2"), any(Instant.class), eq(TENANT_ID));
         verify(emailService).sendDunningEmail(TENANT_ID, "Acme", 2);
         verify(emailService, never()).sendPaymentFailedEmail(any(), anyString(), any());
         verifyNoInteractions(eventPublisher);
@@ -124,9 +137,10 @@ class SubscriptionPendingHandlerTest {
 
         handler.handle(pendingEvent(SUB_ID));
 
-        verify(jdbcTemplate).update(anyString(), eq("PENDING:3"), any(Instant.class), eq(TENANT_ID));
+        verify(jdbcTemplate)
+                .update(anyString(), eq("PENDING:3"), any(Instant.class), eq(TENANT_ID));
         ArgumentCaptor<SubscriptionPaymentExhaustedEvent> published =
-            ArgumentCaptor.forClass(SubscriptionPaymentExhaustedEvent.class);
+                ArgumentCaptor.forClass(SubscriptionPaymentExhaustedEvent.class);
         verify(eventPublisher).publishEvent(published.capture());
         assertEquals(TENANT_ID, published.getValue().tenantId());
         assertEquals(SUB_ID, published.getValue().gatewaySubscriptionId());
@@ -141,7 +155,8 @@ class SubscriptionPendingHandlerTest {
 
         handler.handle(pendingEvent(SUB_ID));
 
-        verify(jdbcTemplate).update(anyString(), eq("PENDING:3"), any(Instant.class), eq(TENANT_ID));
+        verify(jdbcTemplate)
+                .update(anyString(), eq("PENDING:3"), any(Instant.class), eq(TENANT_ID));
         verifyNoInteractions(emailService);
         verifyNoInteractions(eventPublisher);
     }
@@ -159,8 +174,10 @@ class SubscriptionPendingHandlerTest {
     @Test
     void unknownSubscriptionIdIsSkippedWithoutAWrite() {
         when(jdbcTemplate.queryForObject(
-            startsWith("SELECT id FROM control_plane.tenant"), eq(String.class), eq(SUB_ID)))
-            .thenThrow(new EmptyResultDataAccessException(1));
+                        startsWith("SELECT id FROM control_plane.tenant"),
+                        eq(String.class),
+                        eq(SUB_ID)))
+                .thenThrow(new EmptyResultDataAccessException(1));
 
         assertDoesNotThrow(() -> handler.handle(pendingEvent(SUB_ID)));
 
@@ -177,7 +194,7 @@ class SubscriptionPendingHandlerTest {
         // tenant toward the downgrade threshold.
         stubTenantLookup("PREMIUM", "PENDING:2");
         when(jdbcTemplate.update(anyString(), any(), any(), any()))
-            .thenThrow(new RuntimeException("db down"));
+                .thenThrow(new RuntimeException("db down"));
 
         assertDoesNotThrow(() -> handler.handle(pendingEvent(SUB_ID)));
 

@@ -1,13 +1,11 @@
 package com.agenticai.core.common.privacy;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -39,52 +37,31 @@ public class RetentionPolicyService {
 
     public record Saved(Rule rule, List<String> warnings) {}
 
-    private final JdbcTemplate jdbc;
+    private final RetentionPolicyJdbcRepository repository;
 
-    public RetentionPolicyService(JdbcTemplate jdbc) {
-        this.jdbc = jdbc;
+    public RetentionPolicyService(RetentionPolicyJdbcRepository repository) {
+        this.repository = repository;
     }
 
     public List<Rule> list() {
-        return jdbc.query(
-                "SELECT channel, data_class, enabled, retention_days, updated_by, updated_at"
-                        + " FROM privacy_retention_policy ORDER BY data_class, channel",
-                (rs, n) ->
-                        new Rule(
-                                rs.getString(1),
-                                PrivacyDataClass.valueOf(rs.getString(2)),
-                                rs.getBoolean(3),
-                                rs.getInt(4),
-                                rs.getString(5),
-                                rs.getTimestamp(6).toInstant()));
+        return repository.list();
     }
 
     /** The enabled rule that applies to {@code channel}: its own row, else the tenant default. */
     public Optional<Rule> effective(String channel, PrivacyDataClass dataClass) {
-        return jdbc
-                .query(
-                        "SELECT channel, data_class, enabled, retention_days, updated_by, updated_at"
-                                + " FROM privacy_retention_policy WHERE data_class = ? AND channel IN (?, ?)"
-                                + " ORDER BY (channel = '*') LIMIT 1",
-                        (rs, n) ->
-                                new Rule(
-                                        rs.getString(1),
-                                        PrivacyDataClass.valueOf(rs.getString(2)),
-                                        rs.getBoolean(3),
-                                        rs.getInt(4),
-                                        rs.getString(5),
-                                        rs.getTimestamp(6).toInstant()),
-                        dataClass.name(),
-                        channel,
-                        PrivacyDataClass.ALL_CHANNELS)
-                .stream()
-                .findFirst()
-                .filter(Rule::enabled);
+        return repository.effective(channel, dataClass).filter(Rule::enabled);
     }
 
     public Saved put(
-            String channelName, PrivacyDataClass dataClass, boolean enabled, Integer days, String actor) {
-        String channel = channelName == null ? PrivacyDataClass.ALL_CHANNELS : channelName.trim().toUpperCase(Locale.ROOT);
+            String channelName,
+            PrivacyDataClass dataClass,
+            boolean enabled,
+            Integer days,
+            String actor) {
+        String channel =
+                channelName == null
+                        ? PrivacyDataClass.ALL_CHANNELS
+                        : channelName.trim().toUpperCase(Locale.ROOT);
         if (!dataClass.allows(channel)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -96,18 +73,7 @@ public class RetentionPolicyService {
                     HttpStatus.BAD_REQUEST,
                     "retentionDays must be between 1 and " + MAX_RETENTION_DAYS);
         }
-        jdbc.update(
-                "INSERT INTO privacy_retention_policy (channel, data_class, enabled, retention_days,"
-                        + " updated_by, updated_at) VALUES (?, ?, ?, ?, ?, ?)"
-                        + " ON CONFLICT (channel, data_class) DO UPDATE SET enabled = EXCLUDED.enabled,"
-                        + " retention_days = EXCLUDED.retention_days, updated_by = EXCLUDED.updated_by,"
-                        + " updated_at = EXCLUDED.updated_at",
-                channel,
-                dataClass.name(),
-                enabled,
-                retentionDays,
-                actor,
-                Timestamp.from(Instant.now()));
+        repository.upsert(channel, dataClass, enabled, retentionDays, actor);
         List<String> warnings = new ArrayList<>();
         if (enabled && retentionDays < DEFAULT_RETENTION_DAYS) {
             warnings.add(
@@ -117,12 +83,16 @@ public class RetentionPolicyService {
                             + " otherwise. Whether this applies to you is to be confirmed by counsel.");
         }
         if (enabled) {
-            warnings.add("Data older than " + retentionDays + " days will be permanently deleted by the nightly job.");
+            warnings.add(
+                    "Data older than "
+                            + retentionDays
+                            + " days will be permanently deleted by the nightly job.");
         }
-        Rule rule = list().stream()
-                .filter(r -> r.channel().equals(channel) && r.dataClass() == dataClass)
-                .findFirst()
-                .orElseThrow();
+        Rule rule =
+                list().stream()
+                        .filter(r -> r.channel().equals(channel) && r.dataClass() == dataClass)
+                        .findFirst()
+                        .orElseThrow();
         return new Saved(rule, warnings);
     }
 }

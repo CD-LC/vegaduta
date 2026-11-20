@@ -12,21 +12,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 /**
  * Handles {@code subscription.pending} events — fired by Razorpay when a subscription payment fails
  * and is retried by Razorpay's retry engine.
  *
- * <p>Actions: 1. Fetch tenant ID by gateway subscription ID (via JdbcTemplate) 2. Mark subscription
- * status as PENDING, carrying the failed-attempt counter (D5 — see below) 3. Track past-due
- * timestamp (first failure wins) 4. D1 — send a payment-failed email with a retry CTA on the first
- * failure, the escalating dunning email on subsequent failures (via the existing {@link
- * BillingEmailService}; skipped for FREE tenants — their signup-time trial subscription has no paid
- * plan to lose) 5. D5 — after {@code app.billing.dunning.max-failed-attempts} failures (default 3),
- * publish {@link SubscriptionPaymentExhaustedEvent}, which core/tenancy's listener turns into the
- * existing {@code Tenant#downgradeToFree} plan transition
+ * <p>Actions: 1. Fetch tenant ID by gateway subscription ID (via TenantSubscriptionJdbcRepository)
+ * 2. Mark subscription status as PENDING, carrying the failed-attempt counter (D5 — see below) 3.
+ * Track past-due timestamp (first failure wins) 4. D1 — send a payment-failed email with a retry
+ * CTA on the first failure, the escalating dunning email on subsequent failures (via the existing
+ * {@link BillingEmailService}; skipped for FREE tenants — their signup-time trial subscription has
+ * no paid plan to lose) 5. D5 — after {@code app.billing.dunning.max-failed-attempts} failures
+ * (default 3), publish {@link SubscriptionPaymentExhaustedEvent}, which core/tenancy's listener
+ * turns into the existing {@code Tenant#downgradeToFree} plan transition
  *
  * <p><b>D5 attempt tracking (no new schema)</b>: the counter rides on the tenant row's existing
  * {@code subscription_status} column — {@code "PENDING"} on the first failed attempt, {@code
@@ -49,17 +48,17 @@ public class SubscriptionPendingHandler implements BillingEventHandler {
 
     private static final String PENDING_STATUS = "PENDING";
 
-    private final JdbcTemplate jdbcTemplate;
+    private final TenantSubscriptionJdbcRepository tenants;
     private final BillingEmailService emailService;
     private final ApplicationEventPublisher eventPublisher;
     private final int maxFailedAttempts;
 
     public SubscriptionPendingHandler(
-            JdbcTemplate jdbcTemplate,
+            TenantSubscriptionJdbcRepository tenants,
             BillingEmailService emailService,
             ApplicationEventPublisher eventPublisher,
             @Value("${app.billing.dunning.max-failed-attempts:3}") int maxFailedAttempts) {
-        this.jdbcTemplate = jdbcTemplate;
+        this.tenants = tenants;
         this.emailService = emailService;
         this.eventPublisher = eventPublisher;
         this.maxFailedAttempts = maxFailedAttempts;
@@ -80,15 +79,8 @@ public class SubscriptionPendingHandler implements BillingEventHandler {
         String tenantPlan;
         String previousStatus;
         try {
-            tenantIdStr =
-                    jdbcTemplate.queryForObject(
-                            "SELECT id FROM control_plane.tenant WHERE gateway_subscription_id = ?",
-                            String.class,
-                            gatewaySubscriptionId);
-            Map<String, Object> row =
-                    jdbcTemplate.queryForMap(
-                            "SELECT name, plan, subscription_status FROM control_plane.tenant WHERE id = ?::uuid",
-                            tenantIdStr);
+            tenantIdStr = tenants.findTenantIdByGatewaySubscriptionId(gatewaySubscriptionId);
+            Map<String, Object> row = tenants.findNamePlanStatus(tenantIdStr);
             tenantName = (String) row.get("name");
             tenantPlan = (String) row.get("plan");
             previousStatus = (String) row.get("subscription_status");
@@ -120,11 +112,7 @@ public class SubscriptionPendingHandler implements BillingEventHandler {
         // Mark subscription as PENDING (Razorpay is retrying the payment)
         // This typically means: initial charge failed, Razorpay will retry 2-3 times
         try {
-            jdbcTemplate.update(
-                    "UPDATE control_plane.tenant SET subscription_status = ?, past_due_since = CASE WHEN past_due_since IS NULL THEN ? ELSE past_due_since END WHERE id = ?",
-                    newStatus,
-                    Instant.now(),
-                    tenantId);
+            tenants.markPending(tenantId, newStatus, Instant.now());
             log.info(
                     "Tenant '{}' subscription '{}' payment pending - failed attempt {} of {} (Razorpay retry in progress)",
                     tenantName,

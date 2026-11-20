@@ -44,7 +44,7 @@ class OperatorInboxControllerTest {
     void setUp() {
         inbox = mock(OperatorInboxService.class);
         escalation = mock(HandoffEscalationService.class);
-        controller = new OperatorInboxController(inbox, escalation);
+        controller = new OperatorInboxController(new OperatorInboxViewService(inbox, escalation));
     }
 
     @AfterEach

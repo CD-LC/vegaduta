@@ -65,7 +65,7 @@ class SpendCapFailModeAndReservationTest {
                 .thenAnswer(inv -> List.of(row));
         service =
                 new SpendCapService(
-                        jdbc,
+                        new SpendCapJdbcRepository(jdbc),
                         redis,
                         rollup,
                         sinks,

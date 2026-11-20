@@ -8,7 +8,6 @@ import com.agenticai.core.security.SpendControlsFailMode;
 import com.agenticai.core.security.TenantContext;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.Date;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -33,7 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 /**
@@ -101,22 +99,8 @@ public class SpendCapService implements HostedSpendListener {
     static final String SYSTEM_ACTOR = "system:spend-cap";
     static final long WARN_INTERVAL_MS = 60_000L;
 
-    static final String SQL_BY_SCHEMA =
-            "SELECT id, schema_name, name, spend_cap_usd, spend_cap_alert_stage, "
-                    + "spend_cap_alert_month FROM control_plane.tenant WHERE schema_name = ?";
-    static final String SQL_BY_ID =
-            "SELECT id, schema_name, name, spend_cap_usd, spend_cap_alert_stage, "
-                    + "spend_cap_alert_month FROM control_plane.tenant WHERE id = ?";
-    static final String SQL_ALL_CAPPED =
-            "SELECT id, schema_name, name, spend_cap_usd, spend_cap_alert_stage, "
-                    + "spend_cap_alert_month FROM control_plane.tenant WHERE spend_cap_usd IS NOT NULL";
-    static final String SQL_SET_CAP =
-            "UPDATE control_plane.tenant SET spend_cap_usd = ?, spend_cap_alert_stage = 0, "
-                    + "spend_cap_alert_month = NULL WHERE id = ?";
-    static final String SQL_CLAIM_STAGE =
-            "UPDATE control_plane.tenant SET spend_cap_alert_stage = ?, "
-                    + "spend_cap_alert_month = ? WHERE id = ? AND spend_cap_usd IS NOT NULL "
-                    + "AND (spend_cap_alert_month IS DISTINCT FROM ? OR spend_cap_alert_stage < ?)";
+    static final String SQL_SET_CAP = SpendCapJdbcRepository.SQL_SET_CAP;
+    static final String SQL_CLAIM_STAGE = SpendCapJdbcRepository.SQL_CLAIM_STAGE;
 
     /**
      * INCRBYFLOAT only when the key exists; nil otherwise (the next read seeds it from the
@@ -174,7 +158,7 @@ public class SpendCapService implements HostedSpendListener {
 
     record Cached<T>(T value, Instant loadedAt) {}
 
-    final JdbcTemplate jdbc;
+    final SpendCapJdbcRepository repository;
     private final ObjectProvider<StringRedisTemplate> redis;
     private final LlmUsageRollupService rollupService;
     private final ObjectProvider<SpendCapAlertSink> alertSinks;
@@ -210,12 +194,12 @@ public class SpendCapService implements HostedSpendListener {
 
     @Autowired
     public SpendCapService(
-            JdbcTemplate jdbc,
+            SpendCapJdbcRepository repository,
             ObjectProvider<StringRedisTemplate> redis,
             LlmUsageRollupService rollupService,
             ObjectProvider<SpendCapAlertSink> alertSinks) {
         this(
-                jdbc,
+                repository,
                 redis,
                 rollupService,
                 alertSinks,
@@ -224,13 +208,13 @@ public class SpendCapService implements HostedSpendListener {
     }
 
     SpendCapService(
-            JdbcTemplate jdbc,
+            SpendCapJdbcRepository repository,
             ObjectProvider<StringRedisTemplate> redis,
             LlmUsageRollupService rollupService,
             ObjectProvider<SpendCapAlertSink> alertSinks,
             Clock clock,
             Executor alertExecutor) {
-        this.jdbc = jdbc;
+        this.repository = repository;
         this.redis = redis;
         this.rollupService = rollupService;
         this.alertSinks = alertSinks;
@@ -405,7 +389,7 @@ public class SpendCapService implements HostedSpendListener {
         if (before.isEmpty()) {
             return Optional.empty();
         }
-        jdbc.update(SQL_SET_CAP, normalized, tenantId);
+        repository.setCap(normalized, tenantId);
         configBySchema.remove(before.get().schema());
         dbFallback.remove(support.fallbackKey(tenantId));
         TenantCap after = support.loadById(tenantId).orElseThrow();
@@ -429,7 +413,7 @@ public class SpendCapService implements HostedSpendListener {
     /** Roster columns for every capped tenant (others are absent = no cap). */
     public Map<UUID, RosterCap> rosterCaps() {
         Map<UUID, RosterCap> out = new HashMap<>();
-        for (TenantCap cap : jdbc.query(SQL_ALL_CAPPED, (rs, n) -> SpendCapSupport.map(rs))) {
+        for (TenantCap cap : repository.findAllCapped()) {
             BigDecimal mtd = monthToDate(cap);
             out.put(
                     cap.tenantId(),
@@ -550,14 +534,7 @@ public class SpendCapService implements HostedSpendListener {
             return 0;
         }
         LocalDate month = monthStart();
-        int updated =
-                jdbc.update(
-                        SQL_CLAIM_STAGE,
-                        stage,
-                        Date.valueOf(month),
-                        cap.tenantId(),
-                        Date.valueOf(month),
-                        stage);
+        int updated = repository.claimAlertStage(stage, month, cap.tenantId());
         configBySchema.remove(cap.schema());
         if (updated == 0) {
             return 0;

@@ -1,5 +1,6 @@
 package com.agenticai.core.elevenlabs;
 
+import com.agenticai.core.elevenlabs.dto.GeneratedMusicResponse;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.storage.FileStorageService;
@@ -65,6 +66,23 @@ public class GeneratedMusicService {
     @Transactional(readOnly = true)
     public Optional<GeneratedMusic> find(UUID id) {
         return repository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<GeneratedFileRef> findFileRef(UUID id) {
+        return repository
+                .findById(id)
+                .map(
+                        t ->
+                                new GeneratedFileRef(
+                                        t.getContentType(), t.getFilename(), t.getObjectKey()));
+    }
+
+    @Transactional(readOnly = true)
+    public List<GeneratedMusicResponse> listResponses() {
+        return repository.findAllByOrderByCreatedAtDesc().stream()
+                .map(GeneratedMusicResponse::from)
+                .toList();
     }
 
     @Transactional(readOnly = true)

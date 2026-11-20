@@ -1,5 +1,6 @@
 package com.agenticai.core.elevenlabs;
 
+import com.agenticai.core.elevenlabs.dto.ElevenLabsGeneratedAudioResponse;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.storage.FileStorageService;
@@ -46,6 +47,24 @@ public class ElevenLabsGeneratedAudioService {
     @Transactional(readOnly = true)
     public Optional<ElevenLabsGeneratedAudio> find(UUID id) {
         return repository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<GeneratedFileRef> findFileRef(UUID id) {
+        return repository
+                .findById(id)
+                .map(
+                        a ->
+                                new GeneratedFileRef(
+                                        a.getContentType(), a.getFilename(), a.getObjectKey()));
+    }
+
+    /** One newest-first window of the paged listing, as response DTOs. */
+    @Transactional(readOnly = true)
+    public List<ElevenLabsGeneratedAudioResponse> listPageResponses(long offset, int limit) {
+        return listPage(offset, limit).stream()
+                .map(ElevenLabsGeneratedAudioResponse::from)
+                .toList();
     }
 
     /** Backs the Files page's "Generated speech (ElevenLabs)" listing, newest first. */

@@ -10,7 +10,6 @@ import java.time.Instant;
 import java.util.Locale;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -42,11 +41,11 @@ import org.springframework.web.server.ResponseStatusException;
 public class RoiOutcomeService {
 
     private final ResolutionMeteringService metering;
-    private final JdbcTemplate jdbc;
+    private final RoiJdbcRepository repository;
 
-    public RoiOutcomeService(ResolutionMeteringService metering, JdbcTemplate jdbc) {
+    public RoiOutcomeService(ResolutionMeteringService metering, RoiJdbcRepository repository) {
         this.metering = metering;
-        this.jdbc = jdbc;
+        this.repository = repository;
     }
 
     public OutcomeResponse mark(OutcomeRequest req, String subject) {
@@ -58,10 +57,8 @@ public class RoiOutcomeService {
                 || req.outcome() == null) {
             throw bad("conversationKey (<= 160 chars), agentId and outcome are required");
         }
-        Integer agents =
-                jdbc.queryForObject(
-                        "SELECT count(*) FROM agent WHERE id = ?", Integer.class, req.agentId());
-        if (agents == null || agents == 0) {
+        boolean agentFound = repository.agentExists(req.agentId());
+        if (!agentFound) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "No such agent for this tenant");
         }
@@ -69,9 +66,7 @@ public class RoiOutcomeService {
         String outcome = req.outcome().trim().toUpperCase(Locale.ROOT);
         if (outcome.equals("CORRECTED_BY_HUMAN")) {
             int rows =
-                    jdbc.update(
-                            "INSERT INTO conversation_correction (id, conversation_key, agent_id, marked_by, note)"
-                                    + " VALUES (?,?,?,?,?) ON CONFLICT (conversation_key) DO NOTHING",
+                    repository.insertCorrection(
                             UUID.randomUUID(),
                             key,
                             req.agentId(),

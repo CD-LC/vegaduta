@@ -39,19 +39,19 @@ public class TelegramWebhookController {
     private static final String REQUESTED_BY_PREFIX = "system:telegram-inbound:";
 
     private final TenantResolutionService tenantResolutionService;
-    private final TelegramCredentialRepository credentialRepository;
+    private final TelegramCredentialService credentialService;
     private final EncryptionService encryptionService;
     private final TelegramUpdateService updateService;
     private final InboundChannelExecutor inboundExecutor;
 
     public TelegramWebhookController(
             TenantResolutionService tenantResolutionService,
-            TelegramCredentialRepository credentialRepository,
+            TelegramCredentialService credentialService,
             EncryptionService encryptionService,
             TelegramUpdateService updateService,
             InboundChannelExecutor inboundExecutor) {
         this.tenantResolutionService = tenantResolutionService;
-        this.credentialRepository = credentialRepository;
+        this.credentialService = credentialService;
         this.encryptionService = encryptionService;
         this.updateService = updateService;
         this.inboundExecutor = inboundExecutor;
@@ -75,12 +75,12 @@ public class TelegramWebhookController {
         TenantContext.set(
                 TenantContext.of(tenantSchema.get(), REQUESTED_BY_PREFIX + botUserId, Set.of()));
         try {
-            Optional<TelegramCredential> credential =
-                    credentialRepository.findFirstByOrderByCreatedAtAsc();
+            Optional<TelegramCredentialService.WebhookCredential> credential =
+                    credentialService.findWebhookCredential();
             if (credential.isEmpty()
                     || secretHeader == null
                     || !TelegramWebhookSecret.matches(
-                            secretHeader, credential.get().getWebhookSecret())) {
+                            secretHeader, credential.get().webhookSecret())) {
                 log.warn(
                         "Rejected Telegram inbound call with missing/invalid secret token for bot"
                                 + " ***{}",
@@ -89,7 +89,7 @@ public class TelegramWebhookController {
             }
             // Decrypt BEFORE claiming: a decrypt failure must not leave a dedup claim held for a
             // message that was never processed.
-            String botToken = encryptionService.decrypt(credential.get().getEncryptedBotToken());
+            String botToken = encryptionService.decrypt(credential.get().encryptedBotToken());
             if (!updateService.acceptVerifiedUpdate(botUserId, update, botToken)) {
                 // shed-mode=retry (default): 503 so Telegram redelivers; ack: 200 and drop (never
                 // throttled).

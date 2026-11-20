@@ -6,7 +6,6 @@ import com.agenticai.core.common.roi.PilotDtos.DemoStatus;
 import com.agenticai.core.common.roi.PilotDtos.PilotReport;
 import com.agenticai.core.common.roi.RoiDtos.AgentRoiResponse;
 import com.agenticai.core.common.roi.RoiDtos.AgentRoiRow;
-import com.agenticai.core.common.roi.RoiDtos.PriceResponse;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
@@ -16,11 +15,9 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -39,26 +36,27 @@ import org.springframework.web.server.ResponseStatusException;
 @Transactional(readOnly = true)
 public class PilotReportService {
 
-    private final JdbcTemplate jdbc;
+    private final RoiJdbcRepository repository;
     private final RoiAgentService agents;
     private final RoiBaselineService baselines;
     private final RoiPriceService prices;
 
     public PilotReportService(
-            JdbcTemplate jdbc,
+            RoiJdbcRepository repository,
             RoiAgentService agents,
             RoiBaselineService baselines,
             RoiPriceService prices) {
-        this.jdbc = jdbc;
+        this.repository = repository;
         this.agents = agents;
         this.baselines = baselines;
         this.prices = prices;
     }
 
     public DemoStatus demo() {
-        return jdbc.query(
-                "SELECT label FROM demo_dataset WHERE id = 1",
-                rs -> rs.next() ? new DemoStatus(true, rs.getString(1)) : new DemoStatus(false, null));
+        return repository
+                .demoLabel()
+                .map(label -> new DemoStatus(true, label))
+                .orElseGet(() -> new DemoStatus(false, null));
     }
 
     public PilotReport build(
@@ -71,7 +69,8 @@ public class PilotReportService {
                         .orElseThrow(
                                 () ->
                                         new ResponseStatusException(
-                                                HttpStatus.NOT_FOUND, "No such agent for this tenant"));
+                                                HttpStatus.NOT_FOUND,
+                                                "No such agent for this tenant"));
         BaselineResponse baseline = baselines.find(agentId);
         DemoStatus demo = demo();
 
@@ -79,9 +78,10 @@ public class PilotReportService {
         Timestamp end = Timestamp.from(to.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant());
         BigDecimal[] median = new BigDecimal[1];
         long[] samples = new long[1];
-        jdbc.query(
-                "SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY latency_ms) AS med, count(*) AS n"
-                        + " FROM llm_call_log WHERE agent_id = ? AND success AND started_at >= ? AND started_at < ?",
+        repository.queryLatencyMedian(
+                agentId,
+                start,
+                end,
                 rs -> {
                     samples[0] = rs.getLong("n");
                     double ms = rs.getDouble("med");
@@ -89,35 +89,24 @@ public class PilotReportService {
                             samples[0] == 0 || rs.wasNull()
                                     ? null
                                     : BigDecimal.valueOf(ms)
-                                            .divide(BigDecimal.valueOf(1000), 3, RoundingMode.HALF_UP);
-                },
-                agentId,
-                start,
-                end);
+                                            .divide(
+                                                    BigDecimal.valueOf(1000),
+                                                    3,
+                                                    RoundingMode.HALF_UP);
+                });
 
-        Long calls =
-                jdbc.queryForObject(
-                        "SELECT count(*) FROM llm_call_log WHERE agent_id = ? AND started_at >= ? AND started_at < ?",
-                        Long.class,
-                        agentId,
-                        start,
-                        end);
+        Long calls = repository.countModelCalls(agentId, start, end);
         long modelCalls = calls == null ? 0 : calls;
-        Integer currencies =
-                jdbc.queryForObject(
-                        "SELECT count(DISTINCT currency) FROM resolution_event WHERE billable AND disputed_at IS NULL"
-                                + " AND agent_id = ? AND resolved_at >= ? AND resolved_at < ?",
-                        Integer.class,
-                        agentId,
-                        start,
-                        end);
+        Integer currencies = repository.countBillableCurrencies(agentId, start, end);
         boolean mixed = currencies != null && currencies > 1;
 
         long conversations = row.conversations();
-        // No model call recorded means "nothing measured", not "costs nothing": null, shown as a dash.
+        // No model call recorded means "nothing measured", not "costs nothing": null, shown as a
+        // dash.
         BigDecimal cost = modelCalls == 0 ? null : row.estimatedCostUsd();
         BigDecimal perResolved = modelCalls == 0 ? null : row.estimatedCostPerResolvedUsd();
-        // Charges in several currencies cannot be summed; ROI would silently ignore them, so withhold it.
+        // Charges in several currencies cannot be summed; ROI would silently ignore them, so
+        // withhold it.
         BigDecimal net = mixed ? null : row.netValue();
         BigDecimal roiPct = mixed ? null : row.roiPercent();
         String roiNote = mixed ? "CHARGES_MIXED_CURRENCY" : row.roiNote();
@@ -160,14 +149,15 @@ public class PilotReportService {
     private record Used(LocalDate day, String provider, String model) {}
 
     private List<Used> modelsUsed(UUID agentId, Timestamp start, Timestamp end) {
-        return jdbc.query(
-                "SELECT DISTINCT (started_at AT TIME ZONE 'UTC')::date AS day, provider_name, model FROM llm_call_log"
-                        + " WHERE agent_id = ? AND success AND started_at >= ? AND started_at < ?"
-                        + " ORDER BY provider_name, model, day",
-                (rs, n) -> new Used(rs.getObject("day", LocalDate.class), rs.getString(2), rs.getString(3)),
+        return repository.queryModelsUsed(
                 agentId,
                 start,
-                end);
+                end,
+                (rs, n) ->
+                        new Used(
+                                rs.getObject("day", LocalDate.class),
+                                rs.getString(2),
+                                rs.getString(3)));
     }
 
     /** Every number in the report that a person typed, in the order the box prints them. */
@@ -233,10 +223,10 @@ public class PilotReportService {
     }
 
     /**
-     * The prices that actually priced this agent's successful calls, chosen by the same rule the cost
-     * uses ({@link RoiCostModel#select}: provider, longest model prefix, latest effective date not
-     * after the call's day). A model with no applicable price gets an explicit "none entered" line, so
-     * the box matches the cost section's lower-bound wording.
+     * The prices that actually priced this agent's successful calls, chosen by the same rule the
+     * cost uses ({@link RoiCostModel#select}: provider, longest model prefix, latest effective date
+     * not after the call's day). A model with no applicable price gets an explicit "none entered"
+     * line, so the box matches the cost section's lower-bound wording.
      */
     private List<AssumptionLine> priceLines(List<Used> used) {
         List<RoiCostModel.Rate> rates = prices.rates();

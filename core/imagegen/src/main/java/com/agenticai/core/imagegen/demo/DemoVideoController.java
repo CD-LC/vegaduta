@@ -5,7 +5,7 @@ import com.agenticai.core.imagegen.VertexVeoVideoGenerationClient;
 import com.agenticai.core.imagegen.VideoGenerationClient;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
-import com.agenticai.core.tenancy.demo.DemoGeneratedVideo;
+import com.agenticai.core.tenancy.demo.DemoServedMedia;
 import com.agenticai.core.tenancy.demo.DemoSession;
 import com.agenticai.core.tenancy.demo.DemoSessionRateLimiter;
 import com.agenticai.core.tenancy.demo.DemoSessionService;
@@ -230,19 +230,15 @@ public class DemoVideoController {
 
     @GetMapping("/video/{id}")
     public ResponseEntity<byte[]> serve(@PathVariable("id") UUID id) {
-        Optional<DemoGeneratedVideo> video = demoVideoService.find(id);
+        Optional<DemoServedMedia> video = demoVideoService.readServed(id);
         if (video.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        Optional<byte[]> bytes = demoVideoService.readBytes(video.get());
-        if (bytes.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(video.get().getContentType()))
+                .contentType(MediaType.parseMediaType(video.get().contentType()))
                 .header("X-Content-Type-Options", "nosniff")
                 .cacheControl(CacheControl.maxAge(Duration.ofDays(7)).cachePrivate().immutable())
-                .body(bytes.get());
+                .body(video.get().bytes());
     }
 
     private ResponseEntity<DemoVideoResponse> sample(

@@ -10,12 +10,15 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 
-/** Optional limit/offset + X-Total-Count on GET /api/shared-with-me; no params returns everything. */
+/**
+ * Optional limit/offset + X-Total-Count on GET /api/shared-with-me; no params returns everything.
+ */
 class SharedWithMeControllerPagingTest {
 
     private final ResourceAccessService access = mock(ResourceAccessService.class);
     private final SharedWithMeController controller =
-            new SharedWithMeController(access, mock(ShareRateLimiter.class));
+            new SharedWithMeController(
+                    new ResourceGrantService(access), mock(ShareRateLimiter.class));
 
     private void grants(int n) {
         List<ResourceGrant> list = new ArrayList<>();

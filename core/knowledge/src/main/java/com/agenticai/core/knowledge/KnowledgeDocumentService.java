@@ -187,6 +187,28 @@ public class KnowledgeDocumentService {
         withDocument(documentId, doc -> doc.attachOriginalFile(objectKey, contentType));
     }
 
+    /** Creates the row for an accepted upload (status UPLOADED) and returns just its id. */
+    @Transactional
+    public UUID createUploaded(
+            UUID collectionId, String filename, long fileSizeBytes, String contentHash) {
+        return create(
+                        collectionId,
+                        filename,
+                        fileSizeBytes,
+                        KnowledgeDocumentStatus.UPLOADED,
+                        contentHash)
+                .getId();
+    }
+
+    /** Where a document's stored original lives; {@code objectKey} is null when none was stored. */
+    public record OriginalFileRef(String objectKey, String contentType, String filename) {}
+
+    @Transactional(readOnly = true)
+    public OriginalFileRef originalFileRef(UUID documentId) {
+        KnowledgeDocument d = getEntity(documentId);
+        return new OriginalFileRef(d.getObjectKey(), d.getContentType(), d.getFilename());
+    }
+
     /**
      * Stage 5 (KB multi-modal storage) - fetches the raw entity (not the DTO) for {@code
      * KnowledgeController#downloadOriginalFile}, which needs {@link

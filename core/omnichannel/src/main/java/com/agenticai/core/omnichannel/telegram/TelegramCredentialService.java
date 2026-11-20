@@ -190,5 +190,15 @@ public class TelegramCredentialService {
         return sb.toString();
     }
 
+    /** Webhook verification view: stored secret digest plus the still-encrypted bot token. */
+    @Transactional(readOnly = true)
+    public Optional<WebhookCredential> findWebhookCredential() {
+        return repository
+                .findFirstByOrderByCreatedAtAsc()
+                .map(c -> new WebhookCredential(c.getWebhookSecret(), c.getEncryptedBotToken()));
+    }
+
+    public record WebhookCredential(String webhookSecret, String encryptedBotToken) {}
+
     public record DecryptedCredential(String botUserId, String botToken) {}
 }

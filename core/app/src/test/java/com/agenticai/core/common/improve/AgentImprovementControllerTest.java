@@ -49,13 +49,13 @@ class AgentImprovementControllerTest {
 
     @Test
     void generateChecksEditorAccessBeforeSpendingAnything() {
-        when(improvementService.generateForAgent(AGENT)).thenReturn(List.of());
+        when(improvementService.generateSuggestionsForAgent(AGENT)).thenReturn(List.of());
 
         controller.generate(AGENT);
 
         InOrder order = inOrder(agentService, improvementService);
         order.verify(agentService).requireAccess(AGENT, PermissionLevel.EDITOR);
-        order.verify(improvementService).generateForAgent(AGENT);
+        order.verify(improvementService).generateSuggestionsForAgent(AGENT);
     }
 
     @Test
@@ -64,7 +64,7 @@ class AgentImprovementControllerTest {
 
         assertThatThrownBy(() -> controller.generate(AGENT))
                 .isInstanceOf(ResourceAccessDeniedException.class);
-        verify(improvementService, never()).generateForAgent(any());
+        verify(improvementService, never()).generateSuggestionsForAgent(any());
         verify(healthScoreService, never()).recompute(any(), any());
     }
 

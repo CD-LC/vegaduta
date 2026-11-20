@@ -38,14 +38,13 @@ public class ElevenLabsVoiceController {
     public ResponseEntity<ElevenLabsVoiceResponse> clone(
             @RequestParam("name") String name, @RequestParam("file") MultipartFile file) {
         try {
-            ElevenLabsVoice voice =
-                    voiceService.cloneVoice(
+            ElevenLabsVoiceResponse voice =
+                    voiceService.cloneVoiceResponse(
                             name,
                             file.getBytes(),
                             file.getContentType(),
                             file.getOriginalFilename());
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(ElevenLabsVoiceResponse.from(voice));
+            return ResponseEntity.status(HttpStatus.CREATED).body(voice);
         } catch (IOException e) {
             throw new ElevenLabsApiException(
                     0, "Could not read the uploaded sample file: " + e.getMessage());
@@ -54,8 +53,7 @@ public class ElevenLabsVoiceController {
 
     @GetMapping
     public ResponseEntity<List<ElevenLabsVoiceResponse>> list() {
-        return ResponseEntity.ok(
-                voiceService.list().stream().map(ElevenLabsVoiceResponse::from).toList());
+        return ResponseEntity.ok(voiceService.listResponses());
     }
 
     @DeleteMapping("/{id}")

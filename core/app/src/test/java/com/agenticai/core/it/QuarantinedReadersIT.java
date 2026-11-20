@@ -17,6 +17,7 @@ import com.agenticai.core.agents.memory.MemoryTrust;
 import com.agenticai.core.agents.memory.TenantMemoryService;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.common.privacy.ConsentLedger;
+import com.agenticai.core.common.privacy.ContactPrivacyJdbcRepository;
 import com.agenticai.core.common.privacy.ContactPrivacyService;
 import com.agenticai.core.graphmemory.GraphMemoryService;
 import com.agenticai.core.json.JsonMappers;
@@ -84,7 +85,7 @@ class QuarantinedReadersIT {
 
         contacts =
                 new ContactPrivacyService(
-                        jdbc,
+                        new ContactPrivacyJdbcRepository(jdbc),
                         mock(AuditLogService.class),
                         mock(ConsentLedger.class),
                         provider(agentMemory),

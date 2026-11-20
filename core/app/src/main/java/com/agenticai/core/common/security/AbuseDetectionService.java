@@ -372,6 +372,38 @@ public class AbuseDetectionService {
         return challengePass().redeem(token, tenantId, clientIp);
     }
 
+    /** True when a non-expired, not-yet-verified challenge nonce exists for this tenant. */
+    public boolean hasValidChallengeNonce(String nonceId, UUID tenantId) {
+        return challengeNonceRepo.findValidNonce(nonceId, tenantId).isPresent();
+    }
+
+    /**
+     * Marks a valid challenge nonce as verified (after the caller has checked the CAPTCHA
+     * out-of-band). Returns false when the nonce is no longer valid.
+     */
+    @Transactional
+    public boolean markChallengeNonceVerified(
+            String nonceId, UUID tenantId, InetAddress clientAddr) {
+        ChallengeNonce nonce = challengeNonceRepo.findValidNonce(nonceId, tenantId).orElse(null);
+        if (nonce == null) {
+            return false;
+        }
+        nonce.setVerifiedAt(Instant.now());
+        nonce.setVerifiedByIp(clientAddr);
+        challengeNonceRepo.save(nonce);
+        return true;
+    }
+
+    /** Number of currently active IP blacklist entries for the tenant. */
+    public long activeIpBlockCount(UUID tenantId) {
+        return ipBlacklistRepo.countActive(tenantId);
+    }
+
+    /** Number of currently active user blacklist entries for the tenant. */
+    public long activeUserBlockCount(UUID tenantId) {
+        return userBlacklistRepo.countActive(tenantId);
+    }
+
     /** Verify a challenge nonce and hCaptcha token. */
     @Transactional
     public boolean verifyChallengeNonce(String nonce, String hcaptchaToken, String clientIpStr)

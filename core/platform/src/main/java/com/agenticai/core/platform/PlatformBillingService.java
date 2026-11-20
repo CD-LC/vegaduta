@@ -12,7 +12,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.context.annotation.Profile;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 /**
@@ -48,63 +47,27 @@ public class PlatformBillingService {
     /** Hard ceiling on tenant rows scanned for the subscriptions list. */
     static final int TENANT_SCAN_CAP = 5000;
 
-    private static final String LIVE_TENANTS =
-            "FROM control_plane.tenant t WHERE t.status = 'ACTIVE' AND NOT COALESCE(t.is_demo,"
-                    + " FALSE)";
+    private final PlatformBillingJdbcRepository repository;
 
-    private final JdbcTemplate jdbc;
-
-    public PlatformBillingService(JdbcTemplate jdbc) {
-        this.jdbc = jdbc;
+    public PlatformBillingService(PlatformBillingJdbcRepository repository) {
+        this.repository = repository;
     }
 
     // ---------------------------------------------------------------- summary
 
     public BillingSummary summary() {
         Map<String, Long> byPlan = new LinkedHashMap<>();
-        for (Map<String, Object> r :
-                jdbc.queryForList(
-                        "SELECT t.plan AS k, COUNT(*) AS n "
-                                + LIVE_TENANTS
-                                + " GROUP BY t.plan ORDER BY t.plan")) {
+        for (Map<String, Object> r : repository.tenantCountsByPlan()) {
             byPlan.put(String.valueOf(r.get("k")), num(r.get("n")));
         }
         Map<String, Long> byStatus = new LinkedHashMap<>();
-        for (Map<String, Object> r :
-                jdbc.queryForList(
-                        "SELECT COALESCE(t.subscription_status, 'none') AS k, COUNT(*) AS n "
-                                + LIVE_TENANTS
-                                + " GROUP BY 1 ORDER BY 1")) {
+        for (Map<String, Object> r : repository.tenantCountsBySubscriptionStatus()) {
             byStatus.put(String.valueOf(r.get("k")), num(r.get("n")));
         }
-        Map<String, Object> c =
-                jdbc
-                        .queryForList(
-                                "SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE"
-                                        + " t.comp_plan_expires_at > now()) AS comp_active, COUNT(*)"
-                                        + " FILTER (WHERE t.comp_plan_expires_at > now()   AND"
-                                        + " t.comp_plan_expires_at <= now() + interval '7 days') AS"
-                                        + " comp_expiring_7d, COUNT(*) FILTER (WHERE"
-                                        + " t.comp_plan_expires_at <= now()) AS comp_overdue_revert,"
-                                        + " COUNT(*) FILTER (WHERE t.past_due_since IS NOT NULL) AS"
-                                        + " past_due, COUNT(*) FILTER (WHERE t.cancel_scheduled) AS"
-                                        + " cancel_scheduled, COUNT(*) FILTER (WHERE t.pending_plan IS"
-                                        + " NOT NULL) AS pending_upgrade "
-                                        + LIVE_TENANTS)
-                        .stream()
-                        .findFirst()
-                        .orElse(Map.of());
+        Map<String, Object> c = repository.tenantCounters();
 
         List<CurrencyTotal> invoiceTotals = new ArrayList<>();
-        for (Map<String, Object> r :
-                jdbc.queryForList(
-                        "SELECT COALESCE(currency, '?') AS currency, COUNT(*) AS n,"
-                                + " COALESCE(SUM(amount_minor), 0) AS amount,"
-                                + " COALESCE(SUM(gst_amount_minor), 0) AS gst, COUNT(*) FILTER (WHERE"
-                                + " issued_at >= now() - interval '30 days') AS n30,"
-                                + " COALESCE(SUM(amount_minor) FILTER (WHERE issued_at >= now() -"
-                                + " interval '30 days'), 0) AS amount30 FROM"
-                                + " control_plane.billing_invoice GROUP BY 1 ORDER BY 1")) {
+        for (Map<String, Object> r : repository.invoiceTotalsByCurrency()) {
             invoiceTotals.add(
                     new CurrencyTotal(
                             String.valueOf(r.get("currency")),
@@ -135,33 +98,17 @@ public class PlatformBillingService {
      * @param q optional case-insensitive substring over tenant name
      */
     public SubscriptionList subscriptions(String plan, String state, String q, int limit) {
-        List<Object> args = new ArrayList<>();
-        StringBuilder sql =
-                new StringBuilder(
-                                "SELECT t.id, t.name, t.plan, t.payment_gateway,"
-                                        + " t.gateway_subscription_id, t.subscription_status,"
-                                        + " t.trial_ends_at, t.current_period_end, t.past_due_since,"
-                                        + " t.cancel_scheduled, t.pending_plan, t.comp_plan_expires_at,"
-                                        + " t.comp_plan_granted_at, t.comp_plan_reason,"
-                                        + " t.plan_before_comp_grant, t.created_at ")
-                        .append(LIVE_TENANTS);
-        if (plan != null && !plan.isBlank()) {
-            sql.append(" AND t.plan = ?");
-            args.add(plan.trim().toUpperCase(Locale.ROOT));
-        }
-        if (q != null && !q.isBlank()) {
-            sql.append(" AND t.name ILIKE ?");
-            args.add(
-                    "%"
-                            + q.trim().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
-                            + "%");
-        }
-        sql.append(" ORDER BY t.name LIMIT ").append(TENANT_SCAN_CAP);
-
         String wanted =
                 state == null || state.isBlank() ? null : state.trim().toUpperCase(Locale.ROOT);
         List<SubscriptionRow> matched =
-                jdbc.queryForList(sql.toString(), args.toArray()).stream()
+                repository
+                        .subscriptionRows(
+                                plan == null || plan.isBlank()
+                                        ? null
+                                        : plan.trim().toUpperCase(Locale.ROOT),
+                                q,
+                                TENANT_SCAN_CAP)
+                        .stream()
                         .map(PlatformBillingService::subscriptionRow)
                         .filter(r -> wanted == null || wanted.equals(r.state()))
                         .toList();
@@ -245,16 +192,7 @@ public class PlatformBillingService {
     public CompGrantList compGrants(int limit) {
         int cap = Math.max(1, Math.min(limit, 500));
         List<CompGrantRow> rows =
-                jdbc
-                        .queryForList(
-                                "SELECT t.id, t.name, t.plan, t.plan_before_comp_grant,"
-                                        + " t.comp_plan_granted_at, t.comp_plan_expires_at,"
-                                        + " t.comp_plan_reason "
-                                        + LIVE_TENANTS
-                                        + " AND t.comp_plan_expires_at IS NOT NULL"
-                                        + " ORDER BY t.comp_plan_expires_at LIMIT "
-                                        + cap)
-                        .stream()
+                repository.compGrantRows(cap).stream()
                         .map(
                                 r -> {
                                     Instant exp = instant(r.get("comp_plan_expires_at"));
@@ -277,31 +215,15 @@ public class PlatformBillingService {
     /** Most recent invoices across tenants (or one tenant), newest first. Capped at 200. */
     public InvoiceList invoices(String tenantId, int limit) {
         int cap = Math.max(1, Math.min(limit, 200));
-        String sql =
-                "SELECT i.id, i.tenant_id, t.name AS tenant_name, i.invoice_number, i.gateway,"
-                        + " i.gateway_payment_id, i.plan, i.period, i.currency, i.amount_minor,"
-                        + " i.gst_amount_minor, i.issued_at FROM control_plane.billing_invoice i LEFT"
-                        + " JOIN control_plane.tenant t ON t.id = i.tenant_id";
-        List<Map<String, Object>> rows;
+        UUID id = null;
         if (tenantId != null && !tenantId.isBlank()) {
-            UUID id;
             try {
                 id = UUID.fromString(tenantId.trim());
             } catch (IllegalArgumentException e) {
                 throw new IllegalArgumentException("tenantId must be a UUID");
             }
-            rows =
-                    jdbc.queryForList(
-                            sql
-                                    + " WHERE i.tenant_id = ? ORDER BY i.issued_at DESC,"
-                                    + " i.invoice_number DESC LIMIT "
-                                    + cap,
-                            id);
-        } else {
-            rows =
-                    jdbc.queryForList(
-                            sql + " ORDER BY i.issued_at DESC, i.invoice_number DESC LIMIT " + cap);
         }
+        List<Map<String, Object>> rows = repository.invoiceRows(id, cap);
         List<InvoiceRow> out =
                 rows.stream()
                         .map(

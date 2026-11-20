@@ -2,14 +2,13 @@ package com.agenticai.core.platform.spendcap;
 
 import com.agenticai.core.agents.spendcap.SpendCapService;
 import com.agenticai.core.agents.spendcap.SpendCapService.CapStatus;
+import com.agenticai.core.platform.PlatformTenantLookupService;
 import com.agenticai.core.platform.PlatformTenantNotFoundException;
 import com.agenticai.core.platform.TenantDeletionController;
 import com.agenticai.core.platform.ops.PlatformTenantAuditor;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
-import com.agenticai.core.tenancy.Tenant;
-import com.agenticai.core.tenancy.TenantRepository;
 import java.math.BigDecimal;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,17 +31,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class PlatformSpendCapController {
 
     private final SpendCapService spendCaps;
-    private final TenantRepository tenantRepository;
+    private final PlatformTenantLookupService tenantLookup;
     private final PlatformTenantAuditor auditor;
     private final String masterKey;
 
     public PlatformSpendCapController(
             SpendCapService spendCaps,
-            TenantRepository tenantRepository,
+            PlatformTenantLookupService tenantLookup,
             PlatformTenantAuditor auditor,
             @Value("${app.platform.master-key:}") String masterKey) {
         this.spendCaps = spendCaps;
-        this.tenantRepository = tenantRepository;
+        this.tenantLookup = tenantLookup;
         this.auditor = auditor;
         this.masterKey = masterKey;
     }
@@ -67,10 +66,7 @@ public class PlatformSpendCapController {
             throw new IllegalArgumentException(
                     "Request body is required ({\"capUsd\": number|null}).");
         }
-        Tenant tenant =
-                tenantRepository
-                        .findById(tenantId)
-                        .orElseThrow(() -> new PlatformTenantNotFoundException(tenantId));
+        String tenantSchema = tenantLookup.requireSchemaName(tenantId);
         BigDecimal previous = spendCaps.status(tenantId).map(CapStatus::capUsd).orElse(null);
         CapStatus updated =
                 spendCaps
@@ -78,7 +74,7 @@ public class PlatformSpendCapController {
                         .orElseThrow(() -> new PlatformTenantNotFoundException(tenantId));
         String actor = TenantContext.current().map(TenantContext::getSubject).orElse(null);
         auditor.record(
-                tenant.getSchemaName(),
+                tenantSchema,
                 actor,
                 "platform.tenant.spend_cap",
                 "tenant",

@@ -99,7 +99,7 @@ public class WorkflowWebhookController {
     private static final String DEDUP_CHANNEL_SCOPE = "WORKFLOW_WEBHOOK";
 
     private final TenantResolutionService tenantResolutionService;
-    private final WorkflowDefinitionRepository definitionRepository;
+    private final WorkflowWebhookTargetService targetService;
     // Per-node workflow triggers - the webhook token/enabled/auth-mode lookup
     // that used to be a plain WorkflowDefinitionRepository#findByWebhookTokenHash
     // query now goes through this service instead (see its javadoc): the
@@ -147,14 +147,14 @@ public class WorkflowWebhookController {
 
     public WorkflowWebhookController(
             TenantResolutionService tenantResolutionService,
-            WorkflowDefinitionRepository definitionRepository,
+            WorkflowWebhookTargetService targetService,
             WorkflowTriggerNodeService workflowTriggerNodeService,
             WorkflowService workflowService,
             ObjectMapper objectMapper,
             ObjectProvider<JwtDecoder> jwtDecoderProvider,
             InboundMessageDedupService dedupService) {
         this.tenantResolutionService = tenantResolutionService;
-        this.definitionRepository = definitionRepository;
+        this.targetService = targetService;
         this.workflowTriggerNodeService = workflowTriggerNodeService;
         this.workflowService = workflowService;
         this.objectMapper = objectMapper;
@@ -227,12 +227,12 @@ public class WorkflowWebhookController {
                                         "This trigger node is no longer the shared-secret webhook URL - check its "
                                                 + "trigger channel setting."));
             }
-            WorkflowDefinition definition =
-                    definitionRepository.findById(triggerNode.getWorkflowId()).orElse(null);
+            WorkflowWebhookTargetService.Target definition =
+                    targetService.find(triggerNode.getWorkflowId()).orElse(null);
             if (definition == null) {
                 return ResponseEntity.notFound().build();
             }
-            if (definition.getStatus() != WorkflowStatus.ACTIVE) {
+            if (definition.status() != WorkflowStatus.ACTIVE) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body(
                                 Map.of(
@@ -243,7 +243,8 @@ public class WorkflowWebhookController {
             // limits) -
             // its token must not double as a raw webhook that skips all of that.
             if (formService != null
-                    && formService.isFormTriggerNode(definition, triggerNode.getNodeId())) {
+                    && targetService.isFormTriggerNode(
+                            formService, definition.id(), triggerNode.getNodeId())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body(
                                 Map.of(
@@ -309,7 +310,7 @@ public class WorkflowWebhookController {
             }
             WorkflowRunResponse result =
                     workflowService.run(
-                            definition.getId(),
+                            definition.id(),
                             triggerNode.getNodeId(),
                             extractInput(body),
                             REQUESTED_BY_PREFIX + lastFour(token));
@@ -388,11 +389,12 @@ public class WorkflowWebhookController {
         TenantContext.set(
                 TenantContext.of(tenantId, OIDC_REQUESTED_BY_PREFIX + jwt.getSubject(), Set.of()));
         try {
-            WorkflowDefinition definition = definitionRepository.findById(workflowId).orElse(null);
+            WorkflowWebhookTargetService.Target definition =
+                    targetService.find(workflowId).orElse(null);
             if (definition == null) {
                 return ResponseEntity.notFound().build();
             }
-            if (definition.getStatus() != WorkflowStatus.ACTIVE) {
+            if (definition.status() != WorkflowStatus.ACTIVE) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body(
                                 Map.of(
@@ -409,7 +411,7 @@ public class WorkflowWebhookController {
             // resolving "which specific OAUTH2 node" would need a per-node
             // OIDC URL, which remains follow-up scope.
             boolean oidcTriggerConfigured =
-                    workflowTriggerNodeService.triggerNodesFor(definition.getId()).stream()
+                    workflowTriggerNodeService.triggerNodesFor(definition.id()).stream()
                             .anyMatch(
                                     node ->
                                             node.getChannel() == WorkflowTriggerChannel.WEBHOOK
@@ -426,7 +428,7 @@ public class WorkflowWebhookController {
             }
             WorkflowRunResponse result =
                     workflowService.run(
-                            definition.getId(),
+                            definition.id(),
                             null,
                             extractInput(body),
                             OIDC_REQUESTED_BY_PREFIX + jwt.getSubject());

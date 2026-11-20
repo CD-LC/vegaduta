@@ -25,16 +25,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * White-label minimum-real build (PRICING-MONETIZATION-AUDIT-2026-07-31.md
- * item C2) - the settings write-gate and logo-URL validation on {@code PUT
- * /api/tenant/settings}. Plain unit tests calling the controller method
- * directly, no MockMvc/web layer - the established convention in this
+ * White-label minimum-real build (PRICING-MONETIZATION-AUDIT-2026-07-31.md item C2) - the settings
+ * write-gate and logo-URL validation on {@code PUT /api/tenant/settings}. Plain unit tests calling
+ * the controller method directly, no MockMvc/web layer - the established convention in this
  * module's tests (see {@code CompGrantControllerTest}'s header note).
  *
- * <p>The gate under test: {@code brandDisplayName}/{@code brandLogoUrl} are
- * writable only when the plan's {@code white_label} entitlement is true
- * (UNLIMITED today), 403 with an upgrade-oriented message otherwise; the
- * logo URL must be an absolute https URL; blank clears; null leaves the
+ * <p>The gate under test: {@code brandDisplayName}/{@code brandLogoUrl} are writable only when the
+ * plan's {@code white_label} entitlement is true (UNLIMITED today), 403 with an upgrade-oriented
+ * message otherwise; the logo URL must be an absolute https URL; blank clears; null leaves the
  * stored value unchanged. Reads stay open to every plan.
  */
 class TenantSettingsControllerTest {
@@ -52,10 +50,18 @@ class TenantSettingsControllerTest {
         tenantRepository = mock(TenantRepository.class);
         tenantLimits = mock(TenantLimits.class);
         freeModeService = mock(FreeModeService.class);
-        controller = new TenantSettingsController(tenantRepository, tenantLimits, freeModeService);
+        controller =
+                new TenantSettingsController(
+                        new TenantSettingsService(tenantRepository, tenantLimits, freeModeService));
 
-        tenant = new Tenant(
-            "Acme", TenantPlan.UNLIMITED, TENANT_ID, "agentic-ai", AccountType.B2C, ExperienceMode.SIMPLE);
+        tenant =
+                new Tenant(
+                        "Acme",
+                        TenantPlan.UNLIMITED,
+                        TENANT_ID,
+                        "agentic-ai",
+                        AccountType.B2C,
+                        ExperienceMode.SIMPLE);
         when(tenantRepository.findBySchemaName(TENANT_ID)).thenReturn(Optional.of(tenant));
         // get() re-reads everything through TenantLimits after a PUT; the
         // branding fields under test come off the Tenant row itself, so
@@ -82,14 +88,20 @@ class TenantSettingsControllerTest {
         // not the plan name, is what the gate reads.
         when(tenantLimits.whiteLabel(TENANT_ID)).thenReturn(false);
 
-        ResponseStatusException e = assertThrows(
-            ResponseStatusException.class,
-            () -> controller.updateExperienceMode(new UpdateExperienceModeRequest(
-                ExperienceMode.SIMPLE, null, "Acme Corp", "https://cdn.acme.example/logo.png"))
-        );
+        ResponseStatusException e =
+                assertThrows(
+                        ResponseStatusException.class,
+                        () ->
+                                controller.updateExperienceMode(
+                                        new UpdateExperienceModeRequest(
+                                                ExperienceMode.SIMPLE,
+                                                null,
+                                                "Acme Corp",
+                                                "https://cdn.acme.example/logo.png")));
         assertEquals(HttpStatus.FORBIDDEN, e.getStatusCode());
         // Upgrade-oriented copy, not a bare "forbidden".
-        org.junit.jupiter.api.Assertions.assertTrue(e.getReason().toLowerCase().contains("upgrade"));
+        org.junit.jupiter.api.Assertions.assertTrue(
+                e.getReason().toLowerCase().contains("upgrade"));
         verify(tenantRepository, never()).save(ArgumentMatchers.any());
         assertNull(tenant.getBrandDisplayName());
         assertNull(tenant.getBrandLogoUrl());
@@ -102,11 +114,13 @@ class TenantSettingsControllerTest {
         // entitlement-gated on its own (TenantLimits#brandDisplayName).
         when(tenantLimits.whiteLabel(TENANT_ID)).thenReturn(false);
 
-        ResponseStatusException e = assertThrows(
-            ResponseStatusException.class,
-            () -> controller.updateExperienceMode(new UpdateExperienceModeRequest(
-                ExperienceMode.SIMPLE, null, "", null))
-        );
+        ResponseStatusException e =
+                assertThrows(
+                        ResponseStatusException.class,
+                        () ->
+                                controller.updateExperienceMode(
+                                        new UpdateExperienceModeRequest(
+                                                ExperienceMode.SIMPLE, null, "", null)));
         assertEquals(HttpStatus.FORBIDDEN, e.getStatusCode());
         verify(tenantRepository, never()).save(ArgumentMatchers.any());
     }
@@ -115,8 +129,13 @@ class TenantSettingsControllerTest {
     void brandingWriteWithWhiteLabelEntitlementPersistsAndEchoesBack() {
         when(tenantLimits.whiteLabel(TENANT_ID)).thenReturn(true);
 
-        TenantSettingsResponse response = controller.updateExperienceMode(new UpdateExperienceModeRequest(
-            ExperienceMode.SIMPLE, null, "  Acme Corp  ", "https://cdn.acme.example/logo.png"));
+        TenantSettingsResponse response =
+                controller.updateExperienceMode(
+                        new UpdateExperienceModeRequest(
+                                ExperienceMode.SIMPLE,
+                                null,
+                                "  Acme Corp  ",
+                                "https://cdn.acme.example/logo.png"));
 
         assertEquals("Acme Corp", tenant.getBrandDisplayName()); // trimmed
         assertEquals("https://cdn.acme.example/logo.png", tenant.getBrandLogoUrl());
@@ -138,8 +157,8 @@ class TenantSettingsControllerTest {
         when(tenantLimits.whiteLabel(TENANT_ID)).thenReturn(false);
         tenant.updateBranding("Acme Corp", "https://cdn.acme.example/logo.png");
 
-        controller.updateExperienceMode(new UpdateExperienceModeRequest(
-            ExperienceMode.ADVANCED, null, null, null));
+        controller.updateExperienceMode(
+                new UpdateExperienceModeRequest(ExperienceMode.ADVANCED, null, null, null));
 
         assertEquals("Acme Corp", tenant.getBrandDisplayName());
         assertEquals("https://cdn.acme.example/logo.png", tenant.getBrandLogoUrl());
@@ -151,8 +170,8 @@ class TenantSettingsControllerTest {
         when(tenantLimits.whiteLabel(TENANT_ID)).thenReturn(true);
         tenant.updateBranding("Acme Corp", "https://cdn.acme.example/logo.png");
 
-        controller.updateExperienceMode(new UpdateExperienceModeRequest(
-            ExperienceMode.SIMPLE, null, "  ", "  "));
+        controller.updateExperienceMode(
+                new UpdateExperienceModeRequest(ExperienceMode.SIMPLE, null, "  ", "  "));
 
         assertNull(tenant.getBrandDisplayName());
         assertNull(tenant.getBrandLogoUrl());
@@ -193,21 +212,28 @@ class TenantSettingsControllerTest {
     void overlongDisplayNameIsRejected() {
         when(tenantLimits.whiteLabel(TENANT_ID)).thenReturn(true);
 
-        ResponseStatusException e = assertThrows(
-            ResponseStatusException.class,
-            () -> controller.updateExperienceMode(new UpdateExperienceModeRequest(
-                ExperienceMode.SIMPLE, null, "x".repeat(65), null))
-        );
+        ResponseStatusException e =
+                assertThrows(
+                        ResponseStatusException.class,
+                        () ->
+                                controller.updateExperienceMode(
+                                        new UpdateExperienceModeRequest(
+                                                ExperienceMode.SIMPLE,
+                                                null,
+                                                "x".repeat(65),
+                                                null)));
         assertEquals(HttpStatus.BAD_REQUEST, e.getStatusCode());
         verify(tenantRepository, never()).save(ArgumentMatchers.any());
     }
 
     private void assertBadLogoUrl(String url) {
-        ResponseStatusException e = assertThrows(
-            ResponseStatusException.class,
-            () -> controller.updateExperienceMode(new UpdateExperienceModeRequest(
-                ExperienceMode.SIMPLE, null, null, url))
-        );
+        ResponseStatusException e =
+                assertThrows(
+                        ResponseStatusException.class,
+                        () ->
+                                controller.updateExperienceMode(
+                                        new UpdateExperienceModeRequest(
+                                                ExperienceMode.SIMPLE, null, null, url)));
         assertEquals(HttpStatus.BAD_REQUEST, e.getStatusCode());
         assertNull(tenant.getBrandLogoUrl());
         verify(tenantRepository, never()).save(ArgumentMatchers.any());

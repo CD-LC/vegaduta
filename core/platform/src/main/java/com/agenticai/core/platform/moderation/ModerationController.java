@@ -6,7 +6,6 @@ import com.agenticai.core.guardrails.moderation.ModerationPolicyPackNotAvailable
 import com.agenticai.core.guardrails.moderation.ModerationPolicyScope;
 import com.agenticai.core.guardrails.moderation.ModerationPolicyService;
 import com.agenticai.core.guardrails.moderation.ModerationReviewAlreadyDecidedException;
-import com.agenticai.core.guardrails.moderation.ModerationReviewItem;
 import com.agenticai.core.guardrails.moderation.ModerationReviewNotFoundException;
 import com.agenticai.core.guardrails.moderation.ModerationReviewStatus;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
@@ -70,18 +69,15 @@ public class ModerationController {
 
     private final ModerationPolicyService policy;
     private final ModerationThresholdService thresholds;
-    private final PlatformModerationQueueService reviewQueue;
-    private final ModerationBlocklistService blocklists;
+    private final ModerationConsoleService console;
 
     public ModerationController(
             ModerationPolicyService policy,
             ModerationThresholdService thresholds,
-            PlatformModerationQueueService reviewQueue,
-            ModerationBlocklistService blocklists) {
+            ModerationConsoleService console) {
         this.policy = policy;
         this.thresholds = thresholds;
-        this.reviewQueue = reviewQueue;
-        this.blocklists = blocklists;
+        this.console = console;
     }
 
     // ---------------------------------------------------------------- packs
@@ -158,11 +154,7 @@ public class ModerationController {
     public ReviewQueueResponse getReviewQueue(
             @RequestParam(name = "status", required = false) String status) {
         ModerationReviewStatus parsed = parseStatus(status);
-        List<ReviewItemResponse> items =
-                reviewQueue.list(parsed).stream()
-                        .map(t -> ReviewItemResponse.from(t.tenantSchema(), t.item()))
-                        .toList();
-        return new ReviewQueueResponse(items, reviewQueue.pendingCount());
+        return new ReviewQueueResponse(console.listReviewItems(parsed), console.pendingCount());
     }
 
     @PostMapping("/review-queue/{id}/decision")
@@ -182,18 +174,16 @@ public class ModerationController {
         // not a reviewer action - an auto-import of it here would compile with
         // only BLOCK in common and break APPROVE/ESCALATE. The reviewer
         // vocabulary maps 1:1 onto the three audited transitions instead.
-        ModerationReviewItem decided =
-                switch (normalizeDecision(body.decision())) {
-                    case "APPROVE" -> reviewQueue.approve(tenantId, id, actor, body.note());
-                    case "BLOCK" -> reviewQueue.block(tenantId, id, actor, body.note());
-                    case "ESCALATE" -> reviewQueue.escalate(tenantId, id, actor, body.note());
-                    default ->
-                            throw new IllegalArgumentException(
-                                    "decision must be one of APPROVE, BLOCK, ESCALATE (got: "
-                                            + body.decision()
-                                            + ")");
-                };
-        return ReviewItemResponse.from(tenantId, decided);
+        return switch (normalizeDecision(body.decision())) {
+            case "APPROVE" -> console.approve(tenantId, id, actor, body.note());
+            case "BLOCK" -> console.block(tenantId, id, actor, body.note());
+            case "ESCALATE" -> console.escalate(tenantId, id, actor, body.note());
+            default ->
+                    throw new IllegalArgumentException(
+                            "decision must be one of APPROVE, BLOCK, ESCALATE (got: "
+                                    + body.decision()
+                                    + ")");
+        };
     }
 
     // ----------------------------------------------------------- blocklists
@@ -203,22 +193,19 @@ public class ModerationController {
             @RequestParam(name = "type", required = false) String type) {
         ModerationBlocklistType parsed =
                 type == null || type.isBlank() ? null : parseBlocklistType(type);
-        List<BlocklistEntryResponse> entries =
-                blocklists.list(parsed).stream().map(BlocklistEntryResponse::from).toList();
-        return new BlocklistsResponse(entries);
+        return new BlocklistsResponse(console.listBlocklist(parsed));
     }
 
     @PutMapping("/blocklists")
     public BlocklistEntryResponse upsertBlocklistEntry(
             @RequestBody BlocklistUpsertRequest body, Principal principal) {
         ModerationBlocklistType type = parseBlocklistType(body.type());
-        return BlocklistEntryResponse.from(
-                blocklists.upsert(
-                        type,
-                        body.value(),
-                        body.active() == null || body.active(),
-                        body.reason(),
-                        actor(principal)));
+        return console.upsertBlocklistEntry(
+                type,
+                body.value(),
+                body.active() == null || body.active(),
+                body.reason(),
+                actor(principal));
     }
 
     // -------------------------------------------------------------- helpers
@@ -323,70 +310,10 @@ public class ModerationController {
 
     public record ReviewQueueResponse(List<ReviewItemResponse> items, long pendingCount) {}
 
-    /**
-     * One review-queue row, shaped from the engine's tenant-schema entity. Differences from the
-     * pre-unification response, deliberate and safe because that contract had zero callers: {@code
-     * content} is the FULL flagged content (the engine's queue stores it complete, by design, so
-     * the reviewer can actually judge it - not a 280-char excerpt of a copy), {@code confidence} is
-     * the engine's 0-100 int (not a 0.0-1.0 double), and {@code tenantId} is the fan-out routing
-     * token the decision endpoint requires back.
-     */
-    public record ReviewItemResponse(
-            UUID id,
-            String tenantId,
-            String packId,
-            String decidingLayer,
-            int confidence,
-            String reason,
-            String content,
-            String direction,
-            String status,
-            String createdAt,
-            String reviewedBy,
-            String reviewedAt,
-            String reviewNotes) {
-        static ReviewItemResponse from(String tenantSchema, ModerationReviewItem i) {
-            return new ReviewItemResponse(
-                    i.getId(),
-                    tenantSchema,
-                    i.getPolicyPack(),
-                    i.getDecidingLayer(),
-                    i.getConfidence(),
-                    i.getReason(),
-                    i.getContent(),
-                    i.getDirection(),
-                    i.getStatus().name(),
-                    i.getCreatedAt() != null ? i.getCreatedAt().toString() : null,
-                    i.getReviewedBy(),
-                    i.getReviewedAt() != null ? i.getReviewedAt().toString() : null,
-                    i.getReviewNotes());
-        }
-    }
-
     /** {@code tenantId} is required - see {@link #decide}. */
     public record ReviewDecisionRequest(String tenantId, String decision, String note) {}
 
     public record BlocklistsResponse(List<BlocklistEntryResponse> entries) {}
-
-    public record BlocklistEntryResponse(
-            UUID id,
-            String type,
-            String value,
-            String reason,
-            boolean active,
-            String createdBy,
-            String createdAt) {
-        static BlocklistEntryResponse from(ModerationBlocklistEntry e) {
-            return new BlocklistEntryResponse(
-                    e.getId(),
-                    e.getEntryType().name(),
-                    e.getValue(),
-                    e.getReason(),
-                    e.isActive(),
-                    e.getCreatedBy(),
-                    e.getCreatedAt() != null ? e.getCreatedAt().toString() : null);
-        }
-    }
 
     /**
      * {@code active} defaults to true when omitted; send false to unblock (the row is kept for

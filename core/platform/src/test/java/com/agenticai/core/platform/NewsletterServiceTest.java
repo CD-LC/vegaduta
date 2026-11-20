@@ -33,7 +33,12 @@ class NewsletterServiceTest {
     private final ObjectProvider<JavaMailSender> provider = mock(ObjectProvider.class);
 
     private final NewsletterService service =
-            new NewsletterService(jdbc, provider, "news@vegaduta.ai", "", "contact@vegaduta.ai");
+            new NewsletterService(
+                    new NewsletterJdbcRepository(jdbc),
+                    provider,
+                    "news@vegaduta.ai",
+                    "",
+                    "contact@vegaduta.ai");
 
     @BeforeEach
     void wireMailSender() {
@@ -103,7 +108,12 @@ class NewsletterServiceTest {
     @Test
     void unsubscribeMailtoIsConfigurable() throws Exception {
         NewsletterService custom =
-                new NewsletterService(jdbc, provider, "news@vegaduta.ai", "", "unsub@example.test");
+                new NewsletterService(
+                        new NewsletterJdbcRepository(jdbc),
+                        provider,
+                        "news@vegaduta.ai",
+                        "",
+                        "unsub@example.test");
         custom.sendOne(mailSender, "admin@acme.test", "s", "<p>Hi</p>", null);
         ArgumentCaptor<MimeMessage> captor = ArgumentCaptor.forClass(MimeMessage.class);
         verify(mailSender).send(captor.capture());

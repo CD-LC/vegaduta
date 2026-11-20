@@ -42,11 +42,12 @@ class ApprovalControllerListPagingTest {
                 .thenReturn(List.of());
         controller =
                 new ApprovalController(
-                        mock(HumanApprovalGateService.class),
-                        repo,
-                        mock(ApprovalPolicyService.class),
-                        new ObjectMapper(),
-                        List.of());
+                        new ApprovalApiService(
+                                mock(HumanApprovalGateService.class),
+                                repo,
+                                new ObjectMapper(),
+                                List.of()),
+                        mock(ApprovalPolicyService.class));
     }
 
     private int pageSizeFor(Integer limit) {

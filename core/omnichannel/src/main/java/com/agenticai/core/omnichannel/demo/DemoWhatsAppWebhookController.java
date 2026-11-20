@@ -1,7 +1,5 @@
 package com.agenticai.core.omnichannel.demo;
 
-import com.agenticai.core.agents.core.Agent;
-import com.agenticai.core.agents.core.AgentRepository;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
@@ -82,7 +80,7 @@ public class DemoWhatsAppWebhookController {
     private final DemoChannelRateLimiter rateLimiter;
     private final DemoWhatsAppPhoneGuard phoneGuard;
     private final AgentChatService agentChatService;
-    private final AgentRepository agentRepository;
+    private final DemoAgentNameService agentNameService;
     private final InboundMessageDedupService dedupService;
     private final Executor executor;
     private final int maxTurnsPerPhone;
@@ -96,7 +94,7 @@ public class DemoWhatsAppWebhookController {
             DemoChannelRateLimiter rateLimiter,
             DemoWhatsAppPhoneGuard phoneGuard,
             AgentChatService agentChatService,
-            AgentRepository agentRepository,
+            DemoAgentNameService agentNameService,
             InboundMessageDedupService dedupService,
             @Value("${app.demo.whatsapp.max-turns-per-phone:60}") int maxTurnsPerPhone,
             @Value("${app.demo.whatsapp.max-pairs-per-phone:3}") int maxPairsPerPhone) {
@@ -107,7 +105,7 @@ public class DemoWhatsAppWebhookController {
                 rateLimiter,
                 phoneGuard,
                 agentChatService,
-                agentRepository,
+                agentNameService,
                 dedupService,
                 maxTurnsPerPhone,
                 maxPairsPerPhone,
@@ -122,7 +120,7 @@ public class DemoWhatsAppWebhookController {
             DemoChannelRateLimiter rateLimiter,
             DemoWhatsAppPhoneGuard phoneGuard,
             AgentChatService agentChatService,
-            AgentRepository agentRepository,
+            DemoAgentNameService agentNameService,
             InboundMessageDedupService dedupService,
             int maxTurnsPerPhone,
             int maxPairsPerPhone,
@@ -133,7 +131,7 @@ public class DemoWhatsAppWebhookController {
         this.rateLimiter = rateLimiter;
         this.phoneGuard = phoneGuard;
         this.agentChatService = agentChatService;
-        this.agentRepository = agentRepository;
+        this.agentNameService = agentNameService;
         this.dedupService = dedupService;
         this.maxTurnsPerPhone = maxTurnsPerPhone;
         this.maxPairsPerPhone = maxPairsPerPhone;
@@ -443,22 +441,8 @@ public class DemoWhatsAppWebhookController {
         }
     }
 
-    /** Best effort, in the demo tenant's own schema; null means "don't name it". */
     private String agentName(DemoSession session) {
-        try {
-            if (session == null || session.getAgentId() == null) {
-                return null;
-            }
-            return demoSessionService.inDemoTenantContext(
-                    session,
-                    () ->
-                            agentRepository
-                                    .findById(session.getAgentId())
-                                    .map(Agent::getName)
-                                    .orElse(null));
-        } catch (RuntimeException e) {
-            return null;
-        }
+        return agentNameService.agentName(session);
     }
 
     /** Labelled as a sample in the body: a WhatsApp chat has no UI chrome to carry a badge. */

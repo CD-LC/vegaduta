@@ -56,6 +56,7 @@ class OperatorConsoleEditionGateTest {
                             "PlatformTenantMetricsService",
                             "PlatformSpendService",
                             "PlatformTenantPlanService",
+                            "PlatformTenantLookupService",
                             "PlatformObservabilityService",
                             "PlatformTenantDataResidencyService",
                             "LlmUsageRollupScheduler",

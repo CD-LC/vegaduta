@@ -212,7 +212,7 @@ public class PlatformTenantMetricsService {
                     lastSeenByTenant == null ? null : lastSeenByTenant.get(tenant.getId());
             Instant lastActivity =
                     (lastSeenByTenant != null || lastLlmCallKnown)
-                            ? PlatformTenantDetailController.latest(lastSeen, lastLlmCall)
+                            ? PlatformTenantDetailService.latest(lastSeen, lastLlmCall)
                             : null;
             String ownerEmail =
                     appUsersByTenant == null

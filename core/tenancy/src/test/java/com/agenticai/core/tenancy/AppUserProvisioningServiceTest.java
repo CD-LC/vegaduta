@@ -28,9 +28,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 
 /**
- * B10 regression: a member with no {@code app_user} row (created through
- * {@code POST /api/admin/users}) used to make {@code GET /api/account} throw
- * IllegalStateException (HTTP 500). The row is now provisioned from the JWT.
+ * B10 regression: a member with no {@code app_user} row (created through {@code POST
+ * /api/admin/users}) used to make {@code GET /api/account} throw IllegalStateException (HTTP 500).
+ * The row is now provisioned from the JWT.
  */
 class AppUserProvisioningServiceTest {
 
@@ -75,7 +75,9 @@ class AppUserProvisioningServiceTest {
     @Test
     void tenantAdminFlagMapsToTenantAdminRole() {
         when(users.findByKeycloakUserId(KC_ID)).thenReturn(Optional.empty());
-        assertEquals(UserRole.TENANT_ADMIN, service.ensure(SCHEMA, KC_ID, "a@example.com", true).getRole());
+        assertEquals(
+                UserRole.TENANT_ADMIN,
+                service.ensure(SCHEMA, KC_ID, "a@example.com", true).getRole());
     }
 
     @Test
@@ -91,19 +93,22 @@ class AppUserProvisioningServiceTest {
     void losingTheInsertRaceReturnsTheWinnerRow() {
         AppUser winner = new AppUser(TENANT_ID, KC_ID, "m@example.com", UserRole.DELEGATED_USER);
         when(users.findByKeycloakUserId(KC_ID)).thenReturn(Optional.empty(), Optional.of(winner));
-        when(users.saveAndFlush(any(AppUser.class))).thenThrow(new DataIntegrityViolationException("dup"));
+        when(users.saveAndFlush(any(AppUser.class)))
+                .thenThrow(new DataIntegrityViolationException("dup"));
 
         assertSame(winner, service.ensure(SCHEMA, KC_ID, "m@example.com", false));
     }
 
     @Test
     void staleRowForTheSameEmailIsRelinked() {
-        AppUser stale = new AppUser(TENANT_ID, "old-kc-id", "m@example.com", UserRole.DELEGATED_USER);
+        AppUser stale =
+                new AppUser(TENANT_ID, "old-kc-id", "m@example.com", UserRole.DELEGATED_USER);
         when(users.findByKeycloakUserId(KC_ID)).thenReturn(Optional.empty());
         when(users.saveAndFlush(any(AppUser.class)))
-            .thenThrow(new DataIntegrityViolationException("dup"))
-            .thenAnswer(i -> i.getArgument(0));
-        when(users.findByTenantIdAndEmail(TENANT_ID, "m@example.com")).thenReturn(Optional.of(stale));
+                .thenThrow(new DataIntegrityViolationException("dup"))
+                .thenAnswer(i -> i.getArgument(0));
+        when(users.findByTenantIdAndEmail(TENANT_ID, "m@example.com"))
+                .thenReturn(Optional.of(stale));
         when(users.findById(any())).thenReturn(Optional.of(stale));
 
         AppUser repaired = service.ensure(SCHEMA, KC_ID, "m@example.com", false);
@@ -115,8 +120,12 @@ class AppUserProvisioningServiceTest {
     void refusesWithoutEmailOrKnownTenant() {
         when(users.findByKeycloakUserId(KC_ID)).thenReturn(Optional.empty());
         assertThrows(IllegalStateException.class, () -> service.ensure(SCHEMA, KC_ID, null, false));
-        assertThrows(IllegalStateException.class, () -> service.ensure(null, KC_ID, "m@example.com", false));
-        assertThrows(IllegalStateException.class, () -> service.ensure("nope", KC_ID, "m@example.com", false));
+        assertThrows(
+                IllegalStateException.class,
+                () -> service.ensure(null, KC_ID, "m@example.com", false));
+        assertThrows(
+                IllegalStateException.class,
+                () -> service.ensure("nope", KC_ID, "m@example.com", false));
     }
 
     // ---- GET /api/account path ----
@@ -125,10 +134,17 @@ class AppUserProvisioningServiceTest {
     void accountEndpointProvisionsAMissingRowInsteadOfThrowing() {
         when(users.findByKeycloakUserId(KC_ID)).thenReturn(Optional.empty());
         TenantContext.set(TenantContext.of(SCHEMA, KC_ID, Set.of("ROLE_agent-builder")));
-        Jwt jwt = new Jwt("t", Instant.now(), Instant.now().plusSeconds(60),
-            Map.of("alg", "none"), Map.of("sub", KC_ID, "email", "m@example.com"));
+        Jwt jwt =
+                new Jwt(
+                        "t",
+                        Instant.now(),
+                        Instant.now().plusSeconds(60),
+                        Map.of("alg", "none"),
+                        Map.of("sub", KC_ID, "email", "m@example.com"));
         Principal principal = new JwtAuthenticationToken(jwt);
-        AccountController controller = new AccountController(users, mock(FileStorageService.class), service);
+        AccountController controller =
+                new AccountController(
+                        new AccountService(users, service), mock(FileStorageService.class));
 
         AccountResponse response = controller.get(principal);
 
@@ -139,7 +155,8 @@ class AppUserProvisioningServiceTest {
     @Test
     void accountEndpointWithoutProvisionerKeepsTheOldFailure() {
         when(users.findByKeycloakUserId(KC_ID)).thenReturn(Optional.empty());
-        AccountController controller = new AccountController(users, mock(FileStorageService.class));
+        AccountController controller =
+                new AccountController(new AccountService(users), mock(FileStorageService.class));
         assertThrows(IllegalStateException.class, () -> controller.get(() -> KC_ID));
     }
 }

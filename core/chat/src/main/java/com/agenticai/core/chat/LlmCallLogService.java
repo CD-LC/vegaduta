@@ -403,6 +403,12 @@ public class LlmCallLogService {
         return rows.size() > limit ? rows.subList(0, limit) : rows;
     }
 
+    /** Start time of the most recent call, or null if there are none. */
+    @Transactional(readOnly = true)
+    public Instant latestStartedAt() {
+        return repository.findLatestStartedAt();
+    }
+
     @Transactional(readOnly = true)
     public List<LlmProviderUsageSummary> usageSummaryByProvider() {
         return repository.summarizeByProvider();
@@ -422,6 +428,14 @@ public class LlmCallLogService {
     @Transactional(readOnly = true)
     public List<LlmCallLog> forTask(String sessionId) {
         return repository.findBySessionIdOrderByStartedAtAsc(sessionId);
+    }
+
+    /** Calls of one task/session made by one agent, oldest first. */
+    @Transactional(readOnly = true)
+    public List<LlmCallLog> forTaskAndAgent(String sessionId, UUID agentId) {
+        return repository.findBySessionIdOrderByStartedAtAsc(sessionId).stream()
+                .filter(log -> agentId.equals(log.getAgentId()))
+                .toList();
     }
 
     /**

@@ -1,6 +1,5 @@
 package com.agenticai.core.billing.invoice;
 
-import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
 import java.time.Instant;
@@ -30,7 +29,7 @@ import org.springframework.web.server.ResponseStatusException;
  * </ul>
  *
  * <p>Tenant scoping mirrors {@code TenantSettingsController}: identity comes exclusively from
- * {@link TenantContext} (never a path/query param), and SecurityConfig gates all four routes to
+ * {@code TenantContext} (never a path/query param), and SecurityConfig gates all four routes to
  * {@code ROLE_tenant-admin} - invoices are billing-sensitive, same trust tier as {@code POST
  * /api/tenant/upgrade}.
  */
@@ -72,48 +71,32 @@ public class InvoiceController {
      */
     public record BillingProfileBody(String gstin, String billingName, String billingAddress) {}
 
-    private final InvoiceRepository invoiceRepository;
-    private final TenantBillingProfileRepository profileRepository;
-    private final InvoiceHtmlRenderer htmlRenderer;
+    private final InvoiceApiService service;
 
-    public InvoiceController(
-            InvoiceRepository invoiceRepository,
-            TenantBillingProfileRepository profileRepository,
-            InvoiceHtmlRenderer htmlRenderer) {
-        this.invoiceRepository = invoiceRepository;
-        this.profileRepository = profileRepository;
-        this.htmlRenderer = htmlRenderer;
+    public InvoiceController(InvoiceApiService service) {
+        this.service = service;
     }
 
     @GetMapping("/api/tenant/invoices")
     public List<InvoiceSummaryResponse> list() {
-        UUID tenantId = currentTenantUuid();
-        return invoiceRepository.listByTenantId(tenantId).stream()
-                .map(InvoiceSummaryResponse::from)
-                .toList();
+        return service.list();
     }
 
     @GetMapping(value = "/api/tenant/invoices/{id}/html", produces = MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<String> html(@PathVariable("id") UUID id) {
-        UUID tenantId = currentTenantUuid();
-        BillingInvoice invoice =
-                invoiceRepository
-                        .findByIdAndTenantId(id, tenantId)
+        String html =
+                service.renderHtml(id)
                         .orElseThrow(
                                 () ->
                                         new ResponseStatusException(
                                                 HttpStatus.NOT_FOUND,
                                                 "No such invoice for this tenant"));
-        return ResponseEntity.ok()
-                .contentType(MediaType.TEXT_HTML)
-                .body(htmlRenderer.render(invoice));
+        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(html);
     }
 
     @GetMapping("/api/tenant/billing-profile")
     public BillingProfileBody getProfile() {
-        TenantBillingProfileRepository.TenantBillingProfile profile = currentProfile();
-        return new BillingProfileBody(
-                profile.gstin(), profile.billingName(), profile.billingAddress());
+        return service.getProfile();
     }
 
     @PutMapping("/api/tenant/billing-profile")
@@ -127,29 +110,6 @@ public class InvoiceController {
                     HttpStatus.BAD_REQUEST,
                     "Invalid GSTIN - expected 15 characters (2-digit state code + PAN + entity code + 'Z' + checksum)");
         }
-        TenantBillingProfileRepository.TenantBillingProfile profile = currentProfile();
-        profileRepository.updateProfile(
-                profile.tenantId(), gstin, request.billingName(), request.billingAddress());
-        return getProfile();
-    }
-
-    private TenantBillingProfileRepository.TenantBillingProfile currentProfile() {
-        String schemaName =
-                TenantContext.current()
-                        .map(TenantContext::getTenantId)
-                        .orElseThrow(
-                                () ->
-                                        new IllegalStateException(
-                                                "No TenantContext for an authenticated /api/tenant request - SecurityConfig should have blocked this"));
-        return profileRepository
-                .findBySchemaName(schemaName)
-                .orElseThrow(
-                        () ->
-                                new IllegalStateException(
-                                        "No Tenant row for schema '" + schemaName + "'"));
-    }
-
-    private UUID currentTenantUuid() {
-        return currentProfile().tenantId();
+        return service.updateProfile(gstin, request.billingName(), request.billingAddress());
     }
 }

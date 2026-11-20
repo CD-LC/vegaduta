@@ -49,7 +49,17 @@ class PlatformTenantDetailControllerTest {
     private final PlatformSpendService spend = mock(PlatformSpendService.class);
     private final PlatformTenantDetailController controller =
             new PlatformTenantDetailController(
-                    tenants, agents, workflows, keycloak, limiter, calls, appUsers, spend);
+                    new PlatformTenantDetailService(
+                            new com.agenticai.core.tenancy.TenantDirectoryService(tenants),
+                            new com.agenticai.core.agents.core.AgentLookupService(agents),
+                            new com.agenticai.core.workflow.WorkflowDefinitionCountService(
+                                    workflows),
+                            keycloak,
+                            limiter,
+                            new com.agenticai.core.chat.LlmCallLogService(
+                                    calls, mock(com.agenticai.core.chat.LlmPricingCatalog.class)),
+                            new com.agenticai.core.tenancy.AppUserDirectoryService(appUsers),
+                            spend));
 
     @BeforeEach
     void operator() {
@@ -229,10 +239,10 @@ class PlatformTenantDetailControllerTest {
     void latestPicksTheLaterNonNullInstant() {
         Instant a = Instant.parse("2026-01-01T00:00:00Z");
         Instant b = Instant.parse("2026-02-01T00:00:00Z");
-        assertEquals(b, PlatformTenantDetailController.latest(a, b));
-        assertEquals(b, PlatformTenantDetailController.latest(b, a));
-        assertEquals(a, PlatformTenantDetailController.latest(a, null));
-        assertEquals(b, PlatformTenantDetailController.latest(null, b));
-        assertNull(PlatformTenantDetailController.latest(null, null));
+        assertEquals(b, PlatformTenantDetailService.latest(a, b));
+        assertEquals(b, PlatformTenantDetailService.latest(b, a));
+        assertEquals(a, PlatformTenantDetailService.latest(a, null));
+        assertEquals(b, PlatformTenantDetailService.latest(null, b));
+        assertNull(PlatformTenantDetailService.latest(null, null));
     }
 }

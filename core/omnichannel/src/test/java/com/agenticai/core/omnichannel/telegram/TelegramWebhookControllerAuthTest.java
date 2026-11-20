@@ -56,7 +56,7 @@ class TelegramWebhookControllerAuthTest {
         controller =
                 new TelegramWebhookController(
                         tenants,
-                        repository,
+                        new TelegramCredentialService(repository, null, null, null, null, "", null),
                         encryption,
                         updateService,
                         mock(InboundChannelExecutor.class));

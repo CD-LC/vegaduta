@@ -10,14 +10,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.agenticai.core.agents.core.AgentRepository;
 import com.agenticai.core.omnichannel.contact.ChannelContactController;
 import com.agenticai.core.omnichannel.contact.ChannelContactService;
+import com.agenticai.core.omnichannel.contact.ChannelContactViewService;
 import com.agenticai.core.omnichannel.contact.ChannelRoutingController;
+import com.agenticai.core.omnichannel.contact.ChannelRoutingViewService;
 import com.agenticai.core.omnichannel.email.EmailMessageController;
 import com.agenticai.core.omnichannel.email.EmailMessageRepository;
+import com.agenticai.core.omnichannel.email.EmailMessageService;
 import com.agenticai.core.omnichannel.handoff.HandoffEscalationService;
 import com.agenticai.core.omnichannel.handoff.OperatorInboxController;
 import com.agenticai.core.omnichannel.handoff.OperatorInboxService;
+import com.agenticai.core.omnichannel.handoff.OperatorInboxViewService;
 import com.agenticai.core.omnichannel.session.ChannelPairingController;
-import com.agenticai.core.omnichannel.session.ChannelSessionRepository;
+import com.agenticai.core.omnichannel.session.ChannelPairingService;
 import com.agenticai.core.omnichannel.session.ChannelSessionService;
 import com.agenticai.core.omnichannel.session.ChannelType;
 import com.agenticai.core.omnichannel.twilio.VoiceChannelController;
@@ -37,10 +41,18 @@ class Wave2ListPagingTest {
                 .andExpect(content().json("[]"))
                 .andExpect(header().string("X-Total-Count", "0"))
                 .andExpect(header().string("X-Has-More", "false"));
-        mvc.perform(get(path).accept(org.springframework.http.MediaType.APPLICATION_JSON).param("limit", "5").param("offset", "2"))
+        mvc.perform(
+                        get(path)
+                                .accept(org.springframework.http.MediaType.APPLICATION_JSON)
+                                .param("limit", "5")
+                                .param("offset", "2"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"));
-        mvc.perform(get(path).accept(org.springframework.http.MediaType.APPLICATION_JSON).param("limit", "5").param("offset", "999999999999"))
+        mvc.perform(
+                        get(path)
+                                .accept(org.springframework.http.MediaType.APPLICATION_JSON)
+                                .param("limit", "5")
+                                .param("offset", "999999999999"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"))
                 .andExpect(header().string("X-Has-More", "false"));
@@ -50,15 +62,15 @@ class Wave2ListPagingTest {
     void contactGroups() throws Exception {
         var c =
                 new ChannelContactController(
-                        mock(ChannelContactService.class),
-                        mock(ChannelSessionRepository.class),
-                        mock(AgentRepository.class));
+                        mock(ChannelContactService.class), mock(ChannelContactViewService.class));
         assertPaged(MockMvcBuilders.standaloneSetup(c).build(), "/api/channels/contact-groups");
     }
 
     @Test
     void pairingPending() throws Exception {
-        var c = new ChannelPairingController(mock(ChannelSessionService.class));
+        var c =
+                new ChannelPairingController(
+                        mock(ChannelSessionService.class), mock(ChannelPairingService.class));
         assertPaged(MockMvcBuilders.standaloneSetup(c).build(), "/api/channels/pairing/pending");
     }
 
@@ -77,13 +89,23 @@ class Wave2ListPagingTest {
 
     @Test
     void emailMessages() throws Exception {
-        var c = new EmailMessageController(mock(EmailMessageRepository.class));
+        var c =
+                new EmailMessageController(
+                        new EmailMessageService(mock(EmailMessageRepository.class)));
         var mvc = MockMvcBuilders.standaloneSetup(c).build();
-        mvc.perform(get("/api/email/messages").accept(org.springframework.http.MediaType.APPLICATION_JSON).param("runId", "r1"))
+        mvc.perform(
+                        get("/api/email/messages")
+                                .accept(org.springframework.http.MediaType.APPLICATION_JSON)
+                                .param("runId", "r1"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"))
                 .andExpect(header().string("X-Total-Count", "0"));
-        mvc.perform(get("/api/email/messages").accept(org.springframework.http.MediaType.APPLICATION_JSON).param("runId", "r1").param("limit", "2").param("offset", "1"))
+        mvc.perform(
+                        get("/api/email/messages")
+                                .accept(org.springframework.http.MediaType.APPLICATION_JSON)
+                                .param("runId", "r1")
+                                .param("limit", "2")
+                                .param("offset", "1"))
                 .andExpect(status().isOk());
     }
 
@@ -91,13 +113,20 @@ class Wave2ListPagingTest {
     void operatorInbox() throws Exception {
         var c =
                 new OperatorInboxController(
-                        mock(OperatorInboxService.class), mock(HandoffEscalationService.class));
+                        new OperatorInboxViewService(
+                                mock(OperatorInboxService.class),
+                                mock(HandoffEscalationService.class)));
         assertPaged(MockMvcBuilders.standaloneSetup(c).build(), "/api/handoff/inbox");
     }
 
     @Test
     void routingWindowsTheFixedChannelList() throws Exception {
-        var c = new ChannelRoutingController(mock(ChannelSessionService.class), mock(AgentRepository.class));
+        var c =
+                new ChannelRoutingController(
+                        new ChannelRoutingViewService(
+                                mock(ChannelSessionService.class),
+                                new com.agenticai.core.agents.core.AgentLookupService(
+                                        mock(AgentRepository.class))));
         var mvc = MockMvcBuilders.standaloneSetup(c).build();
         int n = ChannelType.values().length;
         mvc.perform(get("/api/channels/routing"))

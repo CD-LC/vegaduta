@@ -1,11 +1,5 @@
 package com.agenticai.core.eventbus.webhook;
 
-import com.agenticai.core.eventbus.webhook.WebhookSubscriptionService.SubscriptionView;
-import java.util.List;
-import java.util.stream.IntStream;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -13,14 +7,25 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Wave 2 (B) paging: no params keep the complete list; limit/offset window it and send X-Total-Count / X-Has-More. */
+import com.agenticai.core.eventbus.webhook.WebhookSubscriptionService.SubscriptionView;
+import java.util.List;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+/**
+ * Wave 2 (B) paging: no params keep the complete list; limit/offset window it and send
+ * X-Total-Count / X-Has-More.
+ */
 class WebhookListPagingTest {
 
     private static <T> List<T> five(Class<T> type) {
         return IntStream.range(0, 5).mapToObj(i -> mock(type)).toList();
     }
 
-    private static void assertPage(ResponseEntity<? extends List<?>> r, int size, String total, String more) {
+    private static void assertPage(
+            ResponseEntity<? extends List<?>> r, int size, String total, String more) {
         assertEquals(size, r.getBody().size());
         assertEquals(total, r.getHeaders().getFirst("X-Total-Count"));
         assertEquals(more, r.getHeaders().getFirst("X-Has-More"));
@@ -28,7 +33,9 @@ class WebhookListPagingTest {
 
     private final WebhookSubscriptionService service = mock(WebhookSubscriptionService.class);
     private final WebhookDeliveryRepository deliveries = mock(WebhookDeliveryRepository.class);
-    private final WebhookSubscriptionController controller = new WebhookSubscriptionController(service, deliveries);
+    private final WebhookSubscriptionController controller =
+            new WebhookSubscriptionController(
+                    service, new WebhookDeliveryQueryService(service, deliveries));
 
     @Test
     void subscriptionsPageAndNoParamsKeepEverything() {
@@ -52,10 +59,13 @@ class WebhookListPagingTest {
 
     @Test
     void deliveriesAreWindowedAndHeaderedEvenWhenEmpty() throws Exception {
-        when(deliveries.findBySubscriptionIdOrderByCreatedAtDesc(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any()))
+        when(deliveries.findBySubscriptionIdOrderByCreatedAtDesc(
+                        org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any()))
                 .thenReturn(List.of());
         var mvc = MockMvcBuilders.standaloneSetup(controller).build();
-        mvc.perform(get("/api/webhooks/" + java.util.UUID.randomUUID() + "/deliveries").param("limit", "10"))
+        mvc.perform(
+                        get("/api/webhooks/" + java.util.UUID.randomUUID() + "/deliveries")
+                                .param("limit", "10"))
                 .andExpect(status().isOk())
                 .andExpect(header().string("X-Total-Count", "0"))
                 .andExpect(header().string("X-Has-More", "false"));

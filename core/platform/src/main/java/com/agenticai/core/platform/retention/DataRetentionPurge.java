@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -36,10 +35,10 @@ import org.springframework.stereotype.Component;
  *
  * <p>Shape: the same as the other tenant sweeps. Postgres advisory lock so one replica works per
  * tick, the tenant iterator (a {@code @Scheduled} thread has no tenant context; tables are
- * schema-qualified here so the plain {@link JdbcTemplate} hits the right schema), batched {@code
- * DELETE ... LIMIT} so no statement holds locks for long, a bounded number of batches per table per
- * tenant per tick plus a tick time budget, and a small pause between batches. Deletes are
- * idempotent, so the lock is a convenience, not correctness.
+ * schema-qualified here so the plain JDBC repository hits the right schema), batched {@code DELETE
+ * ... LIMIT} so no statement holds locks for long, a bounded number of batches per table per tenant
+ * per tick plus a tick time budget, and a small pause between batches. Deletes are idempotent, so
+ * the lock is a convenience, not correctness.
  *
  * <p>Rollout: {@code app.retention.purge.enabled} defaults to FALSE (nothing runs). Turn it on with
  * {@code dry-run=true} (the default) first: each tick then only COUNTS what would be deleted
@@ -93,7 +92,7 @@ public class DataRetentionPurge {
         }
     }
 
-    private final JdbcTemplate jdbc;
+    private final DataRetentionJdbcRepository repository;
     private final TenantSchemaIterator schemaIterator;
     private final PgAdvisoryJobLock jobLock;
     private final Clock clock;
@@ -109,7 +108,7 @@ public class DataRetentionPurge {
 
     @Autowired
     public DataRetentionPurge(
-            JdbcTemplate jdbc,
+            DataRetentionJdbcRepository repository,
             TenantSchemaIterator schemaIterator,
             PgAdvisoryJobLock jobLock,
             @Value("${app.retention.purge.enabled:false}") boolean enabled,
@@ -124,7 +123,7 @@ public class DataRetentionPurge {
             @Value("${app.retention.purge.tool-call-log.enabled:false}") boolean toolCallLogEnabled,
             @Value("${app.retention.purge.tool-call-log-days:90}") int toolCallLogDays) {
         this(
-                jdbc,
+                repository,
                 schemaIterator,
                 jobLock,
                 Clock.systemUTC(),
@@ -144,7 +143,7 @@ public class DataRetentionPurge {
     }
 
     DataRetentionPurge(
-            JdbcTemplate jdbc,
+            DataRetentionJdbcRepository repository,
             TenantSchemaIterator schemaIterator,
             PgAdvisoryJobLock jobLock,
             Clock clock,
@@ -156,7 +155,7 @@ public class DataRetentionPurge {
             long pauseMs,
             long maxTickSeconds,
             List<Target> targets) {
-        this.jdbc = jdbc;
+        this.repository = repository;
         this.schemaIterator = schemaIterator;
         this.jobLock = jobLock;
         this.clock = clock;
@@ -268,12 +267,8 @@ public class DataRetentionPurge {
 
     private int countTable(String schema, Target target, Instant now) {
         Timestamp cutoff = Timestamp.from(now.minus(target.window()));
-        Integer c =
-                jdbc.queryForObject(
-                        target.countSql(schema, batchSize * maxBatchesPerTable),
-                        Integer.class,
-                        cutoff);
-        return c == null ? 0 : c;
+        return repository.countEligible(
+                target.countSql(schema, batchSize * maxBatchesPerTable), cutoff);
     }
 
     private int purgeTable(String schema, Target target, Instant now, Instant deadline) {
@@ -281,7 +276,7 @@ public class DataRetentionPurge {
         String sql = target.deleteSql(schema, batchSize);
         int total = 0;
         for (int i = 0; i < maxBatchesPerTable; i++) {
-            int n = jdbc.update(sql, cutoff);
+            int n = repository.deleteBatch(sql, cutoff);
             total += n;
             if (n < batchSize
                     || clock.instant().isAfter(deadline)

@@ -41,16 +41,11 @@ import org.springframework.web.server.ResponseStatusException;
 public class PaymentController {
 
     private final PaymentMandateService mandateService;
-    private final PaymentTransactionRepository transactionRepository;
-    private final MandateCanonicalizer canonicalizer;
+    private final PaymentApiService apiService;
 
-    public PaymentController(
-            PaymentMandateService mandateService,
-            PaymentTransactionRepository transactionRepository,
-            MandateCanonicalizer canonicalizer) {
+    public PaymentController(PaymentMandateService mandateService, PaymentApiService apiService) {
         this.mandateService = mandateService;
-        this.transactionRepository = transactionRepository;
-        this.canonicalizer = canonicalizer;
+        this.apiService = apiService;
     }
 
     /**
@@ -72,9 +67,7 @@ public class PaymentController {
     @PostMapping("/mandates")
     public ResponseEntity<MandateResponse> grant(@Valid @RequestBody CreateMandateRequest body) {
         try {
-            PaymentMandate mandate = mandateService.grant(toDraft(body));
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(PaymentDtos.toMandateResponse(mandate, canonicalizer));
+            return ResponseEntity.status(HttpStatus.CREATED).body(apiService.grant(toDraft(body)));
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         } catch (org.springframework.dao.DataIntegrityViolationException e) {
@@ -90,25 +83,22 @@ public class PaymentController {
             // deliberate later addition rather than an accidental leak.
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "agentId is required");
         }
-        return mandateService.listForAgent(agentId).stream()
-                .map(m -> PaymentDtos.toMandateResponse(m, canonicalizer))
-                .toList();
+        return apiService.listForAgent(agentId);
     }
 
     @GetMapping("/mandates/{id}")
     public MandateResponse get(@PathVariable UUID id) {
-        PaymentMandate mandate = findMandate(id);
-        return PaymentDtos.toMandateResponse(mandate, canonicalizer);
+        // Read through the same tenant-scoped JPA layer; a mandate in a
+        // different tenant schema is indistinguishable from absent.
+        return apiService.findMandate(id).orElseThrow(PaymentController::noSuchMandate);
     }
 
     @PostMapping("/mandates/{id}/revoke")
     public MandateResponse revoke(
             @PathVariable UUID id, @RequestBody(required = false) RevokeMandateRequest body) {
-        PaymentMandate mandate = mandateService.revoke(id, body == null ? null : body.reason());
-        if (mandate == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "no such mandate");
-        }
-        return PaymentDtos.toMandateResponse(mandate, canonicalizer);
+        return apiService
+                .revoke(id, body == null ? null : body.reason())
+                .orElseThrow(PaymentController::noSuchMandate);
     }
 
     /**
@@ -160,44 +150,23 @@ public class PaymentController {
         int capped = Math.max(1, Math.min(limit, 200));
         long skip = ListPaging.offset(offset);
         OffsetLimitRequest page = new OffsetLimitRequest(skip, capped);
-        List<PaymentTransaction> rows =
-                mandateId != null
-                        ? transactionRepository.findByMandateIdOrderByCreatedAtDescIdDesc(
-                                mandateId, page)
-                        : transactionRepository.findByAgentIdOrderByCreatedAtDescIdDesc(
-                                agentId, page);
-        List<TransactionResponse> body =
-                rows.stream().map(PaymentDtos::toTransactionResponse).toList();
+        List<TransactionResponse> body = apiService.transactions(agentId, mandateId, page);
         return ListPaging.respond(
-                body,
-                capped,
-                skip,
-                () ->
-                        mandateId != null
-                                ? transactionRepository.countByMandateId(mandateId)
-                                : transactionRepository.countByAgentId(agentId));
+                body, capped, skip, () -> apiService.countTransactions(agentId, mandateId));
     }
 
     @GetMapping("/transactions/{id}")
     public TransactionResponse transaction(@PathVariable UUID id) {
-        PaymentTransaction txn =
-                transactionRepository
-                        .findById(id)
-                        .orElseThrow(
-                                () ->
-                                        new ResponseStatusException(
-                                                HttpStatus.NOT_FOUND, "no such transaction"));
-        return PaymentDtos.toTransactionResponse(txn);
+        return apiService
+                .findTransaction(id)
+                .orElseThrow(
+                        () ->
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND, "no such transaction"));
     }
 
-    private PaymentMandate findMandate(UUID id) {
-        // Read through the same tenant-scoped JPA layer; a mandate in a
-        // different tenant schema is indistinguishable from absent.
-        PaymentMandate mandate = mandateService.findById(id);
-        if (mandate == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "no such mandate");
-        }
-        return mandate;
+    private static ResponseStatusException noSuchMandate() {
+        return new ResponseStatusException(HttpStatus.NOT_FOUND, "no such mandate");
     }
 
     private PaymentMandateService.MandateDraft toDraft(CreateMandateRequest body) {

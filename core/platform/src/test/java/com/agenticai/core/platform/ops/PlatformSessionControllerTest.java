@@ -33,7 +33,12 @@ class PlatformSessionControllerTest {
     private final KeycloakAdminClient keycloak = mock(KeycloakAdminClient.class);
     private final TenantRepository tenants = mock(TenantRepository.class);
     private final PlatformTenantAuditor auditor = mock(PlatformTenantAuditor.class);
-    private final PlatformSessionController controller = new PlatformSessionController(keycloak, tenants, auditor);
+    private final PlatformSessionController controller =
+            new PlatformSessionController(
+                    keycloak,
+                    new com.agenticai.core.platform.PlatformTenantLookupService(
+                            new com.agenticai.core.tenancy.TenantDirectoryService(tenants)),
+                    auditor);
 
     @BeforeEach
     void operator() {
@@ -49,7 +54,8 @@ class PlatformSessionControllerTest {
         KeycloakUserRepresentation u = mock(KeycloakUserRepresentation.class);
         when(u.id()).thenReturn(id);
         when(u.username()).thenReturn("user-" + id);
-        when(u.attributes()).thenReturn(tenant == null ? null : Map.of("tenant_id", List.of(tenant)));
+        when(u.attributes())
+                .thenReturn(tenant == null ? null : Map.of("tenant_id", List.of(tenant)));
         return u;
     }
 
@@ -62,8 +68,14 @@ class PlatformSessionControllerTest {
         assertEquals(Map.of("ok", true), controller.logoutUser("kc-1"));
 
         verify(keycloak).logoutUser("kc-1");
-        verify(auditor).record(eq("acme"), eq("ops-1"), eq("platform.user.logout"), eq("keycloak_user"), eq("kc-1"),
-            anyString());
+        verify(auditor)
+                .record(
+                        eq("acme"),
+                        eq("ops-1"),
+                        eq("platform.user.logout"),
+                        eq("keycloak_user"),
+                        eq("kc-1"),
+                        anyString());
     }
 
     @Test
@@ -71,7 +83,8 @@ class PlatformSessionControllerTest {
         KeycloakUserRepresentation admin = user("kc-2", null);
         when(keycloak.getUserById("kc-2")).thenReturn(admin);
         when(keycloak.getUserRealmRoleNames("kc-2")).thenReturn(List.of("platform-admin"));
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> controller.logoutUser("kc-2"));
+        ResponseStatusException e =
+                assertThrows(ResponseStatusException.class, () -> controller.logoutUser("kc-2"));
         assertEquals(HttpStatus.FORBIDDEN, e.getStatusCode());
 
         KeycloakUserRepresentation self = user("ops-1", null);
@@ -92,8 +105,13 @@ class PlatformSessionControllerTest {
         Tenant t = mock(Tenant.class);
         when(t.getSchemaName()).thenReturn("acme");
         when(tenants.findById(id)).thenReturn(Optional.of(t));
-        List<KeycloakUserRepresentation> members = List.of(
-            user("a", "acme"), user("b", "acme"), user("admin", "acme"), user("ops-1", "acme"), user("broken", "acme"));
+        List<KeycloakUserRepresentation> members =
+                List.of(
+                        user("a", "acme"),
+                        user("b", "acme"),
+                        user("admin", "acme"),
+                        user("ops-1", "acme"),
+                        user("broken", "acme"));
         when(keycloak.listUsersByTenant("acme")).thenReturn(members);
         when(keycloak.getUserRealmRoleNames(anyString())).thenReturn(List.of("tenant-member"));
         when(keycloak.getUserRealmRoleNames("admin")).thenReturn(List.of("platform-admin"));
@@ -105,14 +123,21 @@ class PlatformSessionControllerTest {
         verify(keycloak).logoutUser("b");
         verify(keycloak, never()).logoutUser("admin");
         verify(keycloak, never()).logoutUser("ops-1");
-        verify(auditor).record(eq("acme"), eq("ops-1"), eq("platform.tenant.logout_all"), eq("tenant"), eq("acme"),
-            contains("2 user(s); 1 failed"));
+        verify(auditor)
+                .record(
+                        eq("acme"),
+                        eq("ops-1"),
+                        eq("platform.tenant.logout_all"),
+                        eq("tenant"),
+                        eq("acme"),
+                        contains("2 user(s); 1 failed"));
     }
 
     @Test
     void logoutAllUnknownTenantIs404() {
         when(tenants.findBySchemaName("nope")).thenReturn(Optional.empty());
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> controller.logoutTenant("nope"));
+        ResponseStatusException e =
+                assertThrows(ResponseStatusException.class, () -> controller.logoutTenant("nope"));
         assertEquals(HttpStatus.NOT_FOUND, e.getStatusCode());
     }
 }
