@@ -223,7 +223,7 @@ ENV HOME=/home/agentic
 # see core/mcp-stdio-proxy/framing.js). The official binary targets glibc
 # >= 2.28 and links libc/libstdc++/libgcc_s plus, on arm64, libatomic (the
 # libatomic1 package installed above - Node 26 added that dependency).
-FROM node:26.13.0-trixie-slim@sha256:5adad64f9a1fca2d51972caa65983634c8a774eb300d72b20f7f2a0f60368072 AS node-relay
+FROM node:26.13.1-trixie-slim@sha256:e6bedef217677b276c591795e169840edd9096dbf13f29df8ef8d1856b8820bc AS node-relay
 
 # The full variant also needs npm/npx. The npm CLI bundled with the Node image carries High
 # advisories in its own dependencies (brace-expansion, ip-address, picomatch, pacote, sigstore)
