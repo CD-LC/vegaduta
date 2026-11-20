@@ -1911,7 +1911,7 @@
     "traceOk": "ok",
     "unmuteRepliesTitle": "Unmute spoken replies",
     "uploading": "Uploading…",
-    "usageTooltip": "Tokens used and estimated cost for this reply, summed from the real per-call LLM usage ledger - a reasoning-heavy turn counts every call it made, including checks and retries.",
+    "usageTooltip": "Tokens used by this reply, summed from the real per-call LLM usage ledger - a reasoning-heavy turn counts every call it made, including checks and retries.",
     "viewTurn": "View turn",
     "viewTurnTitle": "Open the step-by-step timeline of this conversation's turns",
     "visionFallbackDismiss": "Don't send",
