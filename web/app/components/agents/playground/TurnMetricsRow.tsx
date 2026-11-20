@@ -2,18 +2,16 @@
 
 import { Clock, Sparkles, Wrench } from "lucide-react";
 import { useTranslations } from "../../../lib/i18n";
-import { isBillingEnabled } from "../../../lib/billing-flag";
 import { Badge } from "../../ui/badge";
 import { Button } from "../../ui/button";
 import { Separator } from "../../ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
 import PoweredByChip, { inferSource, providerDisplayName } from "../../PoweredByChip";
 import { edgeFallbackLabel, edgeFallbackShortLabel } from "../../../lib/edge/capabilities";
-import { formatUsageCost } from "./format";
 import type { PlaygroundTurn } from "./types";
 
 /**
- * The per-reply metadata strip: latency, tool-call count, real token/cost
+ * The per-reply metadata strip: latency, tool-call count, real token
  * usage, which engine answered (on-device tier or the hosted provider/model),
  * the fallback/downgrade provenance badges, and the explicit "get a smarter
  * answer" escalation for on-device replies. Only what has a real source is
@@ -80,9 +78,6 @@ export function TurnMetricsRow({
                     <span className="tabular-nums">
                       {turn.metrics.totalTokens.toLocaleString()}{" "}
                       {turn.metrics.totalTokens === 1 ? t("tokenSingular") : t("tokenPlural")}
-                      {isBillingEnabled() && turn.metrics.estimatedCostUsd != null && turn.metrics.estimatedCostUsd > 0
-                        ? ` · ${formatUsageCost(turn.metrics.estimatedCostUsd)}`
-                        : ""}
                     </span>
                   </span>
                 </TooltipTrigger>
