@@ -104,11 +104,7 @@
    * fixed px-6 - content still breathes on an ultrawide monitor without
    * artificially narrowing the container itself. */
   .app-content {
-    @apply mx-auto flex-1 pb-12;
-    /* 70% shell, centred (15% gap each side); the internal clamp padding
-     * still breathes inside it. */
-    width: 70%;
-    max-width: none;
+    @apply mx-auto w-full max-w-none flex-1 pb-12;
     /* pt-6 (24px) plus the topbar's own 60px height, since .ax-topbar is
      * now `position: fixed` and no longer reserves its own space in
      * document flow (see .ax-topbar's comment above). */
@@ -127,8 +123,6 @@
 
   .app-content-bleed {
     @apply flex max-w-none flex-col px-4 pb-24;
-    width: 70%;
-    margin-inline: auto;
     padding-top: calc(60px + 1rem);
   }
 
