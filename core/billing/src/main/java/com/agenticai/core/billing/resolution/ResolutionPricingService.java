@@ -7,20 +7,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Reads the platform-wide resolution-pricing knobs out of {@code
- * control_plane.platform_setting} (seeded by controlplane/V281) via raw
- * JDBC. JdbcTemplate rather than {@code PlatformSettingsService},
- * deliberately: that service lives in {@code core/tenancy}, which already
- * depends on THIS module - importing it would close a dependency cycle.
- * {@code TenantBillingProfileRepository} reads {@code control_plane.tenant}
- * the same way for the same reason.
+ * Reads the platform-wide resolution-pricing knobs out of {@code control_plane.platform_setting}
+ * (seeded by controlplane/V281) via raw JDBC. JdbcTemplate rather than {@code
+ * PlatformSettingsService}, deliberately: that service lives in {@code core/tenancy}, which already
+ * depends on THIS module - importing it would close a dependency cycle. {@code
+ * TenantBillingProfileRepository} reads {@code control_plane.tenant} the same way for the same
+ * reason.
  *
- * <p>Same caching shape as {@code FreeModeService}: a small time-boxed
- * cache ({@code app.resolution-pricing.cache-ms}, default 30s) because
- * {@link #snapshot()} sits on the sweep's per-event path. Missing or
- * unparsable rows fall back to the documented defaults - a corrupt setting
- * must never hard-fail metering, identical posture to
- * {@code PlatformSettingsService}'s own javadoc.
+ * <p>Same caching shape as {@code FreeModeService}: a small time-boxed cache ({@code
+ * app.resolution-pricing.cache-ms}, default 30s) because {@link #snapshot()} sits on the sweep's
+ * per-event path. Missing or unparsable rows fall back to the documented defaults - a corrupt
+ * setting must never hard-fail metering, identical posture to {@code PlatformSettingsService}'s own
+ * javadoc.
  */
 @Service
 public class ResolutionPricingService {
@@ -34,12 +32,14 @@ public class ResolutionPricingService {
 
     /** Seeded defaults (V281): meter-only, USD, idle-close billable, 72h window. */
     public static final long DEFAULT_UNIT_PRICE_MINOR = 0L;
+
     public static final String DEFAULT_CURRENCY = "USD";
     public static final boolean DEFAULT_BILL_IDLE_CLOSE = true;
     public static final long DEFAULT_IDLE_CLOSE_HOURS = 72L;
 
     /** Point-in-time price/config read, snapshotted onto each recorded event. */
-    public record PricingSnapshot(long unitPriceMinor, String currency, boolean billIdleClose, long idleCloseHours) {}
+    public record PricingSnapshot(
+            long unitPriceMinor, String currency, boolean billIdleClose, long idleCloseHours) {}
 
     private final PlatformSettingJdbcRepository settings;
     private final long cacheMs;
@@ -64,11 +64,12 @@ public class ResolutionPricingService {
         if (cached != null && now - cached.readAtMs < cacheMs) {
             return cached.snapshot;
         }
-        PricingSnapshot snapshot = new PricingSnapshot(
-            getLong(KEY_UNIT_PRICE_MINOR, DEFAULT_UNIT_PRICE_MINOR),
-            getString(KEY_CURRENCY, DEFAULT_CURRENCY),
-            getBoolean(KEY_BILL_IDLE_CLOSE, DEFAULT_BILL_IDLE_CLOSE),
-            getLong(KEY_IDLE_CLOSE_HOURS, DEFAULT_IDLE_CLOSE_HOURS));
+        PricingSnapshot snapshot =
+                new PricingSnapshot(
+                        getLong(KEY_UNIT_PRICE_MINOR, DEFAULT_UNIT_PRICE_MINOR),
+                        getString(KEY_CURRENCY, DEFAULT_CURRENCY),
+                        getBoolean(KEY_BILL_IDLE_CLOSE, DEFAULT_BILL_IDLE_CLOSE),
+                        getLong(KEY_IDLE_CLOSE_HOURS, DEFAULT_IDLE_CLOSE_HOURS));
         cache.set(new Cached(snapshot, now));
         return snapshot;
     }
@@ -90,7 +91,11 @@ public class ResolutionPricingService {
         try {
             return Long.parseLong(value.trim());
         } catch (NumberFormatException e) {
-            log.warn("Platform setting '{}' has a non-numeric value '{}' - using default {}", key, value, defaultIfMissing);
+            log.warn(
+                    "Platform setting '{}' has a non-numeric value '{}' - using default {}",
+                    key,
+                    value,
+                    defaultIfMissing);
             return defaultIfMissing;
         }
     }

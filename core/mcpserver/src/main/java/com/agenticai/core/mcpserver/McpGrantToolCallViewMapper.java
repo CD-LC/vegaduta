@@ -2,7 +2,10 @@ package com.agenticai.core.mcpserver;
 
 import com.agenticai.core.agents.tools.ToolCallLog;
 
-/** Maps {@link ToolCallLog} rows to the grant tool-call API view, keeping the entity out of the controller. */
+/**
+ * Maps {@link ToolCallLog} rows to the grant tool-call API view, keeping the entity out of the
+ * controller.
+ */
 final class McpGrantToolCallViewMapper {
 
     private McpGrantToolCallViewMapper() {}

@@ -7,9 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Read facade over {@link WorkflowDefinitionRepository} for the unauthenticated webhook entry
- * points, so {@link WorkflowWebhookController} never touches the repository or the
- * {@link WorkflowDefinition} entity. No tenant access guard here on purpose: the webhook
- * controller establishes the tenant context by hand before calling.
+ * points, so {@link WorkflowWebhookController} never touches the repository or the {@link
+ * WorkflowDefinition} entity. No tenant access guard here on purpose: the webhook controller
+ * establishes the tenant context by hand before calling.
  */
 @Service
 public class WorkflowWebhookTargetService {
@@ -30,9 +30,13 @@ public class WorkflowWebhookTargetService {
                 .map(d -> new Target(d.getId(), d.getStatus()));
     }
 
-    /** Whether {@code nodeId} of the workflow is a hosted-form trigger node (see {@link WorkflowFormService}). */
+    /**
+     * Whether {@code nodeId} of the workflow is a hosted-form trigger node (see {@link
+     * WorkflowFormService}).
+     */
     @Transactional(readOnly = true)
-    public boolean isFormTriggerNode(WorkflowFormService formService, UUID workflowId, String nodeId) {
+    public boolean isFormTriggerNode(
+            WorkflowFormService formService, UUID workflowId, String nodeId) {
         return definitionRepository
                 .findById(workflowId)
                 .map(d -> formService.isFormTriggerNode(d, nodeId))

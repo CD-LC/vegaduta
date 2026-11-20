@@ -42,12 +42,7 @@ public class GeneratedMusicController {
     public ResponseEntity<List<GeneratedMusicResponse>> list(
             @RequestParam(required = false) Integer limit,
             @RequestParam(required = false) Long offset) {
-        return ListPaging.window(
-                service.listResponses(),
-                limit,
-                offset,
-                50,
-                200);
+        return ListPaging.window(service.listResponses(), limit, offset, 50, 200);
     }
 
     @GetMapping("/{id}")
@@ -56,12 +51,10 @@ public class GeneratedMusicController {
                 .map(
                         track ->
                                 ResponseEntity.ok()
-                                        .contentType(
-                                                MediaType.parseMediaType(track.contentType()))
+                                        .contentType(MediaType.parseMediaType(track.contentType()))
                                         .header(
                                                 HttpHeaders.CONTENT_DISPOSITION,
-                                                AttachmentDisposition.attachment(
-                                                        track.filename()))
+                                                AttachmentDisposition.attachment(track.filename()))
                                         .body(resolveBytes(track)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -70,8 +63,7 @@ public class GeneratedMusicController {
         try (InputStream in = fileStorageService.get(track.objectKey())) {
             return in.readAllBytes();
         } catch (IOException e) {
-            throw new FileStorageException(
-                    "Could not read object '" + track.objectKey() + "'", e);
+            throw new FileStorageException("Could not read object '" + track.objectKey() + "'", e);
         }
     }
 }

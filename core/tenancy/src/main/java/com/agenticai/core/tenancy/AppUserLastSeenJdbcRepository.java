@@ -20,7 +20,10 @@ public class AppUserLastSeenJdbcRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    /** Stamps {@code last_seen_at} for the Keycloak user unless it was stamped within the last five minutes. */
+    /**
+     * Stamps {@code last_seen_at} for the Keycloak user unless it was stamped within the last five
+     * minutes.
+     */
     public void stampLastSeen(String keycloakUserId) {
         jdbcTemplate.update(UPDATE_SQL, keycloakUserId);
     }

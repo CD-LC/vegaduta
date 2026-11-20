@@ -15,8 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AccountService {
 
-    /** Identity of the calling user, extracted from the authenticated principal by the controller. */
-    public record Caller(String keycloakUserId, String email, String tenantSchema, boolean tenantAdmin) {}
+    /**
+     * Identity of the calling user, extracted from the authenticated principal by the controller.
+     */
+    public record Caller(
+            String keycloakUserId, String email, String tenantSchema, boolean tenantAdmin) {}
 
     /** What the avatar upload needs to know about the caller's current avatar. */
     public record AvatarTarget(UUID userId, String currentObjectKey) {}
@@ -29,7 +32,8 @@ public class AccountService {
     }
 
     @Autowired
-    public AccountService(AppUserRepository appUserRepository, AppUserProvisioningService provisioningService) {
+    public AccountService(
+            AppUserRepository appUserRepository, AppUserProvisioningService provisioningService) {
         this.appUserRepository = appUserRepository;
         this.provisioningService = provisioningService;
     }
@@ -71,7 +75,8 @@ public class AccountService {
     }
 
     private AppUser currentUser(Caller caller) {
-        Optional<AppUser> existing = appUserRepository.findByKeycloakUserId(caller.keycloakUserId());
+        Optional<AppUser> existing =
+                appUserRepository.findByKeycloakUserId(caller.keycloakUserId());
         if (existing.isPresent()) {
             return existing.get();
         }
@@ -80,9 +85,14 @@ public class AccountService {
         // page load with a 500. Idempotent and race-safe - see AppUserProvisioningService.
         if (provisioningService == null) {
             throw new IllegalStateException(
-                "No AppUser row for authenticated principal '" + caller.keycloakUserId() + "'.");
+                    "No AppUser row for authenticated principal '"
+                            + caller.keycloakUserId()
+                            + "'.");
         }
         return provisioningService.ensure(
-            caller.tenantSchema(), caller.keycloakUserId(), caller.email(), caller.tenantAdmin());
+                caller.tenantSchema(),
+                caller.keycloakUserId(),
+                caller.email(),
+                caller.tenantAdmin());
     }
 }

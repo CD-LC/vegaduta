@@ -382,7 +382,8 @@ public class AbuseDetectionService {
      * out-of-band). Returns false when the nonce is no longer valid.
      */
     @Transactional
-    public boolean markChallengeNonceVerified(String nonceId, UUID tenantId, InetAddress clientAddr) {
+    public boolean markChallengeNonceVerified(
+            String nonceId, UUID tenantId, InetAddress clientAddr) {
         ChallengeNonce nonce = challengeNonceRepo.findValidNonce(nonceId, tenantId).orElse(null);
         if (nonce == null) {
             return false;

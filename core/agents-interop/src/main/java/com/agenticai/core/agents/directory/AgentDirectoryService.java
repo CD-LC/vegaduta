@@ -137,7 +137,9 @@ public class AgentDirectoryService {
     public List<AgentDirectoryView> listPublished(String query, int limit, long offset) {
         int capped = Math.max(1, Math.min(limit, MAX_LIST_LIMIT));
         long skip = Math.min(Math.max(offset, 0L), 1_000_000_000L);
-        return repository.listPublished(pattern(query), new OffsetLimitRequest(skip, capped)).stream()
+        return repository
+                .listPublished(pattern(query), new OffsetLimitRequest(skip, capped))
+                .stream()
                 .map(AgentDirectoryView::of)
                 .toList();
     }

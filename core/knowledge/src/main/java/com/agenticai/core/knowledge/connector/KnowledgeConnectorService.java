@@ -104,12 +104,17 @@ public class KnowledgeConnectorService {
 
     /** API view of {@link #create}. */
     public ConnectorResponse createResponse(
-            UUID collectionId, ConnectorType type, String name, Map<String, String> config, String subject) {
+            UUID collectionId,
+            ConnectorType type,
+            String name,
+            Map<String, String> config,
+            String subject) {
         return toResponse(create(collectionId, type, name, config, subject));
     }
 
     /** API view of {@link #update}. */
-    public ConnectorResponse updateResponse(UUID id, String name, Boolean enabled, Map<String, String> config) {
+    public ConnectorResponse updateResponse(
+            UUID id, String name, Boolean enabled, Map<String, String> config) {
         return toResponse(update(id, name, enabled, config));
     }
 

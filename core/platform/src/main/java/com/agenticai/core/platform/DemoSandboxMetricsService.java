@@ -21,11 +21,11 @@ import org.springframework.stereotype.Service;
  *
  * There is no rollup table and no counter to drift out of sync: every figure is a live aggregate
  * over {@code control_plane.demo_session} (V126), which already records creation, expiry, message
- * count and - the one that matters - {@code converted_tenant_id}/{@code converted_at}. Raw JDBC (in {@link
- * DemoSandboxMetricsJdbcRepository}) rather than JPA for the same reason {@code NewsletterService} does it: these are
- * cross-tenant control-plane reads over columns owned by other workstreams, and a raw column read
- * does not couple this feature's compile-time correctness to whether some other module ever maps
- * them.
+ * count and - the one that matters - {@code converted_tenant_id}/{@code converted_at}. Raw JDBC (in
+ * {@link DemoSandboxMetricsJdbcRepository}) rather than JPA for the same reason {@code
+ * NewsletterService} does it: these are cross-tenant control-plane reads over columns owned by
+ * other workstreams, and a raw column read does not couple this feature's compile-time correctness
+ * to whether some other module ever maps them.
  *
  * <h2>Degrading honestly</h2>
  *

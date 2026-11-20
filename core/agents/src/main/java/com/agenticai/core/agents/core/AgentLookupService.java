@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Small read-only agent lookups (names, counts) for other feature areas, so they never touch
- * {@link AgentRepository}.
+ * Small read-only agent lookups (names, counts) for other feature areas, so they never touch {@link
+ * AgentRepository}.
  */
 @Service
 public class AgentLookupService {
@@ -30,7 +30,9 @@ public class AgentLookupService {
     @Transactional(readOnly = true)
     public Map<UUID, String> namesByIds(Collection<UUID> agentIds) {
         return agentRepository.findAllById(agentIds).stream()
-                .collect(Collectors.toMap(Agent::getId, a -> a.getName() == null ? "agent" : a.getName()));
+                .collect(
+                        Collectors.toMap(
+                                Agent::getId, a -> a.getName() == null ? "agent" : a.getName()));
     }
 
     @Transactional(readOnly = true)

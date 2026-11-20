@@ -30,12 +30,20 @@ class ChannelContactControllerListHeadersTest {
 
     private ChannelContactService service;
     private ChannelContactController controller;
-    private final ChannelContact row = new ChannelContact(ChannelType.values()[0], "+15550001", "A", null, null, "manual");
+    private final ChannelContact row =
+            new ChannelContact(ChannelType.values()[0], "+15550001", "A", null, null, "manual");
 
     @BeforeEach
     void setUp() {
         service = mock(ChannelContactService.class);
-        controller = new ChannelContactController(service, new ChannelContactViewService(service, mock(ChannelSessionRepository.class), new com.agenticai.core.agents.core.AgentLookupService(mock(AgentRepository.class))));
+        controller =
+                new ChannelContactController(
+                        service,
+                        new ChannelContactViewService(
+                                service,
+                                mock(ChannelSessionRepository.class),
+                                new com.agenticai.core.agents.core.AgentLookupService(
+                                        mock(AgentRepository.class))));
     }
 
     @Test

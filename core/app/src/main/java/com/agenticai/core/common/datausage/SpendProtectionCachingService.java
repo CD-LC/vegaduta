@@ -38,41 +38,38 @@ public class SpendProtectionCachingService {
                 llmCallLogService.cacheEffectivenessSince(windowStart).stream()
                         .collect(
                                 Collectors.toMap(
-                                    LlmCallLogRepository.CacheEffectivenessRow::getProviderName,
-                                    row -> row));
+                                        LlmCallLogRepository.CacheEffectivenessRow::getProviderName,
+                                        row -> row));
 
-        return providerCachingRegistry
-                .activeProviders().stream()
-                    .sorted(Comparator.comparing(ProviderName::name))
-                    .map(
-                            provider -> {
-                                LlmCallLogRepository.CacheEffectivenessRow row =
-                                        effectivenessByProvider.get(provider.name());
-                                if (row == null || row.getTotalCalls() == 0) {
-                                    // No calls to this provider in the window yet - real
-                                    // absence of data, not a fabricated 0% metric.
-                                    return new SpendProtectionResponse.CachingProviderStatus(
-                                            provider.name(), true, 0, null, null);
-                                }
-                                long totalInputTokens =
-                                        row.getPromptTokens()
-                                                + row.getCacheCreationTokens()
-                                                + row.getCacheReadTokens();
-                                Double cacheReadTokenShare =
-                                        totalInputTokens > 0
-                                                ? row.getCacheReadTokens()
-                                                        / (double) totalInputTokens
-                                                : null;
-                                Double callsWithCacheHitShare =
-                                        row.getCallsWithCacheHit()
-                                                / (double) row.getTotalCalls();
+        return providerCachingRegistry.activeProviders().stream()
+                .sorted(Comparator.comparing(ProviderName::name))
+                .map(
+                        provider -> {
+                            LlmCallLogRepository.CacheEffectivenessRow row =
+                                    effectivenessByProvider.get(provider.name());
+                            if (row == null || row.getTotalCalls() == 0) {
+                                // No calls to this provider in the window yet - real
+                                // absence of data, not a fabricated 0% metric.
                                 return new SpendProtectionResponse.CachingProviderStatus(
-                                        provider.name(),
-                                        true,
-                                        row.getTotalCalls(),
-                                        cacheReadTokenShare,
-                                        callsWithCacheHitShare);
-                            })
-                    .toList();
+                                        provider.name(), true, 0, null, null);
+                            }
+                            long totalInputTokens =
+                                    row.getPromptTokens()
+                                            + row.getCacheCreationTokens()
+                                            + row.getCacheReadTokens();
+                            Double cacheReadTokenShare =
+                                    totalInputTokens > 0
+                                            ? row.getCacheReadTokens() / (double) totalInputTokens
+                                            : null;
+                            Double callsWithCacheHitShare =
+                                    row.getCallsWithCacheHit() / (double) row.getTotalCalls();
+                            return new SpendProtectionResponse.CachingProviderStatus(
+                                    provider.name(),
+                                    true,
+                                    row.getTotalCalls(),
+                                    cacheReadTokenShare,
+                                    callsWithCacheHitShare);
+                        })
+                .toList();
     }
 }

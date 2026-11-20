@@ -13,9 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * API-facing facade over {@link LeadService}: maps {@link Lead} / {@link LeadActivity} entities
- * to the controller's DTO records (and renders the CSV export) so {@link LeadController} never
- * touches JPA entities.
+ * API-facing facade over {@link LeadService}: maps {@link Lead} / {@link LeadActivity} entities to
+ * the controller's DTO records (and renders the CSV export) so {@link LeadController} never touches
+ * JPA entities.
  */
 @Service
 public class LeadApiService {
@@ -28,14 +28,20 @@ public class LeadApiService {
 
     @Transactional(readOnly = true)
     public PageResponse list(LeadStage stage, String source, String q, int page, int size) {
-        Page<Lead> result = service.list(
-            stage, source, q,
-            PageRequest.of(Math.max(0, page), Math.max(1, Math.min(size, LeadController.MAX_PAGE_SIZE)), Sort.by(Sort.Direction.DESC, "createdAt"))
-        );
+        Page<Lead> result =
+                service.list(
+                        stage,
+                        source,
+                        q,
+                        PageRequest.of(
+                                Math.max(0, page),
+                                Math.max(1, Math.min(size, LeadController.MAX_PAGE_SIZE)),
+                                Sort.by(Sort.Direction.DESC, "createdAt")));
         return new PageResponse(
-            result.getContent().stream().map(LeadApiService::toResponse).toList(),
-            result.getTotalElements(), result.getNumber(), result.getSize()
-        );
+                result.getContent().stream().map(LeadApiService::toResponse).toList(),
+                result.getTotalElements(),
+                result.getNumber(),
+                result.getSize());
     }
 
     @Transactional
@@ -64,7 +70,8 @@ public class LeadApiService {
     }
 
     @Transactional
-    public ActivityResponse addActivity(UUID id, LeadActivityType type, String body, Map<String, Object> meta) {
+    public ActivityResponse addActivity(
+            UUID id, LeadActivityType type, String body, Map<String, Object> meta) {
         return toResponse(service.addActivity(id, type, body, meta));
     }
 
@@ -90,13 +97,27 @@ public class LeadApiService {
 
     private static LeadResponse toResponse(Lead l) {
         return new LeadResponse(
-            l.getId(), l.getName(), l.getEmail(), l.getPhone(), l.getCompany(), l.getTitle(), l.getSource(),
-            l.getStage(), l.getScore(), l.getOwner(), l.getValue(), l.tagList(), l.getNotes(),
-            l.getLastContactedAt(), l.getLastRepliedAt(), l.getCreatedAt(), l.getUpdatedAt()
-        );
+                l.getId(),
+                l.getName(),
+                l.getEmail(),
+                l.getPhone(),
+                l.getCompany(),
+                l.getTitle(),
+                l.getSource(),
+                l.getStage(),
+                l.getScore(),
+                l.getOwner(),
+                l.getValue(),
+                l.tagList(),
+                l.getNotes(),
+                l.getLastContactedAt(),
+                l.getLastRepliedAt(),
+                l.getCreatedAt(),
+                l.getUpdatedAt());
     }
 
     private static ActivityResponse toResponse(LeadActivity a) {
-        return new ActivityResponse(a.getId(), a.getLeadId(), a.getType(), a.getBody(), a.getMeta(), a.getCreatedAt());
+        return new ActivityResponse(
+                a.getId(), a.getLeadId(), a.getType(), a.getBody(), a.getMeta(), a.getCreatedAt());
     }
 }

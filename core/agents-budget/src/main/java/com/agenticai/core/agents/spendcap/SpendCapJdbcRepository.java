@@ -59,12 +59,7 @@ public class SpendCapJdbcRepository {
     /** Rows updated: 1 when this caller won the claim for {@code stage} in {@code month}. */
     int claimAlertStage(int stage, LocalDate month, UUID tenantId) {
         return jdbc.update(
-                SQL_CLAIM_STAGE,
-                stage,
-                Date.valueOf(month),
-                tenantId,
-                Date.valueOf(month),
-                stage);
+                SQL_CLAIM_STAGE, stage, Date.valueOf(month), tenantId, Date.valueOf(month), stage);
     }
 
     private static TenantCap map(java.sql.ResultSet rs) throws java.sql.SQLException {

@@ -109,8 +109,7 @@ public class PlatformTenantDetailService {
 
     public TenantDetail get(UUID tenantId) {
         Tenant t =
-                tenants
-                        .find(tenantId)
+                tenants.find(tenantId)
                         .orElseThrow(() -> new PlatformTenantNotFoundException(tenantId));
         String schema = t.getSchemaName();
         List<String> unavailable = new ArrayList<>();
@@ -125,10 +124,7 @@ public class PlatformTenantDetailService {
         if (active) {
             agents = metric("agents", unavailable, () -> asTenant(schema, agentLookup::count));
             workflows =
-                    metric(
-                            "workflows",
-                            unavailable,
-                            () -> asTenant(schema, workflowCounts::count));
+                    metric("workflows", unavailable, () -> asTenant(schema, workflowCounts::count));
             try {
                 // One MAX() aggregate - this used to load 200 full llm_call_log rows to read one
                 // timestamp.

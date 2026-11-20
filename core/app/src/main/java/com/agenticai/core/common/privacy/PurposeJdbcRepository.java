@@ -30,11 +30,15 @@ public class PurposeJdbcRepository {
     /** {@code table} is one of two internal constants, never user input. */
     boolean resourceExists(String table, UUID resourceId) {
         Integer exists =
-                jdbc.queryForObject("SELECT count(*) FROM " + table + " WHERE id = ?", Integer.class, resourceId);
+                jdbc.queryForObject(
+                        "SELECT count(*) FROM " + table + " WHERE id = ?",
+                        Integer.class,
+                        resourceId);
         return exists != null && exists != 0;
     }
 
-    void replaceTags(String resourceType, UUID resourceId, Collection<String> purposes, String actor) {
+    void replaceTags(
+            String resourceType, UUID resourceId, Collection<String> purposes, String actor) {
         jdbc.update(
                 "DELETE FROM privacy_purpose_tag WHERE resource_type = ? AND resource_id = ?",
                 resourceType,

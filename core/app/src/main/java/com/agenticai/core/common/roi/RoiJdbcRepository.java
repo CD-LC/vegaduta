@@ -78,7 +78,8 @@ public class RoiJdbcRepository {
 
     boolean agentExists(UUID agentId) {
         Integer n =
-                jdbc.queryForObject("SELECT count(*) FROM agent WHERE id = ?", Integer.class, agentId);
+                jdbc.queryForObject(
+                        "SELECT count(*) FROM agent WHERE id = ?", Integer.class, agentId);
         return n != null && n != 0;
     }
 
@@ -151,7 +152,8 @@ public class RoiJdbcRepository {
     }
 
     /** Returns 0 when another replica already recorded this (month, threshold). */
-    int insertBudgetAlert(LocalDate monthStart, int threshold, BigDecimal spendUsd, BigDecimal capUsd) {
+    int insertBudgetAlert(
+            LocalDate monthStart, int threshold, BigDecimal spendUsd, BigDecimal capUsd) {
         return jdbc.update(
                 "INSERT INTO roi_budget_alert (month_start, threshold, spend_usd, cap_usd) VALUES (?,?,?,?)"
                         + " ON CONFLICT (month_start, threshold) DO NOTHING",
@@ -237,7 +239,8 @@ public class RoiJdbcRepository {
     // ---- outcome marks -----------------------------------------------------------------------
 
     /** Returns 0 when the conversation already has a correction mark. */
-    int insertCorrection(UUID id, String conversationKey, UUID agentId, String markedBy, String note) {
+    int insertCorrection(
+            UUID id, String conversationKey, UUID agentId, String markedBy, String note) {
         return jdbc.update(
                 "INSERT INTO conversation_correction (id, conversation_key, agent_id, marked_by, note)"
                         + " VALUES (?,?,?,?,?) ON CONFLICT (conversation_key) DO NOTHING",
@@ -318,9 +321,7 @@ public class RoiJdbcRepository {
                         + " LEFT JOIN LATERAL (SELECT channel FROM channel_session WHERE session_id = l.session_id LIMIT 1) cs ON true"
                         + " WHERE l.started_at >= ? AND l.started_at < ?"
                         + " GROUP BY 1,2,3,4,5,6,7",
-                handler,
-                start,
-                end);
+                handler, start, end);
     }
 
     /** One row: minor, currency, n (distinct currencies). The handler is called once. */
@@ -354,7 +355,8 @@ public class RoiJdbcRepository {
                 rs -> rs.next() ? Optional.of(rs.getString(1)) : Optional.<String>empty());
     }
 
-    void queryLatencyMedian(UUID agentId, Timestamp start, Timestamp end, RowCallbackHandler handler) {
+    void queryLatencyMedian(
+            UUID agentId, Timestamp start, Timestamp end, RowCallbackHandler handler) {
         jdbc.query(
                 "SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY latency_ms) AS med, count(*) AS n"
                         + " FROM llm_call_log WHERE agent_id = ? AND success AND started_at >= ? AND started_at < ?",

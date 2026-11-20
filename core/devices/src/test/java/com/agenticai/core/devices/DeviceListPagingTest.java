@@ -33,8 +33,7 @@ class DeviceListPagingTest {
     void devicesAndCommands() throws Exception {
         var c =
                 new DeviceController(
-                        mock(DevicePairingService.class),
-                        mock(DeviceAdminService.class));
+                        mock(DevicePairingService.class), mock(DeviceAdminService.class));
         MockMvc mvc = MockMvcBuilders.standaloneSetup(c).build();
         assertPaged(mvc, "/api/devices");
         assertPaged(mvc, "/api/devices/" + UUID.randomUUID() + "/commands");

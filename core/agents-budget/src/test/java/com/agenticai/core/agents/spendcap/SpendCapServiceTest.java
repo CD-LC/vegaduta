@@ -51,7 +51,8 @@ class SpendCapServiceTest {
     private ValueOperations<String, String> ops;
     private LlmUsageRollupService rollup;
     private final List<SpendCapAlertSink.Alert> alerts = new ArrayList<>();
-    private final AtomicReference<Clock> clock = new AtomicReference<>(Clock.fixed(NOW, ZoneOffset.UTC));
+    private final AtomicReference<Clock> clock =
+            new AtomicReference<>(Clock.fixed(NOW, ZoneOffset.UTC));
     private SpendCapService service;
     private SpendCapService.TenantCap row;
 
@@ -68,10 +69,19 @@ class SpendCapServiceTest {
         when(sinks.orderedStream()).thenAnswer(inv -> Stream.of((SpendCapAlertSink) alerts::add));
         row = cap(new BigDecimal("100.00"), 0, null);
         when(jdbc.query(anyString(), any(RowMapper.class), any(Object[].class)))
-            .thenAnswer(inv -> row == null ? List.of() : List.of(row));
-        when(jdbc.query(anyString(), any(RowMapper.class), anyString())).thenAnswer(inv -> row == null ? List.of() : List.of(row));
-        when(jdbc.query(anyString(), any(RowMapper.class), any(UUID.class))).thenAnswer(inv -> row == null ? List.of() : List.of(row));
-        service = new SpendCapService(new SpendCapJdbcRepository(jdbc), redis, rollup, sinks, new DelegatingClock(clock), Runnable::run);
+                .thenAnswer(inv -> row == null ? List.of() : List.of(row));
+        when(jdbc.query(anyString(), any(RowMapper.class), anyString()))
+                .thenAnswer(inv -> row == null ? List.of() : List.of(row));
+        when(jdbc.query(anyString(), any(RowMapper.class), any(UUID.class)))
+                .thenAnswer(inv -> row == null ? List.of() : List.of(row));
+        service =
+                new SpendCapService(
+                        new SpendCapJdbcRepository(jdbc),
+                        redis,
+                        rollup,
+                        sinks,
+                        new DelegatingClock(clock),
+                        Runnable::run);
     }
 
     @SuppressWarnings("unchecked")
@@ -86,13 +96,16 @@ class SpendCapServiceTest {
     }
 
     private void hostedMonthToDate(String usd) {
-        SpendReport.ProviderUsage hosted = new SpendReport.ProviderUsage("PLATFORM_HOSTED", metrics(usd));
+        SpendReport.ProviderUsage hosted =
+                new SpendReport.ProviderUsage("PLATFORM_HOSTED", metrics(usd));
         SpendReport.ProviderUsage byok = new SpendReport.ProviderUsage("OPENAI", metrics("999"));
-        when(rollup.byProvider(LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 9))).thenReturn(List.of(hosted, byok));
+        when(rollup.byProvider(LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 9)))
+                .thenReturn(List.of(hosted, byok));
     }
 
     private static SpendReport.UsageMetrics metrics(String usd) {
-        return new SpendReport.UsageMetrics(1, 0, 1.0, 0, 0, 0, 0, 0, new BigDecimal(usd), null, null, null, null);
+        return new SpendReport.UsageMetrics(
+                1, 0, 1.0, 0, 0, 0, 0, 0, new BigDecimal(usd), null, null, null, null);
     }
 
     // ------------------------------------------------------------------ gate
@@ -115,9 +128,11 @@ class SpendCapServiceTest {
     @Test
     void atCapRejectsWithContractFieldsAndRaisesTheHundredPercentAlertOnce() {
         when(ops.get(KEY)).thenReturn("100.00");
-        when(jdbc.update(eq(SpendCapService.SQL_CLAIM_STAGE), any(Object[].class))).thenReturn(1, 0);
+        when(jdbc.update(eq(SpendCapService.SQL_CLAIM_STAGE), any(Object[].class)))
+                .thenReturn(1, 0);
 
-        SpendCapReachedException e = assertThrows(SpendCapReachedException.class, () -> service.assertWithinCap(SCHEMA));
+        SpendCapReachedException e =
+                assertThrows(SpendCapReachedException.class, () -> service.assertWithinCap(SCHEMA));
         assertEquals(new BigDecimal("100.00"), e.getCapUsd());
         assertEquals(0, new BigDecimal("100").compareTo(e.getMonthToDateUsd()));
         assertEquals(Instant.parse("2026-11-01T00:00:00Z"), e.getResetsAt());
@@ -137,7 +152,8 @@ class SpendCapServiceTest {
         service.assertWithinCap(SCHEMA);
 
         verify(ops).setIfAbsent(KEY, "12.34", Duration.ofDays(40));
-        assertTrue(TenantContext.current().isEmpty(), "tenant context restored after the seed query");
+        assertTrue(
+                TenantContext.current().isEmpty(), "tenant context restored after the seed query");
     }
 
     @Test
@@ -169,23 +185,32 @@ class SpendCapServiceTest {
     @Test
     @SuppressWarnings("unchecked")
     void hostedSpendIncrementsOnlyAnExistingKeyAndAlertsAtEightyPercent() {
-        when(redisTemplate.execute(any(RedisScript.class), anyList(), any(Object[].class))).thenReturn("85.0");
+        when(redisTemplate.execute(any(RedisScript.class), anyList(), any(Object[].class)))
+                .thenReturn("85.0");
         when(jdbc.update(eq(SpendCapService.SQL_CLAIM_STAGE), any(Object[].class))).thenReturn(1);
 
         service.onHostedSpend(SCHEMA, new BigDecimal("0.25"));
 
-        verify(redisTemplate).execute(eq(SpendCapService.INCR_IF_EXISTS), eq(List.of(KEY)), eq("0.25"));
+        verify(redisTemplate)
+                .execute(eq(SpendCapService.INCR_IF_EXISTS), eq(List.of(KEY)), eq("0.25"));
         assertEquals(1, alerts.size());
         assertEquals(80, alerts.get(0).stage());
-        verify(jdbc).update(SpendCapService.SQL_CLAIM_STAGE, 80, Date.valueOf("2026-10-01"), TENANT,
-            Date.valueOf("2026-10-01"), 80);
+        verify(jdbc)
+                .update(
+                        SpendCapService.SQL_CLAIM_STAGE,
+                        80,
+                        Date.valueOf("2026-10-01"),
+                        TENANT,
+                        Date.valueOf("2026-10-01"),
+                        80);
     }
 
     @Test
     @SuppressWarnings("unchecked")
     void alreadyAlertedStageThisMonthIsNotReclaimed() {
         row = cap(new BigDecimal("100.00"), 80, LocalDate.of(2026, 10, 1));
-        when(redisTemplate.execute(any(RedisScript.class), anyList(), any(Object[].class))).thenReturn("90");
+        when(redisTemplate.execute(any(RedisScript.class), anyList(), any(Object[].class)))
+                .thenReturn("90");
         service.onHostedSpend(SCHEMA, new BigDecimal("1"));
         verify(jdbc, never()).update(eq(SpendCapService.SQL_CLAIM_STAGE), any(Object[].class));
     }
@@ -194,7 +219,8 @@ class SpendCapServiceTest {
     @SuppressWarnings("unchecked")
     void lastMonthsStageReArmsOnANewMonth() {
         row = cap(new BigDecimal("100.00"), 100, LocalDate.of(2026, 9, 1));
-        when(redisTemplate.execute(any(RedisScript.class), anyList(), any(Object[].class))).thenReturn("81");
+        when(redisTemplate.execute(any(RedisScript.class), anyList(), any(Object[].class)))
+                .thenReturn("81");
         when(jdbc.update(eq(SpendCapService.SQL_CLAIM_STAGE), any(Object[].class))).thenReturn(1);
         service.onHostedSpend(SCHEMA, new BigDecimal("1"));
         assertEquals(80, alerts.get(0).stage());
@@ -206,7 +232,8 @@ class SpendCapServiceTest {
         service.onHostedSpend(SCHEMA, BigDecimal.ZERO);
         row = cap(null, 0, null);
         service.onHostedSpend(SCHEMA, new BigDecimal("3"));
-        verify(redisTemplate, never()).execute(any(RedisScript.class), anyList(), any(Object[].class));
+        verify(redisTemplate, never())
+                .execute(any(RedisScript.class), anyList(), any(Object[].class));
     }
 
     // ------------------------------------------------------------------ admin
@@ -215,10 +242,17 @@ class SpendCapServiceTest {
     void capValidation() {
         assertNull(SpendCapService.validateCap(null));
         assertEquals(new BigDecimal("10.50"), SpendCapService.validateCap(new BigDecimal("10.5")));
-        assertEquals(new BigDecimal("1000000.00"), SpendCapService.validateCap(new BigDecimal("1000000")));
-        assertThrows(IllegalArgumentException.class, () -> SpendCapService.validateCap(BigDecimal.ZERO));
-        assertThrows(IllegalArgumentException.class, () -> SpendCapService.validateCap(new BigDecimal("-1")));
-        assertThrows(IllegalArgumentException.class, () -> SpendCapService.validateCap(new BigDecimal("1000000.01")));
+        assertEquals(
+                new BigDecimal("1000000.00"),
+                SpendCapService.validateCap(new BigDecimal("1000000")));
+        assertThrows(
+                IllegalArgumentException.class, () -> SpendCapService.validateCap(BigDecimal.ZERO));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> SpendCapService.validateCap(new BigDecimal("-1")));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> SpendCapService.validateCap(new BigDecimal("1000000.01")));
     }
 
     @Test

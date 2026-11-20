@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
  * Marks agents as callable specialists (crew handoff):
  *
  * <ul>
- *   <li>GET /api/agents/{agentId}/specialties - the agent's roles (VIEWER)</li>
- *   <li>PUT /api/agents/{agentId}/specialties - replace the set (EDITOR + PERM_MANAGE_AGENTS)</li>
- *   <li>GET /api/agents/specialties/tags - distinct role tags in the tenant</li>
+ *   <li>GET /api/agents/{agentId}/specialties - the agent's roles (VIEWER)
+ *   <li>PUT /api/agents/{agentId}/specialties - replace the set (EDITOR + PERM_MANAGE_AGENTS)
+ *   <li>GET /api/agents/specialties/tags - distinct role tags in the tenant
  * </ul>
  *
  * Authorization lives in {@link AgentSpecialtyService}; the PUT additionally needs
@@ -44,12 +44,19 @@ public class AgentSpecialtyController {
     }
 
     @PutMapping("/{agentId}/specialties")
-    public SpecialtiesResponse put(@PathVariable UUID agentId, @RequestBody SpecialtiesRequest request) {
-        List<AgentSpecialtyService.Specialty> requested = request == null || request.specialties() == null
-            ? null
-            : request.specialties().stream()
-                .map(s -> s == null ? null : new AgentSpecialtyService.Specialty(s.capabilityTag(), s.description()))
-                .toList();
+    public SpecialtiesResponse put(
+            @PathVariable UUID agentId, @RequestBody SpecialtiesRequest request) {
+        List<AgentSpecialtyService.Specialty> requested =
+                request == null || request.specialties() == null
+                        ? null
+                        : request.specialties().stream()
+                                .map(
+                                        s ->
+                                                s == null
+                                                        ? null
+                                                        : new AgentSpecialtyService.Specialty(
+                                                                s.capabilityTag(), s.description()))
+                                .toList();
         return toResponse(agentId, service.replaceForAgent(agentId, requested));
     }
 
@@ -58,8 +65,12 @@ public class AgentSpecialtyController {
         return service.listTenantTags();
     }
 
-    private static SpecialtiesResponse toResponse(UUID agentId, List<AgentSpecialtyService.Specialty> rows) {
-        return new SpecialtiesResponse(agentId,
-            rows.stream().map(r -> new SpecialtyDto(r.capabilityTag(), r.description())).toList());
+    private static SpecialtiesResponse toResponse(
+            UUID agentId, List<AgentSpecialtyService.Specialty> rows) {
+        return new SpecialtiesResponse(
+                agentId,
+                rows.stream()
+                        .map(r -> new SpecialtyDto(r.capabilityTag(), r.description()))
+                        .toList());
     }
 }

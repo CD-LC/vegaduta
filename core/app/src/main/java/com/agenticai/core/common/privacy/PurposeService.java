@@ -16,9 +16,9 @@ import org.springframework.web.server.ResponseStatusException;
  * Purpose tags on knowledge collections and agents, and the rule that stops an agent reading or
  * writing a collection collected for another purpose.
  *
- * <p>Rule: a collection with no tag is unrestricted (existing behaviour, so nothing changes until
- * a tenant starts tagging). A tagged collection is usable only by an agent that carries at least
- * one of its purposes. An agent's purposes are its own tags plus the purpose of its enabled consent
+ * <p>Rule: a collection with no tag is unrestricted (existing behaviour, so nothing changes until a
+ * tenant starts tagging). A tagged collection is usable only by an agent that carries at least one
+ * of its purposes. An agent's purposes are its own tags plus the purpose of its enabled consent
  * policy, so a support agent that asked for consent "for support" can use "support" collections
  * without a second step.
  *
@@ -46,13 +46,15 @@ public class PurposeService implements PurposeAccessPolicy {
 
     /** Replaces the resource's tags with {@code purposes} (empty list = untagged). */
     @Transactional
-    public List<String> replace(String resourceType, UUID resourceId, List<String> purposes, String actor) {
+    public List<String> replace(
+            String resourceType, UUID resourceId, List<String> purposes, String actor) {
         Set<String> clean = new LinkedHashSet<>();
         for (String p : purposes == null ? List.<String>of() : purposes) {
             String purpose = p == null ? "" : p.trim().toLowerCase(Locale.ROOT);
             if (!ConsentPolicyService.PURPOSE.matcher(purpose).matches()) {
                 throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST, "purpose must be 1-64 characters of a-z, 0-9, '-' or '_'");
+                        HttpStatus.BAD_REQUEST,
+                        "purpose must be 1-64 characters of a-z, 0-9, '-' or '_'");
             }
             clean.add(purpose);
         }
@@ -70,7 +72,9 @@ public class PurposeService implements PurposeAccessPolicy {
             return Set.of();
         }
         Set<String> agentPurposes = new HashSet<>(purposes(AGENT, agentId));
-        consent.find(agentId).filter(ConsentPolicyService.Policy::enabled).ifPresent(p -> agentPurposes.add(p.purpose()));
+        consent.find(agentId)
+                .filter(ConsentPolicyService.Policy::enabled)
+                .ifPresent(p -> agentPurposes.add(p.purpose()));
 
         Set<UUID> permitted = new LinkedHashSet<>();
         for (UUID id : collectionIds) {

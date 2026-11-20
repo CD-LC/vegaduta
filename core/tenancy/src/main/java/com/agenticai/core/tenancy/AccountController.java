@@ -1,5 +1,6 @@
 package com.agenticai.core.tenancy;
 
+import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.storage.FileStorageException;
 import com.agenticai.core.storage.FileStorageService;
 import com.agenticai.core.tenancy.dto.AccountResponse;
@@ -8,7 +9,6 @@ import jakarta.validation.Valid;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import com.agenticai.core.security.TenantContext;
 import java.security.Principal;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.springframework.core.io.InputStreamResource;
@@ -28,33 +28,27 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * The logged-in user's own self-service account details - phone number
- * (Simple mode's Quick Task feature delivers WhatsApp/SMS/call results to
- * it) and, as of the avatar endpoints below, their profile picture. Every
- * other user-management endpoint in this codebase ({@code
- * UserAdminController}) is about an admin managing OTHER users; this one is
- * a user managing themselves, so it resolves identity from the request's
- * own {@link Principal} rather than a path variable - there is no "whose
- * account" question to ask.
+ * The logged-in user's own self-service account details - phone number (Simple mode's Quick Task
+ * feature delivers WhatsApp/SMS/call results to it) and, as of the avatar endpoints below, their
+ * profile picture. Every other user-management endpoint in this codebase ({@code
+ * UserAdminController}) is about an admin managing OTHER users; this one is a user managing
+ * themselves, so it resolves identity from the request's own {@link Principal} rather than a path
+ * variable - there is no "whose account" question to ask.
  *
- * <p>Not profile-gated ({@code @Profile("security")}) - same reasoning as
- * {@code SystemStatusController}: it works identically whether "security" is
- * active or not (falls through to {@code anyRequest().authenticated()} when
- * it is; {@code NoSecurityConfig}'s {@code permitAll()} when it isn't). With
- * security off there's no {@link Principal}, so {@code currentUser}
- * resolves nothing and throws - equivalent to every other authenticated
- * endpoint's behavior in that mode.
+ * <p>Not profile-gated ({@code @Profile("security")}) - same reasoning as {@code
+ * SystemStatusController}: it works identically whether "security" is active or not (falls through
+ * to {@code anyRequest().authenticated()} when it is; {@code NoSecurityConfig}'s {@code
+ * permitAll()} when it isn't). With security off there's no {@link Principal}, so {@code
+ * currentUser} resolves nothing and throws - equivalent to every other authenticated endpoint's
+ * behavior in that mode.
  *
- * <p>Avatar storage follows the same "persist the object key, stream the
- * bytes back through our own endpoint" pattern as {@code
- * GeneratedImageController}/{@code SarvamGeneratedAudioController}: the
- * uploaded picture lands in {@link FileStorageService} (MinIO locally,
- * S3/R2 in production - see that interface's javadoc) under a key fixed per
- * user ({@code "avatars/<appUserId>"}), never under a fresh
- * random id each time, so re-uploading simply overwrites the previous
- * picture instead of accumulating orphaned objects. Only that key is
- * persisted on {@link AppUser#getAvatarUrl()}; the raw bytes never touch
- * Postgres.
+ * <p>Avatar storage follows the same "persist the object key, stream the bytes back through our own
+ * endpoint" pattern as {@code GeneratedImageController}/{@code SarvamGeneratedAudioController}: the
+ * uploaded picture lands in {@link FileStorageService} (MinIO locally, S3/R2 in production - see
+ * that interface's javadoc) under a key fixed per user ({@code "avatars/<appUserId>"}), never under
+ * a fresh random id each time, so re-uploading simply overwrites the previous picture instead of
+ * accumulating orphaned objects. Only that key is persisted on {@link AppUser#getAvatarUrl()}; the
+ * raw bytes never touch Postgres.
  */
 @RestController
 @RequestMapping("/api/account")
@@ -68,12 +62,12 @@ public class AccountController {
     private static final long MAX_AVATAR_BYTES = 5L * 1024 * 1024;
 
     /**
-     * Name the avatar stream's close-callback is registered under for the current
-     * request - see {@link #closedAtRequestCompletion}. A fixed name is fine because a
-     * single request can only ever open one avatar stream.
+     * Name the avatar stream's close-callback is registered under for the current request - see
+     * {@link #closedAtRequestCompletion}. A fixed name is fine because a single request can only
+     * ever open one avatar stream.
      */
     private static final String AVATAR_STREAM_CLEANUP_ATTRIBUTE =
-        AccountController.class.getName() + ".avatarStream";
+            AccountController.class.getName() + ".avatarStream";
 
     private final AccountService accountService;
     private final FileStorageService fileStorageService;
@@ -89,22 +83,23 @@ public class AccountController {
     }
 
     @PutMapping("/phone")
-    public AccountResponse setPhoneNumber(Principal principal, @Valid @RequestBody UpdatePhoneNumberRequest request) {
+    public AccountResponse setPhoneNumber(
+            Principal principal, @Valid @RequestBody UpdatePhoneNumberRequest request) {
         return accountService.setPhoneNumber(caller(principal), request.phoneNumber());
     }
 
     /**
-     * Stores {@code file} as this user's avatar and returns the refreshed
-     * account (so the frontend's upload-modal confirm handler doesn't need a
-     * separate follow-up {@link #get} call). Rejects non-image content types
-     * and anything over {@link #MAX_AVATAR_BYTES} the same "client-actionable
-     * 400, not a server bug" way {@code ChatAttachmentService} rejects an
-     * oversized/wrong-type chat attachment - both fall through {@code
-     * GlobalExceptionHandler}'s existing {@code IllegalArgumentException} ->
-     * 400 mapping, no new exception type needed for this small a surface.
+     * Stores {@code file} as this user's avatar and returns the refreshed account (so the
+     * frontend's upload-modal confirm handler doesn't need a separate follow-up {@link #get} call).
+     * Rejects non-image content types and anything over {@link #MAX_AVATAR_BYTES} the same
+     * "client-actionable 400, not a server bug" way {@code ChatAttachmentService} rejects an
+     * oversized/wrong-type chat attachment - both fall through {@code GlobalExceptionHandler}'s
+     * existing {@code IllegalArgumentException} -> 400 mapping, no new exception type needed for
+     * this small a surface.
      */
     @PostMapping("/avatar")
-    public AccountResponse uploadAvatar(Principal principal, @RequestParam("file") MultipartFile file) {
+    public AccountResponse uploadAvatar(
+            Principal principal, @RequestParam("file") MultipartFile file) {
         AccountService.Caller caller = caller(principal);
         AccountService.AvatarTarget avatar = accountService.avatarTarget(caller);
         if (file == null || file.isEmpty()) {
@@ -112,11 +107,12 @@ public class AccountController {
         }
         String contentType = file.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
-            throw new IllegalArgumentException("Avatar must be an image file (received " + contentType + ").");
+            throw new IllegalArgumentException(
+                    "Avatar must be an image file (received " + contentType + ").");
         }
         if (file.getSize() > MAX_AVATAR_BYTES) {
             throw new IllegalArgumentException(
-                "Avatar is too large - limit is " + (MAX_AVATAR_BYTES / 1024 / 1024) + "MB.");
+                    "Avatar is too large - limit is " + (MAX_AVATAR_BYTES / 1024 / 1024) + "MB.");
         }
         byte[] content;
         try {
@@ -149,40 +145,34 @@ public class AccountController {
 
     /**
      * Streams the logged-in user's own avatar bytes back - what {@link
-     * AccountResponse#avatarUrl()}'s fixed {@code /api/account/avatar} path
-     * resolves to. Mirrors {@code GeneratedImageController#download}: an
-     * ordinary authenticated GET, no bespoke access check needed since it
-     * always resolves the CALLING user's own row, never a path-variable id.
-     * 404 if this user has never uploaded a picture - AppShell's fallback to
-     * initials is the expected behavior in that case, not an error state.
+     * AccountResponse#avatarUrl()}'s fixed {@code /api/account/avatar} path resolves to. Mirrors
+     * {@code GeneratedImageController#download}: an ordinary authenticated GET, no bespoke access
+     * check needed since it always resolves the CALLING user's own row, never a path-variable id.
+     * 404 if this user has never uploaded a picture - AppShell's fallback to initials is the
+     * expected behavior in that case, not an error state.
      *
-     * <p>Returns an {@link InputStreamResource} rather than {@code byte[]} so
-     * Spring's {@code ResourceHttpMessageConverter} copies the object storage
-     * stream to the response in bounded chunks instead of this controller
-     * first buffering the whole avatar into its own {@code byte[]} (on top of
-     * whatever {@link FileStorageService#get} already buffered) just to hand
-     * it to {@code ResponseEntity.body(byte[])} - one fewer full-size heap
-     * copy per request, same as {@code file.getBytes()} at {@link
-     * #uploadAvatar} needing no equivalent change: that read is already
-     * bounded by the {@link #MAX_AVATAR_BYTES} check one line above it, run
-     * BEFORE the read happens, whereas this GET had no such bound at all.
+     * <p>Returns an {@link InputStreamResource} rather than {@code byte[]} so Spring's {@code
+     * ResourceHttpMessageConverter} copies the object storage stream to the response in bounded
+     * chunks instead of this controller first buffering the whole avatar into its own {@code
+     * byte[]} (on top of whatever {@link FileStorageService#get} already buffered) just to hand it
+     * to {@code ResponseEntity.body(byte[])} - one fewer full-size heap copy per request, same as
+     * {@code file.getBytes()} at {@link #uploadAvatar} needing no equivalent change: that read is
+     * already bounded by the {@link #MAX_AVATAR_BYTES} check one line above it, run BEFORE the read
+     * happens, whereas this GET had no such bound at all.
      *
-     * <p><b>Why the stream is wrapped in {@link #closedAtRequestCompletion}.</b> Since
-     * {@code S3FileStorageService#get} became genuinely lazy (JVM memory audit,
-     * 2026-07-29) the value returned here is an SDK {@code ResponseInputStream} holding
-     * an OPEN HTTP connection from the SDK's pool, not a detached
-     * {@code ByteArrayInputStream} the GC can simply reclaim. Spring's {@code
-     * ResourceHttpMessageConverter} does close the body in a {@code finally} once it
-     * starts writing - including when the client disconnects mid-copy - but there are
-     * dispatch paths where it never starts writing at all and the stream would leak:
-     * most concretely a request whose {@code Accept} header cannot match the image
-     * content type set below, which makes {@code writeWithMessageConverters} raise
-     * {@code HttpMediaTypeNotAcceptableException} (406) with the body untouched. That
-     * is client-triggerable, so repeating it would exhaust the SDK connection pool and
-     * wedge every download in the app. Registering a request-completion callback closes
-     * the stream on EVERY path (the callback runs from {@code
-     * FrameworkServlet.processRequest}'s own finally block), and is a no-op on the
-     * normal path because the wrapper only closes once.
+     * <p><b>Why the stream is wrapped in {@link #closedAtRequestCompletion}.</b> Since {@code
+     * S3FileStorageService#get} became genuinely lazy (JVM memory audit, 2026-07-29) the value
+     * returned here is an SDK {@code ResponseInputStream} holding an OPEN HTTP connection from the
+     * SDK's pool, not a detached {@code ByteArrayInputStream} the GC can simply reclaim. Spring's
+     * {@code ResourceHttpMessageConverter} does close the body in a {@code finally} once it starts
+     * writing - including when the client disconnects mid-copy - but there are dispatch paths where
+     * it never starts writing at all and the stream would leak: most concretely a request whose
+     * {@code Accept} header cannot match the image content type set below, which makes {@code
+     * writeWithMessageConverters} raise {@code HttpMediaTypeNotAcceptableException} (406) with the
+     * body untouched. That is client-triggerable, so repeating it would exhaust the SDK connection
+     * pool and wedge every download in the app. Registering a request-completion callback closes
+     * the stream on EVERY path (the callback runs from {@code FrameworkServlet.processRequest}'s
+     * own finally block), and is a no-op on the normal path because the wrapper only closes once.
      */
     @GetMapping("/avatar")
     public ResponseEntity<InputStreamResource> getAvatar(Principal principal) {
@@ -201,49 +191,57 @@ public class AccountController {
             return ResponseEntity.notFound().build();
         }
         InputStream guarded = closedAtRequestCompletion(in);
-        MediaType contentType = objectKey.endsWith(".png") ? MediaType.IMAGE_PNG : MediaType.IMAGE_JPEG;
+        MediaType contentType =
+                objectKey.endsWith(".png") ? MediaType.IMAGE_PNG : MediaType.IMAGE_JPEG;
         return ResponseEntity.ok().contentType(contentType).body(new InputStreamResource(guarded));
     }
 
     /**
-     * Wraps {@code in} so it closes at most once, and schedules that close for the end
-     * of the current request - see {@link #getAvatar}'s javadoc for why. Falls back to
-     * returning just the close-once wrapper when there is no bound request (a direct
-     * unit-test call to the controller method), which is exactly the pre-existing
-     * behavior for those callers.
+     * Wraps {@code in} so it closes at most once, and schedules that close for the end of the
+     * current request - see {@link #getAvatar}'s javadoc for why. Falls back to returning just the
+     * close-once wrapper when there is no bound request (a direct unit-test call to the controller
+     * method), which is exactly the pre-existing behavior for those callers.
      */
     private static InputStream closedAtRequestCompletion(InputStream in) {
         AtomicBoolean closed = new AtomicBoolean();
-        InputStream guarded = new FilterInputStream(in) {
-            @Override
-            public void close() throws IOException {
-                if (closed.compareAndSet(false, true)) {
-                    super.close();
-                }
-            }
-        };
+        InputStream guarded =
+                new FilterInputStream(in) {
+                    @Override
+                    public void close() throws IOException {
+                        if (closed.compareAndSet(false, true)) {
+                            super.close();
+                        }
+                    }
+                };
         RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
         if (attributes != null) {
-            attributes.registerDestructionCallback(AVATAR_STREAM_CLEANUP_ATTRIBUTE, () -> {
-                try {
-                    guarded.close();
-                } catch (IOException ignored) {
-                    // Nothing useful to do with a failure to close a response
-                    // stream after the request is already over.
-                }
-            }, RequestAttributes.SCOPE_REQUEST);
+            attributes.registerDestructionCallback(
+                    AVATAR_STREAM_CLEANUP_ATTRIBUTE,
+                    () -> {
+                        try {
+                            guarded.close();
+                        } catch (IOException ignored) {
+                            // Nothing useful to do with a failure to close a response
+                            // stream after the request is already over.
+                        }
+                    },
+                    RequestAttributes.SCOPE_REQUEST);
         }
         return guarded;
     }
 
     private AccountService.Caller caller(Principal principal) {
         if (principal == null || !StringUtils.hasText(principal.getName())) {
-            throw new IllegalStateException("No authenticated principal for an /api/account request.");
+            throw new IllegalStateException(
+                    "No authenticated principal for an /api/account request.");
         }
-        String email = principal instanceof JwtAuthenticationToken jwt
-            ? jwt.getToken().getClaimAsString("email") : null;
+        String email =
+                principal instanceof JwtAuthenticationToken jwt
+                        ? jwt.getToken().getClaimAsString("email")
+                        : null;
         String schema = TenantContext.current().map(TenantContext::getTenantId).orElse(null);
-        boolean tenantAdmin = TenantContext.current().map(c -> c.hasRole("ROLE_tenant-admin")).orElse(false);
+        boolean tenantAdmin =
+                TenantContext.current().map(c -> c.hasRole("ROLE_tenant-admin")).orElse(false);
         return new AccountService.Caller(principal.getName(), email, schema, tenantAdmin);
     }
 }

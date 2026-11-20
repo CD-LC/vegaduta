@@ -51,10 +51,7 @@ public class ElevenLabsGeneratedAudioController {
         int size = ListPaging.limit(limit, 50, 200);
         long skip = ListPaging.offset(offset);
         return ListPaging.respond(
-                service.listPageResponses(skip, size),
-                size,
-                skip,
-                service::countAll);
+                service.listPageResponses(skip, size), size, skip, service::countAll);
     }
 
     @GetMapping("/{id}")
@@ -63,12 +60,10 @@ public class ElevenLabsGeneratedAudioController {
                 .map(
                         audio ->
                                 ResponseEntity.ok()
-                                        .contentType(
-                                                MediaType.parseMediaType(audio.contentType()))
+                                        .contentType(MediaType.parseMediaType(audio.contentType()))
                                         .header(
                                                 HttpHeaders.CONTENT_DISPOSITION,
-                                                AttachmentDisposition.attachment(
-                                                        audio.filename()))
+                                                AttachmentDisposition.attachment(audio.filename()))
                                         .body(resolveBytes(audio)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -77,8 +72,7 @@ public class ElevenLabsGeneratedAudioController {
         try (InputStream in = fileStorageService.get(audio.objectKey())) {
             return in.readAllBytes();
         } catch (IOException e) {
-            throw new FileStorageException(
-                    "Could not read object '" + audio.objectKey() + "'", e);
+            throw new FileStorageException("Could not read object '" + audio.objectKey() + "'", e);
         }
     }
 }

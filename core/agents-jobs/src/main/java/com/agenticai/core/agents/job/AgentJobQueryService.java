@@ -52,10 +52,16 @@ public class AgentJobQueryService {
         }
         Map<java.util.UUID, AgentSchedule> schedules =
                 scheduleRepository
-                        .findAllById(runs.stream().map(AgentScheduleRun::getScheduleId).distinct().toList())
+                        .findAllById(
+                                runs.stream()
+                                        .map(AgentScheduleRun::getScheduleId)
+                                        .distinct()
+                                        .toList())
                         .stream()
                         .collect(Collectors.toMap(AgentSchedule::getId, Function.identity()));
-        return runs.stream().map(r -> new SentinelRun(r, schedules.get(r.getScheduleId()))).toList();
+        return runs.stream()
+                .map(r -> new SentinelRun(r, schedules.get(r.getScheduleId())))
+                .toList();
     }
 
     /** Up to 50 most recently created jobs since {@code since}. */

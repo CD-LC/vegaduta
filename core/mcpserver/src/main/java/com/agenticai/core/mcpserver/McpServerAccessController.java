@@ -111,6 +111,5 @@ public class McpServerAccessController {
             String toolOutput,
             String errorMessage,
             Instant startedAt,
-            Instant completedAt) {
-    }
+            Instant completedAt) {}
 }

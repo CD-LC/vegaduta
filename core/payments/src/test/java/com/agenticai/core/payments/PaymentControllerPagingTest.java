@@ -32,7 +32,8 @@ class PaymentControllerPagingTest {
     @Test
     void agentTransactionsPassTheOffsetAndReportTotals() {
         UUID agent = UUID.randomUUID();
-        when(txns.findByAgentIdOrderByCreatedAtDescIdDesc(eq(agent), any(Pageable.class))).thenReturn(List.of());
+        when(txns.findByAgentIdOrderByCreatedAtDescIdDesc(eq(agent), any(Pageable.class)))
+                .thenReturn(List.of());
         when(txns.countByAgentId(agent)).thenReturn(120L);
 
         ResponseEntity<List<TransactionResponse>> r = controller.transactions(agent, null, 50, 50L);
@@ -49,9 +50,11 @@ class PaymentControllerPagingTest {
     void mandateFilterCountsThatMandateAndNoParamsKeepsTheOldFirstPage() {
         UUID agent = UUID.randomUUID();
         UUID mandate = UUID.randomUUID();
-        when(txns.findByMandateIdOrderByCreatedAtDescIdDesc(eq(mandate), any(Pageable.class))).thenReturn(List.of());
+        when(txns.findByMandateIdOrderByCreatedAtDescIdDesc(eq(mandate), any(Pageable.class)))
+                .thenReturn(List.of());
 
-        ResponseEntity<List<TransactionResponse>> r = controller.transactions(agent, mandate, 5000, null);
+        ResponseEntity<List<TransactionResponse>> r =
+                controller.transactions(agent, mandate, 5000, null);
 
         ArgumentCaptor<Pageable> page = ArgumentCaptor.forClass(Pageable.class);
         verify(txns).findByMandateIdOrderByCreatedAtDescIdDesc(eq(mandate), page.capture());
@@ -68,9 +71,11 @@ class PaymentControllerPagingTest {
         UUID agent = UUID.randomUUID();
         UUID m1 = UUID.randomUUID();
         UUID m2 = UUID.randomUUID();
-        when(mandates.spendForAgent(agent)).thenReturn(List.of(
-                new MandateSpend(m1, new MandateSpendView(100, 200, 300, 10, 20)),
-                new MandateSpend(m2, new MandateSpendView(1, 2, 3, 0, 0))));
+        when(mandates.spendForAgent(agent))
+                .thenReturn(
+                        List.of(
+                                new MandateSpend(m1, new MandateSpendView(100, 200, 300, 10, 20)),
+                                new MandateSpend(m2, new MandateSpendView(1, 2, 3, 0, 0))));
 
         List<MandateSpendResponse> out = controller.spendForAgent(agent);
 

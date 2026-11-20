@@ -75,8 +75,7 @@ public class RoiBudgetService {
                         ? null
                         : spent.multiply(BigDecimal.valueOf(100))
                                 .divide(capUsd, 1, RoundingMode.HALF_UP);
-        List<Integer> fired =
-                repository.firedThresholds(monthStart);
+        List<Integer> fired = repository.firedThresholds(monthStart);
         String plan = tenantId == null ? null : tenantLimits.plan(tenantId).name();
         return new BudgetResponse(
                 monthStart, plan, spent, capUsd, percent, capUsd != null, SPEND_BASIS, fired);

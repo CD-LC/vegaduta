@@ -10,15 +10,14 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 /**
- * Persistence/access facade for {@link AgentJobObservabilityController}: owns every
- * repository touch so the controller deals only in DTOs and service calls.
+ * Persistence/access facade for {@link AgentJobObservabilityController}: owns every repository
+ * touch so the controller deals only in DTOs and service calls.
  *
- * <p>The result schema is saved through {@link AgentRepository} rather than an
- * {@code AgentService} update method on purpose: those methods call {@code
- * AgentSchemaService#refresh}, which regenerates {@code output_schema_json} and
- * bumps {@code schema_version}. Neither has anything to do with a tenant-authored
- * RESULT schema, and triggering them here would make an unrelated column churn on
- * every save of this one.
+ * <p>The result schema is saved through {@link AgentRepository} rather than an {@code AgentService}
+ * update method on purpose: those methods call {@code AgentSchemaService#refresh}, which
+ * regenerates {@code output_schema_json} and bumps {@code schema_version}. Neither has anything to
+ * do with a tenant-authored RESULT schema, and triggering them here would make an unrelated column
+ * churn on every save of this one.
  */
 @Service
 public class AgentJobObservabilityService {
@@ -29,11 +28,10 @@ public class AgentJobObservabilityService {
     private final JobResultSchemaValidator schemaValidator;
 
     public AgentJobObservabilityService(
-        AgentService agentService,
-        AgentRepository agentRepository,
-        AgentJobRepository jobRepository,
-        JobResultSchemaValidator schemaValidator
-    ) {
+            AgentService agentService,
+            AgentRepository agentRepository,
+            AgentJobRepository jobRepository,
+            JobResultSchemaValidator schemaValidator) {
         this.agentService = agentService;
         this.agentRepository = agentRepository;
         this.jobRepository = jobRepository;
@@ -41,19 +39,18 @@ public class AgentJobObservabilityService {
     }
 
     /**
-     * Path-scoped existence check: throws {@link AgentJobNotFoundException} when the
-     * job does not exist OR belongs to a different agent.
+     * Path-scoped existence check: throws {@link AgentJobNotFoundException} when the job does not
+     * exist OR belongs to a different agent.
      */
     public void requireJob(UUID agentId, UUID jobId) {
-        jobRepository.findByIdAndAgentId(jobId, agentId)
-            .orElseThrow(() -> new AgentJobNotFoundException(jobId));
+        jobRepository
+                .findByIdAndAgentId(jobId, agentId)
+                .orElseThrow(() -> new AgentJobNotFoundException(jobId));
     }
 
     /** True when the job is terminal, or no longer exists. */
     public boolean isJobFinished(UUID jobId) {
-        return jobRepository.findById(jobId)
-            .map(job -> job.getStatus().isTerminal())
-            .orElse(true);
+        return jobRepository.findById(jobId).map(job -> job.getStatus().isTerminal()).orElse(true);
     }
 
     /** Validates then stores the schema (EDITOR); returns what is now stored. */

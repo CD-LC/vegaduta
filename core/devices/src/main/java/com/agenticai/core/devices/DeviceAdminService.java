@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Console-side device management facade for {@link DeviceController}: owns the repository access and
- * transactions, and maps entities to response DTOs so the controller never touches entities.
+ * Console-side device management facade for {@link DeviceController}: owns the repository access
+ * and transactions, and maps entities to response DTOs so the controller never touches entities.
  */
 @Service
 public class DeviceAdminService {
@@ -17,20 +17,25 @@ public class DeviceAdminService {
     private final MobileDeviceRepository deviceRepository;
     private final DeviceCommandService commandService;
 
-    public DeviceAdminService(MobileDeviceRepository deviceRepository, DeviceCommandService commandService) {
+    public DeviceAdminService(
+            MobileDeviceRepository deviceRepository, DeviceCommandService commandService) {
         this.deviceRepository = deviceRepository;
         this.commandService = commandService;
     }
 
     @Transactional(readOnly = true)
     public List<DeviceResponse> listDevices() {
-        return deviceRepository.findByOrderByCreatedAtDesc().stream().map(DeviceResponse::from).toList();
+        return deviceRepository.findByOrderByCreatedAtDesc().stream()
+                .map(DeviceResponse::from)
+                .toList();
     }
 
     @Transactional
     public void revoke(UUID deviceId) {
-        MobileDevice device = deviceRepository.findById(deviceId)
-            .orElseThrow(() -> new DeviceException("Unknown device: " + deviceId));
+        MobileDevice device =
+                deviceRepository
+                        .findById(deviceId)
+                        .orElseThrow(() -> new DeviceException("Unknown device: " + deviceId));
         device.revoke();
         deviceRepository.save(device);
     }

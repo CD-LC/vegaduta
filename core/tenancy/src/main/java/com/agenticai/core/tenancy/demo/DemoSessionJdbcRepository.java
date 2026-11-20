@@ -6,7 +6,9 @@ import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-/** Raw control-plane statements behind {@link DemoSessionRecorder} that JPA cannot express safely. */
+/**
+ * Raw control-plane statements behind {@link DemoSessionRecorder} that JPA cannot express safely.
+ */
 @Repository
 public class DemoSessionJdbcRepository {
 
@@ -25,8 +27,8 @@ public class DemoSessionJdbcRepository {
     }
 
     /**
-     * Assigns a share id exactly once per session, atomically (conditional UPDATE guarded by
-     * {@code share_id IS NULL}).
+     * Assigns a share id exactly once per session, atomically (conditional UPDATE guarded by {@code
+     * share_id IS NULL}).
      *
      * @return the share id actually on the row afterwards, or null if the session vanished.
      */

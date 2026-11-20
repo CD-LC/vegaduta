@@ -19,9 +19,11 @@ public class PlatformSettingJdbcRepository {
 
     /** The setting's value, or null when the key has no row. */
     public String readSetting(String key) {
-        List<String> rows = jdbcTemplate.query(
-            "SELECT value FROM control_plane.platform_setting WHERE key = ?",
-            (rs, rowNum) -> rs.getString(1), key);
+        List<String> rows =
+                jdbcTemplate.query(
+                        "SELECT value FROM control_plane.platform_setting WHERE key = ?",
+                        (rs, rowNum) -> rs.getString(1),
+                        key);
         return rows.stream().findFirst().orElse(null);
     }
 }

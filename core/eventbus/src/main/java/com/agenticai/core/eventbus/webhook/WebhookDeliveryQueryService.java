@@ -7,7 +7,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Read facade for a subscription's delivery history; maps {@link WebhookDelivery} rows to {@link DeliveryView}. */
+/**
+ * Read facade for a subscription's delivery history; maps {@link WebhookDelivery} rows to {@link
+ * DeliveryView}.
+ */
 @Service
 public class WebhookDeliveryQueryService {
 
@@ -33,7 +36,10 @@ public class WebhookDeliveryQueryService {
         this.deliveryRepository = deliveryRepository;
     }
 
-    /** Newest first, capped at 100. Throws (404) when the subscription isn't this tenant's / doesn't exist. */
+    /**
+     * Newest first, capped at 100. Throws (404) when the subscription isn't this tenant's / doesn't
+     * exist.
+     */
     @Transactional(readOnly = true)
     public List<DeliveryView> recentDeliveries(UUID subscriptionId) {
         subscriptionService.get(subscriptionId);

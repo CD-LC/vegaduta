@@ -23,17 +23,16 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Tenant-facing vault API.
  *
- * <p><b>Write-only by design.</b> There is no endpoint that returns a stored
- * value, because there is no legitimate caller for one: the UI needs to show
- * that a secret exists (it gets {@link SecretResponse}, preview only) and a
- * tool needs the value (it gets it in-process through
- * {@link SecretReferenceResolver}, never over HTTP). Adding a "reveal" button
- * later would mean adding the one endpoint an attacker with a stolen session
- * most wants, in exchange for a convenience that rotation already covers.
+ * <p><b>Write-only by design.</b> There is no endpoint that returns a stored value, because there
+ * is no legitimate caller for one: the UI needs to show that a secret exists (it gets {@link
+ * SecretResponse}, preview only) and a tool needs the value (it gets it in-process through {@link
+ * SecretReferenceResolver}, never over HTTP). Adding a "reveal" button later would mean adding the
+ * one endpoint an attacker with a stolen session most wants, in exchange for a convenience that
+ * rotation already covers.
  *
- * <p>Every method takes {@link Authentication} rather than a user id from the
- * request, so USER-scoped secrets are bound to the token's subject and cannot
- * be addressed on someone else's behalf.
+ * <p>Every method takes {@link Authentication} rather than a user id from the request, so
+ * USER-scoped secrets are bound to the token's subject and cannot be addressed on someone else's
+ * behalf.
  */
 @RestController
 @RequestMapping("/api/secrets")
@@ -61,28 +60,26 @@ public class SecretVaultController {
     }
 
     /**
-     * Stores a new secret or rotates an existing one of the same name and
-     * scope. Returns 201 either way - the caller's intent is "this name now
-     * has this value", and distinguishing create from rotate in the status
-     * code would tell an attacker probing names which ones already exist.
+     * Stores a new secret or rotates an existing one of the same name and scope. Returns 201 either
+     * way - the caller's intent is "this name now has this value", and distinguishing create from
+     * rotate in the status code would tell an attacker probing names which ones already exist.
      */
     @PostMapping
     public ResponseEntity<SecretResponse> store(
-        @Valid @RequestBody SecretStoreRequest request,
-        Authentication authentication
-    ) {
+            @Valid @RequestBody SecretStoreRequest request, Authentication authentication) {
         String actor = userId(authentication);
         requireCanWriteScope(request.scope(), authentication);
-        SecretResponse stored = vaultService.storeAsResponse(
-            request.name(),
-            request.scope(),
-            request.kind(),
-            request.description(),
-            request.value(),
-            request.expiresAt(),
-            Boolean.TRUE.equals(request.codeToolAccess()),
-            request.allowedHosts(),
-            actor);
+        SecretResponse stored =
+                vaultService.storeAsResponse(
+                        request.name(),
+                        request.scope(),
+                        request.kind(),
+                        request.description(),
+                        request.value(),
+                        request.expiresAt(),
+                        Boolean.TRUE.equals(request.codeToolAccess()),
+                        request.allowedHosts(),
+                        actor);
         return ResponseEntity.status(HttpStatus.CREATED).body(stored);
     }
 
@@ -90,34 +87,34 @@ public class SecretVaultController {
     public record AllowedHostsRequest(@Size(max = 32) List<@Size(max = 255) String> allowedHosts) {}
 
     /**
-     * Replaces a secret's destination allow-list (SEC-006). An empty list
-     * means the secret is never sent to any URL-bound destination. Same write
-     * gate as revoke: TENANT scope needs the integrations permission.
+     * Replaces a secret's destination allow-list (SEC-006). An empty list means the secret is never
+     * sent to any URL-bound destination. Same write gate as revoke: TENANT scope needs the
+     * integrations permission.
      */
     @PutMapping("/{id}/allowed-hosts")
     public SecretResponse updateAllowedHosts(
-        @PathVariable UUID id,
-        @Valid @RequestBody AllowedHostsRequest request,
-        Authentication authentication
-    ) {
+            @PathVariable UUID id,
+            @Valid @RequestBody AllowedHostsRequest request,
+            Authentication authentication) {
         return vaultService.updateAllowedHostsAsResponse(
-            id, request.allowedHosts() == null ? List.of() : request.allowedHosts(),
-            userId(authentication), isWorkspaceAdmin(authentication));
+                id,
+                request.allowedHosts() == null ? List.of() : request.allowedHosts(),
+                userId(authentication),
+                isWorkspaceAdmin(authentication));
     }
 
     /**
      * Revokes by default; {@code ?purge=true} deletes irreversibly.
      *
-     * <p>Revoke is the default because it is the safe one: it stops the secret
-     * working immediately while keeping the row that proves what used it and
-     * when. Purge exists for a real erasure request and is opt-in.
+     * <p>Revoke is the default because it is the safe one: it stops the secret working immediately
+     * while keeping the row that proves what used it and when. Purge exists for a real erasure
+     * request and is opt-in.
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
-        @PathVariable UUID id,
-        @RequestParam(name = "purge", defaultValue = "false") boolean purge,
-        Authentication authentication
-    ) {
+            @PathVariable UUID id,
+            @RequestParam(name = "purge", defaultValue = "false") boolean purge,
+            Authentication authentication) {
         String actor = userId(authentication);
         // The scope lives on the row, not in the request, so the gate has to be
         // applied inside the service where the row is already loaded - doing it
@@ -133,15 +130,14 @@ public class SecretVaultController {
     }
 
     /**
-     * A TENANT-scoped secret is shared by everyone in the workspace, so writing
-     * one is workspace configuration and carries the same posture as the
-     * integrations scope ({@code PERM_MANAGE_INTEGRATIONS}; granular RBAC
-     * 2026-09-23 - previously the blanket tenant-admin role). A USER-scoped
-     * secret is the caller's own and needs no special right.
+     * A TENANT-scoped secret is shared by everyone in the workspace, so writing one is workspace
+     * configuration and carries the same posture as the integrations scope ({@code
+     * PERM_MANAGE_INTEGRATIONS}; granular RBAC 2026-09-23 - previously the blanket tenant-admin
+     * role). A USER-scoped secret is the caller's own and needs no special right.
      *
-     * <p>This cannot be expressed in {@code SecurityConfig}: the scope arrives
-     * in the request body, and a path-matcher rule cannot see it. That is why
-     * the check lives here rather than alongside the other route rules.
+     * <p>This cannot be expressed in {@code SecurityConfig}: the scope arrives in the request body,
+     * and a path-matcher rule cannot see it. That is why the check lives here rather than alongside
+     * the other route rules.
      */
     private void requireCanWriteScope(SecretScope scope, Authentication authentication) {
         if (scope == SecretScope.TENANT && !isWorkspaceAdmin(authentication)) {
@@ -150,31 +146,29 @@ public class SecretVaultController {
     }
 
     /**
-     * Authorities are the literal Keycloak role strings the rest of this app
-     * matches on (see {@code SecurityConfig}'s {@code hasAuthority(
-     * "ROLE_tenant-admin")} rules), not Spring's {@code hasRole} short form.
+     * Authorities are the literal Keycloak role strings the rest of this app matches on (see {@code
+     * SecurityConfig}'s {@code hasAuthority( "ROLE_tenant-admin")} rules), not Spring's {@code
+     * hasRole} short form.
      *
-     * <p>Returns false when unauthenticated, which is the safe direction: under
-     * {@code NoSecurityConfig} (local dev, no Keycloak) every caller is the same
-     * pseudo-user, and letting that pseudo-user write shared secrets would make
-     * the dev experience diverge from production in exactly the place where
-     * that divergence is most likely to hide a bug.
+     * <p>Returns false when unauthenticated, which is the safe direction: under {@code
+     * NoSecurityConfig} (local dev, no Keycloak) every caller is the same pseudo-user, and letting
+     * that pseudo-user write shared secrets would make the dev experience diverge from production
+     * in exactly the place where that divergence is most likely to hide a bug.
      */
     private boolean isWorkspaceAdmin(Authentication authentication) {
         if (authentication == null || authentication.getAuthorities() == null) {
             return false;
         }
         return authentication.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .anyMatch(a -> PERM_MANAGE_INTEGRATIONS.equals(a) || ROLE_PLATFORM_ADMIN.equals(a));
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(a -> PERM_MANAGE_INTEGRATIONS.equals(a) || ROLE_PLATFORM_ADMIN.equals(a));
     }
 
     /**
-     * The subject the token was issued for. Null-tolerant because
-     * {@code NoSecurityConfig} runs in local dev with no authentication at
-     * all, and an NPE there would make the vault untestable outside a full
-     * Keycloak stack. In that mode every caller is the same pseudo-user, which
-     * is correct: there are no separate identities to keep apart.
+     * The subject the token was issued for. Null-tolerant because {@code NoSecurityConfig} runs in
+     * local dev with no authentication at all, and an NPE there would make the vault untestable
+     * outside a full Keycloak stack. In that mode every caller is the same pseudo-user, which is
+     * correct: there are no separate identities to keep apart.
      */
     private String userId(Authentication authentication) {
         return authentication != null ? authentication.getName() : "anonymous";

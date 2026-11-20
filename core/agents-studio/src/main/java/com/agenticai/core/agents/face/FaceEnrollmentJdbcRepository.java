@@ -34,25 +34,31 @@ public class FaceEnrollmentJdbcRepository {
             Instant consentedAt) {
         String table = KnowledgeSchemaSupport.qualifiedTableName(TABLE_NAME);
         jdbcTemplate.update(
-            "INSERT INTO " + table + " (id, collection_id, document_id, person_name, embedding, consented_at) "
-                + "VALUES (?, ?, ?, ?, ?::public.vector, ?)",
-            id, collectionId, documentId, personName, toVectorLiteral(embedding), consentedAt
-        );
+                "INSERT INTO "
+                        + table
+                        + " (id, collection_id, document_id, person_name, embedding, consented_at) "
+                        + "VALUES (?, ?, ?, ?, ?::public.vector, ?)",
+                id,
+                collectionId,
+                documentId,
+                personName,
+                toVectorLiteral(embedding),
+                consentedAt);
     }
 
     List<FaceEnrollmentRecord> listForCollection(UUID collectionId) {
         String table = KnowledgeSchemaSupport.qualifiedTableName(TABLE_NAME);
         return jdbcTemplate.query(
-            "SELECT id, person_name, embedding::text AS embedding_text, created_at FROM " + table
-                + " WHERE collection_id = ? ORDER BY created_at",
-            (rs, rowNum) -> new FaceEnrollmentRecord(
-                UUID.fromString(rs.getString("id")),
-                rs.getString("person_name"),
-                parseVectorLiteral(rs.getString("embedding_text")),
-                rs.getTimestamp("created_at").toInstant()
-            ),
-            collectionId
-        );
+                "SELECT id, person_name, embedding::text AS embedding_text, created_at FROM "
+                        + table
+                        + " WHERE collection_id = ? ORDER BY created_at",
+                (rs, rowNum) ->
+                        new FaceEnrollmentRecord(
+                                UUID.fromString(rs.getString("id")),
+                                rs.getString("person_name"),
+                                parseVectorLiteral(rs.getString("embedding_text")),
+                                rs.getTimestamp("created_at").toInstant()),
+                collectionId);
     }
 
     void deleteById(UUID enrollmentId) {
@@ -64,12 +70,17 @@ public class FaceEnrollmentJdbcRepository {
         return embedding.stream().map(String::valueOf).collect(Collectors.joining(",", "[", "]"));
     }
 
-    /** Inverse of {@link #toVectorLiteral} - pgvector's {@code ::text} cast renders as {@code [0.1,0.2,...]}. */
+    /**
+     * Inverse of {@link #toVectorLiteral} - pgvector's {@code ::text} cast renders as {@code
+     * [0.1,0.2,...]}.
+     */
     private static List<Double> parseVectorLiteral(String literal) {
         String trimmed = literal.substring(1, literal.length() - 1);
         if (trimmed.isBlank()) {
             return List.of();
         }
-        return List.of(trimmed.split(",")).stream().map(s -> Double.parseDouble(s.trim())).collect(Collectors.toList());
+        return List.of(trimmed.split(",")).stream()
+                .map(s -> Double.parseDouble(s.trim()))
+                .collect(Collectors.toList());
     }
 }

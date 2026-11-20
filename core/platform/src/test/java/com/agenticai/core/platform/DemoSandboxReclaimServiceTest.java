@@ -45,7 +45,12 @@ class DemoSandboxReclaimServiceTest {
     private final DemoSandboxDataPurger purger = mock(DemoSandboxDataPurger.class);
     private final DemoSandboxReclaimService service =
             new DemoSandboxReclaimService(
-                    new DemoSandboxReclaimJdbcRepository(jdbc), tenants, erasure, orchestration, purger, SHARED);
+                    new DemoSandboxReclaimJdbcRepository(jdbc),
+                    tenants,
+                    erasure,
+                    orchestration,
+                    purger,
+                    SHARED);
 
     private Tenant tenant(String name, String schema) {
         Tenant t = mock(Tenant.class);

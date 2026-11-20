@@ -7,9 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * API-facing facade over {@link ChannelSessionService}'s pairing operations: maps
- * {@link ChannelSession} to {@link PendingPairingResponse} (last-4 masking of the external id)
- * so {@link ChannelPairingController} never touches the JPA entity.
+ * API-facing facade over {@link ChannelSessionService}'s pairing operations: maps {@link
+ * ChannelSession} to {@link PendingPairingResponse} (last-4 masking of the external id) so {@link
+ * ChannelPairingController} never touches the JPA entity.
  */
 @Service
 public class ChannelPairingService {
@@ -23,8 +23,8 @@ public class ChannelPairingService {
     @Transactional(readOnly = true)
     public List<PendingPairingResponse> listPending() {
         return channelSessionService.listPendingPairings().stream()
-            .map(ChannelPairingService::toResponse)
-            .toList();
+                .map(ChannelPairingService::toResponse)
+                .toList();
     }
 
     @Transactional
@@ -39,12 +39,11 @@ public class ChannelPairingService {
 
     private static PendingPairingResponse toResponse(ChannelSession session) {
         return new PendingPairingResponse(
-            session.getId(),
-            session.getChannel(),
-            mask(session.getExternalId()),
-            session.getPairingCode(),
-            session.getCreatedAt()
-        );
+                session.getId(),
+                session.getChannel(),
+                mask(session.getExternalId()),
+                session.getPairingCode(),
+                session.getCreatedAt());
     }
 
     private static String mask(String value) {

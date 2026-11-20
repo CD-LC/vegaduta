@@ -1,7 +1,7 @@
 package com.agenticai.core.omnichannel.crm;
 
-import java.math.BigDecimal;
 import com.agenticai.core.tenancy.ListPaging;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
@@ -24,9 +24,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * /admin/leads backend (V337). Every route here is gated by
- * {@code PERM_MANAGE_LEADS} in SecurityConfig - leads are PII, so reads are
- * gated too (unlike the contact directory's read-open split).
+ * /admin/leads backend (V337). Every route here is gated by {@code PERM_MANAGE_LEADS} in
+ * SecurityConfig - leads are PII, so reads are gated too (unlike the contact directory's read-open
+ * split).
  */
 @RestController
 @RequestMapping("/api/leads")
@@ -47,12 +47,11 @@ public class LeadController {
 
     @GetMapping
     public PageResponse list(
-        @RequestParam(required = false) String stage,
-        @RequestParam(required = false) String source,
-        @RequestParam(required = false) String q,
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "50") int size
-    ) {
+            @RequestParam(required = false) String stage,
+            @RequestParam(required = false) String source,
+            @RequestParam(required = false) String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size) {
         return service.list(parseStage(stage), source, q, page, size);
     }
 
@@ -89,18 +88,23 @@ public class LeadController {
 
     @PostMapping("/{id}/activities")
     @org.springframework.web.bind.annotation.ResponseStatus(HttpStatus.CREATED)
-    public ActivityResponse addActivity(@PathVariable UUID id, @RequestBody ActivityRequest request) {
+    public ActivityResponse addActivity(
+            @PathVariable UUID id, @RequestBody ActivityRequest request) {
         LeadActivityType type;
         try {
             type = LeadActivityType.parse(request.type());
         } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown activity type: " + request.type());
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Unknown activity type: " + request.type());
         }
         return service.addActivity(id, type, request.body(), request.meta());
     }
 
     @GetMapping("/{id}/activities")
-    public ResponseEntity<List<ActivityResponse>> activities(@PathVariable UUID id, @RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
+    public ResponseEntity<List<ActivityResponse>> activities(
+            @PathVariable UUID id,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
         return ListPaging.window(service.activities(id), limit, offset, 50, 200);
     }
 
@@ -109,7 +113,9 @@ public class LeadController {
     // ------------------------------------------------------------------
 
     @GetMapping("/pipeline")
-    public ResponseEntity<List<LeadService.StageTotal>> pipeline(@RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
+    public ResponseEntity<List<LeadService.StageTotal>> pipeline(
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
         return ListPaging.window(service.pipeline(), limit, offset, 100, 500);
     }
 
@@ -117,17 +123,21 @@ public class LeadController {
     @PostMapping("/import")
     public LeadService.ImportResult importFile(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Choose a .csv file to import");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Choose a .csv file to import");
         }
         if (file.getSize() > MAX_IMPORT_BYTES) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File is larger than 5 MB - split it and retry");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "File is larger than 5 MB - split it and retry");
         }
         try {
-            return service.importRows(LeadCsv.parse(new String(file.getBytes(), StandardCharsets.UTF_8)));
+            return service.importRows(
+                    LeadCsv.parse(new String(file.getBytes(), StandardCharsets.UTF_8)));
         } catch (LeadCsv.CsvException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         } catch (java.io.IOException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Could not read that file", e);
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Could not read that file", e);
         }
     }
 
@@ -135,9 +145,9 @@ public class LeadController {
     public ResponseEntity<byte[]> export() {
         byte[] body = service.exportCsv().getBytes(StandardCharsets.UTF_8);
         return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"leads.csv\"")
-            .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
-            .body(body);
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"leads.csv\"")
+                .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
+                .body(body);
     }
 
     // ------------------------------------------------------------------
@@ -152,9 +162,18 @@ public class LeadController {
 
     static LeadService.LeadInput toInput(LeadRequest r) {
         return new LeadService.LeadInput(
-            r.name(), r.email(), r.phone(), r.company(), r.title(), r.source(), parseStage(r.stage()),
-            r.score(), r.owner(), r.value(), r.tags(), r.notes()
-        );
+                r.name(),
+                r.email(),
+                r.phone(),
+                r.company(),
+                r.title(),
+                r.source(),
+                parseStage(r.stage()),
+                r.score(),
+                r.owner(),
+                r.value(),
+                r.tags(),
+                r.notes());
     }
 
     // ------------------------------------------------------------------
@@ -162,27 +181,49 @@ public class LeadController {
     // ------------------------------------------------------------------
 
     public record LeadRequest(
-        String name, String email, String phone, String company, String title, String source, String stage,
-        Integer score, String owner, BigDecimal value, List<String> tags, String notes
-    ) {
-    }
+            String name,
+            String email,
+            String phone,
+            String company,
+            String title,
+            String source,
+            String stage,
+            Integer score,
+            String owner,
+            BigDecimal value,
+            List<String> tags,
+            String notes) {}
 
-    public record StageRequest(String stage, String note) {
-    }
+    public record StageRequest(String stage, String note) {}
 
-    public record ActivityRequest(String type, String body, Map<String, Object> meta) {
-    }
+    public record ActivityRequest(String type, String body, Map<String, Object> meta) {}
 
     public record LeadResponse(
-        UUID id, String name, String email, String phone, String company, String title, String source, LeadStage stage,
-        int score, String owner, BigDecimal value, List<String> tags, String notes, Instant lastContactedAt,
-        Instant lastRepliedAt, Instant createdAt, Instant updatedAt
-    ) {
-    }
+            UUID id,
+            String name,
+            String email,
+            String phone,
+            String company,
+            String title,
+            String source,
+            LeadStage stage,
+            int score,
+            String owner,
+            BigDecimal value,
+            List<String> tags,
+            String notes,
+            Instant lastContactedAt,
+            Instant lastRepliedAt,
+            Instant createdAt,
+            Instant updatedAt) {}
 
-    public record ActivityResponse(UUID id, UUID leadId, LeadActivityType type, String body, Map<String, Object> meta, Instant createdAt) {
-    }
+    public record ActivityResponse(
+            UUID id,
+            UUID leadId,
+            LeadActivityType type,
+            String body,
+            Map<String, Object> meta,
+            Instant createdAt) {}
 
-    public record PageResponse(List<LeadResponse> items, long total, int page, int size) {
-    }
+    public record PageResponse(List<LeadResponse> items, long total, int page, int size) {}
 }

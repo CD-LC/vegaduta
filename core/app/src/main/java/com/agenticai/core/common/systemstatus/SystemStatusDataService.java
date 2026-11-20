@@ -10,13 +10,13 @@ import javax.sql.DataSource;
 import org.springframework.stereotype.Service;
 
 /**
- * Data-source and outbox reads behind {@link SystemStatusController}. Holds the documented
- * {@code dataSource.getConnection()} site (a pooled connection borrowed only for
- * {@code DatabaseMetaData}, released immediately) and the outbox counts, so the controller stays
- * free of JDBC and repository access.
+ * Data-source and outbox reads behind {@link SystemStatusController}. Holds the documented {@code
+ * dataSource.getConnection()} site (a pooled connection borrowed only for {@code DatabaseMetaData},
+ * released immediately) and the outbox counts, so the controller stays free of JDBC and repository
+ * access.
  *
- * <p>The outbox table exists in every tenant schema unconditionally (Flyway tenant migrations),
- * so these counts just return zero when the workflow-events feature is unused.
+ * <p>The outbox table exists in every tenant schema unconditionally (Flyway tenant migrations), so
+ * these counts just return zero when the workflow-events feature is unused.
  */
 @Service
 public class SystemStatusDataService {
@@ -24,7 +24,8 @@ public class SystemStatusDataService {
     private final DataSource dataSource;
     private final WorkflowEventOutboxStatsService outboxStats;
 
-    public SystemStatusDataService(DataSource dataSource, WorkflowEventOutboxStatsService outboxStats) {
+    public SystemStatusDataService(
+            DataSource dataSource, WorkflowEventOutboxStatsService outboxStats) {
         this.dataSource = dataSource;
         this.outboxStats = outboxStats;
     }

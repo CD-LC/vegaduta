@@ -59,7 +59,8 @@ public class AppUserLastSeenRecorder implements UserActivityRecorder {
         this(repository, boundedSingleThreadExecutor(), Clock.systemUTC());
     }
 
-    AppUserLastSeenRecorder(AppUserLastSeenJdbcRepository repository, Executor executor, Clock clock) {
+    AppUserLastSeenRecorder(
+            AppUserLastSeenJdbcRepository repository, Executor executor, Clock clock) {
         this.repository = repository;
         this.executor = executor;
         this.clock = clock;

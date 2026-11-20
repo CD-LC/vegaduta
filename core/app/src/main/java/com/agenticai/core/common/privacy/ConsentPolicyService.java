@@ -83,12 +83,24 @@ public class ConsentPolicyService {
 
         Optional<Policy> existing = find(agentId);
         int version =
-                existing.map(p -> p.notices().equals(notices) ? p.noticeVersion() : p.noticeVersion() + 1)
+                existing.map(
+                                p ->
+                                        p.notices().equals(notices)
+                                                ? p.noticeVersion()
+                                                : p.noticeVersion() + 1)
                         .orElse(1);
         boolean erase = req.eraseOnWithdrawal() == null || req.eraseOnWithdrawal();
         repository.upsert(
-                agentId, req.enabled(), purpose, version, defaultLanguage, notices, instructions,
-                keywords, erase, actor);
+                agentId,
+                req.enabled(),
+                purpose,
+                version,
+                defaultLanguage,
+                notices,
+                instructions,
+                keywords,
+                erase,
+                actor);
         return find(agentId).orElseThrow();
     }
 
@@ -120,7 +132,10 @@ public class ConsentPolicyService {
             }
         }
         if (enabled && !notices.containsKey(defaultLanguage)) {
-            throw bad("enabling consent needs a notice in the default language '" + defaultLanguage + "'");
+            throw bad(
+                    "enabling consent needs a notice in the default language '"
+                            + defaultLanguage
+                            + "'");
         }
     }
 

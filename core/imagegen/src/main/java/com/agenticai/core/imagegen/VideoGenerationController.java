@@ -134,10 +134,7 @@ public class VideoGenerationController {
         int size = ListPaging.limit(limit, 50, 200);
         long skip = ListPaging.offset(offset);
         return ListPaging.respond(
-                jobService.listPageResponses(skip, size),
-                size,
-                skip,
-                jobService::countAll);
+                jobService.listPageResponses(skip, size), size, skip, jobService::countAll);
     }
 
     @GetMapping("/videos/{id}")

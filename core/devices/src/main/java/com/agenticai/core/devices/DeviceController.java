@@ -1,13 +1,12 @@
 package com.agenticai.core.devices;
 
-import org.springframework.web.bind.annotation.RequestParam;
-import com.agenticai.core.tenancy.ListPaging;
 import com.agenticai.core.devices.dto.ClaimResponse;
 import com.agenticai.core.devices.dto.CommandResponse;
 import com.agenticai.core.devices.dto.DeviceResponse;
 import com.agenticai.core.devices.dto.EnqueueCommandRequest;
 import com.agenticai.core.devices.dto.PairingCodeResponse;
 import com.agenticai.core.devices.dto.RegisterDeviceRequest;
+import com.agenticai.core.tenancy.ListPaging;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -18,19 +17,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Authenticated (Keycloak JWT) console-side half of the Mobile SDK: any
- * signed-in tenant member can generate a pairing code for their own phone,
- * list/revoke devices, and send a device a one-off command outside of a
- * workflow run. The other half - what the phone itself calls, with no JWT -
- * is {@link DeviceGatewayController}.
+ * Authenticated (Keycloak JWT) console-side half of the Mobile SDK: any signed-in tenant member can
+ * generate a pairing code for their own phone, list/revoke devices, and send a device a one-off
+ * command outside of a workflow run. The other half - what the phone itself calls, with no JWT - is
+ * {@link DeviceGatewayController}.
  *
- * <p>Not admin-gated, unlike Twilio/LLM-provider/webhook config in {@code
- * SecurityConfig} - pairing your own device is a personal utility action
- * (same trust tier as creating an agent), not a platform-wide credential
- * change a non-admin teammate shouldn't be able to make.
+ * <p>Not admin-gated, unlike Twilio/LLM-provider/webhook config in {@code SecurityConfig} - pairing
+ * your own device is a personal utility action (same trust tier as creating an agent), not a
+ * platform-wide credential change a non-admin teammate shouldn't be able to make.
  */
 @RestController
 @RequestMapping("/api/devices")
@@ -39,10 +37,7 @@ public class DeviceController {
     private final DevicePairingService pairingService;
     private final DeviceAdminService adminService;
 
-    public DeviceController(
-        DevicePairingService pairingService,
-        DeviceAdminService adminService
-    ) {
+    public DeviceController(DevicePairingService pairingService, DeviceAdminService adminService) {
         this.pairingService = pairingService;
         this.adminService = adminService;
     }
@@ -53,25 +48,24 @@ public class DeviceController {
     }
 
     /**
-     * #157 follow-up - the Mobile SDK's Keycloak-login alternative to the
-     * pairing-code flow above (see {@link RegisterDeviceRequest}'s javadoc).
-     * No explicit {@code SecurityConfig} matcher needed: this path is
-     * already JWT-authenticated by the same default {@code
-     * anyRequest().authenticated()} rule every other endpoint on this
-     * controller relies on, unlike {@code DeviceGatewayController}'s
-     * permitAll endpoints.
+     * #157 follow-up - the Mobile SDK's Keycloak-login alternative to the pairing-code flow above
+     * (see {@link RegisterDeviceRequest}'s javadoc). No explicit {@code SecurityConfig} matcher
+     * needed: this path is already JWT-authenticated by the same default {@code
+     * anyRequest().authenticated()} rule every other endpoint on this controller relies on, unlike
+     * {@code DeviceGatewayController}'s permitAll endpoints.
      */
     @PostMapping("/register")
     public ClaimResponse register(@Valid @RequestBody RegisterDeviceRequest request) {
-        DevicePairingService.ClaimResult result = pairingService.registerAuthenticated(request.deviceName(), request.platform());
+        DevicePairingService.ClaimResult result =
+                pairingService.registerAuthenticated(request.deviceName(), request.platform());
         return new ClaimResponse(result.deviceId(), result.deviceToken());
     }
 
     @GetMapping
-    public ResponseEntity<List<DeviceResponse>> list(@RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
-        return ListPaging.window(
-            adminService.listDevices(),
-            limit, offset, 50, 500);
+    public ResponseEntity<List<DeviceResponse>> list(
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
+        return ListPaging.window(adminService.listDevices(), limit, offset, 50, 500);
     }
 
     @DeleteMapping("/{deviceId}")
@@ -81,15 +75,17 @@ public class DeviceController {
     }
 
     @GetMapping("/{deviceId}/commands")
-    public ResponseEntity<List<CommandResponse>> commandHistory(@PathVariable UUID deviceId, @RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
-        return ListPaging.window(
-            adminService.commandHistory(deviceId),
-            limit, offset, 50, 500);
+    public ResponseEntity<List<CommandResponse>> commandHistory(
+            @PathVariable UUID deviceId,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
+        return ListPaging.window(adminService.commandHistory(deviceId), limit, offset, 50, 500);
     }
 
     /** Send a device a command directly, without a workflow run involved. */
     @PostMapping("/{deviceId}/commands")
-    public CommandResponse enqueue(@PathVariable UUID deviceId, @Valid @RequestBody EnqueueCommandRequest request) {
+    public CommandResponse enqueue(
+            @PathVariable UUID deviceId, @Valid @RequestBody EnqueueCommandRequest request) {
         return adminService.enqueue(deviceId, request.commandType(), request.payload());
     }
 }

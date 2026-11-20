@@ -51,11 +51,27 @@ public class ConsentLedger {
         UUID id = UUID.randomUUID();
         Instant now = Instant.now();
         repository.insert(
-                id, channel, externalId, agentId, purpose, noticeVersion, language, noticeSha256,
-                decision, now);
+                id,
+                channel,
+                externalId,
+                agentId,
+                purpose,
+                noticeVersion,
+                language,
+                noticeSha256,
+                decision,
+                now);
         return new Entry(
-                id, channel, externalId, agentId, purpose, noticeVersion, language, noticeSha256,
-                decision, now);
+                id,
+                channel,
+                externalId,
+                agentId,
+                purpose,
+                noticeVersion,
+                language,
+                noticeSha256,
+                decision,
+                now);
     }
 
     public Optional<Entry> latest(String channel, String externalId, String purpose) {

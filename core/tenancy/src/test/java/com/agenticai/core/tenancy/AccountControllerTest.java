@@ -21,16 +21,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 /**
- * Regression coverage for {@link AccountController#getAvatar} - the
- * whole-payload-into-heap fix (JVM memory audit, 2026-07-29) that replaced
- * {@code fileStorageService.get(key).readAllBytes()} + {@code
- * ResponseEntity.body(byte[])} with a streamed {@link InputStreamResource}
- * so the controller no longer holds a second full-size copy of the avatar on
- * top of whatever {@link FileStorageService#get} itself buffered. Plain
- * unit tests calling the controller method directly (no MockMvc/web layer -
- * see {@code CompGrantControllerTest}'s javadoc for why that is this
- * codebase's established convention), so nothing here needs a network or a
- * live database.
+ * Regression coverage for {@link AccountController#getAvatar} - the whole-payload-into-heap fix
+ * (JVM memory audit, 2026-07-29) that replaced {@code fileStorageService.get(key).readAllBytes()} +
+ * {@code ResponseEntity.body(byte[])} with a streamed {@link InputStreamResource} so the controller
+ * no longer holds a second full-size copy of the avatar on top of whatever {@link
+ * FileStorageService#get} itself buffered. Plain unit tests calling the controller method directly
+ * (no MockMvc/web layer - see {@code CompGrantControllerTest}'s javadoc for why that is this
+ * codebase's established convention), so nothing here needs a network or a live database.
  */
 class AccountControllerTest {
 
@@ -43,14 +40,21 @@ class AccountControllerTest {
     void setUp() {
         appUserRepository = mock(AppUserRepository.class);
         fileStorageService = mock(FileStorageService.class);
-        controller = new AccountController(new AccountService(appUserRepository), fileStorageService);
+        controller =
+                new AccountController(new AccountService(appUserRepository), fileStorageService);
         principal = () -> "keycloak-user-1";
     }
 
     @Test
     void getAvatarReturnsNotFoundWhenUserHasNeverUploadedOne() {
-        AppUser user = new AppUser(UUID.randomUUID(), "keycloak-user-1", "user@example.com", UserRole.AGENT_BUILDER);
-        when(appUserRepository.findByKeycloakUserId("keycloak-user-1")).thenReturn(Optional.of(user));
+        AppUser user =
+                new AppUser(
+                        UUID.randomUUID(),
+                        "keycloak-user-1",
+                        "user@example.com",
+                        UserRole.AGENT_BUILDER);
+        when(appUserRepository.findByKeycloakUserId("keycloak-user-1"))
+                .thenReturn(Optional.of(user));
 
         ResponseEntity<InputStreamResource> response = controller.getAvatar(principal);
 
@@ -60,11 +64,17 @@ class AccountControllerTest {
     @Test
     void getAvatarReturnsNotFoundWhenObjectStorageHasNoMatchingObject() {
         String objectKey = "avatars/" + UUID.randomUUID() + ".png";
-        AppUser user = new AppUser(UUID.randomUUID(), "keycloak-user-1", "user@example.com", UserRole.AGENT_BUILDER);
+        AppUser user =
+                new AppUser(
+                        UUID.randomUUID(),
+                        "keycloak-user-1",
+                        "user@example.com",
+                        UserRole.AGENT_BUILDER);
         user.setAvatarUrl(objectKey);
-        when(appUserRepository.findByKeycloakUserId("keycloak-user-1")).thenReturn(Optional.of(user));
+        when(appUserRepository.findByKeycloakUserId("keycloak-user-1"))
+                .thenReturn(Optional.of(user));
         when(fileStorageService.get(eq(objectKey)))
-            .thenThrow(new FileStorageException("No object at key '" + objectKey + "'", null));
+                .thenThrow(new FileStorageException("No object at key '" + objectKey + "'", null));
 
         ResponseEntity<InputStreamResource> response = controller.getAvatar(principal);
 
@@ -75,10 +85,17 @@ class AccountControllerTest {
     void getAvatarStreamsStoredBytesWithPngContentType() throws IOException {
         byte[] storedBytes = {1, 2, 3, 4, 5};
         String objectKey = "avatars/" + UUID.randomUUID() + ".png";
-        AppUser user = new AppUser(UUID.randomUUID(), "keycloak-user-1", "user@example.com", UserRole.AGENT_BUILDER);
+        AppUser user =
+                new AppUser(
+                        UUID.randomUUID(),
+                        "keycloak-user-1",
+                        "user@example.com",
+                        UserRole.AGENT_BUILDER);
         user.setAvatarUrl(objectKey);
-        when(appUserRepository.findByKeycloakUserId("keycloak-user-1")).thenReturn(Optional.of(user));
-        when(fileStorageService.get(eq(objectKey))).thenReturn(new ByteArrayInputStream(storedBytes));
+        when(appUserRepository.findByKeycloakUserId("keycloak-user-1"))
+                .thenReturn(Optional.of(user));
+        when(fileStorageService.get(eq(objectKey)))
+                .thenReturn(new ByteArrayInputStream(storedBytes));
 
         ResponseEntity<InputStreamResource> response = controller.getAvatar(principal);
 
@@ -94,10 +111,17 @@ class AccountControllerTest {
     void getAvatarUsesJpegContentTypeForJpgKey() throws IOException {
         byte[] storedBytes = {9, 8, 7};
         String objectKey = "avatars/" + UUID.randomUUID() + ".jpg";
-        AppUser user = new AppUser(UUID.randomUUID(), "keycloak-user-1", "user@example.com", UserRole.AGENT_BUILDER);
+        AppUser user =
+                new AppUser(
+                        UUID.randomUUID(),
+                        "keycloak-user-1",
+                        "user@example.com",
+                        UserRole.AGENT_BUILDER);
         user.setAvatarUrl(objectKey);
-        when(appUserRepository.findByKeycloakUserId("keycloak-user-1")).thenReturn(Optional.of(user));
-        when(fileStorageService.get(eq(objectKey))).thenReturn(new ByteArrayInputStream(storedBytes));
+        when(appUserRepository.findByKeycloakUserId("keycloak-user-1"))
+                .thenReturn(Optional.of(user));
+        when(fileStorageService.get(eq(objectKey)))
+                .thenReturn(new ByteArrayInputStream(storedBytes));
 
         ResponseEntity<InputStreamResource> response = controller.getAvatar(principal);
 

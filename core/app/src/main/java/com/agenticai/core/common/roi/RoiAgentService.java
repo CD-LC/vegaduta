@@ -248,7 +248,8 @@ public class RoiAgentService {
                     HttpStatus.BAD_REQUEST,
                     "valueCurrency (ISO 4217, e.g. USD) is required with valuePerResolution");
         }
-        repository.upsertAssumption(agentId, value, value == null ? null : currency, minutes, subject);
+        repository.upsertAssumption(
+                agentId, value, value == null ? null : currency, minutes, subject);
         return assumption(agentId);
     }
 

@@ -107,8 +107,7 @@ public class ApprovalApiService {
      * @param isTenantAdmin whether the caller holds the approvals permission or is platform-admin
      * @param callerSubject the server-derived identity of the caller
      */
-    public void enforceApproverAuthorization(
-            UUID id, boolean isTenantAdmin, String callerSubject) {
+    public void enforceApproverAuthorization(UUID id, boolean isTenantAdmin, String callerSubject) {
         ApprovalRequest request =
                 requestRepository
                         .findById(id)

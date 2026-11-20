@@ -109,8 +109,9 @@ class KnowledgeControllerAccessTest {
         when(documents.findById(id)).thenReturn(Optional.of(doc));
         when(documentService.getEntity(id)).thenReturn(doc);
         when(documentService.originalFileRef(id))
-                .thenReturn(new KnowledgeDocumentService.OriginalFileRef(
-                        "knowledge-documents/x/report.pdf", null, "report.pdf"));
+                .thenReturn(
+                        new KnowledgeDocumentService.OriginalFileRef(
+                                "knowledge-documents/x/report.pdf", null, "report.pdf"));
         return id;
     }
 

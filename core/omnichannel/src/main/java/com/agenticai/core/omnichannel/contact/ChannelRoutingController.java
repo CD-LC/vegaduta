@@ -18,18 +18,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * /admin/contacts "Channel routing" card (migration V238) - one read and one
- * write for BOTH halves of a channel's inbound mapping: which agent new
- * conversations default to, and whether a never-seen sender still has to be
- * approved by hand first ({@code autoApproveNewSenders}) or goes straight to
- * that agent. The legacy {@code PUT /api/channels/<channel>/default-agent}
- * endpoints stay untouched - this is the combined surface the new page
- * drives, so the two halves can never drift out of sync in the UI.
+ * /admin/contacts "Channel routing" card (migration V238) - one read and one write for BOTH halves
+ * of a channel's inbound mapping: which agent new conversations default to, and whether a
+ * never-seen sender still has to be approved by hand first ({@code autoApproveNewSenders}) or goes
+ * straight to that agent. The legacy {@code PUT /api/channels/<channel>/default-agent} endpoints
+ * stay untouched - this is the combined surface the new page drives, so the two halves can never
+ * drift out of sync in the UI.
  *
- * <p>Read stays on plain {@code authenticated()} (same posture as GET
- * /api/channels/status); the PUT is {@code ROLE_tenant-admin} in
- * SecurityConfig - turning on auto-approve means "every stranger on the
- * internet gets a live agent conversation", strictly a bigger grant than the
+ * <p>Read stays on plain {@code authenticated()} (same posture as GET /api/channels/status); the
+ * PUT is {@code ROLE_tenant-admin} in SecurityConfig - turning on auto-approve means "every
+ * stranger on the internet gets a live agent conversation", strictly a bigger grant than the
  * default-agent writes alone.
  */
 @RestController
@@ -43,41 +41,68 @@ public class ChannelRoutingController {
     }
 
     @GetMapping
-    public ResponseEntity<List<RoutingResponse>> list(@RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
+    public ResponseEntity<List<RoutingResponse>> list(
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
         return ListPaging.window(
-            List.of(ChannelType.values()).stream()
-            .map(channel -> routingService.routingFor(channel)
-                .orElseGet(() -> new RoutingResponse(
-                    channel.name().toLowerCase(java.util.Locale.ROOT), null, null, false, InboundSafetyMode.FLAG.name(),
-                    null, false)))
-            .toList(),
-            limit, offset, 50, 500);
+                List.of(ChannelType.values()).stream()
+                        .map(
+                                channel ->
+                                        routingService
+                                                .routingFor(channel)
+                                                .orElseGet(
+                                                        () ->
+                                                                new RoutingResponse(
+                                                                        channel.name()
+                                                                                .toLowerCase(
+                                                                                        java.util
+                                                                                                .Locale
+                                                                                                .ROOT),
+                                                                        null,
+                                                                        null,
+                                                                        false,
+                                                                        InboundSafetyMode.FLAG
+                                                                                .name(),
+                                                                        null,
+                                                                        false)))
+                        .toList(),
+                limit,
+                offset,
+                50,
+                500);
     }
 
     @PutMapping("/{channel}")
-    public RoutingResponse set(@PathVariable String channel, @Valid @RequestBody RoutingRequest request) {
+    public RoutingResponse set(
+            @PathVariable String channel, @Valid @RequestBody RoutingRequest request) {
         ChannelType type = ChannelContactController.parseChannel(channel);
-        if (type == ChannelType.WHATSAPP && request.agentId() != null
-            && !request.agentId().equals(
-                routingService.currentAgentId(type))) {
+        if (type == ChannelType.WHATSAPP
+                && request.agentId() != null
+                && !request.agentId().equals(routingService.currentAgentId(type))) {
             // Attaching or changing the agent on a WhatsApp number needs a declared task and the
             // open-ended check, which PUT /api/channels/whatsapp/default-agent performs
             // (docs/channels/whatsapp-policy.md). Mode flips with the current agent are fine.
-            throw new ChannelConfigurationException("whatsapp",
-                "Change the WhatsApp agent from the Channels page: it needs a declared task.");
+            throw new ChannelConfigurationException(
+                    "whatsapp",
+                    "Change the WhatsApp agent from the Channels page: it needs a declared task.");
         }
         return routingService.setRouting(
-            type, request.agentId(), request.autoApproveNewSenders(), request.inboundSafetyMode());
+                type,
+                request.agentId(),
+                request.autoApproveNewSenders(),
+                request.inboundSafetyMode());
     }
 
     /** {@code inboundSafetyMode} (V242) is optional - omitted keeps the stored mode. */
-    public record RoutingRequest(UUID agentId, @NotNull Boolean autoApproveNewSenders, String inboundSafetyMode) {
-    }
+    public record RoutingRequest(
+            UUID agentId, @NotNull Boolean autoApproveNewSenders, String inboundSafetyMode) {}
 
     public record RoutingResponse(
-        String channel, UUID defaultAgentId, String defaultAgentName,
-        boolean autoApproveNewSenders, String inboundSafetyMode,
-        String declaredTask, boolean openEndedOverride
-    ) {
-    }
+            String channel,
+            UUID defaultAgentId,
+            String defaultAgentName,
+            boolean autoApproveNewSenders,
+            String inboundSafetyMode,
+            String declaredTask,
+            boolean openEndedOverride) {}
 }

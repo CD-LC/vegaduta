@@ -35,18 +35,31 @@ public class OperatorInboxViewService {
 
     @Transactional(readOnly = true)
     public List<InboxSessionResponse> listNeedingAttention() {
-        return inboxService.listNeedingAttention().stream().map(OperatorInboxViewService::toInbox).toList();
+        return inboxService.listNeedingAttention().stream()
+                .map(OperatorInboxViewService::toInbox)
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public ConversationPageResponse searchConversations(
-            ChannelType channel, HandoffState state, Boolean paired, String query, int page, int size) {
-        Page<ChannelSession> result = inboxService.searchConversations(
-            channel, state, paired, query,
-            PageRequest.of(Math.max(0, page), Math.min(Math.max(size, 1), 100)));
+            ChannelType channel,
+            HandoffState state,
+            Boolean paired,
+            String query,
+            int page,
+            int size) {
+        Page<ChannelSession> result =
+                inboxService.searchConversations(
+                        channel,
+                        state,
+                        paired,
+                        query,
+                        PageRequest.of(Math.max(0, page), Math.min(Math.max(size, 1), 100)));
         return new ConversationPageResponse(
-            result.getContent().stream().map(OperatorInboxViewService::toSummary).toList(),
-            result.getTotalElements(), result.getNumber(), result.getTotalPages());
+                result.getContent().stream().map(OperatorInboxViewService::toSummary).toList(),
+                result.getTotalElements(),
+                result.getNumber(),
+                result.getTotalPages());
     }
 
     public OperatorInboxService.InboxStats stats() {
@@ -55,7 +68,9 @@ public class OperatorInboxViewService {
 
     @Transactional(readOnly = true)
     public List<TranscriptMessageResponse> transcript(UUID sessionId) {
-        return inboxService.transcript(sessionId).stream().map(OperatorInboxViewService::toTranscript).toList();
+        return inboxService.transcript(sessionId).stream()
+                .map(OperatorInboxViewService::toTranscript)
+                .toList();
     }
 
     @Transactional
@@ -80,44 +95,46 @@ public class OperatorInboxViewService {
 
     private static InboxSessionResponse toInbox(ChannelSession session) {
         return new InboxSessionResponse(
-            session.getId(),
-            session.getChannel(),
-            mask(session.getExternalId()),
-            session.getAgentId(),
-            session.getHandoffState(),
-            session.getEscalationReason(),
-            session.getEscalatedAt(),
-            session.getTakenOverBy(),
-            session.getTakenOverAt(),
-            session.getLastMessagePreview(),
-            session.getLastMessageAt(),
-            session.getCreatedAt()
-        );
+                session.getId(),
+                session.getChannel(),
+                mask(session.getExternalId()),
+                session.getAgentId(),
+                session.getHandoffState(),
+                session.getEscalationReason(),
+                session.getEscalatedAt(),
+                session.getTakenOverBy(),
+                session.getTakenOverAt(),
+                session.getLastMessagePreview(),
+                session.getLastMessageAt(),
+                session.getCreatedAt());
     }
 
     private static ConversationSummary toSummary(ChannelSession session) {
         return new ConversationSummary(
-            session.getId(),
-            session.getChannel(),
-            mask(session.getExternalId()),
-            mask(session.getResolvedPhoneNumber()),
-            session.isPaired(),
-            session.isPaired() ? null : session.getPairingCode(),
-            session.getAgentId(),
-            session.getHandoffState(),
-            session.getEscalationReason(),
-            session.getEscalatedAt(),
-            session.getTakenOverBy(),
-            session.getTakenOverAt(),
-            session.getLastMessagePreview(),
-            session.getLastMessageAt(),
-            session.getCreatedAt()
-        );
+                session.getId(),
+                session.getChannel(),
+                mask(session.getExternalId()),
+                mask(session.getResolvedPhoneNumber()),
+                session.isPaired(),
+                session.isPaired() ? null : session.getPairingCode(),
+                session.getAgentId(),
+                session.getHandoffState(),
+                session.getEscalationReason(),
+                session.getEscalatedAt(),
+                session.getTakenOverBy(),
+                session.getTakenOverAt(),
+                session.getLastMessagePreview(),
+                session.getLastMessageAt(),
+                session.getCreatedAt());
     }
 
     private static TranscriptMessageResponse toTranscript(ChannelMessageLog log) {
         return new TranscriptMessageResponse(
-            log.getId(), log.getDirection(), log.getAuthor(), log.getBody(), log.getCreatedAt());
+                log.getId(),
+                log.getDirection(),
+                log.getAuthor(),
+                log.getBody(),
+                log.getCreatedAt());
     }
 
     private static String mask(String value) {

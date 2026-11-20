@@ -14,7 +14,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.agenticai.core.agents.core.AgentRepository;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.omnichannel.session.ChannelType;

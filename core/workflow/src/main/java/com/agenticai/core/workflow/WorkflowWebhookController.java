@@ -243,7 +243,8 @@ public class WorkflowWebhookController {
             // limits) -
             // its token must not double as a raw webhook that skips all of that.
             if (formService != null
-                    && targetService.isFormTriggerNode(formService, definition.id(), triggerNode.getNodeId())) {
+                    && targetService.isFormTriggerNode(
+                            formService, definition.id(), triggerNode.getNodeId())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body(
                                 Map.of(
@@ -388,7 +389,8 @@ public class WorkflowWebhookController {
         TenantContext.set(
                 TenantContext.of(tenantId, OIDC_REQUESTED_BY_PREFIX + jwt.getSubject(), Set.of()));
         try {
-            WorkflowWebhookTargetService.Target definition = targetService.find(workflowId).orElse(null);
+            WorkflowWebhookTargetService.Target definition =
+                    targetService.find(workflowId).orElse(null);
             if (definition == null) {
                 return ResponseEntity.notFound().build();
             }

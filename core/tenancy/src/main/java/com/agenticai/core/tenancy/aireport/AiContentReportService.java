@@ -184,7 +184,10 @@ public class AiContentReportService {
         return saved;
     }
 
-    /** Submits a report and returns the {@code {"id","status"}} acknowledgement the API responds with. */
+    /**
+     * Submits a report and returns the {@code {"id","status"}} acknowledgement the API responds
+     * with.
+     */
     public Map<String, Object> submitAck(AiContentReportRequest request) {
         AiContentReport saved = submit(request);
         return Map.of("id", saved.getId(), "status", saved.getStatus());

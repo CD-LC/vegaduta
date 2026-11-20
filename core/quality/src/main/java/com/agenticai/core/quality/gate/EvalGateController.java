@@ -21,25 +21,24 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST surface for the per-agent eval gate, nested under the quality URL
- * family beside the datasets it references:
+ * REST surface for the per-agent eval gate, nested under the quality URL family beside the datasets
+ * it references:
  *
  * <ul>
- *   <li>GET    /api/agents/{agentId}/quality/gate - config + evaluation of the live config</li>
- *   <li>PUT    /api/agents/{agentId}/quality/gate - create/update the gate</li>
- *   <li>DELETE /api/agents/{agentId}/quality/gate - remove the gate</li>
- *   <li>GET    /api/agents/{agentId}/quality/gate/check?versionId= - dry-run report for one version</li>
+ *   <li>GET /api/agents/{agentId}/quality/gate - config + evaluation of the live config
+ *   <li>PUT /api/agents/{agentId}/quality/gate - create/update the gate
+ *   <li>DELETE /api/agents/{agentId}/quality/gate - remove the gate
+ *   <li>GET /api/agents/{agentId}/quality/gate/check?versionId= - dry-run report for one version
  * </ul>
  *
- * <p>Plan gating differs deliberately from {@code EvalDatasetController}'s
- * blanket premium rule: ENABLING or re-pointing a gate requires PREMIUM (the
- * gate is meaningless without the premium-gated runs it consumes), but a
- * tenant may always READ the gate, DISABLE it, or DELETE it on any plan - a
- * downgraded tenant must never be locked out of promoting by a gate they can
- * no longer feed runs to. See {@code AgentEvalGate}'s javadoc.
+ * <p>Plan gating differs deliberately from {@code EvalDatasetController}'s blanket premium rule:
+ * ENABLING or re-pointing a gate requires PREMIUM (the gate is meaningless without the
+ * premium-gated runs it consumes), but a tenant may always READ the gate, DISABLE it, or DELETE it
+ * on any plan - a downgraded tenant must never be locked out of promoting by a gate they can no
+ * longer feed runs to. See {@code AgentEvalGate}'s javadoc.
  *
- * <p>No {@code SecurityConfig} change: {@code /api/**} falls through to
- * authenticated (same reasoning as {@code EvalDatasetController}).
+ * <p>No {@code SecurityConfig} change: {@code /api/**} falls through to authenticated (same
+ * reasoning as {@code EvalDatasetController}).
  */
 @RestController
 @RequestMapping("/api/agents/{agentId}/quality/gate")
@@ -50,10 +49,9 @@ public class EvalGateController {
     private final TenantLimits tenantLimits;
 
     public EvalGateController(
-        EvalGateService gateService,
-        AgentHeadVersionLookup headVersionLookup,
-        TenantLimits tenantLimits
-    ) {
+            EvalGateService gateService,
+            AgentHeadVersionLookup headVersionLookup,
+            TenantLimits tenantLimits) {
         this.gateService = gateService;
         this.headVersionLookup = headVersionLookup;
         this.tenantLimits = tenantLimits;
@@ -68,7 +66,7 @@ public class EvalGateController {
     private void assertPremiumPlan() {
         if (isFree()) {
             throw new TenantLimitExceededException(
-                "Eval gates consume premium eval runs - upgrade your plan to configure one.");
+                    "Eval gates consume premium eval runs - upgrade your plan to configure one.");
         }
     }
 
@@ -77,36 +75,39 @@ public class EvalGateController {
     public ResponseEntity<GateStatusResponse> getGate(@PathVariable UUID agentId) {
         GateResponse gate = gateService.findGateResponse(agentId).orElse(null);
         UUID headVersionId = headVersionLookup.findHeadVersionId(agentId).orElse(null);
-        GateEvaluationResponse headEvaluation = headVersionId != null
-            ? GateEvaluationResponse.of(gateService.evaluate(agentId, headVersionId))
-            : null;
-        return ResponseEntity.ok(new GateStatusResponse(
-            gate, headVersionId, headEvaluation));
+        GateEvaluationResponse headEvaluation =
+                headVersionId != null
+                        ? GateEvaluationResponse.of(gateService.evaluate(agentId, headVersionId))
+                        : null;
+        return ResponseEntity.ok(new GateStatusResponse(gate, headVersionId, headEvaluation));
     }
 
     /**
-     * PUT / - create or replace the gate. Disabling an existing gate is
-     * allowed on any plan (see class javadoc); everything else is premium.
+     * PUT / - create or replace the gate. Disabling an existing gate is allowed on any plan (see
+     * class javadoc); everything else is premium.
      */
     @PutMapping
     public ResponseEntity<GateResponse> upsertGate(
-        @PathVariable UUID agentId,
-        @RequestBody UpsertGateRequest request
-    ) {
-        boolean disabling = request.enabled() != null && !request.enabled()
-            && gateService.findGate(agentId).isPresent();
+            @PathVariable UUID agentId, @RequestBody UpsertGateRequest request) {
+        boolean disabling =
+                request.enabled() != null
+                        && !request.enabled()
+                        && gateService.findGate(agentId).isPresent();
         if (!disabling) {
             assertPremiumPlan();
         }
         if (request.datasetId() == null) {
-            throw new IllegalArgumentException("datasetId is required - the gate needs a dataset to consult.");
+            throw new IllegalArgumentException(
+                    "datasetId is required - the gate needs a dataset to consult.");
         }
-        GateResponse gate = gateService.upsertGateResponse(
-            agentId, request.datasetId(),
-            request.enabled() == null || request.enabled(),
-            request.maxRunAgeHours(),
-            request.requireSimulation() != null && request.requireSimulation(),
-            request.maxSimulationAgeHours());
+        GateResponse gate =
+                gateService.upsertGateResponse(
+                        agentId,
+                        request.datasetId(),
+                        request.enabled() == null || request.enabled(),
+                        request.maxRunAgeHours(),
+                        request.requireSimulation() != null && request.requireSimulation(),
+                        request.maxSimulationAgeHours());
         return ResponseEntity.ok(gate);
     }
 
@@ -120,9 +121,8 @@ public class EvalGateController {
     /** GET /check?versionId= - the gate report for one specific version. */
     @GetMapping("/check")
     public ResponseEntity<GateEvaluationResponse> check(
-        @PathVariable UUID agentId,
-        @RequestParam UUID versionId
-    ) {
-        return ResponseEntity.ok(GateEvaluationResponse.of(gateService.evaluate(agentId, versionId)));
+            @PathVariable UUID agentId, @RequestParam UUID versionId) {
+        return ResponseEntity.ok(
+                GateEvaluationResponse.of(gateService.evaluate(agentId, versionId)));
     }
 }

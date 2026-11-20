@@ -41,7 +41,10 @@ public class WorkflowRunDiffService {
                 .orElseThrow(() -> new WorkflowRunNotFoundException(runId));
     }
 
-    /** Stamped version -> its snapshot row, or null (unstamped run, or a snapshot deleted with an older workflow id). */
+    /**
+     * Stamped version -> its snapshot row, or null (unstamped run, or a snapshot deleted with an
+     * older workflow id).
+     */
     private WorkflowVersion resolveVersion(UUID workflowId, Integer versionNumber) {
         if (versionNumber == null) {
             return null;

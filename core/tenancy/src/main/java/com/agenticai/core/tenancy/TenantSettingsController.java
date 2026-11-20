@@ -12,13 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Backs the "which experience do you want" control in Admin Overview and
- * the account-type/limits summary shown there - {@code accountType} itself
- * is read-only here (see {@code Tenant.accountType}'s javadoc for why it's
- * a signup-time-only decision); only {@code experienceMode} can change
- * after the fact. Gated by {@code SecurityConfig}'s {@code /api/tenant/**}
- * -> {@code ROLE_tenant-admin} rule, same posture as {@code
- * UserAdminController}.
+ * Backs the "which experience do you want" control in Admin Overview and the account-type/limits
+ * summary shown there - {@code accountType} itself is read-only here (see {@code
+ * Tenant.accountType}'s javadoc for why it's a signup-time-only decision); only {@code
+ * experienceMode} can change after the fact. Gated by {@code SecurityConfig}'s {@code
+ * /api/tenant/**} -> {@code ROLE_tenant-admin} rule, same posture as {@code UserAdminController}.
  */
 @RestController
 @RequestMapping("/api/tenant/settings")
@@ -37,13 +35,17 @@ public class TenantSettingsController {
     }
 
     @PutMapping
-    public TenantSettingsResponse updateExperienceMode(@Valid @RequestBody UpdateExperienceModeRequest request) {
+    public TenantSettingsResponse updateExperienceMode(
+            @Valid @RequestBody UpdateExperienceModeRequest request) {
         return settingsService.updateExperienceMode(tenantId(), request);
     }
 
     private String tenantId() {
-        return TenantContext.current().map(TenantContext::getTenantId)
-            .orElseThrow(() -> new IllegalStateException(
-                "No TenantContext for an authenticated /api/tenant/settings request - SecurityConfig should have blocked this"));
+        return TenantContext.current()
+                .map(TenantContext::getTenantId)
+                .orElseThrow(
+                        () ->
+                                new IllegalStateException(
+                                        "No TenantContext for an authenticated /api/tenant/settings request - SecurityConfig should have blocked this"));
     }
 }

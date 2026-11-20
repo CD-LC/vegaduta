@@ -7,8 +7,8 @@ import org.springframework.stereotype.Repository;
 
 /**
  * JDBC lookups {@link BillingEmailService} needs to address a billing email: the tenant's admin
- * recipients and its current plan. Exceptions propagate unchanged; the service decides the
- * fallback for each.
+ * recipients and its current plan. Exceptions propagate unchanged; the service decides the fallback
+ * for each.
  */
 @Repository
 public class BillingRecipientJdbcRepository {

@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service;
  * Handles {@code subscription.charged} events — fired by Razorpay when a subscription payment is
  * successfully collected.
  *
- * <p>Actions: 1. Fetch tenant ID by gateway subscription ID (via TenantSubscriptionJdbcRepository) 2. Update
- * subscription status to ACTIVE in the tenant table 3. Queue receipt email send (via
+ * <p>Actions: 1. Fetch tenant ID by gateway subscription ID (via TenantSubscriptionJdbcRepository)
+ * 2. Update subscription status to ACTIVE in the tenant table 3. Queue receipt email send (via
  * BillingEmailService) 4. Log the transition
  *
  * <p>Uses JdbcTemplate to avoid importing the Tenant entity and creating a cycle dependency
@@ -51,8 +51,7 @@ public class SubscriptionChargedHandler implements BillingEventHandler {
         // 1. Fetch tenant ID by gateway subscription ID
         String tenantIdStr;
         try {
-            tenantIdStr =
-                    tenants.findTenantIdByGatewaySubscriptionId(gatewaySubscriptionId);
+            tenantIdStr = tenants.findTenantIdByGatewaySubscriptionId(gatewaySubscriptionId);
         } catch (EmptyResultDataAccessException e) {
             log.warn(
                     "No tenant found for gateway subscription ID '{}' - webhook may be replayed",

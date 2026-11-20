@@ -27,10 +27,9 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 
 /**
- * {@code POST /api/edge/turns} - fire-and-forget edge-turn telemetry that
- * NEVER 401s/errors back to the caller (see the controller's own javadoc),
- * and only writes an {@link RlTurnRecorder} episode for a real Keycloak
- * session. Plain unit tests calling the controller method directly, same
+ * {@code POST /api/edge/turns} - fire-and-forget edge-turn telemetry that NEVER 401s/errors back to
+ * the caller (see the controller's own javadoc), and only writes an {@link RlTurnRecorder} episode
+ * for a real Keycloak session. Plain unit tests calling the controller method directly, same
  * convention as {@code EdgeToolExecutionControllerTest}.
  */
 class EdgeTurnTelemetryControllerTest {
@@ -43,8 +42,10 @@ class EdgeTurnTelemetryControllerTest {
     private EdgeTurnRepository edgeTurnRepository;
     private com.agenticai.core.devices.DeviceAuthResolver deviceAuthResolver;
     private EdgeTurnTelemetryRateLimiter rateLimiter;
+
     @SuppressWarnings("unchecked")
     private final ObjectProvider<RlTurnRecorder> recorderProvider = mock(ObjectProvider.class);
+
     private EdgeTurnTelemetryController controller;
 
     @BeforeEach
@@ -56,19 +57,27 @@ class EdgeTurnTelemetryControllerTest {
         rateLimiter = mock(EdgeTurnTelemetryRateLimiter.class);
         when(rateLimiter.tryAcquire(any())).thenReturn(true);
         when(recorderProvider.getIfAvailable()).thenReturn(recorder);
-        controller = new EdgeTurnTelemetryController(
-            agentService, recorderProvider, new EdgeTurnRecordService(edgeTurnRepository), deviceAuthResolver, rateLimiter);
-        when(agentService.requireAccess(AGENT_ID, PermissionLevel.RUNNER)).thenReturn(mock(Agent.class));
+        controller =
+                new EdgeTurnTelemetryController(
+                        agentService,
+                        recorderProvider,
+                        new EdgeTurnRecordService(edgeTurnRepository),
+                        deviceAuthResolver,
+                        rateLimiter);
+        when(agentService.requireAccess(AGENT_ID, PermissionLevel.RUNNER))
+                .thenReturn(mock(Agent.class));
         when(recorder.beginTurn(any(), any(), any(), any(), any())).thenReturn(UUID.randomUUID());
     }
 
     private static EdgeTurnReportRequest request(String outcome) {
-        return new EdgeTurnReportRequest(AGENT_ID, "agent-session", 1, "Llama-3.2-1B", outcome, "test-reason", 42L);
+        return new EdgeTurnReportRequest(
+                AGENT_ID, "agent-session", 1, "Llama-3.2-1B", outcome, "test-reason", 42L);
     }
 
     /** A normal-sized servlet request from a fixed test address. */
     private static MockHttpServletRequest httpRequest() {
-        MockHttpServletRequest servletRequest = new MockHttpServletRequest("POST", "/api/edge/turns");
+        MockHttpServletRequest servletRequest =
+                new MockHttpServletRequest("POST", "/api/edge/turns");
         servletRequest.setRemoteAddr("198.51.100.7");
         servletRequest.setContent(new byte[128]);
         return servletRequest;
@@ -90,10 +99,16 @@ class EdgeTurnTelemetryControllerTest {
 
     @Test
     void anonymousCallerIsAcceptedButNeverWritesAnRlEpisodeOrAnEdgeTurnRow() {
-        Principal anonymous = new AnonymousAuthenticationToken(
-            "key", "anonymousUser", java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_ANONYMOUS")));
+        Principal anonymous =
+                new AnonymousAuthenticationToken(
+                        "key",
+                        "anonymousUser",
+                        java.util.List.of(
+                                new org.springframework.security.core.authority
+                                        .SimpleGrantedAuthority("ROLE_ANONYMOUS")));
 
-        ResponseEntity<Void> response = controller.report(request("success"), null, anonymous, httpRequest());
+        ResponseEntity<Void> response =
+                controller.report(request("success"), null, anonymous, httpRequest());
 
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
         verify(recorder, never()).beginTurn(any(), any(), any(), any(), any());
@@ -113,13 +128,18 @@ class EdgeTurnTelemetryControllerTest {
     void deviceTokenCallerPersistsAndRecordsLikeAKeycloakOne() {
         // DeviceAuthResolver.run resolves the token and executes the action
         // with TenantContext bound (mocked here by just invoking it).
-        when(deviceAuthResolver.run(eq("dev-token"), any())).thenAnswer(invocation -> {
-            java.util.function.Function<com.agenticai.core.devices.MobileDevice, Object> action =
-                invocation.getArgument(1);
-            return action.apply(mock(com.agenticai.core.devices.MobileDevice.class));
-        });
+        when(deviceAuthResolver.run(eq("dev-token"), any()))
+                .thenAnswer(
+                        invocation -> {
+                            java.util.function.Function<
+                                            com.agenticai.core.devices.MobileDevice, Object>
+                                    action = invocation.getArgument(1);
+                            return action.apply(
+                                    mock(com.agenticai.core.devices.MobileDevice.class));
+                        });
 
-        ResponseEntity<Void> response = controller.report(request("success"), "dev-token", null, httpRequest());
+        ResponseEntity<Void> response =
+                controller.report(request("success"), "dev-token", null, httpRequest());
 
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
         verify(agentService).requireAccess(AGENT_ID, PermissionLevel.RUNNER);
@@ -130,9 +150,10 @@ class EdgeTurnTelemetryControllerTest {
     @Test
     void invalidDeviceTokenDegradesToLogOnlyAndStillAnswers202() {
         when(deviceAuthResolver.run(eq("bad-token"), any()))
-            .thenThrow(new RuntimeException("Unknown device token."));
+                .thenThrow(new RuntimeException("Unknown device token."));
 
-        ResponseEntity<Void> response = controller.report(request("success"), "bad-token", null, httpRequest());
+        ResponseEntity<Void> response =
+                controller.report(request("success"), "bad-token", null, httpRequest());
 
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
         verify(edgeTurnRepository, never()).save(any());
@@ -143,7 +164,8 @@ class EdgeTurnTelemetryControllerTest {
     void keycloakSessionWinsOverAPresentDeviceToken() {
         // Mirrors withCallerSubject's precedence: the device token is only
         // consulted when there is no Keycloak session.
-        ResponseEntity<Void> response = controller.report(request("success"), "dev-token", PRINCIPAL, httpRequest());
+        ResponseEntity<Void> response =
+                controller.report(request("success"), "dev-token", PRINCIPAL, httpRequest());
 
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
         verify(deviceAuthResolver, never()).run(any(), any());
@@ -156,10 +178,12 @@ class EdgeTurnTelemetryControllerTest {
 
     @Test
     void authenticatedReportPersistsAnEdgeTurnRow() {
-        ResponseEntity<Void> response = controller.report(request("fallback"), null, PRINCIPAL, httpRequest());
+        ResponseEntity<Void> response =
+                controller.report(request("fallback"), null, PRINCIPAL, httpRequest());
 
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
-        org.mockito.ArgumentCaptor<EdgeTurn> captor = org.mockito.ArgumentCaptor.forClass(EdgeTurn.class);
+        org.mockito.ArgumentCaptor<EdgeTurn> captor =
+                org.mockito.ArgumentCaptor.forClass(EdgeTurn.class);
         verify(edgeTurnRepository).save(captor.capture());
         EdgeTurn saved = captor.getValue();
         assertEquals(AGENT_ID, saved.getAgentId());
@@ -179,7 +203,8 @@ class EdgeTurnTelemetryControllerTest {
         ResponseEntity<Void> response = controller.report(req, null, PRINCIPAL, httpRequest());
 
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
-        org.mockito.ArgumentCaptor<EdgeTurn> captor = org.mockito.ArgumentCaptor.forClass(EdgeTurn.class);
+        org.mockito.ArgumentCaptor<EdgeTurn> captor =
+                org.mockito.ArgumentCaptor.forClass(EdgeTurn.class);
         verify(edgeTurnRepository).save(captor.capture());
         assertEquals(512, captor.getValue().getReason().length());
     }
@@ -188,7 +213,8 @@ class EdgeTurnTelemetryControllerTest {
     void persistenceFailureNeverBlocksTheRlPathOrTheCaller() {
         when(edgeTurnRepository.save(any())).thenThrow(new RuntimeException("db down"));
 
-        ResponseEntity<Void> response = controller.report(request("success"), null, PRINCIPAL, httpRequest());
+        ResponseEntity<Void> response =
+                controller.report(request("success"), null, PRINCIPAL, httpRequest());
 
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
         // The RL episode still records — each sink fails independently.
@@ -198,9 +224,10 @@ class EdgeTurnTelemetryControllerTest {
     @Test
     void accessDeniedSkipsPersistenceToo() {
         when(agentService.requireAccess(AGENT_ID, PermissionLevel.RUNNER))
-            .thenThrow(new ResourceAccessDeniedException());
+                .thenThrow(new ResourceAccessDeniedException());
 
-        ResponseEntity<Void> response = controller.report(request("success"), null, PRINCIPAL, httpRequest());
+        ResponseEntity<Void> response =
+                controller.report(request("success"), null, PRINCIPAL, httpRequest());
 
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
         verify(edgeTurnRepository, never()).save(any());
@@ -209,14 +236,33 @@ class EdgeTurnTelemetryControllerTest {
     @Test
     void authenticatedSuccessRecordsTaskSuccessAndCostRewards() {
         UUID episodeId = UUID.randomUUID();
-        when(recorder.beginTurn(eq(AGENT_ID), eq("agent-session"), any(), isNull(), eq(java.util.Map.of()))).thenReturn(episodeId);
+        when(recorder.beginTurn(
+                        eq(AGENT_ID), eq("agent-session"), any(), isNull(), eq(java.util.Map.of())))
+                .thenReturn(episodeId);
 
-        ResponseEntity<Void> response = controller.report(request("success"), null, PRINCIPAL, httpRequest());
+        ResponseEntity<Void> response =
+                controller.report(request("success"), null, PRINCIPAL, httpRequest());
 
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
         verify(agentService).requireAccess(AGENT_ID, PermissionLevel.RUNNER);
-        verify(recorder).recordStep(eq(episodeId), eq("user"), eq("message"), isNull(), isNull(), isNull(), isNull());
-        verify(recorder).recordStep(eq(episodeId), eq("assistant"), eq("answer"), isNull(), isNull(), isNull(), eq(42L));
+        verify(recorder)
+                .recordStep(
+                        eq(episodeId),
+                        eq("user"),
+                        eq("message"),
+                        isNull(),
+                        isNull(),
+                        isNull(),
+                        isNull());
+        verify(recorder)
+                .recordStep(
+                        eq(episodeId),
+                        eq("assistant"),
+                        eq("answer"),
+                        isNull(),
+                        isNull(),
+                        isNull(),
+                        eq(42L));
         verify(recorder).endTurn(episodeId, true);
         verify(recorder).addReward(episodeId, RewardSource.TASK_SUCCESS, 1.0, null);
         verify(recorder).addReward(episodeId, RewardSource.COST, 1.0, null);
@@ -227,16 +273,18 @@ class EdgeTurnTelemetryControllerTest {
     void authenticatedFallbackRecordsZeroTaskSuccessAndNoCostReward() {
         controller.report(request("fallback"), null, PRINCIPAL, httpRequest());
 
-        verify(recorder).addReward(any(), eq(RewardSource.TASK_SUCCESS), eq(0.0), eq((Double) null));
+        verify(recorder)
+                .addReward(any(), eq(RewardSource.TASK_SUCCESS), eq(0.0), eq((Double) null));
         verify(recorder, never()).addReward(any(), eq(RewardSource.COST), any(Double.class), any());
     }
 
     @Test
     void agentAccessDeniedNeverPropagatesToTheCaller() {
         when(agentService.requireAccess(AGENT_ID, PermissionLevel.RUNNER))
-            .thenThrow(new ResourceAccessDeniedException());
+                .thenThrow(new ResourceAccessDeniedException());
 
-        ResponseEntity<Void> response = controller.report(request("success"), null, PRINCIPAL, httpRequest());
+        ResponseEntity<Void> response =
+                controller.report(request("success"), null, PRINCIPAL, httpRequest());
 
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
         verify(recorder, never()).beginTurn(any(), any(), any(), any(), any());
@@ -246,7 +294,8 @@ class EdgeTurnTelemetryControllerTest {
     void noRlPolicyWiredIsANoOp() {
         when(recorderProvider.getIfAvailable()).thenReturn(null);
 
-        ResponseEntity<Void> response = controller.report(request("success"), null, PRINCIPAL, httpRequest());
+        ResponseEntity<Void> response =
+                controller.report(request("success"), null, PRINCIPAL, httpRequest());
 
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
     }
@@ -261,7 +310,8 @@ class EdgeTurnTelemetryControllerTest {
     void overTheRateLimitIsDroppedSilentlyWithA202() {
         when(rateLimiter.tryAcquire("198.51.100.7")).thenReturn(false);
 
-        ResponseEntity<Void> response = controller.report(request("success"), null, PRINCIPAL, httpRequest());
+        ResponseEntity<Void> response =
+                controller.report(request("success"), null, PRINCIPAL, httpRequest());
 
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
         // Nothing downstream runs for a dropped report - no access check,
@@ -276,7 +326,8 @@ class EdgeTurnTelemetryControllerTest {
         MockHttpServletRequest oversized = httpRequest();
         oversized.setContent(new byte[(int) EdgeTurnTelemetryController.MAX_BODY_BYTES + 1]);
 
-        ResponseEntity<Void> response = controller.report(request("success"), null, PRINCIPAL, oversized);
+        ResponseEntity<Void> response =
+                controller.report(request("success"), null, PRINCIPAL, oversized);
 
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
         verify(rateLimiter, never()).tryAcquire(any());

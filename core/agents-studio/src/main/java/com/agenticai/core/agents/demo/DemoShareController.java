@@ -357,9 +357,7 @@ public class DemoShareController {
             try {
                 String name =
                         demoSessionService.inDemoTenantContext(
-                                session,
-                                () ->
-                                        agentLookup.findAgentName(agentId).orElse(null));
+                                session, () -> agentLookup.findAgentName(agentId).orElse(null));
                 if (name != null && !name.isBlank()) {
                     return name;
                 }

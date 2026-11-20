@@ -22,9 +22,9 @@ import org.springframework.stereotype.Component;
  * nightly job does that per tenant through {@code TenantSchemaIterator}); every query is
  * unqualified, so it can only see that tenant's schema.
  *
- * <p>One audit event per rule that actually removed (or failed to remove) something, so a
- * quiet night writes nothing. Deletes go in bounded batches; a run stops at {@value #MAX_BATCHES}
- * batches per rule and the next night carries on.
+ * <p>One audit event per rule that actually removed (or failed to remove) something, so a quiet
+ * night writes nothing. Deletes go in bounded batches; a run stops at {@value #MAX_BATCHES} batches
+ * per rule and the next night carries on.
  */
 @Component
 public class RetentionPurger {
@@ -96,7 +96,9 @@ public class RetentionPurger {
                                 + r.cutoff()
                                 + ") for channel "
                                 + r.channel()
-                                + (r.failed() > 0 ? "; " + r.failed() + " failed and will be retried" : ""));
+                                + (r.failed() > 0
+                                        ? "; " + r.failed() + " failed and will be retried"
+                                        : ""));
             }
         }
         return results;
@@ -112,9 +114,11 @@ public class RetentionPurger {
                 break;
             }
         }
-        // The session row keeps a short preview of the last message; it ages out with the transcript.
+        // The session row keeps a short preview of the last message; it ages out with the
+        // transcript.
         repository.clearSessionPreviews(channel, cutoff);
-        return new Result(PrivacyDataClass.TRANSCRIPT, channel, rule.retentionDays(), cutoff, deleted, 0);
+        return new Result(
+                PrivacyDataClass.TRANSCRIPT, channel, rule.retentionDays(), cutoff, deleted, 0);
     }
 
     private Result purgeRecordings(Rule rule, Instant now) {
@@ -135,7 +139,9 @@ public class RetentionPurger {
                 } catch (RuntimeException e) {
                     // Keep the row so the object is not orphaned from its record; retry tomorrow.
                     failedThisBatch++;
-                    log.warn("Retention purge could not delete a recording object: {}", e.getMessage());
+                    log.warn(
+                            "Retention purge could not delete a recording object: {}",
+                            e.getMessage());
                 }
             }
             failed += failedThisBatch;
@@ -143,7 +149,13 @@ public class RetentionPurger {
                 break;
             }
         }
-        return new Result(PrivacyDataClass.RECORDING, PrivacyDataClass.VOICE, rule.retentionDays(), cutoff, deleted, failed);
+        return new Result(
+                PrivacyDataClass.RECORDING,
+                PrivacyDataClass.VOICE,
+                rule.retentionDays(),
+                cutoff,
+                deleted,
+                failed);
     }
 
     private Result purgeExtractedFields(Rule rule, Instant now) {
@@ -158,7 +170,12 @@ public class RetentionPurger {
             deleted += drain(limit -> tenant.purgeCreatedBefore(cutoff, limit));
         }
         return new Result(
-                PrivacyDataClass.EXTRACTED_FIELDS, PrivacyDataClass.ALL_CHANNELS, rule.retentionDays(), cutoff, deleted, 0);
+                PrivacyDataClass.EXTRACTED_FIELDS,
+                PrivacyDataClass.ALL_CHANNELS,
+                rule.retentionDays(),
+                cutoff,
+                deleted,
+                0);
     }
 
     private static long drain(java.util.function.IntUnaryOperator batch) {

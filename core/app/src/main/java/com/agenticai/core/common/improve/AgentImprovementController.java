@@ -57,18 +57,21 @@ public class AgentImprovementController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ImprovementDtos.SuggestionResponse>> list(@PathVariable UUID agentId, @RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
+    public ResponseEntity<List<ImprovementDtos.SuggestionResponse>> list(
+            @PathVariable UUID agentId,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
         agentService.requireAccess(agentId, PermissionLevel.VIEWER);
         return ListPaging.window(
-            improvementService.listSuggestionsForAgent(agentId),
-            limit, offset, 50, 500);
+                improvementService.listSuggestionsForAgent(agentId), limit, offset, 50, 500);
     }
 
     @PostMapping("/generate")
     public List<ImprovementDtos.SuggestionResponse> generate(@PathVariable UUID agentId) {
         // Before any work: generating spends LLM budget on this agent.
         agentService.requireAccess(agentId, PermissionLevel.EDITOR);
-        List<ImprovementDtos.SuggestionResponse> created = improvementService.generateSuggestionsForAgent(agentId);
+        List<ImprovementDtos.SuggestionResponse> created =
+                improvementService.generateSuggestionsForAgent(agentId);
         // Keep the manual "scan now" button and the scheduled sweep on the same
         // contract: a generate call also refreshes the health snapshot, so an
         // admin who scans by hand sees an up-to-date score without waiting for

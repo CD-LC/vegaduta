@@ -2,7 +2,6 @@ package com.agenticai.core.admin.sso;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -22,10 +21,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 /**
- * The auth boundary is the load-bearing part: a {@code vdscim_*} token must
- * scope every operation to ITS tenant's users and nothing else. These tests
- * pin unauthorized/short-circuit behavior and the tenant_id cross-check on
- * user-by-id paths.
+ * The auth boundary is the load-bearing part: a {@code vdscim_*} token must scope every operation
+ * to ITS tenant's users and nothing else. These tests pin unauthorized/short-circuit behavior and
+ * the tenant_id cross-check on user-by-id paths.
  */
 class ScimProvisioningControllerTest {
 
@@ -47,21 +45,30 @@ class ScimProvisioningControllerTest {
         // Plan gate's default posture in these tests: the tenant HAS the
         // scim entitlement; the gate-specific tests below flip it off.
         when(tenantLimits.scimAllowed(TENANT)).thenReturn(true);
-        controller = new ScimProvisioningController(
-                new TenantScimTokenService(tokenRepository), keycloak, tenantLimits);
+        controller =
+                new ScimProvisioningController(
+                        new TenantScimTokenService(tokenRepository), keycloak, tenantLimits);
 
         TenantScimToken row = new TenantScimToken();
         row.setTenantSchema(TENANT);
         row.setTokenHash(TenantScimTokenService.sha256Hex(TOKEN));
-        when(tokenRepository.findByTokenHashAndRevokedAtIsNull(TenantScimTokenService.sha256Hex(TOKEN)))
-            .thenReturn(Optional.of(row));
+        when(tokenRepository.findByTokenHashAndRevokedAtIsNull(
+                        TenantScimTokenService.sha256Hex(TOKEN)))
+                .thenReturn(Optional.of(row));
     }
 
     private static KeycloakUserRepresentation user(String id, String tenantId) {
         return new KeycloakUserRepresentation(
-            id, "jane@acme.com", "jane@acme.com", "Jane", "Doe",
-            true, false, null,
-            Map.of("tenant_id", List.of(tenantId)), null);
+                id,
+                "jane@acme.com",
+                "jane@acme.com",
+                "Jane",
+                "Doe",
+                true,
+                false,
+                null,
+                Map.of("tenant_id", List.of(tenantId)),
+                null);
     }
 
     @Test
@@ -88,16 +95,22 @@ class ScimProvisioningControllerTest {
     void createUser_passesTokenTenant_toKeycloak() {
         when(keycloak.findByEmail("jane@acme.com")).thenReturn(Optional.empty());
         KeycloakUserRepresentation created = user("u9", TENANT);
-        when(keycloak.createUserForInvite(eq("jane@acme.com"), eq("jane@acme.com"), any(), any(), eq(TENANT)))
-            .thenReturn(created);
+        when(keycloak.createUserForInvite(
+                        eq("jane@acme.com"), eq("jane@acme.com"), any(), any(), eq(TENANT)))
+                .thenReturn(created);
         when(keycloak.getUserById("u9")).thenReturn(created);
 
-        ResponseEntity<?> res = controller.createUser(
-            "Bearer " + TOKEN,
-            Map.of("userName", "jane@acme.com",
-                   "name", Map.of("givenName", "Jane", "familyName", "Doe")));
+        ResponseEntity<?> res =
+                controller.createUser(
+                        "Bearer " + TOKEN,
+                        Map.of(
+                                "userName",
+                                "jane@acme.com",
+                                "name",
+                                Map.of("givenName", "Jane", "familyName", "Doe")));
         assertEquals(HttpStatus.CREATED, res.getStatusCode());
-        verify(keycloak).createUserForInvite("jane@acme.com", "jane@acme.com", "Jane", "Doe", TENANT);
+        verify(keycloak)
+                .createUserForInvite("jane@acme.com", "jane@acme.com", "Jane", "Doe", TENANT);
     }
 
     @Test
@@ -111,14 +124,34 @@ class ScimProvisioningControllerTest {
     void patchUser_onlyActiveFlag_isHonored() {
         when(keycloak.getUserById("u1")).thenReturn(user("u1", TENANT));
         // SCIM PATCH operations shape
-        ResponseEntity<?> res = controller.patchUser("Bearer " + TOKEN, "u1", Map.of(
-            "Operations", List.of(Map.of("op", "replace", "path", "active", "value", false))));
+        ResponseEntity<?> res =
+                controller.patchUser(
+                        "Bearer " + TOKEN,
+                        "u1",
+                        Map.of(
+                                "Operations",
+                                List.of(
+                                        Map.of(
+                                                "op", "replace", "path", "active", "value",
+                                                false))));
         assertEquals(HttpStatus.OK, res.getStatusCode());
         verify(keycloak).setUserEnabled("u1", false);
 
         // A PATCH carrying no active replacement is a SCIM 400, not silent success
-        res = controller.patchUser("Bearer " + TOKEN, "u1",
-            Map.of("Operations", List.of(Map.of("op", "replace", "path", "displayName", "value", "X"))));
+        res =
+                controller.patchUser(
+                        "Bearer " + TOKEN,
+                        "u1",
+                        Map.of(
+                                "Operations",
+                                List.of(
+                                        Map.of(
+                                                "op",
+                                                "replace",
+                                                "path",
+                                                "displayName",
+                                                "value",
+                                                "X"))));
         assertEquals(HttpStatus.BAD_REQUEST, res.getStatusCode());
     }
 
@@ -127,8 +160,8 @@ class ScimProvisioningControllerTest {
         // Downgraded tenant: an already-minted token can still read and
         // deprovision, but must not be able to provision new seats.
         when(tenantLimits.scimAllowed(TENANT)).thenReturn(false);
-        ResponseEntity<?> res = controller.createUser(
-            "Bearer " + TOKEN, Map.of("userName", "jane@acme.com"));
+        ResponseEntity<?> res =
+                controller.createUser("Bearer " + TOKEN, Map.of("userName", "jane@acme.com"));
         assertEquals(HttpStatus.FORBIDDEN, res.getStatusCode());
         verify(keycloak, never()).createUserForInvite(any(), any(), any(), any(), any());
     }
@@ -138,7 +171,8 @@ class ScimProvisioningControllerTest {
         when(keycloak.getUserById("u1")).thenReturn(user("u1", TENANT));
         when(tenantLimits.scimAllowed(TENANT)).thenReturn(false);
         // active:true is provisioning-shaped - blocked.
-        ResponseEntity<?> res = controller.patchUser("Bearer " + TOKEN, "u1", Map.of("active", true));
+        ResponseEntity<?> res =
+                controller.patchUser("Bearer " + TOKEN, "u1", Map.of("active", true));
         assertEquals(HttpStatus.FORBIDDEN, res.getStatusCode());
         verify(keycloak, never()).setUserEnabled("u1", true);
         // active:false is cleanup - must keep working after the entitlement ends.
@@ -168,10 +202,12 @@ class ScimProvisioningControllerTest {
     @Test
     void createUser_atThePlanUserLimit_isRejectedAndNothingIsCreated() {
         when(keycloak.findByEmail("new@acme.com")).thenReturn(Optional.empty());
-        when(keycloak.listUsersByTenant(TENANT)).thenReturn(List.of(user("u1", TENANT), user("u2", TENANT)));
+        when(keycloak.listUsersByTenant(TENANT))
+                .thenReturn(List.of(user("u1", TENANT), user("u2", TENANT)));
         when(tenantLimits.maxUsers(TENANT)).thenReturn(2);
 
-        ResponseEntity<?> res = controller.createUser("Bearer " + TOKEN, Map.of("userName", "new@acme.com"));
+        ResponseEntity<?> res =
+                controller.createUser("Bearer " + TOKEN, Map.of("userName", "new@acme.com"));
 
         assertEquals(HttpStatus.FORBIDDEN, res.getStatusCode());
         @SuppressWarnings("unchecked")
@@ -187,11 +223,13 @@ class ScimProvisioningControllerTest {
         when(keycloak.listUsersByTenant(TENANT)).thenReturn(List.of(user("u1", TENANT)));
         when(tenantLimits.maxUsers(TENANT)).thenReturn(2);
         KeycloakUserRepresentation created = user("u9", TENANT);
-        when(keycloak.createUserForInvite(eq("new@acme.com"), eq("new@acme.com"), any(), any(), eq(TENANT)))
-            .thenReturn(created);
+        when(keycloak.createUserForInvite(
+                        eq("new@acme.com"), eq("new@acme.com"), any(), any(), eq(TENANT)))
+                .thenReturn(created);
         when(keycloak.getUserById("u9")).thenReturn(created);
 
-        ResponseEntity<?> res = controller.createUser("Bearer " + TOKEN, Map.of("userName", "new@acme.com"));
+        ResponseEntity<?> res =
+                controller.createUser("Bearer " + TOKEN, Map.of("userName", "new@acme.com"));
 
         assertEquals(HttpStatus.CREATED, res.getStatusCode());
         verify(tenantLimits).maxUsers(TENANT);
@@ -203,7 +241,8 @@ class ScimProvisioningControllerTest {
         when(keycloak.listUsersByTenant(TENANT)).thenReturn(List.of(user("u1", TENANT)));
         when(tenantLimits.maxUsers(TENANT)).thenReturn(1);
 
-        ResponseEntity<?> res = controller.createUser("Bearer " + TOKEN, Map.of("userName", "new@acme.com"));
+        ResponseEntity<?> res =
+                controller.createUser("Bearer " + TOKEN, Map.of("userName", "new@acme.com"));
 
         assertEquals(HttpStatus.FORBIDDEN, res.getStatusCode());
         verify(keycloak, never()).listUsersByTenant("tenant_other");

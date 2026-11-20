@@ -29,10 +29,10 @@ import org.springframework.stereotype.Service;
  * is never mailed, even if its id is explicitly passed in {@code recipientTenantIds}.
  *
  * <p>Deliberately queries {@code control_plane.tenant}/{@code control_plane.app_user} with a raw
- * {@link NewsletterJdbcRepository} query rather than going through {@code Tenant}'s JPA entity - {@code
- * news_opt_in} is a column owned by a different, separately-landing workstream (see this class's
- * own callers/javadoc for that context), and a raw column read avoids coupling this feature's
- * compile-time correctness to exactly when that other migration lands or whether {@code
+ * {@link NewsletterJdbcRepository} query rather than going through {@code Tenant}'s JPA entity -
+ * {@code news_opt_in} is a column owned by a different, separately-landing workstream (see this
+ * class's own callers/javadoc for that context), and a raw column read avoids coupling this
+ * feature's compile-time correctness to exactly when that other migration lands or whether {@code
  * Tenant.java} ever grows a mapped field for it. Only {@link NewsletterRecipient#tenantId}/{@code
  * name}/{@code adminEmail}/{@code newsOptIn} are read this way - nothing here writes to {@code
  * control_plane.tenant} or {@code control_plane.app_user}.

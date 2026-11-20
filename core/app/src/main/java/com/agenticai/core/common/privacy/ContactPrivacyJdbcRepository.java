@@ -91,7 +91,8 @@ public class ContactPrivacyJdbcRepository {
     }
 
     int deleteEmailSendRecords(String recipient) {
-        return jdbc.update("DELETE FROM email_message WHERE lower(recipient) = lower(?)", recipient);
+        return jdbc.update(
+                "DELETE FROM email_message WHERE lower(recipient) = lower(?)", recipient);
     }
 
     int deleteSession(String channel, String externalId) {
@@ -106,6 +107,7 @@ public class ContactPrivacyJdbcRepository {
     }
 
     int deleteLeadsByPhoneDigits(String digits) {
-        return jdbc.update("DELETE FROM lead WHERE regexp_replace(phone, '\\D', '', 'g') = ?", digits);
+        return jdbc.update(
+                "DELETE FROM lead WHERE regexp_replace(phone, '\\D', '', 'g') = ?", digits);
     }
 }

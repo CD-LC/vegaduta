@@ -13,8 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * API-facing facade over {@link ChannelContactService}: owns the repository lookups (agent name,
- * session pairing state) and the entity-to-DTO mapping so {@link ChannelContactController}
- * never touches repositories or JPA entities.
+ * session pairing state) and the entity-to-DTO mapping so {@link ChannelContactController} never
+ * touches repositories or JPA entities.
  */
 @Service
 public class ChannelContactViewService {
@@ -48,12 +48,12 @@ public class ChannelContactViewService {
             UUID groupId,
             UUID agentId) {
         return toResponse(
-                contactService.upsert(channel, identifier, displayName, groupId, agentId, "IMPORT"));
+                contactService.upsert(
+                        channel, identifier, displayName, groupId, agentId, "IMPORT"));
     }
 
     @Transactional
-    public ContactResponse updateContact(
-            UUID id, String displayName, UUID groupId, UUID agentId) {
+    public ContactResponse updateContact(UUID id, String displayName, UUID groupId, UUID agentId) {
         return toResponse(contactService.update(id, displayName, groupId, agentId));
     }
 
@@ -121,8 +121,6 @@ public class ChannelContactViewService {
     }
 
     private String agentName(UUID agentId) {
-        return agentId != null
-                ? agentLookup.nameOf(agentId).orElse(null)
-                : null;
+        return agentId != null ? agentLookup.nameOf(agentId).orElse(null) : null;
     }
 }

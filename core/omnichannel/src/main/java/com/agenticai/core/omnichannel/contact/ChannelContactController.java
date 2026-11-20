@@ -9,7 +9,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import org.apache.poi.ss.usermodel.Row;
@@ -119,10 +118,10 @@ public class ChannelContactController {
     // ------------------------------------------------------------------
 
     @GetMapping("/contact-groups")
-    public ResponseEntity<List<GroupResponse>> listGroups(@RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
-        return ListPaging.window(
-            viewService.listGroups(),
-            limit, offset, 50, 500);
+    public ResponseEntity<List<GroupResponse>> listGroups(
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
+        return ListPaging.window(viewService.listGroups(), limit, offset, 50, 500);
     }
 
     @PostMapping("/contact-groups")
@@ -133,7 +132,8 @@ public class ChannelContactController {
     @PutMapping("/contact-groups/{id}")
     public GroupResponse updateGroup(
             @PathVariable UUID id, @Valid @RequestBody GroupRequest request) {
-        return viewService.updateGroup(id, request.name(), request.description(), request.agentId());
+        return viewService.updateGroup(
+                id, request.name(), request.description(), request.agentId());
     }
 
     @DeleteMapping("/contact-groups/{id}")

@@ -12,9 +12,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
- * Persistence and egress orchestration behind {@link VoiceCallRecordingController}. Deliberately not
- * one big {@code @Transactional}: the egress calls are network I/O, and the "failed" row written on
- * an egress error must survive the re-thrown exception, so each repository save commits on its own.
+ * Persistence and egress orchestration behind {@link VoiceCallRecordingController}. Deliberately
+ * not one big {@code @Transactional}: the egress calls are network I/O, and the "failed" row
+ * written on an egress error must survive the re-thrown exception, so each repository save commits
+ * on its own.
  */
 @ConditionalOnEditionFeature(EditionFeature.VOICE_REALTIME_SHARE)
 @Service

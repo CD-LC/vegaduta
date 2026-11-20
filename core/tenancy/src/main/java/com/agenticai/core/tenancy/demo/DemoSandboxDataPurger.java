@@ -30,11 +30,11 @@ import org.springframework.stereotype.Component;
  *       session delete removes them.
  * </ul>
  *
- * <p>Raw SQL via {@link DemoSandboxDataJdbcRepository} (not the JPA repositories) because these are set-based deletes by
- * tenant across seven tables, and because the operator's request runs with no tenant context. Every
- * step is best-effort: logged and reported, never thrown - by the time this runs the sandbox tenant
- * itself is already erased, and a leftover transcript row must not turn a successful reclaim into a
- * reported failure the operator retries against an ERASED tenant.
+ * <p>Raw SQL via {@link DemoSandboxDataJdbcRepository} (not the JPA repositories) because these are
+ * set-based deletes by tenant across seven tables, and because the operator's request runs with no
+ * tenant context. Every step is best-effort: logged and reported, never thrown - by the time this
+ * runs the sandbox tenant itself is already erased, and a leftover transcript row must not turn a
+ * successful reclaim into a reported failure the operator retries against an ERASED tenant.
  */
 @Component
 public class DemoSandboxDataPurger {
@@ -112,16 +112,11 @@ public class DemoSandboxDataPurger {
                     tenantId);
         }
         // Cascades demo_magic_workflow, demo_studio_workflow and demo_studio_run.
-        runStep(
-                failures,
-                "demo_session",
-                () -> repository.deleteSessions(tenantId),
-                tenantId);
+        runStep(failures, "demo_session", () -> repository.deleteSessions(tenantId), tenantId);
         return failures;
     }
 
-    private void runStep(
-            List<String> failures, String label, IntSupplier step, UUID tenantId) {
+    private void runStep(List<String> failures, String label, IntSupplier step, UUID tenantId) {
         try {
             int rows = step.getAsInt();
             if (rows > 0) {

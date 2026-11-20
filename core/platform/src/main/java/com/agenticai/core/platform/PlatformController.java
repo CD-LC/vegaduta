@@ -310,7 +310,8 @@ public class PlatformController extends PlatformLlmControlEndpoints {
      */
     @GetMapping("/issues")
     public ResponseEntity<List<PlatformIssueSummary>> listIssues(
-            @RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
         return PlatformListPaging.window(platformObservabilityService.listIssues(), limit, offset);
     }
 
@@ -368,8 +369,10 @@ public class PlatformController extends PlatformLlmControlEndpoints {
 
     @GetMapping("/activity")
     public ResponseEntity<List<PlatformActivityEntry>> recentActivity(
-            @RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
-        return PlatformListPaging.window(platformObservabilityService.recentActivity(), limit, offset);
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
+        return PlatformListPaging.window(
+                platformObservabilityService.recentActivity(), limit, offset);
     }
 
     /**
@@ -504,8 +507,7 @@ public class PlatformController extends PlatformLlmControlEndpoints {
         // The hosted-pool counter is keyed by the request's TenantContext id, which is the
         // tenant's schema name (Keycloak's tenant_id attribute) - NOT the control_plane UUID
         // in this URL. Resetting by UUID deleted a key nothing ever wrote or read.
-        String counterKey =
-        tenantLookupService.requireSchemaName(tenantId);
+        String counterKey = tenantLookupService.requireSchemaName(tenantId);
         freeTierUsageLimiterService.resetTenantUsage(counterKey);
     }
 }

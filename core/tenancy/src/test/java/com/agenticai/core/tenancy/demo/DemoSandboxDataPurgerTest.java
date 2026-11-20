@@ -20,7 +20,8 @@ class DemoSandboxDataPurgerTest {
 
     private final JdbcTemplate jdbc = mock(JdbcTemplate.class);
     private final FileStorageService storage = mock(FileStorageService.class);
-    private final DemoSandboxDataPurger purger = new DemoSandboxDataPurger(new DemoSandboxDataJdbcRepository(jdbc), storage);
+    private final DemoSandboxDataPurger purger =
+            new DemoSandboxDataPurger(new DemoSandboxDataJdbcRepository(jdbc), storage);
     private final UUID tenantId = UUID.randomUUID();
 
     @Test

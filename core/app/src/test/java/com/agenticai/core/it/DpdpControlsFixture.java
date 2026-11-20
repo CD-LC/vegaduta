@@ -8,21 +8,21 @@ import com.agenticai.core.agents.memory.AgentMemoryService;
 import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.memory.TenantMemoryService;
 import com.agenticai.core.audit.AuditLogService;
+import com.agenticai.core.common.privacy.AuditExportJdbcRepository;
 import com.agenticai.core.common.privacy.AuditExportService;
+import com.agenticai.core.common.privacy.ConsentGateJdbcRepository;
 import com.agenticai.core.common.privacy.ConsentGateService;
 import com.agenticai.core.common.privacy.ConsentLedger;
-import com.agenticai.core.common.privacy.ConsentPolicyJdbcRepository;
 import com.agenticai.core.common.privacy.ConsentLedgerJdbcRepository;
-import com.agenticai.core.common.privacy.ContactPrivacyJdbcRepository;
-import com.agenticai.core.common.privacy.ConsentGateJdbcRepository;
-import com.agenticai.core.common.privacy.RetentionPolicyJdbcRepository;
-import com.agenticai.core.common.privacy.RetentionPurgeJdbcRepository;
-import com.agenticai.core.common.privacy.PurposeJdbcRepository;
-import com.agenticai.core.common.privacy.AuditExportJdbcRepository;
+import com.agenticai.core.common.privacy.ConsentPolicyJdbcRepository;
 import com.agenticai.core.common.privacy.ConsentPolicyService;
+import com.agenticai.core.common.privacy.ContactPrivacyJdbcRepository;
 import com.agenticai.core.common.privacy.ContactPrivacyService;
+import com.agenticai.core.common.privacy.PurposeJdbcRepository;
 import com.agenticai.core.common.privacy.PurposeService;
+import com.agenticai.core.common.privacy.RetentionPolicyJdbcRepository;
 import com.agenticai.core.common.privacy.RetentionPolicyService;
+import com.agenticai.core.common.privacy.RetentionPurgeJdbcRepository;
 import com.agenticai.core.common.privacy.RetentionPurger;
 import com.agenticai.core.graphmemory.GraphMemoryService;
 import com.agenticai.core.knowledge.SidecarClient;
@@ -142,7 +142,9 @@ abstract class DpdpControlsFixture {
                         provider(graph),
                         provider(sessionMemory),
                         noErasers());
-        gate = new ConsentGateService(new ConsentGateJdbcRepository(jdbc), policies, ledger, contacts, audit);
+        gate =
+                new ConsentGateService(
+                        new ConsentGateJdbcRepository(jdbc), policies, ledger, contacts, audit);
         retention = new RetentionPolicyService(new RetentionPolicyJdbcRepository(jdbc));
         purger =
                 new RetentionPurger(

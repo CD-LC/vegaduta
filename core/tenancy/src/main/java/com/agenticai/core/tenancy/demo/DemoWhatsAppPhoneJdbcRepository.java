@@ -28,7 +28,9 @@ public class DemoWhatsAppPhoneJdbcRepository {
         return consume(phoneHash, TURN, cap);
     }
 
-    /** Spends one pairing if the phone is still under {@code cap}; false when the cap is reached. */
+    /**
+     * Spends one pairing if the phone is still under {@code cap}; false when the cap is reached.
+     */
     public boolean tryConsumePair(String phoneHash, int cap) {
         return consume(phoneHash, PAIR, cap);
     }
@@ -36,12 +38,22 @@ public class DemoWhatsAppPhoneJdbcRepository {
     private boolean consume(String phoneHash, String column, int cap) {
         // 'column' is one of the two constants above, never caller input.
         String initial = TURN.equals(column) ? "1, 0" : "0, 1";
-        String sql = "INSERT INTO control_plane.demo_whatsapp_phone AS t "
-            + "(phone_hash, turn_count, pair_count, first_seen, last_seen) "
-            + "VALUES (?, " + initial + ", ?, ?) "
-            + "ON CONFLICT (phone_hash) DO UPDATE SET " + column + " = t." + column + " + 1, last_seen = EXCLUDED.last_seen "
-            + "WHERE t." + column + " < ? "
-            + "RETURNING " + column;
+        String sql =
+                "INSERT INTO control_plane.demo_whatsapp_phone AS t "
+                        + "(phone_hash, turn_count, pair_count, first_seen, last_seen) "
+                        + "VALUES (?, "
+                        + initial
+                        + ", ?, ?) "
+                        + "ON CONFLICT (phone_hash) DO UPDATE SET "
+                        + column
+                        + " = t."
+                        + column
+                        + " + 1, last_seen = EXCLUDED.last_seen "
+                        + "WHERE t."
+                        + column
+                        + " < ? "
+                        + "RETURNING "
+                        + column;
         Timestamp ts = Timestamp.from(Instant.now());
         List<Integer> rows = jdbc.queryForList(sql, Integer.class, phoneHash, ts, ts, cap);
         return !rows.isEmpty();

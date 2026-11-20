@@ -6,7 +6,6 @@ import com.agenticai.core.common.roi.PilotDtos.DemoStatus;
 import com.agenticai.core.common.roi.PilotDtos.PilotReport;
 import com.agenticai.core.common.roi.RoiDtos.AgentRoiResponse;
 import com.agenticai.core.common.roi.RoiDtos.AgentRoiRow;
-import com.agenticai.core.common.roi.RoiDtos.PriceResponse;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
@@ -16,7 +15,6 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -71,7 +69,8 @@ public class PilotReportService {
                         .orElseThrow(
                                 () ->
                                         new ResponseStatusException(
-                                                HttpStatus.NOT_FOUND, "No such agent for this tenant"));
+                                                HttpStatus.NOT_FOUND,
+                                                "No such agent for this tenant"));
         BaselineResponse baseline = baselines.find(agentId);
         DemoStatus demo = demo();
 
@@ -90,7 +89,10 @@ public class PilotReportService {
                             samples[0] == 0 || rs.wasNull()
                                     ? null
                                     : BigDecimal.valueOf(ms)
-                                            .divide(BigDecimal.valueOf(1000), 3, RoundingMode.HALF_UP);
+                                            .divide(
+                                                    BigDecimal.valueOf(1000),
+                                                    3,
+                                                    RoundingMode.HALF_UP);
                 });
 
         Long calls = repository.countModelCalls(agentId, start, end);
@@ -99,10 +101,12 @@ public class PilotReportService {
         boolean mixed = currencies != null && currencies > 1;
 
         long conversations = row.conversations();
-        // No model call recorded means "nothing measured", not "costs nothing": null, shown as a dash.
+        // No model call recorded means "nothing measured", not "costs nothing": null, shown as a
+        // dash.
         BigDecimal cost = modelCalls == 0 ? null : row.estimatedCostUsd();
         BigDecimal perResolved = modelCalls == 0 ? null : row.estimatedCostPerResolvedUsd();
-        // Charges in several currencies cannot be summed; ROI would silently ignore them, so withhold it.
+        // Charges in several currencies cannot be summed; ROI would silently ignore them, so
+        // withhold it.
         BigDecimal net = mixed ? null : row.netValue();
         BigDecimal roiPct = mixed ? null : row.roiPercent();
         String roiNote = mixed ? "CHARGES_MIXED_CURRENCY" : row.roiNote();
@@ -149,7 +153,11 @@ public class PilotReportService {
                 agentId,
                 start,
                 end,
-                (rs, n) -> new Used(rs.getObject("day", LocalDate.class), rs.getString(2), rs.getString(3)));
+                (rs, n) ->
+                        new Used(
+                                rs.getObject("day", LocalDate.class),
+                                rs.getString(2),
+                                rs.getString(3)));
     }
 
     /** Every number in the report that a person typed, in the order the box prints them. */
@@ -215,10 +223,10 @@ public class PilotReportService {
     }
 
     /**
-     * The prices that actually priced this agent's successful calls, chosen by the same rule the cost
-     * uses ({@link RoiCostModel#select}: provider, longest model prefix, latest effective date not
-     * after the call's day). A model with no applicable price gets an explicit "none entered" line, so
-     * the box matches the cost section's lower-bound wording.
+     * The prices that actually priced this agent's successful calls, chosen by the same rule the
+     * cost uses ({@link RoiCostModel#select}: provider, longest model prefix, latest effective date
+     * not after the call's day). A model with no applicable price gets an explicit "none entered"
+     * line, so the box matches the cost section's lower-bound wording.
      */
     private List<AssumptionLine> priceLines(List<Used> used) {
         List<RoiCostModel.Rate> rates = prices.rates();

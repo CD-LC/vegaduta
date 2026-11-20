@@ -23,8 +23,10 @@ import org.springframework.web.server.ResponseStatusException;
 public class RoiBaselineService {
 
     private static final Pattern CURRENCY = Pattern.compile("^[A-Za-z]{3}$");
-    // Column limits of agent_pilot_baseline (V497): NUMERIC(12,0), (10,2), (5,4), (14,4). Validation matches them so
-    // a number is either stored exactly as typed or rejected with a 400, never rounded or turned into a 500.
+    // Column limits of agent_pilot_baseline (V497): NUMERIC(12,0), (10,2), (5,4), (14,4).
+    // Validation matches them so
+    // a number is either stored exactly as typed or rejected with a 400, never rounded or turned
+    // into a 500.
     private static final BigDecimal MAX_VOLUME = new BigDecimal("999999999999");
     private static final BigDecimal MAX_MINUTES = new BigDecimal("99999999.99");
     private static final BigDecimal MAX_VALUE = new BigDecimal("9999999999.9999");
@@ -82,13 +84,22 @@ public class RoiBaselineService {
                 && (missed.signum() < 0
                         || missed.compareTo(BigDecimal.ONE) > 0
                         || missed.stripTrailingZeros().scale() > 4)) {
-            throw bad("missedRate is a fraction between 0 and 1 with at most 4 decimals (0.25 = 25%)");
+            throw bad(
+                    "missedRate is a fraction between 0 and 1 with at most 4 decimals (0.25 = 25%)");
         }
         if (value != null && (currency == null || !CURRENCY.matcher(currency).matches())) {
             throw bad("valueCurrency (ISO 4217, e.g. INR) is required with avgValuePerConversion");
         }
         repository.upsertBaseline(
-                agentId, job, period, volume, minutes, missed, value, value == null ? null : currency, subject);
+                agentId,
+                job,
+                period,
+                volume,
+                minutes,
+                missed,
+                value,
+                value == null ? null : currency,
+                subject);
         return find(agentId);
     }
 

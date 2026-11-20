@@ -30,16 +30,24 @@ class PlatformSpendCapControllerTest {
     private final SpendCapService caps = mock(SpendCapService.class);
     private final TenantRepository tenants = mock(TenantRepository.class);
     private final PlatformTenantAuditor auditor = mock(PlatformTenantAuditor.class);
-    private final PlatformSpendCapController controller = new PlatformSpendCapController(
+    private final PlatformSpendCapController controller =
+            new PlatformSpendCapController(
                     caps,
-                    new com.agenticai.core.platform.PlatformTenantLookupService(new com.agenticai.core.tenancy.TenantDirectoryService(tenants)),
+                    new com.agenticai.core.platform.PlatformTenantLookupService(
+                            new com.agenticai.core.tenancy.TenantDirectoryService(tenants)),
                     auditor,
                     "mk");
     private final UUID id = UUID.randomUUID();
 
     private CapStatus status(String cap) {
-        return new CapStatus(id, cap == null ? null : new BigDecimal(cap), new BigDecimal("12.0000"), null, 0, false,
-            LocalDate.of(2026, 10, 1));
+        return new CapStatus(
+                id,
+                cap == null ? null : new BigDecimal(cap),
+                new BigDecimal("12.0000"),
+                null,
+                0,
+                false,
+                LocalDate.of(2026, 10, 1));
     }
 
     @Test
@@ -59,9 +67,20 @@ class PlatformSpendCapControllerTest {
         CapStatus updated = status("25.00");
         when(caps.updateCap(id, new BigDecimal("25"))).thenReturn(Optional.of(updated));
 
-        assertSame(updated, controller.put(id, "mk", new PlatformSpendCapController.SpendCapUpdate(new BigDecimal("25"))));
-        verify(auditor).record(eq("tenant_acme"), any(), eq("platform.tenant.spend_cap"), eq("tenant"), eq(id.toString()),
-            contains("from none to $25.00"));
+        assertSame(
+                updated,
+                controller.put(
+                        id,
+                        "mk",
+                        new PlatformSpendCapController.SpendCapUpdate(new BigDecimal("25"))));
+        verify(auditor)
+                .record(
+                        eq("tenant_acme"),
+                        any(),
+                        eq("platform.tenant.spend_cap"),
+                        eq("tenant"),
+                        eq(id.toString()),
+                        contains("from none to $25.00"));
     }
 
     @Test
@@ -69,8 +88,11 @@ class PlatformSpendCapControllerTest {
         when(caps.status(id)).thenReturn(Optional.empty());
         assertThrows(PlatformTenantNotFoundException.class, () -> controller.get(id));
         when(tenants.findById(id)).thenReturn(Optional.empty());
-        assertThrows(PlatformTenantNotFoundException.class,
-            () -> controller.put(id, "mk", new PlatformSpendCapController.SpendCapUpdate(null)));
+        assertThrows(
+                PlatformTenantNotFoundException.class,
+                () ->
+                        controller.put(
+                                id, "mk", new PlatformSpendCapController.SpendCapUpdate(null)));
         verify(auditor, never()).record(anyString(), any(), any(), any(), any(), any());
     }
 }

@@ -53,8 +53,15 @@ public class RetentionPolicyService {
     }
 
     public Saved put(
-            String channelName, PrivacyDataClass dataClass, boolean enabled, Integer days, String actor) {
-        String channel = channelName == null ? PrivacyDataClass.ALL_CHANNELS : channelName.trim().toUpperCase(Locale.ROOT);
+            String channelName,
+            PrivacyDataClass dataClass,
+            boolean enabled,
+            Integer days,
+            String actor) {
+        String channel =
+                channelName == null
+                        ? PrivacyDataClass.ALL_CHANNELS
+                        : channelName.trim().toUpperCase(Locale.ROOT);
         if (!dataClass.allows(channel)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -76,12 +83,16 @@ public class RetentionPolicyService {
                             + " otherwise. Whether this applies to you is to be confirmed by counsel.");
         }
         if (enabled) {
-            warnings.add("Data older than " + retentionDays + " days will be permanently deleted by the nightly job.");
+            warnings.add(
+                    "Data older than "
+                            + retentionDays
+                            + " days will be permanently deleted by the nightly job.");
         }
-        Rule rule = list().stream()
-                .filter(r -> r.channel().equals(channel) && r.dataClass() == dataClass)
-                .findFirst()
-                .orElseThrow();
+        Rule rule =
+                list().stream()
+                        .filter(r -> r.channel().equals(channel) && r.dataClass() == dataClass)
+                        .findFirst()
+                        .orElseThrow();
         return new Saved(rule, warnings);
     }
 }

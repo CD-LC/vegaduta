@@ -1,7 +1,7 @@
 package com.agenticai.core.billing.email;
 
 import jakarta.mail.internet.MimeMessage;
-
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -10,8 +10,6 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-
-import java.util.UUID;
 
 /**
  * Sends billing lifecycle emails: receipt (A1), welcome (D1 future), payment failed (D1), dunning
@@ -51,9 +49,10 @@ public class BillingEmailService {
     private final String upgradeUrl;
 
     /**
-     * {@code app.edition.billing-enabled}. Off: receipts, welcome, dunning, promo and complimentary-plan mails
-     * are never sent (there is no subscription to write about). The spend-cap alert is a cost control, not a
-     * billing mail, and still goes out when a mail server is configured.
+     * {@code app.edition.billing-enabled}. Off: receipts, welcome, dunning, promo and
+     * complimentary-plan mails are never sent (there is no subscription to write about). The
+     * spend-cap alert is a cost control, not a billing mail, and still goes out when a mail server
+     * is configured.
      */
     private final boolean billingEdition;
 

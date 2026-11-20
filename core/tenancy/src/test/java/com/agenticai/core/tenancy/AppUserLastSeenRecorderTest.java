@@ -77,7 +77,8 @@ class AppUserLastSeenRecorderTest {
                 command -> {
                     throw new RejectedExecutionException("queue full");
                 };
-        AppUserLastSeenRecorder saturated = new AppUserLastSeenRecorder(new AppUserLastSeenJdbcRepository(jdbc), full, clock);
+        AppUserLastSeenRecorder saturated =
+                new AppUserLastSeenRecorder(new AppUserLastSeenJdbcRepository(jdbc), full, clock);
 
         assertDoesNotThrow(() -> saturated.recordSeen("acme", "kc-1"));
         verify(jdbc, never()).update(anyString(), anyString());

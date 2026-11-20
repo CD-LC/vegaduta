@@ -5,7 +5,8 @@ final class LlmGatewayContentPolicyMapper {
 
     private LlmGatewayContentPolicyMapper() {}
 
-    static LlmGatewayContentPolicyController.ContentPolicyResponse toResponse(LlmGatewayContentPolicy policy) {
+    static LlmGatewayContentPolicyController.ContentPolicyResponse toResponse(
+            LlmGatewayContentPolicy policy) {
         return new LlmGatewayContentPolicyController.ContentPolicyResponse(
                 policy.isPiiRedactionEnabled(),
                 policy.isPiiRedactEmail(),

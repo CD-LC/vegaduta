@@ -4,7 +4,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Read-only approval queries for other feature areas (keeps {@link ApprovalRequestRepository} private). */
+/**
+ * Read-only approval queries for other feature areas (keeps {@link ApprovalRequestRepository}
+ * private).
+ */
 @Service
 public class ApprovalQueryService {
 

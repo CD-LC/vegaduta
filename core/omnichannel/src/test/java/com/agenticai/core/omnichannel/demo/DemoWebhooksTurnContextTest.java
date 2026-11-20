@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.agenticai.core.agents.core.AgentRepository;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.omnichannel.session.ChannelType;
 import com.agenticai.core.omnichannel.session.InboundMessageDedupService;

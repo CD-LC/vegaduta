@@ -534,8 +534,7 @@ public class SpendCapService implements HostedSpendListener {
             return 0;
         }
         LocalDate month = monthStart();
-        int updated =
-                repository.claimAlertStage(stage, month, cap.tenantId());
+        int updated = repository.claimAlertStage(stage, month, cap.tenantId());
         configBySchema.remove(cap.schema());
         if (updated == 0) {
             return 0;

@@ -127,9 +127,7 @@ public class ContactPrivacyService {
 
         Optional<Map<String, Object>> session = session(channel, externalId);
         session.ifPresent(s -> data.put("session", s));
-        data.put(
-                "messages",
-                repository.messages(channel, externalId));
+        data.put("messages", repository.messages(channel, externalId));
         data.put(
                 "contactRecord",
                 repository.contactRecord(channel, externalId, phoneDigits(externalId)));

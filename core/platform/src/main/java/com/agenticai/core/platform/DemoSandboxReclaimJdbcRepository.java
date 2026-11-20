@@ -31,8 +31,7 @@ public class DemoSandboxReclaimJdbcRepository {
     /** The tenant row registered under the shared sandbox schema, if any. */
     public List<SharedSandbox> findShared(String sharedSchema) {
         return jdbc.query(
-                "SELECT id, name, schema_name FROM control_plane.tenant WHERE schema_name ="
-                        + " ?",
+                "SELECT id, name, schema_name FROM control_plane.tenant WHERE schema_name =" + " ?",
                 (rs, i) ->
                         new SharedSandbox(
                                 rs.getObject("id", UUID.class),

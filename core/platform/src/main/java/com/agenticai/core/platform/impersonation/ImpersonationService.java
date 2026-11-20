@@ -546,5 +546,4 @@ public class ImpersonationService implements ImpersonationGrantResolver {
     private static String display(String email, String id) {
         return email == null || email.isBlank() ? id : email;
     }
-
 }

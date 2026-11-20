@@ -1,8 +1,8 @@
 package com.agenticai.core.common.ambient;
 
 import com.agenticai.core.agents.core.AgentLookupService;
-import com.agenticai.core.agents.job.AgentJobQueryService;
 import com.agenticai.core.agents.job.AgentJob;
+import com.agenticai.core.agents.job.AgentJobQueryService;
 import com.agenticai.core.agents.job.schedule.AgentSchedule;
 import com.agenticai.core.agents.job.schedule.AgentScheduleRun;
 import com.agenticai.core.approval.ApprovalQueryService;
@@ -34,10 +34,9 @@ public class AmbientDigestService {
     private final ApprovalQueryService approvalQueries;
 
     public AmbientDigestService(
-        AgentJobQueryService jobQueries,
-        AgentLookupService agentLookup,
-        ApprovalQueryService approvalQueries
-    ) {
+            AgentJobQueryService jobQueries,
+            AgentLookupService agentLookup,
+            ApprovalQueryService approvalQueries) {
         this.jobQueries = jobQueries;
         this.agentLookup = agentLookup;
         this.approvalQueries = approvalQueries;
@@ -53,12 +52,13 @@ public class AmbientDigestService {
 
     public PendingApprovals pendingApprovals() {
         try {
-            List<ApprovalRequest> pending =
-                approvalQueries.pending();
-            return new PendingApprovals(pending.size(), pending.stream()
-                .limit(MAX_PENDING_ITEMS)
-                .map(ApprovalRequestResponse::from)
-                .toList());
+            List<ApprovalRequest> pending = approvalQueries.pending();
+            return new PendingApprovals(
+                    pending.size(),
+                    pending.stream()
+                            .limit(MAX_PENDING_ITEMS)
+                            .map(ApprovalRequestResponse::from)
+                            .toList());
         } catch (RuntimeException e) {
             return new PendingApprovals(0, List.of());
         }
@@ -70,20 +70,32 @@ public class AmbientDigestService {
             if (runs.isEmpty()) {
                 return List.of();
             }
-            Map<UUID, String> agentNames = agentLookup.namesByIds(runs.stream()
-                .map(AgentJobQueryService.SentinelRun::schedule)
-                .filter(java.util.Objects::nonNull)
-                .map(AgentSchedule::getAgentId).distinct().toList());
-            return runs.stream().map(sr -> {
-                AgentScheduleRun run = sr.run();
-                AgentSchedule schedule = sr.schedule();
-                return new SentinelOutcomeItem(
-                    run.getId(), run.getScheduleId(),
-                    schedule == null ? null : schedule.getAgentId(),
-                    schedule == null ? null : agentNames.get(schedule.getAgentId()),
-                    run.getSentinelOutcome(), run.getSentinelOutcomeNote(),
-                    run.getJobId(), run.getStartedAt());
-            }).toList();
+            Map<UUID, String> agentNames =
+                    agentLookup.namesByIds(
+                            runs.stream()
+                                    .map(AgentJobQueryService.SentinelRun::schedule)
+                                    .filter(java.util.Objects::nonNull)
+                                    .map(AgentSchedule::getAgentId)
+                                    .distinct()
+                                    .toList());
+            return runs.stream()
+                    .map(
+                            sr -> {
+                                AgentScheduleRun run = sr.run();
+                                AgentSchedule schedule = sr.schedule();
+                                return new SentinelOutcomeItem(
+                                        run.getId(),
+                                        run.getScheduleId(),
+                                        schedule == null ? null : schedule.getAgentId(),
+                                        schedule == null
+                                                ? null
+                                                : agentNames.get(schedule.getAgentId()),
+                                        run.getSentinelOutcome(),
+                                        run.getSentinelOutcomeNote(),
+                                        run.getJobId(),
+                                        run.getStartedAt());
+                            })
+                    .toList();
         } catch (RuntimeException e) {
             return List.of();
         }
@@ -92,8 +104,11 @@ public class AmbientDigestService {
     public JobsInWindow jobsInWindow(Instant since) {
         try {
             List<AgentJob> jobs = jobQueries.recentJobs(since);
-            Map<String, Long> byStatus = jobs.stream()
-                .collect(Collectors.groupingBy(j -> j.getStatus().name(), Collectors.counting()));
+            Map<String, Long> byStatus =
+                    jobs.stream()
+                            .collect(
+                                    Collectors.groupingBy(
+                                            j -> j.getStatus().name(), Collectors.counting()));
             return new JobsInWindow(jobs.size(), jobs.size() == 50, byStatus);
         } catch (RuntimeException e) {
             return new JobsInWindow(0, false, Map.of());

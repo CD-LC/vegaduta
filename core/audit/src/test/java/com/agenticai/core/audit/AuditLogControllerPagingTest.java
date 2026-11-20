@@ -16,7 +16,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 
-/** limit/offset + X-Total-Count / X-Has-More on GET /api/audit-log; limit-less callers keep the old 200. */
+/**
+ * limit/offset + X-Total-Count / X-Has-More on GET /api/audit-log; limit-less callers keep the old
+ * 200.
+ */
 class AuditLogControllerPagingTest {
 
     private final AuditLogService service = mock(AuditLogService.class);
@@ -24,7 +27,7 @@ class AuditLogControllerPagingTest {
 
     private void stubPage(long total) {
         when(service.searchPage(any(), any(), any(), any(), any(), any(), anyLong(), anyInt()))
-            .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 1), total));
+                .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 1), total));
     }
 
     @Test
@@ -60,7 +63,8 @@ class AuditLogControllerPagingTest {
     @Test
     void reportsTotalAndHasMoreHeaders() {
         stubPage(120);
-        ResponseEntity<List<AuditLogEntryResponse>> r = controller.list(null, null, null, null, 50, 50L, null, null, null);
+        ResponseEntity<List<AuditLogEntryResponse>> r =
+                controller.list(null, null, null, null, 50, 50L, null, null, null);
         assertEquals("120", r.getHeaders().getFirst("X-Total-Count"));
         assertEquals("true", r.getHeaders().getFirst("X-Has-More"));
     }
@@ -68,8 +72,9 @@ class AuditLogControllerPagingTest {
     @Test
     void lastPageHasNoMore() {
         when(service.searchPage(any(), any(), any(), any(), any(), any(), anyLong(), anyInt()))
-            .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 50), 0));
-        ResponseEntity<List<AuditLogEntryResponse>> r = controller.list(null, null, null, null, 50, 0L, null, null, null);
+                .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 50), 0));
+        ResponseEntity<List<AuditLogEntryResponse>> r =
+                controller.list(null, null, null, null, 50, 0L, null, null, null);
         assertEquals("0", r.getHeaders().getFirst("X-Total-Count"));
         assertEquals("false", r.getHeaders().getFirst("X-Has-More"));
     }

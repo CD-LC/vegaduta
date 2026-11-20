@@ -35,10 +35,10 @@ import org.springframework.stereotype.Component;
  *
  * <p>Shape: the same as the other tenant sweeps. Postgres advisory lock so one replica works per
  * tick, the tenant iterator (a {@code @Scheduled} thread has no tenant context; tables are
- * schema-qualified here so the plain JDBC repository hits the right schema), batched {@code
- * DELETE ... LIMIT} so no statement holds locks for long, a bounded number of batches per table per
- * tenant per tick plus a tick time budget, and a small pause between batches. Deletes are
- * idempotent, so the lock is a convenience, not correctness.
+ * schema-qualified here so the plain JDBC repository hits the right schema), batched {@code DELETE
+ * ... LIMIT} so no statement holds locks for long, a bounded number of batches per table per tenant
+ * per tick plus a tick time budget, and a small pause between batches. Deletes are idempotent, so
+ * the lock is a convenience, not correctness.
  *
  * <p>Rollout: {@code app.retention.purge.enabled} defaults to FALSE (nothing runs). Turn it on with
  * {@code dry-run=true} (the default) first: each tick then only COUNTS what would be deleted

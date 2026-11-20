@@ -1,9 +1,9 @@
 package com.agenticai.core.elevenlabs;
 
+import com.agenticai.core.elevenlabs.dto.GeneratedMusicResponse;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.storage.FileStorageService;
-import com.agenticai.core.elevenlabs.dto.GeneratedMusicResponse;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -72,7 +72,10 @@ public class GeneratedMusicService {
     public Optional<GeneratedFileRef> findFileRef(UUID id) {
         return repository
                 .findById(id)
-                .map(t -> new GeneratedFileRef(t.getContentType(), t.getFilename(), t.getObjectKey()));
+                .map(
+                        t ->
+                                new GeneratedFileRef(
+                                        t.getContentType(), t.getFilename(), t.getObjectKey()));
     }
 
     @Transactional(readOnly = true)

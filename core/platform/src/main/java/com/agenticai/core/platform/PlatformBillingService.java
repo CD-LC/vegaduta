@@ -57,20 +57,17 @@ public class PlatformBillingService {
 
     public BillingSummary summary() {
         Map<String, Long> byPlan = new LinkedHashMap<>();
-        for (Map<String, Object> r :
-                repository.tenantCountsByPlan()) {
+        for (Map<String, Object> r : repository.tenantCountsByPlan()) {
             byPlan.put(String.valueOf(r.get("k")), num(r.get("n")));
         }
         Map<String, Long> byStatus = new LinkedHashMap<>();
-        for (Map<String, Object> r :
-                repository.tenantCountsBySubscriptionStatus()) {
+        for (Map<String, Object> r : repository.tenantCountsBySubscriptionStatus()) {
             byStatus.put(String.valueOf(r.get("k")), num(r.get("n")));
         }
         Map<String, Object> c = repository.tenantCounters();
 
         List<CurrencyTotal> invoiceTotals = new ArrayList<>();
-        for (Map<String, Object> r :
-                repository.invoiceTotalsByCurrency()) {
+        for (Map<String, Object> r : repository.invoiceTotalsByCurrency()) {
             invoiceTotals.add(
                     new CurrencyTotal(
                             String.valueOf(r.get("currency")),
@@ -195,9 +192,7 @@ public class PlatformBillingService {
     public CompGrantList compGrants(int limit) {
         int cap = Math.max(1, Math.min(limit, 500));
         List<CompGrantRow> rows =
-                repository
-                        .compGrantRows(cap)
-                        .stream()
+                repository.compGrantRows(cap).stream()
                         .map(
                                 r -> {
                                     Instant exp = instant(r.get("comp_plan_expires_at"));

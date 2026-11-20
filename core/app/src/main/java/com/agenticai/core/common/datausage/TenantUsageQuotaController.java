@@ -57,7 +57,10 @@ public class TenantUsageQuotaController {
     private final ToolRelevanceSelector toolRelevanceSelector;
     private final ApprovalPolicyService approvalPolicyService;
 
-    /** Off (personal profile): the monthly ceiling is never enforced - see FreeTierUsageLimiterService. */
+    /**
+     * Off (personal profile): the monthly ceiling is never enforced - see
+     * FreeTierUsageLimiterService.
+     */
     @Value("${app.edition.billing-enabled:true}")
     private boolean billingEdition = true;
 
@@ -97,17 +100,21 @@ public class TenantUsageQuotaController {
         FreeTierUsageLimiterService.QuotaSnapshot s =
                 usageLimiterService.quotaSnapshot(tenantId, plan);
         return new TenantUsageQuotaResponse(
-                plan.name(), usesPlatformPool, s.tokensUsedMonth(), s.tokensMonthlyLimit(), billingEdition);
+                plan.name(),
+                usesPlatformPool,
+                s.tokensUsedMonth(),
+                s.tokensMonthlyLimit(),
+                billingEdition);
     }
 
     /**
      * "What's protecting your spend" transparency panel (additive to {@link #usageQuota()}, not a
-     * replacement). No {@link TenantContext} scoping needed beyond what {@link SpendProtectionCachingService}
-     * already applies: {@code LlmCallLogService}/{@code LlmCallLogRepository} run against
-     * Hibernate's tenant-schema multi-tenancy the same way every other query on that repository
-     * does (see {@code LlmCallLogRepository}'s own javadoc), so the cache-effectiveness numbers
-     * below are already scoped to the calling tenant's own schema without this method passing a
-     * tenant id anywhere.
+     * replacement). No {@link TenantContext} scoping needed beyond what {@link
+     * SpendProtectionCachingService} already applies: {@code LlmCallLogService}/{@code
+     * LlmCallLogRepository} run against Hibernate's tenant-schema multi-tenancy the same way every
+     * other query on that repository does (see {@code LlmCallLogRepository}'s own javadoc), so the
+     * cache-effectiveness numbers below are already scoped to the calling tenant's own schema
+     * without this method passing a tenant id anywhere.
      */
     @GetMapping("/spend-protection")
     public SpendProtectionResponse spendProtection() {

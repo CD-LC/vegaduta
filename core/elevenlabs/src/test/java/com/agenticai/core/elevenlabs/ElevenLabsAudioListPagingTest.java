@@ -17,12 +17,19 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-/** Paging of GET /api/elevenlabs/audio: no params keep the complete list, limit/offset window it with headers. */
+/**
+ * Paging of GET /api/elevenlabs/audio: no params keep the complete list, limit/offset window it
+ * with headers.
+ */
 class ElevenLabsAudioListPagingTest {
 
-    private final ElevenLabsGeneratedAudioService service = mock(ElevenLabsGeneratedAudioService.class);
-    private final MockMvc mvc = MockMvcBuilders.standaloneSetup(
-            new ElevenLabsGeneratedAudioController(service, mock(FileStorageService.class))).build();
+    private final ElevenLabsGeneratedAudioService service =
+            mock(ElevenLabsGeneratedAudioService.class);
+    private final MockMvc mvc =
+            MockMvcBuilders.standaloneSetup(
+                            new ElevenLabsGeneratedAudioController(
+                                    service, mock(FileStorageService.class)))
+                    .build();
 
     @Test
     void noParamsReadsTheCompleteListFromTheStart() throws Exception {

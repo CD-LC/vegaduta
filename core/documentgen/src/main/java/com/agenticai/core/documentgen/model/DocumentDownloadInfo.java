@@ -5,4 +5,4 @@ package com.agenticai.core.documentgen.model;
  * status (to tell "not ready" from "ready"), storage key, MIME type and download filename.
  */
 public record DocumentDownloadInfo(
-    DocumentGenerationStatus status, String storageKey, String mimeType, String filename) {}
+        DocumentGenerationStatus status, String storageKey, String mimeType, String filename) {}

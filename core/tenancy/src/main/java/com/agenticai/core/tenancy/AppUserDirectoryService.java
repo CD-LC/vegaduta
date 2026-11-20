@@ -7,7 +7,10 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Last-seen lookups over app users for other feature areas (keeps {@link AppUserRepository} private). */
+/**
+ * Last-seen lookups over app users for other feature areas (keeps {@link AppUserRepository}
+ * private).
+ */
 @Service
 public class AppUserDirectoryService {
 

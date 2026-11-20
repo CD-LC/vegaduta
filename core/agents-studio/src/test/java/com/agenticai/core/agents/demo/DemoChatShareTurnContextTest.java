@@ -115,7 +115,12 @@ class DemoChatShareTurnContextTest {
         ObjectProvider<ModerationService> noModeration = mock(ObjectProvider.class);
         DemoShareController controller =
                 new DemoShareController(
-                        shares, sessions, limiter, chat, mock(DemoShareAgentLookupService.class), noModeration);
+                        shares,
+                        sessions,
+                        limiter,
+                        chat,
+                        mock(DemoShareAgentLookupService.class),
+                        noModeration);
 
         controller.chat(
                 "share-1",

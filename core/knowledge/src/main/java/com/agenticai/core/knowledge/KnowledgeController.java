@@ -389,7 +389,8 @@ public class KnowledgeController {
     public ResponseEntity<byte[]> downloadOriginalFile(@PathVariable UUID documentId) {
         // VIEWER on the document's collection (404 otherwise, like a missing document).
         access.requireReadDocument(documentId);
-        KnowledgeDocumentService.OriginalFileRef document = documentService.originalFileRef(documentId);
+        KnowledgeDocumentService.OriginalFileRef document =
+                documentService.originalFileRef(documentId);
         if (document.objectKey() == null) {
             return ResponseEntity.notFound().build();
         }

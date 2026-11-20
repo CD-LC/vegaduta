@@ -18,13 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
  * the app-store compliance requirements (described inline).
  *
  * <ul>
- *   <li>{@code POST /api/ai-reports} - any signed-in user (falls through to
- *       {@code anyRequest().authenticated()} in SecurityConfig) -> 202
- *       {@code {"id","status":"OPEN"}}.</li>
- *   <li>{@code GET /api/platform/ai-reports?status=&limit=} and
- *       {@code PATCH /api/platform/ai-reports/{id}} - gated by SecurityConfig's
- *       {@code /api/platform/**} -> {@code ROLE_platform-admin} rule, and again
- *       in {@link AiContentReportService}.</li>
+ *   <li>{@code POST /api/ai-reports} - any signed-in user (falls through to {@code
+ *       anyRequest().authenticated()} in SecurityConfig) -> 202 {@code {"id","status":"OPEN"}}.
+ *   <li>{@code GET /api/platform/ai-reports?status=&limit=} and {@code PATCH
+ *       /api/platform/ai-reports/{id}} - gated by SecurityConfig's {@code /api/platform/**} ->
+ *       {@code ROLE_platform-admin} rule, and again in {@link AiContentReportService}.
  * </ul>
  */
 @RestController
@@ -43,22 +41,24 @@ public class AiContentReportController {
 
     @GetMapping("/api/platform/ai-reports")
     public ResponseEntity<Map<String, Object>> list(
-        @RequestParam(required = false) String status,
-        @RequestParam(required = false) Integer limit,
-        @RequestParam(required = false) Long offset
-    ) {
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
         long skip = ListPaging.offset(offset);
         List<Map<String, Object>> reports = service.listViews(status, limit, skip);
-        int size = limit == null
-            ? AiContentReportService.DEFAULT_LIMIT
-            : Math.max(1, Math.min(AiContentReportService.MAX_LIMIT, limit));
+        int size =
+                limit == null
+                        ? AiContentReportService.DEFAULT_LIMIT
+                        : Math.max(1, Math.min(AiContentReportService.MAX_LIMIT, limit));
         // Reuse ListPaging's header logic (count only runs when the page could hide rows).
-        var headers = ListPaging.respond(reports, size, skip, () -> service.count(status)).getHeaders();
+        var headers =
+                ListPaging.respond(reports, size, skip, () -> service.count(status)).getHeaders();
         return ResponseEntity.ok().headers(headers).body(Map.of("reports", reports));
     }
 
     @PatchMapping("/api/platform/ai-reports/{id}")
-    public Map<String, Object> review(@PathVariable UUID id, @RequestBody AiContentReportReviewRequest request) {
+    public Map<String, Object> review(
+            @PathVariable UUID id, @RequestBody AiContentReportReviewRequest request) {
         return service.reviewView(id, request);
     }
 }

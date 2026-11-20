@@ -88,7 +88,12 @@ class TelegramTurnContextTest {
                         executor);
         controller =
                 new TelegramWebhookController(
-                        tenants, new TelegramCredentialService(credentials, null, null, null, null, "", null), encryption, updateService, executor);
+                        tenants,
+                        new TelegramCredentialService(
+                                credentials, null, null, null, null, "", null),
+                        encryption,
+                        updateService,
+                        executor);
         when(tenants.resolveTenantSchema(ExternalAccountProvider.TELEGRAM, BOT_USER_ID))
                 .thenReturn(Optional.of("tenant_telegram"));
         TelegramCredential credential =

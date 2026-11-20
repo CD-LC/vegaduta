@@ -7,7 +7,6 @@ import com.agenticai.core.security.oauth.OAuthStateBinding;
 import com.agenticai.core.security.publicurl.PublicWebUrl;
 import jakarta.servlet.http.HttpServletResponse;
 import java.net.URI;
-import java.util.Optional;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +56,7 @@ public class GoogleOAuthController {
     private static final String REQUESTED_BY = "system:google-oauth-callback";
 
     private final GoogleOAuthService oauthService;
+    private final GoogleOAuthViewService oauthView;
     private final String consoleRedirectUri;
 
     /**
@@ -67,9 +67,11 @@ public class GoogleOAuthController {
      */
     public GoogleOAuthController(
             GoogleOAuthService oauthService,
+            GoogleOAuthViewService oauthView,
             @Value("${app.google.oauth.console-redirect-uri:}") String consoleRedirectUri,
             @Value("${app.web.public-url:}") String appPublicUrl) {
         this.oauthService = oauthService;
+        this.oauthView = oauthView;
         this.consoleRedirectUri =
                 PublicWebUrl.consoleRedirect(
                         consoleRedirectUri, appPublicUrl, "/admin/integrations");
@@ -127,7 +129,7 @@ public class GoogleOAuthController {
      */
     @GetMapping("/api/channels/google/status")
     public ResponseEntity<GoogleConnectionResponse> status() {
-        return oauthService
+        return oauthView
                 .statusResponse()
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.noContent().build());
@@ -231,8 +233,8 @@ public class GoogleOAuthController {
         // spoofed by) whatever subject happens to be on the thread.
         TenantContext.set(TenantContext.of(decoded.schema(), REQUESTED_BY, Set.of()));
         try {
-            GoogleOAuthService.ConnectOutcome credential =
-                    oauthService.connectOutcome(
+            GoogleOAuthViewService.ConnectOutcome credential =
+                    oauthView.connectOutcome(
                             code, decoded.subjectKey(), decoded.purpose(), decoded.nonce());
             if (decoded.purpose() == null && !credential.youtubeReadonlyGranted()) {
                 // Base connect succeeded - chain straight into the

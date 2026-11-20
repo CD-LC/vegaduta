@@ -30,7 +30,7 @@ public class ResolutionQueryService {
     private final ResolutionPricingService pricing;
 
     public ResolutionQueryService(
-        ResolutionEventRepository repository, ResolutionPricingService pricing) {
+            ResolutionEventRepository repository, ResolutionPricingService pricing) {
         this.repository = repository;
         this.pricing = pricing;
     }
@@ -49,11 +49,15 @@ public class ResolutionQueryService {
         ResolutionEventRepository.BillableTotals billable = repository.billableTotals(start, end);
         ResolutionPricingService.PricingSnapshot price = pricing.snapshot();
         return new ResolutionSummaryResponse(
-            start, end, total, byOutcome,
-            billable.billableCount(), billable.totalMinor(),
-            billable.currency() != null ? billable.currency() : price.currency(),
-            price.unitPriceMinor(),
-            price.unitPriceMinor() == 0);
+                start,
+                end,
+                total,
+                byOutcome,
+                billable.billableCount(),
+                billable.totalMinor(),
+                billable.currency() != null ? billable.currency() : price.currency(),
+                price.unitPriceMinor(),
+                price.unitPriceMinor() == 0);
     }
 
     @Transactional(readOnly = true)
@@ -61,8 +65,10 @@ public class ResolutionQueryService {
         Instant end = to != null ? to : Instant.now();
         Instant start = from != null ? from : end.minus(30, ChronoUnit.DAYS);
         int capped = Math.min(Math.max(limit, 1), MAX_LIMIT);
-        List<ResolutionEventResponse> events = repository.listPage(start, end, capped, Math.max(offset, 0))
-            .stream().map(ResolutionEventResponse::from).toList();
+        List<ResolutionEventResponse> events =
+                repository.listPage(start, end, capped, Math.max(offset, 0)).stream()
+                        .map(ResolutionEventResponse::from)
+                        .toList();
         return new ResolutionListResponse(events, capped, Math.max(offset, 0));
     }
 }

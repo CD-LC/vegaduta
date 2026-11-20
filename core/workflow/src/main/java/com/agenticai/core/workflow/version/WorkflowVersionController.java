@@ -6,7 +6,6 @@ import com.agenticai.core.workflow.WorkflowDefinition;
 import com.agenticai.core.workflow.WorkflowNotFoundException;
 import com.agenticai.core.workflow.WorkflowRunNotFoundException;
 import com.agenticai.core.workflow.WorkflowService;
-import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -22,15 +21,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Workflow version history + diffs (Tier-3). Every endpoint sits under
- * the same {@code /api/workflows} umbrella {@code WorkflowController} owns,
- * and inherits the exact same SecurityConfig matchers - nothing about
- * "who may see/do this" is decided here.
+ * Workflow version history + diffs (Tier-3). Every endpoint sits under the same {@code
+ * /api/workflows} umbrella {@code WorkflowController} owns, and inherits the exact same
+ * SecurityConfig matchers - nothing about "who may see/do this" is decided here.
  *
- * <p>Access is funnelled through {@code WorkflowService}'s own methods
- * ({@code requireAccess} VIEWER for reads, EDITOR for restore) rather than
- * re-implementing sharing/legacy-open semantics - the same "the service
- * decides, the controller just routes" convention the rest of this module
+ * <p>Access is funnelled through {@code WorkflowService}'s own methods ({@code requireAccess}
+ * VIEWER for reads, EDITOR for restore) rather than re-implementing sharing/legacy-open semantics -
+ * the same "the service decides, the controller just routes" convention the rest of this module
  * follows.
  */
 @RestController
@@ -42,21 +39,30 @@ public class WorkflowVersionController {
     private final WorkflowRunDiffService runDiffService;
 
     public WorkflowVersionController(
-        WorkflowService workflowService,
-        WorkflowVersionService versionService,
-        WorkflowRunDiffService runDiffService
-    ) {
+            WorkflowService workflowService,
+            WorkflowVersionService versionService,
+            WorkflowRunDiffService runDiffService) {
         this.workflowService = workflowService;
         this.versionService = versionService;
         this.runDiffService = runDiffService;
     }
 
     @GetMapping("/versions")
-    public ResponseEntity<List<WorkflowVersionResponse>> list(@PathVariable UUID workflowId, @RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
+    public ResponseEntity<List<WorkflowVersionResponse>> list(
+            @PathVariable UUID workflowId,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
         // VIEWER-level access check via the service's own funnel - a
         // private workflow's history is as private as the workflow.
         workflowService.requireViewerAccess(workflowId);
-        return ListPaging.window(versionService.list(workflowId).stream().map(WorkflowVersionResponse::from).toList(), limit, offset, 50, 200);
+        return ListPaging.window(
+                versionService.list(workflowId).stream()
+                        .map(WorkflowVersionResponse::from)
+                        .toList(),
+                limit,
+                offset,
+                50,
+                200);
     }
 
     @GetMapping("/versions/{versionNumber}")
@@ -70,7 +76,8 @@ public class WorkflowVersionController {
     }
 
     @PostMapping("/versions/{versionNumber}/restore")
-    public ResponseEntity<?> restore(@PathVariable UUID workflowId, @PathVariable int versionNumber) {
+    public ResponseEntity<?> restore(
+            @PathVariable UUID workflowId, @PathVariable int versionNumber) {
         // EDITOR-level via WorkflowService#restoreVersion - restoring
         // overwrites the live definition's graph, exactly what an update
         // does, so it asks for the same permission, not a weaker one.
@@ -78,19 +85,18 @@ public class WorkflowVersionController {
     }
 
     /**
-     * C1 publish - snapshot the current draft with a change note. Deduped
-     * server-side: an unchanged bundle answers the existing newest row.
-     * EDITOR, same bar as an update - a publish decides what can be
-     * promoted.
+     * C1 publish - snapshot the current draft with a change note. Deduped server-side: an unchanged
+     * bundle answers the existing newest row. EDITOR, same bar as an update - a publish decides
+     * what can be promoted.
      */
     @PostMapping("/versions")
     public Map<String, Object> publish(
-        @PathVariable UUID workflowId,
-        @RequestBody(required = false) Map<String, String> body
-    ) {
+            @PathVariable UUID workflowId,
+            @RequestBody(required = false) Map<String, String> body) {
         WorkflowDefinition definition = workflowService.requireEditorAccess(workflowId);
         WorkflowVersion before = versionService.list(workflowId).stream().findFirst().orElse(null);
-        WorkflowVersion version = versionService.publish(definition, body == null ? null : body.get("changeNote"));
+        WorkflowVersion version =
+                versionService.publish(definition, body == null ? null : body.get("changeNote"));
         Map<String, Object> result = new java.util.LinkedHashMap<>();
         result.put("version", WorkflowVersionResponse.from(version));
         result.put("createdNew", before == null || !before.getId().equals(version.getId()));
@@ -98,29 +104,29 @@ public class WorkflowVersionController {
     }
 
     /**
-     * C1 promote - {@code {"label":"PRODUCTION"}} (or {@code STAGING}) at
-     * this version. Runtime resolution follows the label on the next run;
-     * the graph itself is untouched.
+     * C1 promote - {@code {"label":"PRODUCTION"}} (or {@code STAGING}) at this version. Runtime
+     * resolution follows the label on the next run; the graph itself is untouched.
      */
     @PostMapping("/versions/{versionNumber}/promote")
     public WorkflowVersionResponse promote(
-        @PathVariable UUID workflowId,
-        @PathVariable int versionNumber,
-        @RequestBody(required = false) Map<String, String> body
-    ) {
+            @PathVariable UUID workflowId,
+            @PathVariable int versionNumber,
+            @RequestBody(required = false) Map<String, String> body) {
         workflowService.requireEditorAccess(workflowId);
         String label = body == null ? null : body.get("label");
         if (label == null) {
             throw new IllegalArgumentException("'label' is required (STAGING or PRODUCTION).");
         }
         return WorkflowVersionResponse.from(
-            versionService.promote(workflowId, versionNumber,
-                com.agenticai.core.agents.version.VersionLabel.valueOf(label)));
+                versionService.promote(
+                        workflowId,
+                        versionNumber,
+                        com.agenticai.core.agents.version.VersionLabel.valueOf(label)));
     }
 
     /**
-     * C1 rollback - PRODUCTION back to the previous version; a label move,
-     * never a new snapshot. 409 when there is nothing earlier to point at.
+     * C1 rollback - PRODUCTION back to the previous version; a label move, never a new snapshot.
+     * 409 when there is nothing earlier to point at.
      */
     @PostMapping("/versions/rollback")
     public WorkflowVersionResponse rollback(@PathVariable UUID workflowId) {
@@ -130,22 +136,21 @@ public class WorkflowVersionController {
 
     @GetMapping("/versions/diff")
     public Map<String, Object> diffVersions(
-        @PathVariable UUID workflowId, @RequestParam int from, @RequestParam int to
-    ) {
+            @PathVariable UUID workflowId, @RequestParam int from, @RequestParam int to) {
         workflowService.requireViewerAccess(workflowId);
         return versionService.diffVersions(
-            versionService.get(workflowId, from), versionService.get(workflowId, to));
+                versionService.get(workflowId, from), versionService.get(workflowId, to));
     }
 
     /**
-     * Run-to-run diff - the audit's missing surface. Both run ids must
-     * belong to {@code workflowId} (a cross-workflow compare is rejected
-     * rather than silently comparing apples/oranges).
+     * Run-to-run diff - the audit's missing surface. Both run ids must belong to {@code workflowId}
+     * (a cross-workflow compare is rejected rather than silently comparing apples/oranges).
      */
     @GetMapping("/runs/{runId}/diff/{otherRunId}")
     public Map<String, Object> diffRuns(
-        @PathVariable UUID workflowId, @PathVariable UUID runId, @PathVariable UUID otherRunId
-    ) {
+            @PathVariable UUID workflowId,
+            @PathVariable UUID runId,
+            @PathVariable UUID otherRunId) {
         workflowService.requireViewerAccess(workflowId);
         return runDiffService.diffRuns(workflowId, runId, otherRunId);
     }

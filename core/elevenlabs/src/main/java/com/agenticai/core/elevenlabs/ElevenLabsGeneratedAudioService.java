@@ -53,13 +53,18 @@ public class ElevenLabsGeneratedAudioService {
     public Optional<GeneratedFileRef> findFileRef(UUID id) {
         return repository
                 .findById(id)
-                .map(a -> new GeneratedFileRef(a.getContentType(), a.getFilename(), a.getObjectKey()));
+                .map(
+                        a ->
+                                new GeneratedFileRef(
+                                        a.getContentType(), a.getFilename(), a.getObjectKey()));
     }
 
     /** One newest-first window of the paged listing, as response DTOs. */
     @Transactional(readOnly = true)
     public List<ElevenLabsGeneratedAudioResponse> listPageResponses(long offset, int limit) {
-        return listPage(offset, limit).stream().map(ElevenLabsGeneratedAudioResponse::from).toList();
+        return listPage(offset, limit).stream()
+                .map(ElevenLabsGeneratedAudioResponse::from)
+                .toList();
     }
 
     /** Backs the Files page's "Generated speech (ElevenLabs)" listing, newest first. */

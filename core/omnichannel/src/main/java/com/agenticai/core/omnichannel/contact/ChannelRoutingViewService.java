@@ -12,9 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * API-facing facade for the channel routing card: wraps {@link ChannelSessionService} routing
- * rows and the agent-name lookup, and maps to {@link RoutingResponse} so the controller never
- * sees {@link ChannelDefaultAgent} or {@link AgentRepository}.
+ * API-facing facade for the channel routing card: wraps {@link ChannelSessionService} routing rows
+ * and the agent-name lookup, and maps to {@link RoutingResponse} so the controller never sees
+ * {@link ChannelDefaultAgent} or {@link AgentRepository}.
  */
 @Service
 public class ChannelRoutingViewService {
@@ -40,17 +40,25 @@ public class ChannelRoutingViewService {
 
     @Transactional
     public RoutingResponse setRouting(
-            ChannelType channel, UUID agentId, boolean autoApproveNewSenders, String inboundSafetyMode) {
+            ChannelType channel,
+            UUID agentId,
+            boolean autoApproveNewSenders,
+            String inboundSafetyMode) {
         ChannelDefaultAgent saved =
-                sessionService.setRouting(channel, agentId, autoApproveNewSenders, inboundSafetyMode);
+                sessionService.setRouting(
+                        channel, agentId, autoApproveNewSenders, inboundSafetyMode);
         return toResponse(channel, saved);
     }
 
     private RoutingResponse toResponse(ChannelType channel, ChannelDefaultAgent row) {
         String agentName = agentLookup.nameOf(row.getAgentId()).orElse(null);
         return new RoutingResponse(
-            channel.name().toLowerCase(Locale.ROOT), row.getAgentId(), agentName,
-            row.isAutoApproveNewSenders(), row.getInboundSafetyMode(),
-            row.getDeclaredTask(), row.isOpenEndedOverride());
+                channel.name().toLowerCase(Locale.ROOT),
+                row.getAgentId(),
+                agentName,
+                row.isAutoApproveNewSenders(),
+                row.getInboundSafetyMode(),
+                row.getDeclaredTask(),
+                row.isOpenEndedOverride());
     }
 }

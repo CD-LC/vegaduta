@@ -60,8 +60,7 @@ public class ApprovalController {
         // can hide rows, so only then pay for the count. Clients that need a
         // real total (dashboard counters) read X-Total-Count, and older rows
         // are reached with ?offset=.
-        return ListPaging.respond(
-                requests, size, skip, () -> apiService.count(status));
+        return ListPaging.respond(requests, size, skip, () -> apiService.count(status));
     }
 
     @GetMapping("/{id}")

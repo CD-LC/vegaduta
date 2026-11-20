@@ -25,13 +25,13 @@ import org.springframework.transaction.annotation.Transactional;
  * schema creation and migration - IS reused verbatim via {@code TenantSchemaMigrator}, which is the
  * public component built for exactly that.
  *
- * <p><b>{@code is_demo} is written with {@link DemoSessionJdbcRepository}, not JPA.</b> Migration V126 adds
- * {@code control_plane.tenant.is_demo}, but {@code Tenant.java} deliberately gains no mapped field
- * for it in this slice - that file is shared, hot, and concurrently edited, and Hibernate is
- * perfectly happy to ignore a column it does not know about (the column is {@code NOT NULL DEFAULT
- * FALSE}, so JPA inserts still work untouched). This is the same call {@code NewsletterService}
- * already made and documented for {@code news_opt_in}. Follow-up, stated honestly: once {@code
- * Tenant.java} is quiet, map it properly and delete this one raw UPDATE.
+ * <p><b>{@code is_demo} is written with {@link DemoSessionJdbcRepository}, not JPA.</b> Migration
+ * V126 adds {@code control_plane.tenant.is_demo}, but {@code Tenant.java} deliberately gains no
+ * mapped field for it in this slice - that file is shared, hot, and concurrently edited, and
+ * Hibernate is perfectly happy to ignore a column it does not know about (the column is {@code NOT
+ * NULL DEFAULT FALSE}, so JPA inserts still work untouched). This is the same call {@code
+ * NewsletterService} already made and documented for {@code news_opt_in}. Follow-up, stated
+ * honestly: once {@code Tenant.java} is quiet, map it properly and delete this one raw UPDATE.
  */
 @Component
 class DemoSessionRecorder {

@@ -25,7 +25,10 @@ public class RetentionPolicyJdbcRepository {
                 (rs, n) -> map(rs));
     }
 
-    /** The row that applies to {@code channel}: its own row, else the tenant default (any enabled state). */
+    /**
+     * The row that applies to {@code channel}: its own row, else the tenant default (any enabled
+     * state).
+     */
     Optional<Rule> effective(String channel, PrivacyDataClass dataClass) {
         return jdbc
                 .query(
@@ -41,7 +44,11 @@ public class RetentionPolicyJdbcRepository {
     }
 
     void upsert(
-            String channel, PrivacyDataClass dataClass, boolean enabled, int retentionDays, String actor) {
+            String channel,
+            PrivacyDataClass dataClass,
+            boolean enabled,
+            int retentionDays,
+            String actor) {
         jdbc.update(
                 "INSERT INTO privacy_retention_policy (channel, data_class, enabled, retention_days,"
                         + " updated_by, updated_at) VALUES (?, ?, ?, ?, ?, ?)"

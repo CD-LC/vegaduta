@@ -163,7 +163,10 @@ public class VideoGenerationJobService {
     /** A finished video's storage key and content type, for the streaming endpoint. */
     public record VideoFileRef(String objectKey, String contentType) {}
 
-    /** {@link #enqueue(String, int, VideoGenerationClient.SourceImage)} rendered as the API response DTO. */
+    /**
+     * {@link #enqueue(String, int, VideoGenerationClient.SourceImage)} rendered as the API response
+     * DTO.
+     */
     public VideoGenerationJobResponse enqueueResponse(
             String prompt, int durationSeconds, VideoGenerationClient.SourceImage sourceImage) {
         return VideoGenerationJobResponse.from(enqueue(prompt, durationSeconds, sourceImage));
@@ -179,10 +182,14 @@ public class VideoGenerationJobService {
         return listPage(offset, limit).stream().map(VideoGenerationJobResponse::from).toList();
     }
 
-    /** The job's finished video, or empty when it is not {@code COMPLETE} yet (an unknown job still throws, as {@link #get}). */
+    /**
+     * The job's finished video, or empty when it is not {@code COMPLETE} yet (an unknown job still
+     * throws, as {@link #get}).
+     */
     public Optional<VideoFileRef> findCompletedVideo(UUID jobId) {
         VideoGenerationJob job = get(jobId);
-        if (job.getStatus() != VideoGenerationJobStatus.COMPLETE || job.getResultObjectKey() == null) {
+        if (job.getStatus() != VideoGenerationJobStatus.COMPLETE
+                || job.getResultObjectKey() == null) {
             return Optional.empty();
         }
         return Optional.of(new VideoFileRef(job.getResultObjectKey(), job.getResultContentType()));

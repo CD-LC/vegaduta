@@ -44,8 +44,7 @@ public class ElevenLabsVoiceController {
                             file.getBytes(),
                             file.getContentType(),
                             file.getOriginalFilename());
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(voice);
+            return ResponseEntity.status(HttpStatus.CREATED).body(voice);
         } catch (IOException e) {
             throw new ElevenLabsApiException(
                     0, "Could not read the uploaded sample file: " + e.getMessage());

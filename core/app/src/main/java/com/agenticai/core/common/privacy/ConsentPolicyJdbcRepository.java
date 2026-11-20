@@ -20,7 +20,8 @@ public class ConsentPolicyJdbcRepository {
 
     private static final ObjectMapper MAPPER = JsonMappers.plain();
     private static final TypeReference<Map<String, String>> STRING_MAP = new TypeReference<>() {};
-    private static final TypeReference<Map<String, List<String>>> LIST_MAP = new TypeReference<>() {};
+    private static final TypeReference<Map<String, List<String>>> LIST_MAP =
+            new TypeReference<>() {};
 
     private final JdbcTemplate jdbc;
 
@@ -54,7 +55,8 @@ public class ConsentPolicyJdbcRepository {
 
     boolean agentExists(UUID agentId) {
         Integer agentExists =
-                jdbc.queryForObject("SELECT count(*) FROM agent WHERE id = ?", Integer.class, agentId);
+                jdbc.queryForObject(
+                        "SELECT count(*) FROM agent WHERE id = ?", Integer.class, agentId);
         return agentExists != null && agentExists != 0;
     }
 

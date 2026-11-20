@@ -189,8 +189,14 @@ public class KnowledgeDocumentService {
 
     /** Creates the row for an accepted upload (status UPLOADED) and returns just its id. */
     @Transactional
-    public UUID createUploaded(UUID collectionId, String filename, long fileSizeBytes, String contentHash) {
-        return create(collectionId, filename, fileSizeBytes, KnowledgeDocumentStatus.UPLOADED, contentHash)
+    public UUID createUploaded(
+            UUID collectionId, String filename, long fileSizeBytes, String contentHash) {
+        return create(
+                        collectionId,
+                        filename,
+                        fileSizeBytes,
+                        KnowledgeDocumentStatus.UPLOADED,
+                        contentHash)
                 .getId();
     }
 
