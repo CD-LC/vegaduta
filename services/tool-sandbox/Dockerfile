@@ -34,7 +34,7 @@ RUN set -eux; \
 # The Node runtime for the javascript/typescript languages: the same pinned
 # 22.x tag every other Node-based service uses (services/workspace-runner,
 # services/mcp-stdio-runner).
-FROM node:26.13.0-trixie-slim@sha256:5adad64f9a1fca2d51972caa65983634c8a774eb300d72b20f7f2a0f60368072 AS node
+FROM node:26.13.1-trixie-slim@sha256:e6bedef217677b276c591795e169840edd9096dbf13f29df8ef8d1856b8820bc AS node
 
 FROM python:3.14.10-slim-trixie@sha256:9aaa474097d094040649f2162a627c0049b408f52138d980916788d80f04802f
 
