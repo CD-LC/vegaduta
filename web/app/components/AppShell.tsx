@@ -383,7 +383,7 @@ function AppShellBody({
             fillViewport
               ? "relative flex min-h-0 flex-1 flex-col overflow-hidden"
               : bleed
-                ? "relative flex flex-1 flex-col"
+                ? "relative flex w-[70%] flex-1 flex-col self-center"
                 : "relative flex-1 px-4 py-6 sm:px-6 lg:px-8"
           }
           initial={{ opacity: 0, y: 10 }}
@@ -393,7 +393,7 @@ function AppShellBody({
           {bleed ? (
             <FeatureGate>{children}</FeatureGate>
           ) : (
-            <div className="mx-auto w-full max-w-none">
+            <div className="mx-auto w-[70%] max-w-none">
               {/* >=80%/100% usage warning with the upgrade CTA - dismissible,
                   follows the user to every console page rather than only
                   warning people who happen to open /usage. Deliberately not
