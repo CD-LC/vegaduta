@@ -483,7 +483,7 @@ services:
 
   keycloak:
     # Same Keycloak release as deploy/helm/charts/keycloak (one version line).
-    image: quay.io/keycloak/keycloak:26.7.5
+    image: quay.io/keycloak/keycloak:26.8.2-3
     <<: [*restart, *logging, *nnp]
     # Production mode (`start`) against keycloak-db, HTTP only inside the
     # compose network / on the loopback port; TLS is terminated by Caddy in
@@ -550,7 +550,7 @@ services:
   # Idempotent; shares keycloak's network namespace so the script's
   # localhost:8080 is this realm's Keycloak.
   keycloak-reconcile:
-    image: quay.io/keycloak/keycloak:26.7.5
+    image: quay.io/keycloak/keycloak:26.8.2-3
     <<: [*logging, *nnp]
     restart: "no"
     network_mode: "service:keycloak"
@@ -858,7 +858,7 @@ services:
     # Kafka-API event backbone for the `workflow` Spring profile. Redpanda is
     # BSL-1.1 (see NOTICE); any Kafka-compatible broker works via
     # WORKFLOW_KAFKA_BOOTSTRAP_SERVERS in core.env.
-    image: redpandadata/redpanda:v26.2.6
+    image: redpandadata/redpanda:v26.2.7
     profiles: ["events", "temporal", "jobs"]
     <<: [*restart, *logging, *nnp]
     command:
@@ -909,7 +909,7 @@ services:
     networks: [data-tier, observability]
 
   loki:
-    image: grafana/loki:3.7.9
+    image: grafana/loki:3.7.10
     profiles: ["observability"]
     <<: [*restart, *logging, *nnp]
     command: -config.file=/etc/loki/loki-config.yaml
@@ -1023,7 +1023,7 @@ services:
     # The mounted config has no env interpolation; the webhook secret (and the
     # optional SMTP block, activated only when ALERT_EMAIL_TO+ALERT_SMTP_HOST
     # are set) are templated into /tmp at start.
-    image: prom/alertmanager:v0.34.2
+    image: prom/alertmanager:v0.35.0
     profiles: ["observability"]
     <<: [*restart, *logging, *nnp]
     entrypoint: ["/bin/sh", "-c"]
@@ -1070,7 +1070,7 @@ services:
     networks: [observability]
 
   grafana:
-    image: grafana/grafana:13.3.0
+    image: grafana/grafana:13.3.1
     profiles: ["observability"]
     <<: [*restart, *logging, *nnp]
     depends_on:
@@ -1129,7 +1129,7 @@ services:
     networks: [observability]
 
   langfuse-clickhouse:
-    image: clickhouse/clickhouse-server:26.10.3.7
+    image: clickhouse/clickhouse-server:26.10.4.207
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     user: "101:101"
@@ -1212,7 +1212,7 @@ services:
     networks: [observability]
 
   langfuse-worker:
-    image: langfuse/langfuse-worker:4.76.0
+    image: langfuse/langfuse-worker:4.80.0
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     depends_on: &langfuse-depends-on
@@ -1268,7 +1268,7 @@ services:
     networks: [observability]
 
   langfuse-web:
-    image: langfuse/langfuse:4.76.0
+    image: langfuse/langfuse:4.80.0
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     depends_on: *langfuse-depends-on
@@ -1462,7 +1462,7 @@ services:
     # Still plaintext TCP: code-intel's docker client does not load TLS client
     # certs yet. Once it does, switch to DOCKER_TLS_CERTDIR=/certs and
     # tcp://code-intel-docker:2376 with a shared read-only client-cert volume.
-    image: docker:29.9.2-dind
+    image: docker:29.9.3-dind
     profiles: ["code-intel", "builder"]
     <<: [*restart, *logging]
     privileged: true
