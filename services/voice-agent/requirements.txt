@@ -10,21 +10,21 @@ livekit-agents==1.8.10
 
 # livekit-agents 1.8.8 requires openai>=3.19,<4; the 1.6.8-era 2.x hold
 # (its inference/llm.py passed httpx objects to openai) is gone.
-openai==3.45.0
+openai==3.51.0
 
 # Official ElevenLabs TTS plugin - this platform's preferred/default TTS
 # provider (see core/agents/.../SpeakToolCallback.java's javadoc: "ElevenLabs
 # first... Sarvam otherwise"). Only the TTS leg is used from this package;
 # its `stt` submodule (ElevenLabs also offers STT) is NOT used here - STT is
 # sidecar Whisper (app/stt_sidecar_whisper.py), per the build brief.
-livekit-plugins-elevenlabs==1.8.10
+livekit-plugins-elevenlabs==1.8.12
 
 # Silero VAD - turn detection (utterance start/end), ships its own ONNX
 # model file inside the wheel (see silero/resources/silero_vad.onnx) so,
 # unlike sidecar's sentence-transformers model, there is nothing to
 # download or cache at runtime/build time - no HF_HOME-style baking needed
 # in the Dockerfile for this dependency.
-livekit-plugins-silero==1.8.10
+livekit-plugins-silero==1.8.12
 
 # HTTP client for both custom plugins (stt_sidecar_whisper.py's sidecar
 # /transcribe call, llm_core_bridge.py's core /api/agents/{id}/chat SSE
@@ -42,7 +42,7 @@ aiohttp==3.14.5
 # imports it by name. Both pins verified present on PyPI for python:3.12
 # (this image's base) but NOT pip-installed/runtime-verified in this pass -
 # see the header comment's re-verify note.
-numpy==2.5.4
+numpy==2.5.5
 pillow==13.0.0
 
 # Local TTS provider: app/tts_piper.py shells out to the MIT-licensed
