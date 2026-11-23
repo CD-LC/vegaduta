@@ -33,7 +33,7 @@
 # =============================================================================
 services:
   searxng:
-    image: ${SEARXNG_IMAGE:-searxng/searxng:2026.11.6-ac11e14c5}
+    image: ${SEARXNG_IMAGE:-searxng/searxng:2026.11.14-fd718fe0b}
     profiles: ["search"]
     restart: unless-stopped
     environment:
