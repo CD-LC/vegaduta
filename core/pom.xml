@@ -281,7 +281,7 @@
     <jspecify.version>1.0.1</jspecify.version>
     <!-- Google Application Default Credentials: core/providers (Vertex AI) and core/dbauth (Cloud SQL IAM login)
          must use the same one. Managed in dependencyManagement below. -->
-    <google-auth.version>1.57.0</google-auth.version>
+    <google-auth.version>1.58.0</google-auth.version>
     <webauthn4j.version>0.32.0.RELEASE</webauthn4j.version>
     <!-- Apache POI (documentgen writes DOCX/XLSX/PPTX; omnichannel reads the contacts XLSX).
          One version for both. 5.4.0 fixed the advisories that Dependabot alerts #5 and #6 list
